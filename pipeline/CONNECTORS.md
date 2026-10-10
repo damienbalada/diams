@@ -191,6 +191,18 @@ python -m paris_memoire.import_investments --file inv.csv [--apply]
 python -m paris_memoire.import_curated --file curated/banques_2026-10_lot1.csv [--apply]
 ```
 
+### `verify_curated` — vérification déterministe contre la source primaire
+- Relit la source de chaque preuve curée et compare chiffre par chiffre : tableaux
+  BOCC (PDF ; composantes + total recalculé, empreinte SHA-256 affichée) et fiches
+  HATVP (données JSON officielles : SIREN de l'entité, date d'inscription, tranche
+  de dépenses, absence d'activité).
+- Verdicts : `OK` (approuvable, reviewer `auto:verify_curated`), `ÉCART`,
+  `JUGEMENT` (attribution : la source vise un périmètre plus large que l'entité),
+  `NON VÉRIFIABLE`. Seuls les `OK` encore en attente sont approuvés.
+```bash
+python -m paris_memoire.verify_curated --file curated/banques_2026-10_lot1.csv --bocc-pdf tables.pdf [--apply]
+```
+
 ### `attach_regimes` — assujettissement aux obligations de publication (Règle 1)
 - `--egapro egapro.csv` : **déterministe**. SIREN présent dans une déclaration
   Égapro des 3 dernières années → régime `FR_EGAPRO` (reviewer `auto:attach_regimes`).

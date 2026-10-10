@@ -93,6 +93,17 @@ humain, ou sans piste d'audit.
   `import_curated`) → **toujours `pending`**, même si la source est
   réglementaire : la recherche assistée n'est pas déterministe (v0.5, 10/2026).
 
+**Vérification déterministe d'une preuve curée** (`verify_curated`, 10/2026).
+Une preuve `ai:` peut être approuvée sans clic humain **seulement** si un script
+relit sa source primaire lisible par machine et y retrouve chaque chiffre affirmé
+(tableaux BOCC : chaque composante et le total ; fiche HATVP : SIREN de l'entité,
+date d'inscription, tranche de dépenses). Mêmes entrées, même verdict, détail de
+chaque comparaison affiché : c'est la même garantie que pour un connecteur, d'où
+le reviewer `auto:verify_curated`. Restent **humains** : tout écart, toute source
+sans vérificateur, et toute question d'**attribution** (la source vise un
+périmètre plus large que l'entité notée — ex. « groupe Crédit Mutuel » pour
+Crédit Mutuel Alliance Fédérale).
+
 Le `reviewer` distinct (`auto:*` vs humain) permet l'audit par échantillon et la
 distinction nette entre publication automatique et validation humaine.
 Verrouillé par `pipeline/tests/test_review_model.py` : ces tests échouent si la

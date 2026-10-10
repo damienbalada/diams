@@ -1,0 +1,225 @@
+"""Vérification DÉTERMINISTE des preuves curées contre leur source primaire.
+
+Une preuve compilée par une IA (reviewer `ai:…`) attend une validation. Quand la
+source primaire est lisible par machine, cette validation peut être mécanique :
+le script relit la source, recalcule chaque chiffre et le compare à la preuve.
+Mêmes entrées → même verdict, et le détail de chaque comparaison est affiché :
+c'est la garantie qui fonde la publication automatique des connecteurs
+(REVIEW_MODEL.md). Ce que la machine ne peut pas trancher reste humain.
+
+Verdicts :
+  OK              tout concorde avec la source → approuvable (`auto:verify_curated`)
+  ÉCART           la source dit autre chose → reste en revue, écart affiché
+  JUGEMENT        la source ne vise pas exactement l'entité (attribution) → humain
+  NON VÉRIFIABLE  aucun vérificateur pour cette source → humain
+
+Usage :
+    python -m paris_memoire.verify_curated --file curated/banques_2026-10_lot1.csv --bocc-pdf tables.pdf
+    ... --apply     # approuve les seules preuves OK encore en attente
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import unicodedata
+from dataclasses import dataclass, field
+
+import httpx
+
+from . import config, supabase_client
+from .import_curated import parse_file
+
+# --- BOCC : tableaux « Oil & Gas Expansion » ---------------------------------
+BOCC_SECTIONS = {"Upstream": "amont", "Midstream": "transport/GNL", "Gas Power": "centrales à gaz"}
+# Libellé exact de la ligne BOCC pour chaque entité. `attribution` : le libellé
+# désigne un périmètre plus large que l'entité notée → décision humaine.
+BOCC_LABELS = {
+    "societe-generale": ("societe generale", False),
+    "credit-agricole": ("credit agricole", False),
+    "bpce": ("groupe bpce", False),
+    "bnp-paribas": ("bnp paribas", False),
+    "la-banque-postale": ("la banque postale", False),
+    "credit-mutuel-alliance-federale": ("credit mutuel", True),
+}
+_ROW = re.compile(
+    r"(?:^|\s)(\d{1,2})\s+([A-Za-z&'.\- ]+?)\s+"
+    r"\$(\d+\.\d)\s+\$(\d+\.\d)\s+\$(\d+\.\d)\s+\$(\d+\.\d)\s+\$(\d+\.\d)\s+\$(\d+\.\d)"
+)
+
+
+def _norm(s: str) -> str:
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def parse_bocc_text(text: str) -> dict[str, dict[str, list[float]]]:
+    """Texte des tableaux → {section: {libellé normalisé: [2021..2025, total]}}."""
+    out: dict[str, dict[str, list[float]]] = {}
+    for chunk in re.split(r"Financing to ", text)[1:]:
+        title = chunk.split("Companies", 1)[0]
+        section = next((k for k in BOCC_SECTIONS if k.lower() in title.lower()), None)
+        if section is None:
+            continue
+        flat = re.sub(r"\s+", " ", _norm(chunk))
+        rows = out.setdefault(section, {})
+        for m in _ROW.finditer(flat):
+            rows.setdefault(m.group(2).strip(), [float(x) for x in m.groups()[2:]])
+    return out
+
+
+def parse_bocc_pdf(path: str) -> dict[str, dict[str, list[float]]]:
+    import pypdf
+    reader = pypdf.PdfReader(path)
+    return parse_bocc_text("\n".join(p.extract_text() or "" for p in reader.pages))
+
+
+def _fr(x: float) -> str:
+    return f"{x:.1f}".replace(".", ",")
+
+
+@dataclass
+class Verdict:
+    status: str
+    details: list[str] = field(default_factory=list)
+
+
+def verify_bocc(row, tables: dict[str, dict[str, list[float]]]) -> Verdict:
+    label, attribution = BOCC_LABELS.get(row.entity_slug, (None, False))
+    if label is None:
+        return Verdict("NON VÉRIFIABLE", [f"pas de libellé BOCC connu pour {row.entity_slug}"])
+    details, total, ok = [], 0.0, True
+    for section, fr_name in BOCC_SECTIONS.items():
+        vals = tables.get(section, {}).get(label)
+        if vals is None:
+            return Verdict("ÉCART", [f"ligne « {label} » introuvable dans le tableau {section}"])
+        v2025 = vals[4]
+        total += v2025
+        claimed = f"{fr_name} {_fr(v2025)}"
+        found = claimed in (row.excerpt or "")
+        ok &= found
+        details.append(f"{section} 2025 = ${v2025:.1f} → extrait « {claimed} » {'✓' if found else '✗ ABSENT'}")
+    total = round(total, 1)
+    total_ok = row.value_numeric is not None and abs(row.value_numeric - total) < 1e-9
+    ok &= total_ok
+    details.append(f"total recalculé {total:.1f} vs valeur {row.value_numeric} {'✓' if total_ok else '✗'}")
+    if not ok:
+        return Verdict("ÉCART", details)
+    if attribution:
+        details.append(f"la ligne « {label} » couvre un périmètre plus large que {row.entity_slug} : attribution à trancher")
+        return Verdict("JUGEMENT", details)
+    return Verdict("OK", details)
+
+
+# --- HATVP : répertoire des représentants d'intérêts --------------------------
+def _range(s: str) -> tuple[int, int] | None:
+    nums = [int(n.replace(" ", "").replace(" ", "")) for n in re.findall(r"\d[\d  ]*\d", s)]
+    return (nums[0], nums[1]) if len(nums) >= 2 else None
+
+
+def check_hatvp(row, record: dict, entity_siren: str | None) -> Verdict:
+    pub = record.get("publicationCourante") or {}
+    siren = str(pub.get("identifiantNational") or "")
+    details = [f"fiche : {pub.get('denomination')} (SIREN {siren}), inscrite le {str(pub.get('datePremierePublication'))[:10]}"]
+    if not siren or not pub.get("datePremierePublication"):
+        return Verdict("ÉCART", details + ["fiche vide : organisation non inscrite"])
+    ok = True
+    excerpt = row.excerpt or ""
+    m = re.search(r"(\d{2}/\d{2}/\d{4})", excerpt)
+    if m:
+        same = m.group(1) == str(pub["datePremierePublication"])[:10]
+        ok &= same
+        details.append(f"date citée {m.group(1)} {'✓' if same else '✗'}")
+    exercises = {str(e["publicationCourante"].get("dateDebut", ""))[-4:]: e["publicationCourante"]
+                 for e in record.get("exercices", []) if e.get("publicationCourante")}
+    for year, rng in re.findall(r"(\d{4})\)? ?: ([\d  ]+ à [\d  ]+ €)", excerpt):
+        declared = (exercises.get(year) or {}).get("montantDepense") or ""
+        same = _range(declared) == _range(rng) and _range(rng) is not None
+        ok &= same
+        details.append(f"dépenses {year} citées « {rng} » vs déclarées « {declared or '—'} » {'✓' if same else '✗'}")
+    na = re.search(r"aucune activité déclarée pour (\d{4}) et (\d{4})", excerpt)
+    if na:
+        for y in na.groups():
+            e = exercises.get(y) or {}
+            none = bool(e.get("noActivite")) or int(e.get("nombreActivite") or 0) == 0
+            ok &= none
+            details.append(f"aucune activité en {y} {'✓' if none else '✗'}")
+    if not ok:
+        return Verdict("ÉCART", details)
+    if entity_siren and siren != entity_siren:
+        details.append(f"fiche d'une autre entité (SIREN {siren} ≠ {entity_siren}) : attribution à trancher")
+        return Verdict("JUGEMENT", details)
+    return Verdict("OK", details)
+
+
+def verify_hatvp(row, client: httpx.Client, sirens: dict[str, str | None]) -> Verdict:
+    m = re.search(r"organisation=(\d{9})", row.source_url or "")
+    if not m:
+        return Verdict("NON VÉRIFIABLE", ["URL HATVP sans SIREN"])
+    r = client.get(f"https://www.hatvp.fr/agora/{m.group(1)}.json", timeout=60)
+    if r.status_code != 200:
+        return Verdict("ÉCART", [f"données HATVP indisponibles (HTTP {r.status_code})"])
+    return check_hatvp(row, r.json(), sirens.get(row.entity_slug))
+
+
+# --- Application ---------------------------------------------------------------
+def approve(rows) -> int:
+    h = {"apikey": config.SUPABASE_SERVICE_ROLE_KEY, "Authorization": f"Bearer {config.SUPABASE_SERVICE_ROLE_KEY}",
+         "Content-Type": "application/json"}
+    base = f"{config.SUPABASE_URL}/rest/v1"
+    n = 0
+    with httpx.Client(timeout=60) as c:
+        ids = lambda t, k: {x[k]: x["id"] for x in c.get(f"{base}/{t}", params={"select": f"id,{k}"}, headers=h).json()}  # noqa: E731
+        ents, inds, srcs = ids("entities", "slug"), ids("indicators", "code"), ids("sources", "code")
+        for r in rows:
+            resp = c.patch(f"{base}/evidence", headers={**h, "Prefer": "return=representation"},
+                           params={"entity_id": f"eq.{ents[r.entity_slug]}", "indicator_id": f"eq.{inds[r.indicator_code]}",
+                                   "source_id": f"eq.{srcs[r.source_code]}", "observed_on": f"eq.{r.observed_on}",
+                                   "review_status": "eq.pending"},
+                           json={"review_status": "approved", "reviewer": "auto:verify_curated"})
+            resp.raise_for_status()
+            n += len(resp.json())
+    return n
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Vérifie des preuves curées contre leur source primaire.")
+    parser.add_argument("--file", required=True)
+    parser.add_argument("--bocc-pdf", help="PDF des tableaux BOCC (sector-tables)")
+    parser.add_argument("--apply", action="store_true", help="approuve les preuves OK encore en attente")
+    args = parser.parse_args()
+
+    rows, errors = parse_file(args.file)
+    if errors:
+        raise SystemExit("CSV invalide : " + "; ".join(errors))
+    tables = {}
+    if args.bocc_pdf:
+        import hashlib
+        with open(args.bocc_pdf, "rb") as fh:
+            print(f"PDF BOCC : sha256 {hashlib.sha256(fh.read()).hexdigest()}")
+        tables = parse_bocc_pdf(args.bocc_pdf)
+    sirens = {e["slug"]: e.get("siren") for e in supabase_client.list_entities()}
+
+    ok_rows, counts = [], {}
+    with httpx.Client(timeout=60) as client:
+        for r in rows:
+            if r.source_code == "BOCC" and tables:
+                v = verify_bocc(r, tables)
+            elif r.source_code == "HATVP":
+                v = verify_hatvp(r, client, sirens)
+            else:
+                v = Verdict("NON VÉRIFIABLE", [f"aucun vérificateur pour la source {r.source_code}"])
+            counts[v.status] = counts.get(v.status, 0) + 1
+            print(f"\n[{v.status}] {r.entity_slug} · {r.indicator_code} ({r.source_code})")
+            for d in v.details:
+                print(f"    {d}")
+            if v.status == "OK":
+                ok_rows.append(r)
+    print("\nBilan : " + ", ".join(f"{k} {n}" for k, n in sorted(counts.items())))
+    if args.apply:
+        print(f"Approuvées (auto:verify_curated) : {approve(ok_rows)}")
+    else:
+        print("(contrôle seulement : --apply approuve les seules preuves OK)")
+
+
+if __name__ == "__main__":
+    main()
