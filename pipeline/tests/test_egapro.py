@@ -41,7 +41,8 @@ def test_build_rows_normalizes_over_100():
     r = rows[0]
     assert r.entity_slug == "kering"
     assert r.normalized_value == 0.94
-    assert r.observed_on == "2024-03-01"
+    # index calculé au titre de 2024, publié au plus tard le 1er mars 2025
+    assert r.observed_on == "2025-03-01"
 
 
 def test_parse_csv_offline_fallback(tmp_path):

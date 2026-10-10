@@ -28,7 +28,10 @@ def build_rows(entities: list[dict], by_siren: dict[str, egapro.EgaproRecord]) -
         rec = by_siren.get(str(siren))
         if rec is None:
             continue
-        observed_on = f"{rec.year}-03-01" if rec.year else "1970-01-01"  # publication annuelle ~1er mars
+        # « Année » = année de CALCUL de l'index ; publication obligatoire au plus
+        # tard le 1er mars de l'année suivante (C. trav. D1142-4). Les premières
+        # déclarations (2018) ont été publiées en mars 2019.
+        observed_on = f"{int(rec.year) + 1}-03-01" if rec.year.isdigit() else "1970-01-01"
         rows.append(EvidenceRow(
             entity_slug=e["slug"], indicator_code="LAB_EGAPRO_INDEX", source_code="EGAPRO",
             nature="result", observed_on=observed_on, value_type="numeric",
@@ -62,7 +65,7 @@ def main() -> None:
     rows = build_rows(entities, by_siren)
     for r in rows:
         print(f"✔ {r.entity_slug}: LAB_EGAPRO_INDEX = {r.value_numeric}/100")
-    print(f"\n{len(rows)} evidence à insérer (pending)")
+    print(f"\n{len(rows)} evidence à insérer (statut selon le tier de la source)")
 
     if args.apply:
         stats = insert_evidence(rows)
