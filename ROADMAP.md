@@ -54,6 +54,33 @@ sans obligation de publication — précisément les alternatives à recommander
 curation manuelle qui plafonne. **Prochaine étape : une verticale complète
 (≥ 15 entités à ≥ 60 % de fiabilité) plutôt que 16 secteurs à moitié.**
 
+### Phase 1 — verticale banque (démarrée le 10/10/2026)
+
+Pourquoi la banque : c'est l'achat qui pèse le plus (l'épargne finance ou non
+l'expansion fossile), le choix est réel (réseaux, banques en ligne, coopératives),
+~15 entités couvrent le marché français, et la donnée obligatoire existe (CbCR
+bancaire CRD IV, CSRD, Égapro, HATVP).
+
+**Fait :** 19 établissements (7 têtes de groupe + La Nef + filiales et marques),
+SIREN/LEI vérifiés aux registres ; Égapro pour toutes les entités juridiques
+(déterministe) ; régimes CSRD et CbCR rattachés aux têtes de groupe ; lot 1 de
+preuves curées **en revue** (financement de l'expansion fossile BOCC 2026,
+inscription HATVP).
+
+**Critère de sortie :** ≥ 15 banques publiables (fiabilité ≥ 60 %), notes
+étalées de A à E, une alternative mieux notée pour chaque grande banque, écarts
+avec les classements ONG (Oxfam, Amis de la Terre…) documentés.
+
+**Collecte restante, par ordre d'impact :**
+1. Données **obligatoires** des 7 têtes de groupe (comptent 0 tant qu'absentes) :
+   CbCR publié + taux effectif (TAX), mixité + indépendance du conseil (GOV),
+   Scope 3 + intensité carbone (ENV), écart salarial + ratio de rémunération (LAB).
+2. Plans de vigilance (régime FR_VIGILANCE à rattacher, avec le plan lui-même).
+3. Petits acteurs (La Nef, Crédit Coopératif, néobanques) : politiques
+   d'exclusion, labels (Finansol, B Corp), publication des financements.
+4. Exposition fossile réglementaire (Pillar 3 ESG, CRR art. 449a) en complément
+   de BOCC.
+
 **Limite structurelle identifiée :** la curation manuelle ne passe pas à
 l'échelle. La suite passe par l'**ingestion par fichiers/API** via les connecteurs
 (bloquée aujourd'hui par la politique réseau de l'environnement).

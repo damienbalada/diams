@@ -88,7 +88,10 @@ humain, ou sans piste d'audit.
 à l'ingestion (`review_status_for()`), conformément à la règle ci-dessus :
 
 - tier 1-2 → insertion directe en `approved`, reviewer préfixé **`auto:<connecteur>`** ;
-- tier 3 / crowd / **tier inconnu ou absent** → `pending`, file de revue (`/admin/revue`).
+- tier 3 / crowd / **tier inconnu ou absent** → `pending`, file de revue (`/admin/revue`) ;
+- **donnée compilée par une IA** (reviewer **`ai:<modèle>`**, connecteur
+  `import_curated`) → **toujours `pending`**, même si la source est
+  réglementaire : la recherche assistée n'est pas déterministe (v0.5, 10/2026).
 
 Le `reviewer` distinct (`auto:*` vs humain) permet l'audit par échantillon et la
 distinction nette entre publication automatique et validation humaine.

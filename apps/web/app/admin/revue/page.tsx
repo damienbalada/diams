@@ -63,6 +63,7 @@ export default async function ReviewQueuePage() {
               <span className="badge">{e.nature}</span>
               <span className={`badge tier-${e.source?.tier}`}>{e.source?.name}</span>
               <span className="badge">{e.observed_on}</span>
+              {e.reviewer && <span className="badge" title="Qui a préparé cette preuve">{e.reviewer}</span>}
             </span>
           </div>
 

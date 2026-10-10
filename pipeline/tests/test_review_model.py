@@ -25,6 +25,14 @@ def test_tier_inconnu_ou_absent_reste_prudent():
     assert review_status_for("nouveau_tier_inconnu") == "pending"
 
 
+def test_donnee_compilee_par_ia_toujours_en_revue():
+    # Une IA n'est pas déterministe : même une source réglementaire extraite par
+    # une IA attend la validation humaine.
+    assert review_status_for("regulatory", "ai:claude-opus-5-5") == "pending"
+    assert review_status_for("audited_ngo", "ai:claude-opus-5-5") == "pending"
+    assert review_status_for("regulatory", "pipeline") == "approved"
+
+
 def test_liste_auto_publication_est_bien_restreinte():
     # Garde-fou explicite : seuls ces deux tiers échappent à la revue.
     assert AUTO_PUBLISH_TIERS == {"regulatory", "audited_ngo"}

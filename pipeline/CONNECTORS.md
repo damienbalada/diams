@@ -177,6 +177,37 @@ python -m paris_memoire.import_investments --file inv.csv [--apply]
 
 ---
 
+## Preuves curées & obligations (v0.5)
+
+### `import_curated` — recherche documentaire assistée → toujours en revue
+- CSV versionné dans `pipeline/curated/` (piste d'audit) : une ligne = une preuve
+  (`entity_slug, indicator_code, source_code, nature, observed_on, value_type,
+  value_numeric, value_boolean, value_text, normalized_value, confidence,
+  source_url, excerpt`).
+- Contrôle strict : une ligne invalide (URL, date future, nature inconnue…) ou une
+  référence absente de la base bloque tout l'import.
+- Reviewer `ai:<modèle>` obligatoire → statut `pending`, validation dans `/admin/revue`.
+```bash
+python -m paris_memoire.import_curated --file curated/banques_2026-10_lot1.csv [--apply]
+```
+
+### `attach_regimes` — assujettissement aux obligations de publication (Règle 1)
+- `--egapro egapro.csv` : **déterministe**. SIREN présent dans une déclaration
+  Égapro des 3 dernières années → régime `FR_EGAPRO` (reviewer `auto:attach_regimes`).
+- `--file curated/regimes_*.csv` : rattachements curés (`entity_slug, regime_code,
+  basis, source_url, observed_on`), reviewer `ai:<modèle>`.
+```bash
+python -m paris_memoire.attach_regimes --egapro egapro.csv [--apply]
+python -m paris_memoire.attach_regimes --file curated/regimes_banques_2026-10.csv [--apply]
+```
+
+> Identifiants : un SIREN ou un LEI n'est retenu que s'il est **confirmé par le
+> registre** (API Recherche d'entreprises, GLEIF par SIREN). L'audit du 10/10/2026
+> a corrigé 19 SIREN et 12 LEI issus d'un rapprochement par nom.
+>
+> Poste Windows derrière un proxy TLS (ex. Cloudflare WARP) : exporter un bundle
+> incluant les racines Windows et le passer via `SSL_CERT_FILE`.
+
 ## Écrire un nouveau connecteur
 
 1. `connectors/<source>.py` : **module pur** — `parse_csv()`, normalisation(s),

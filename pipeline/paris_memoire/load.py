@@ -1,9 +1,10 @@
-"""Chargement d'evidence en base — TOUJOURS en statut `pending`.
+"""Chargement d'evidence en base — statut dérivé du tier ET de l'auteur.
 
-Règle de curation : le pipeline ne publie jamais directement. Chaque evidence
-importée attend la revue humaine (back-office /admin/revue) avant de compter
-dans un score. L'insertion est idempotente grâce à l'index unique
-(entity, indicator, source, observed_on) : relancer un import est sans effet.
+Règle de curation (REVIEW_MODEL.md) : un connecteur DÉTERMINISTE sur une source
+de tier 1-2 publie directement (`auto:<connecteur>`) ; tout le reste — tier 3,
+crowd, tier inconnu, et toute donnée compilée par une IA (`ai:<modèle>`) — attend
+la revue humaine (back-office /admin/revue). L'insertion est idempotente grâce à
+l'index unique (entity, indicator, source, observed_on).
 """
 from __future__ import annotations
 
@@ -65,8 +66,16 @@ def _lookup_ids(client: httpx.Client) -> tuple[dict, dict, dict]:
 AUTO_PUBLISH_TIERS = {"regulatory", "audited_ngo"}
 
 
-def review_status_for(tier: str | None) -> str:
-    """`approved` pour les tiers 1-2, `pending` sinon (tier inconnu = prudence)."""
+# Préfixe de reviewer des données compilées par une IA (extraction, recherche) :
+# non déterministe, donc JAMAIS publiée sans validation humaine, quel que soit le
+# tier de la source (REVIEW_MODEL.md, « l'IA copilote, pas autonome »).
+AI_REVIEWER_PREFIX = "ai:"
+
+
+def review_status_for(tier: str | None, reviewer: str | None = None) -> str:
+    """`approved` pour les tiers 1-2 via connecteur déterministe, `pending` sinon."""
+    if reviewer and reviewer.startswith(AI_REVIEWER_PREFIX):
+        return "pending"
     return "approved" if tier in AUTO_PUBLISH_TIERS else "pending"
 
 
@@ -92,7 +101,7 @@ def insert_evidence(rows: list[EvidenceRow], client: httpx.Client | None = None)
                 stats["skipped"] += 1
                 continue
             sid, tier = src
-            status = review_status_for(tier)
+            status = review_status_for(tier, row.reviewer)
             # Traçabilité : distinguer une publication automatique d'une validation humaine.
             reviewer = row.reviewer
             if status == "approved" and not reviewer.startswith("auto:"):

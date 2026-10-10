@@ -371,8 +371,9 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
               <div className="muted small" style={{ marginTop: 3 }}>
                 {i.mandatory ? (
                   <>
-                    Publication obligatoire ({(i.mandatory_regimes ?? []).join(", ")}) mais aucune preuve
-                    trouvée : compté 0 dans la note. Ne pas publier ce que la loi impose n'est pas récompensé.
+                    Publication obligatoire ({(i.mandatory_regimes ?? []).join(", ")}). Aucune preuve versée
+                    dans DIAMS à ce jour : comptée 0 dans la note tant qu'elle manque — que l'entreprise n'ait
+                    pas publié, ou que la collecte reste à faire. Ne pas publier ce que la loi impose n'est pas récompensé.
                   </>
                 ) : (
                   <>
