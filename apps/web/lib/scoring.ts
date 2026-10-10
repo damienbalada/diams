@@ -122,6 +122,9 @@ export interface IndicatorResult {
   display_only?: boolean;
   /** Une controverse existe mais n'a pas été comptée faute de corroboration. */
   unscored_controversy?: boolean;
+  /** Indicateur-gate (plafond de dimension) : ne se compte pas comme les autres
+   *  — s'il est manquant il n'est pas « noté 0 » mais applique default_ceiling. */
+  is_gate?: boolean;
 }
 export interface DimensionResult {
   dimension_code: string;
@@ -387,6 +390,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
 
     for (const ind of inds) {
       const r = resByCode.get(ind.code)!;
+      if (ind.code === gateCode) r.is_gate = true;
       indicators.push(r);
       if (ind.code === gateCode) continue; // exclu de la moyenne et des compteurs
       if (r.display_only) continue;        // affiché mais hors calcul (controverse non corroborée)

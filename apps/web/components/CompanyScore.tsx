@@ -1,6 +1,15 @@
 import { computeScore, type DimensionResult, type ScoreResult } from "@/lib/scoring";
 import type { Alternative, ScorePayload } from "@/lib/data";
 import { CorrectionForm } from "@/components/CorrectionForm";
+import { Tip } from "@/components/Tip";
+
+// Explication de chaque tier de source (fiabilité de la preuve, pas jugement).
+const tierExplain: Record<string, string> = {
+  regulatory: "Source réglementaire (obligation légale, régulateur, justice) — fiabilité maximale.",
+  audited_ngo: "ONG auditée / référentiel reconnu — fiabilité élevée.",
+  press: "Presse ou source publique — fiabilité moyenne, à recouper.",
+  crowd: "Contribution / source militante — fiabilité faible, traitée comme signalement.",
+};
 
 const gradeColor: Record<string, string> = {
   A: "var(--a)", B: "var(--b)", C: "var(--c)", D: "var(--d)", E: "var(--e)",
@@ -94,7 +103,15 @@ export function CompanyScore({
               <div className="muted small" style={{ marginTop: 4 }}>Note · {pct(result.score)}</div>
             </div>
             <div style={{ minWidth: 160 }}>
-              <div className="small">Fiabilité</div>
+              <div className="small">
+                Fiabilité
+                <Tip label="Comment lire la fiabilité ?">
+                  La fiabilité mesure la <strong>complétude et la fraîcheur des preuves</strong>, pas la
+                  qualité de l'entreprise. Une donnée manquante compte 0 dans la note (l'opacité n'est
+                  pas récompensée) <strong>et</strong> fait baisser la fiabilité. Une note basse avec une
+                  fiabilité basse veut donc dire « on ne sait pas encore », pas « c'est mauvais ».
+                </Tip>
+              </div>
               <div className="meter" style={{ margin: "4px 0" }}>
                 <span style={{ width: pct(result.confidence) }} />
               </div>
@@ -116,12 +133,6 @@ export function CompanyScore({
           </div>
         )}
 
-        {/* Clarification : la fiabilité n'est pas la qualité de l'entreprise. */}
-        <p className="muted small" style={{ marginTop: 14, marginBottom: 0, lineHeight: 1.45 }}>
-          ℹ️ La <strong>fiabilité</strong> mesure la <strong>complétude et la fraîcheur des preuves</strong>,
-          pas la qualité de l'entreprise. Peu de données publiées ou anciennes → fiabilité basse
-          (pas une mauvaise note, une absence de preuves).
-        </p>
       </div>
 
       {/* Encart marque ↔ groupe propriétaire */}
@@ -242,7 +253,12 @@ function Alternatives({ items }: { items: Alternative[] }) {
 }
 
 function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, string> }) {
+  // On affiche TOUS les indicateurs applicables (couverts ET manquants) pour
+  // rendre la note lisible. Un gate documenté reste affiché avec sa source
+  // (traçabilité) ; un gate manquant n'est pas listé comme « compté 0 » : il
+  // applique un plafond par défaut, pas un 0.
   const covered = d.indicators.filter((i) => i.covered);
+  const missing = d.indicators.filter((i) => !i.covered && !i.is_gate);
   return (
     <details className="pillar-card">
       <summary>
@@ -251,6 +267,12 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
           {d.name}
           <small>
             fiabilité {pct(d.confidence)} · {d.covered_indicators}/{d.applicable_indicators} indicateurs
+            <Tip label="Fiabilité de ce pilier">
+              {d.covered_indicators} indicateur(s) documenté(s) sur {d.applicable_indicators} applicables.
+              Les {Math.max(0, d.applicable_indicators - d.covered_indicators)} manquant(s), listés ci-dessous,
+              font baisser la <strong>fiabilité</strong> — et comptent comme 0 dans la <strong>note</strong>
+              (l'opacité n'est pas récompensée). Note et fiabilité restent deux mesures distinctes.
+            </Tip>
           </small>
         </div>
         <span className="chev" aria-hidden="true">›</span>
@@ -268,11 +290,6 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
         <span className="badge cap">⛔ Plafonné à {pct(d.ceiling ?? 0)} — {capReason[d.dimension_code] ?? "cause structurelle"}</span>
       )}
 
-      {covered.length === 0 ? (
-        <p className="muted small" style={{ marginTop: 10 }}>
-          Aucune donnée publiée sur ce pilier — noté 0 (l'opacité n'est pas récompensée).
-        </p>
-      ) : (
         <div style={{ marginTop: 8 }}>
           {covered.map((i) => (
             <div className="evidence" key={i.indicator_code}>
@@ -281,7 +298,8 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   {names.get(i.indicator_code) ?? i.indicator_code}
                 </span>
                 <span className="row" style={{ gap: 6 }}>
-                  {i.capped_by_greenwashing && <span className="badge warn">engagement plafonné</span>}
+                  {i.is_gate && <span className="badge cap" title="Indicateur-plafond : sa valeur borne la note du pilier, il n'entre pas dans la moyenne.">plafond du pilier</span>}
+                  {i.capped_by_greenwashing &&<span className="badge warn">engagement plafonné</span>}
                   {i.floored_by_low_tier && <span className="badge warn">source faible</span>}
                   {i.unscored_controversy && <span className="badge warn" title="Source unique non corroborée : signalée mais exclue du calcul de la note.">controverse · hors note</span>}
                   <span className="badge">{i.nature}</span>
@@ -295,11 +313,14 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
               <div className="muted small" style={{ marginTop: 3 }}>
                 {i.source_url ? (
                   <a href={i.source_url} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
-                    <span className={`tier-${i.tier}`}>{i.source_code}</span> ↗
+                    <span className={`tier-${i.tier}`} title={tierExplain[i.tier ?? ""] ?? ""}>{i.source_code}</span> ↗
                   </a>
                 ) : (
-                  <span className={`tier-${i.tier}`}>{i.source_code}</span>
+                  <span className={`tier-${i.tier}`} title={tierExplain[i.tier ?? ""] ?? ""}>{i.source_code}</span>
                 )}
+                <Tip label="Fiabilité de cette source">
+                  {tierExplain[i.tier ?? ""] ?? "Fiabilité de la source selon son type."}
+                </Tip>
                 {" · "}{frDate(i.observed_on) ?? i.observed_on}
                 {i.observed_on && i.observed_on < STALE_BEFORE && (
                   <span className="badge warn" style={{ marginLeft: 6 }} title="Preuve de plus de 3 ans — à rafraîchir (décote totale à 5 ans).">donnée ancienne</span>
@@ -307,8 +328,26 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
               </div>
             </div>
           ))}
+
+          {missing.map((i) => (
+            <div className="evidence missing" key={i.indicator_code}>
+              <div className="row between wrap" style={{ gap: 6 }}>
+                <span className="small muted" title={i.indicator_code}>
+                  {names.get(i.indicator_code) ?? i.indicator_code}
+                </span>
+                <span className="badge">donnée manquante</span>
+              </div>
+              <div className="muted small" style={{ marginTop: 3 }}>
+                Aucune preuve publiée pour cet indicateur — compté comme 0 (l'opacité
+                n'est pas récompensée). C'est précisément ce que reflète l'indice de fiabilité.
+              </div>
+            </div>
+          ))}
+
+          {covered.length === 0 && missing.length === 0 && (
+            <p className="muted small">Aucun indicateur applicable à ce pilier.</p>
+          )}
         </div>
-      )}
       </div>
     </details>
   );

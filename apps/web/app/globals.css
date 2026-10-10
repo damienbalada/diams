@@ -91,6 +91,22 @@ h1, h2, h3 { margin: 0 0 8px; line-height: 1.2; }
 .evidence { border-top: 1px solid var(--border); padding: 10px 0; }
 .evidence:last-child { padding-bottom: 0; }
 
+/* Infobulle : bouton « i » + explication révélée en flux normal (jamais rognée). */
+.tip { display: inline; }
+.tip-btn { display: inline-flex; align-items: center; justify-content: center;
+  width: 15px; height: 15px; margin-left: 5px; padding: 0; vertical-align: middle;
+  border: 1px solid var(--border-strong); border-radius: 50%; background: var(--panel-2);
+  color: var(--muted); font: 700 10px/1 Georgia, serif; font-style: italic; cursor: pointer; }
+@media (hover: hover) { .tip-btn:hover { color: var(--accent); border-color: var(--accent); } }
+.tip-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tip-pop { display: block; margin: 6px 0 2px; padding: 8px 10px; border-radius: 8px;
+  background: var(--panel-3); border: 1px solid var(--border-strong);
+  color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.5; }
+/* Indicateur manquant : présent mais sans preuve — grisé, pour montrer le trou
+   sans le confondre avec une donnée réelle. */
+.evidence.missing { opacity: .72; }
+.evidence.missing .badge { color: var(--muted); background: var(--panel-2); border-color: var(--border); }
+
 input[type=range] { width: 100%; accent-color: var(--accent); }
 .slider-row { display: grid; grid-template-columns: 150px 1fr 44px; gap: 10px; align-items: center; padding: 5px 0; }
 .btn { background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
