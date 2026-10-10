@@ -11,7 +11,9 @@ export default async function HomePage() {
   try {
     const [ents, scores] = await Promise.all([listEntities(), getAllScores()]);
     entities = ents;
-    grades = new Map(scores.map((s) => [s.slug, s.grade]));
+    // Pas de lettre sous le seuil de fiabilité (Règle 5) : une note mal
+    // documentée ne doit pas se lire comme un verdict.
+    grades = new Map(scores.filter((s) => s.publishable).map((s) => [s.slug, s.grade]));
   } catch (e) {
     error = (e as Error).message;
   }

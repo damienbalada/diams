@@ -89,7 +89,7 @@ async function build() {
     "sectors", "dimensions", "dimension_groups", "dimension_group_members", "indicators",
     "dimension_gates", "sources", "source_tier_config", "evidence_nature_config", "scoring_params",
     "value_profiles", "profile_weights", "entities", "evidence", "political_groups",
-    "civic_votes", "civic_positions",
+    "civic_votes", "civic_positions", "disclosure_regimes", "indicator_regimes", "entity_regimes",
   ]) T[t] = await fetchAll(t);
 
   const code = (rows, field = "code") => new Map(rows.map((r) => [r.id, r[field]]));
@@ -102,6 +102,7 @@ async function build() {
   const ent = code(T.entities, "slug");
   const vote = code(T.civic_votes);
   const pgroup = code(T.political_groups);
+  const regime = code(T.disclosure_regimes);
   const by = (f) => (a, b) => cmp(f(a), f(b));
 
   const parts = [];
@@ -184,6 +185,23 @@ async function build() {
     links.map((r) => `  (${lit(r.slug)}, ${lit(ent.get(r.parent_id))}, ${lit(r.ownership_pct)}::numeric)`).join(",\n") +
     `\n) as v(slug, parent_slug, pct)\njoin entities p on p.slug = v.parent_slug\n` +
     `where e.slug = v.slug and (e.parent_id is distinct from p.id or e.ownership_pct is distinct from v.pct);\n`);
+
+  section("Obligations de publication : régimes (Règle 1)", upsert("disclosure_regimes",
+    ["code", "name", "jurisdiction", "legal_basis", "scope", "url", "in_force_since"], ["code"],
+    [...T.disclosure_regimes].sort(by((r) => r.code)).map((r) =>
+      [r.code, r.name, r.jurisdiction, r.legal_basis, r.scope, r.url, r.in_force_since].map(lit))));
+
+  section("Obligations : indicateurs rendus obligatoires", upsert("indicator_regimes",
+    ["indicator_id", "regime_id", "note"], ["indicator_id", "regime_id"],
+    [...T.indicator_regimes].sort(by((r) => `${regime.get(r.regime_id)}|${ind.get(r.indicator_id)}`)).map((r) =>
+      [ref("indicators", "code", ind.get(r.indicator_id)), ref("disclosure_regimes", "code", regime.get(r.regime_id)), lit(r.note)])));
+
+  section("Obligations : entités soumises (faits sourcés)", upsert("entity_regimes",
+    ["entity_id", "regime_id", "basis", "source_url", "observed_on", "reviewer"], ["entity_id", "regime_id"],
+    [...T.entity_regimes].sort(by((r) => `${ent.get(r.entity_id)}|${regime.get(r.regime_id)}`)).map((r) => [
+      ref("entities", "slug", ent.get(r.entity_id)), ref("disclosure_regimes", "code", regime.get(r.regime_id)),
+      lit(r.basis), lit(r.source_url), lit(r.observed_on), lit(r.reviewer),
+    ])));
 
   section("Preuves (evidence) — clé : entité + indicateur + source + date", upsert("evidence",
     ["entity_id", "indicator_id", "source_id", "observed_on", "value_type", "value_numeric", "value_boolean", "value_text",

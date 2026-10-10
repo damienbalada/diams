@@ -26,12 +26,12 @@ export default async function CompanyPage({
 
     // Groupe propriétaire (le vrai bénéficiaire économique) : on calcule aussi
     // sa note pour l'afficher en regard de celle de la marque.
-    let group: { name: string; result: ReturnType<typeof computeScore> } | null = null;
+    let group: { slug: string; name: string; result: ReturnType<typeof computeScore> } | null = null;
     try {
       const owner = await getOwnerGroup(slug);
       if (owner) {
         const gp = await getScorePayload(owner.slug);
-        if (gp) group = { name: owner.name, result: computeScore(gp) };
+        if (gp) group = { slug: owner.slug, name: owner.name, result: computeScore(gp) };
       }
     } catch {
       // encart groupe optionnel : on ignore les erreurs

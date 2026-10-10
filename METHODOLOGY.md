@@ -5,7 +5,7 @@
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : `0.4.0` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : `0.5.0` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -14,7 +14,9 @@ tech, automobile, restauration, énergie, banque** (France + international).
 
 1. **Résolution d'entités d'abord.** Une marque n'est pas une entreprise.
    Bottega → Kering, Dior → LVMH. Sans table marque → filiale → groupe avec les
-   % de détention, le score est faux dès le départ. C'est le socle.
+   % de détention, on ne sait pas à qui va l'argent. C'est le socle. Chaque
+   entité est pourtant **notée sur ses propres preuves** (Règle 8) : la chaîne de
+   détention s'affiche à côté de la note, elle ne la remplace pas.
 2. **Chaque point de score = une evidence sourcée et datée.** Jamais une opinion.
 3. **Décroissance à 5 ans + fraîcheur affichée.** Un fait de 2014 ne plombe pas
    une entreprise à vie : une evidence n'est « active » que pendant 5 ans après
@@ -32,8 +34,11 @@ tech, automobile, restauration, énergie, banque** (France + international).
 4. **Faits séparés des jugements.** On stocke des indicateurs factuels
    normalisés ; la pondération est appliquée *après*, via des profils de valeurs
    configurables. Pas de score « one-size-fits-all ».
-5. **Indice de confiance séparé du score.** La donnée manquante ne produit jamais
-   une bonne note. On affiche « Note : B / Fiabilité : 40 % ».
+5. **Indice de confiance séparé du score.** On affiche « Note : B / Fiabilité :
+   40 % ». La donnée manquante fait toujours baisser la fiabilité ; elle compte 0
+   dans la note quand sa publication est obligatoire (Règle 1), et sous le seuil
+   de fiabilité aucune note n'est affichée (Règle 5) : l'opacité ne produit
+   jamais une bonne note visible.
 6. **Normalisation intra-secteur.** Comparer une banque et un maroquinier sur le
    bien-être animal n'a pas de sens.
 7. **Anti-greenwashing.** Un engagement (promesse) pèse beaucoup moins qu'un
@@ -49,13 +54,43 @@ Ces règles sont stockées **en base** (`source_tier_config`,
 `evidence_nature_config`, `scoring_params`) pour être datées, auditables et
 modifiables sans redéploiement de code.
 
-### Règle 1 — Donnée manquante = note pénalisante
+### Règle 1 — Donnée manquante : pénalisante si la publication est obligatoire
 
-Une dimension sans aucune evidence active reçoit un score de **0** (paramètre
-`missing_data_score`) **et** une confiance de 0. L'opacité est donc **punie dans
-la note ET signalée dans la fiabilité**. Justification : le périmètre vise des
-grands groupes soumis à obligation légale de publication (CSRD, devoir de
-vigilance) — ne pas publier est un choix, pas une excuse.
+*(Révisée en v0.5.0, octobre 2026.)* Une donnée manquante fait **toujours**
+baisser la fiabilité. Dans la **note**, tout dépend de l'obligation :
+
+| Situation de l'indicateur manquant | Effet sur la note | Effet sur la fiabilité |
+|---|---|---|
+| Publication **légalement obligatoire** pour cette entité | compté **0** (`missing_data_score`) | baisse |
+| **Aucune obligation** de publier | **exclu** de la note | baisse |
+
+Un pilier sans aucune preuve **ni** obligation n'est **pas noté** : il sort de la
+note globale mais tire la fiabilité vers le bas.
+
+**Pourquoi.** Ne pas publier ce que la loi impose est un choix, pas une excuse :
+l'opacité est punie. Mais ne pas publier ce que rien n'impose n'en est pas un —
+une coopérative, une PME ou une marque n'ont pas d'obligation CSRD. Pénaliser leur
+silence condamnerait d'avance les petits acteurs, précisément les alternatives
+qu'un consommateur cherche.
+
+**Comment l'obligation est établie.** Un **régime** (texte légal :
+`disclosure_regimes`) rend obligatoires certains indicateurs
+(`indicator_regimes`), et une entité y est **soumise** par un fait sourcé et daté
+(`entity_regimes` : base légale, URL, date) — exactement comme une preuve. Régimes
+en vigueur au 10/10/2026 :
+
+| Régime | Base légale | Indicateurs rendus obligatoires |
+|---|---|---|
+| Index Égapro | C. trav. art. L1142-8, D1142-4 (≥ 50 salariés) | index égalité F/H |
+| Déclaration pays par pays (banques) | directive CRD IV art. 89 ; CMF art. L511-45 | CbCR publié, taux effectif d'imposition |
+| CSRD — 1re vague | directive (UE) 2022/2464 + ESRS | mixité et indépendance du conseil (ESRS 2), Scope 3 et intensité carbone (E1), écart salarial F/H et ratio de rémunération (S1) |
+| Devoir de vigilance | loi n° 2017-399 ; C. com. art. L225-102-4 | plan de vigilance |
+| Copé-Zimmermann | loi n° 2011-103 ; C. com. art. L225-18-1 | mixité du conseil |
+
+**Limite assumée.** Un manquant obligatoire compte 0, que l'entreprise n'ait pas
+publié **ou** que DIAMS n'ait pas encore collecté l'information. Dans les deux cas
+la fiabilité reste basse et la note n'est pas affichée sous le seuil (Règle 5) ;
+c'est aussi pourquoi la collecte commence par les données obligatoires.
 
 ### Règle 2 — Solidité des sources : pondérée et plafonnée
 
@@ -112,9 +147,11 @@ protège le label du reproche de parti pris tout en préservant la transparence.
 
 Une entité dont la **fiabilité est sous le seuil** (`min_confidence_to_publish`,
 30 %) n'est **pas classée** : elle apparaît dans une section « données
-insuffisantes », sans note ni rang. On ne veut pas qu'une note basse *faute de
-preuves* soit lue comme un mauvais résultat. Note, fiabilité et fraîcheur sont
-les **trois axes de confiance** affichés séparément.
+insuffisantes », sans note ni rang, et **sa fiche n'affiche aucune lettre**
+(depuis v0.5.0). Une note bâtie sur trop peu de preuves ne doit être lue ni comme
+un mauvais résultat, ni — maintenant que les manquants non obligatoires sont
+exclus — comme un bon. Note, fiabilité et fraîcheur sont les **trois axes de
+confiance** affichés séparément.
 
 ### Règle 6 — Comparaison à périmètre égal (alternatives)
 
@@ -152,6 +189,18 @@ l'evidence sourcée qu'il a permis de créer. C'est la contribution ouverte sans
 la vulnérabilité du vote : le nombre de personnes qui affirment une chose ne
 change pas sa véracité.
 
+### Règle 8 — Une marque est notée sur ses propres preuves
+
+*(Depuis v0.5.0.)* Une marque **n'hérite pas** des preuves de son groupe. Une
+marque de mode qui n'utilise ni cuir ni fourrure ne doit pas porter le plafond
+« exploitation animale » de son propriétaire ; inversement, la vertu d'un groupe
+ne blanchit pas une marque qui n'a rien publié.
+
+La fiche d'une marque affiche **toujours** son groupe propriétaire — avec un lien
+vers sa fiche et sa note — parce que c'est lui qui reçoit l'argent. Une marque
+nettement mieux notée que son groupe porte une alerte : votre achat bénéficie
+tout de même au groupe.
+
 ---
 
 ## 3. Du fait au score (pipeline de calcul)
@@ -163,7 +212,7 @@ evidence (faits sourcés, datés, typés)
 normalisation INTRA-SECTEUR  →  valeur [0,1] par indicateur
    │  applique : poids de tier (règle 2) + nature (règle 3)
    ▼
-agrégation par DIMENSION  (donnée manquante → 0, règle 1)
+agrégation par DIMENSION  (manquant obligatoire → 0, sinon hors note ; règle 1)
    │  applique : poids du PROFIL de valeurs choisi
    ▼
 score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
@@ -279,11 +328,14 @@ pas du nombre de marques. Trois garde-fous invariants :
 1. **Matching conservateur.** Un fait n'est rattaché à une entité que si les noms
    correspondent nettement (`is_strong_match`). En cas de doute : on saute, on ne
    devine pas.
-2. **Écriture en `pending`.** Aucun connecteur ne publie directement. Toute
-   evidence attend la **revue humaine** (back-office) avant de compter dans un score.
+2. **Publication graduée par tier** (voir `REVIEW_MODEL.md`). Les sources de
+   tier 1-2 ingérées par un connecteur déterministe sont publiées directement
+   (reviewer `auto:<connecteur>`, audit par échantillon) ; tier 3, crowd ou tier
+   inconnu restent en `pending` jusqu'à la **revue humaine**.
 3. **Niveau de rattachement explicite.** Gouvernance, fiscalité et note climat sont
-   consolidées au niveau **groupe** (héritées par les marques) ; les benchmarks
-   peuvent noter une **marque** (ex. FTI note Gucci) et s'y rattachent alors.
+   rattachées au **groupe** ; les benchmarks peuvent noter une **marque** (ex. FTI
+   note Gucci). Depuis v0.5.0, une marque n'hérite plus des preuves du groupe
+   (Règle 8).
 
 | Connecteur | Pilier | Indicateur(s) | Source | Niveau |
 |---|---|---|---|---|
@@ -309,5 +361,11 @@ fausserait la comparaison sectorielle.
 
 ## 8. Statut
 
-Document vivant (v`0.4.0`, juillet 2026). Toute modification des paramètres de
+Document vivant (v`0.5.0`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
+
+**Journal :**
+- **0.5.0 (10/10/2026)** — Règle 1 conditionnée aux obligations légales de
+  publication (régimes sourcés) ; Règle 8 : chaque marque notée sur ses propres
+  preuves ; Règle 5 : aucune lettre affichée sous le seuil de fiabilité.
+- 0.4.0 (07/2026) — connecteurs déterministes, gates, méta-scores.

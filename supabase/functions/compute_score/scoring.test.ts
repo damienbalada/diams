@@ -57,23 +57,25 @@ function baseInput(over: Partial<ScoreInput>): ScoreInput {
   };
 }
 
-// --- Règle 1 : donnée manquante = 0 ------------------------------------------
-test("règle 1 — dimension sans evidence : score 0 et confiance 0", () => {
+// --- Règle 1 (v0.5) : manquant = 0 SI la publication est obligatoire ---------
+test("règle 1 — dimension sans evidence ni obligation : non notée, confiance 0", () => {
   const res = computeScore(baseInput({
     applicableIndicators: [ind("ENV_A", "ENV"), ind("ENV_B", "ENV")],
     evidence: [],
     profileWeights: [{ dimension_code: "ENV", weight: 1 }],
   }));
   const env = res.dimensions.find((d) => d.dimension_code === "ENV")!;
+  assert.equal(env.rated, false);
   assert.equal(env.score, 0);
   assert.equal(env.confidence, 0);
   assert.equal(env.covered_indicators, 0);
-  assert.equal(res.publishable, false); // confiance 0 < seuil
+  assert.equal(res.rated, false);
+  assert.equal(res.publishable, false);
 });
 
-test("règle 1 — donnée partielle : l'indicateur manquant tire le score vers le bas", () => {
+test("règle 1 — manquant OBLIGATOIRE : tire la note vers le bas (opacité punie)", () => {
   const res = computeScore(baseInput({
-    applicableIndicators: [ind("ENV_A", "ENV"), ind("ENV_B", "ENV")],
+    applicableIndicators: [ind("ENV_A", "ENV"), ind("ENV_B", "ENV", { mandatory: true, mandatory_regimes: ["CSRD"] })],
     evidence: [ev({ indicator_code: "ENV_A", normalized_value: 1.0 })], // ENV_B manquant
     profileWeights: [{ dimension_code: "ENV", weight: 1 }],
   }));
@@ -81,6 +83,55 @@ test("règle 1 — donnée partielle : l'indicateur manquant tire le score vers 
   // (1.0*1 + 0*1) / 2 = 0.5
   assert.equal(env.score, 0.5);
   assert.equal(env.covered_indicators, 1);
+  const b = env.indicators.find((i) => i.indicator_code === "ENV_B")!;
+  assert.equal(b.mandatory, true);
+  assert.deepEqual(b.mandatory_regimes, ["CSRD"]);
+});
+
+test("règle 1 — manquant NON obligatoire : hors note, mais la fiabilité baisse", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("ENV_A", "ENV"), ind("ENV_B", "ENV")],
+    evidence: [ev({ indicator_code: "ENV_A", normalized_value: 1.0, confidence: 0.9 })],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const env = res.dimensions.find((d) => d.dimension_code === "ENV")!;
+  assert.equal(env.rated, true);
+  assert.equal(env.score, 1.0);                         // ENV_B n'entre pas dans la note
+  assert.ok(Math.abs(env.confidence - 0.45) < 1e-9);    // (0.9 + 0) / 2
+});
+
+test("règle 1 — dimension vide mais obligatoire : notée 0", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("ENV_A", "ENV", { mandatory: true })],
+    evidence: [],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const env = res.dimensions[0];
+  assert.equal(env.rated, true);
+  assert.equal(env.score, 0);
+  assert.equal(res.rated, true);
+});
+
+test("règle 1 — un pilier non noté sort de la note globale mais pèse sur la fiabilité", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("ENV_A", "ENV"), ind("ANI_A", "ANI")],
+    evidence: [ev({ indicator_code: "ENV_A", normalized_value: 0.8, confidence: 0.9 })], // ANI vide, non obligatoire
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }, { dimension_code: "ANI", weight: 1 }],
+  }));
+  assert.ok(Math.abs(res.score - 0.8) < 1e-9);          // ANI hors note
+  assert.ok(Math.abs(res.confidence - 0.45) < 1e-9);    // (0.9 + 0) / 2
+  assert.equal(res.publishable, true);                  // 0.45 >= 0.30
+});
+
+test("règle 5 — une note n'est publiable que si elle repose sur au moins un pilier noté", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("ENV_A", "ENV")],
+    evidence: [],
+    params: { ...params, min_confidence_to_publish: 0 },
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  assert.equal(res.rated, false);
+  assert.equal(res.publishable, false);
 });
 
 // --- Règle 3 : anti-greenwashing --------------------------------------------
@@ -236,19 +287,11 @@ test("règle 2 — une controverse régulatoire peut pénaliser fortement (pas d
   assert.equal(res.dimensions[0].indicators[0].value, 0);
 });
 
-// --- Héritage groupe -> marque ----------------------------------------------
-test("héritage — une marque hérite de l'evidence du groupe", () => {
-  const res = computeScore(baseInput({
-    applicableIndicators: [ind("ENV_A", "ENV")],
-    // evidence portée par le groupe (specificity 0), aucune evidence propre
-    evidence: [ev({ indicator_code: "ENV_A", nature: "result", normalized_value: 0.7, specificity: 0 })],
-    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
-  }));
-  assert.equal(res.dimensions[0].indicators[0].covered, true);
-  assert.equal(res.dimensions[0].indicators[0].value, 0.7);
-});
-
-test("héritage — l'evidence propre de la marque prime sur celle du groupe", () => {
+// --- Spécificité ---------------------------------------------------------------
+// Depuis v0.5, compute_score_input ne transmet plus l'evidence du groupe à une
+// marque (chaque marque est notée sur ses propres preuves). Le moteur garde
+// néanmoins le départage par spécificité, neutre quand toutes valent 0.
+test("spécificité — à nature égale, l'evidence la plus spécifique prime", () => {
   const res = computeScore(baseInput({
     applicableIndicators: [ind("ENV_A", "ENV")],
     evidence: [
@@ -365,6 +408,37 @@ test("gate — exploitation inconnue : plafond par défaut appliqué", () => {
   const ani = res.dimensions.find((d) => d.dimension_code === "ANI")!;
   assert.equal(ani.score, 0.40); // plafond par défaut (on suppose l'exploitation)
   assert.equal(ani.capped_by_gate, true);
+});
+
+test("gate — documenté seul (aucun autre indicateur) : il fixe la note du pilier", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("ANI_FUR_FREE", "ANI", { weight: 1 }),
+      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
+    ],
+    evidence: [ev({ indicator_code: "ANI_EXPLOITATION", nature: "result", normalized_value: 0.0, tier: "press" })],
+    dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }],
+  }));
+  const ani = res.dimensions[0];
+  assert.equal(ani.rated, true);
+  assert.equal(ani.score, 0);
+  assert.equal(ani.capped_by_gate, true);
+  assert.equal(ani.confidence, 0); // le gate ne compte pas dans la fiabilité
+});
+
+test("gate — non documenté et pilier sans preuve : pilier non noté (pas de plafond appliqué à rien)", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("ANI_FUR_FREE", "ANI", { weight: 1 }),
+      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
+    ],
+    evidence: [],
+    dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }],
+  }));
+  assert.equal(res.dimensions[0].rated, false);
+  assert.ok(!res.dimensions[0].capped_by_gate);
 });
 
 test("animal_free — pilier ANI noté sur l'absence d'intrant animal, sans plafond (cas Alpro)", () => {

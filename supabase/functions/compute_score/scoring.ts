@@ -8,11 +8,12 @@
 // Le test « miroir » (scoring.test.ts) échoue si les deux fichiers divergent.
 //
 // Pipeline :
-//   evidence active (héritée groupe→marque)
+//   evidence active PROPRE à l'entité (v0.5 : une marque n'hérite plus du groupe)
 //     -> normalisation [0,1] (intra-secteur pour le quantitatif)
 //     -> règle 3 (anti-greenwashing : promesse plafonnée, preuve débloque)
 //     -> règle 2 (tiers : poids + plafond de confiance + plancher anti-presse)
-//     -> agrégation par dimension (règle 1 : donnée manquante = 0)
+//     -> agrégation par dimension (règle 1 v0.5 : manquant = 0 SI publication
+//        obligatoire ; sinon hors note, mais la fiabilité baisse)
 //     -> pondération par profil de valeurs
 //     -> score + indice de confiance (séparés) + méta-scores
 // =============================================================================
@@ -51,6 +52,11 @@ export interface Indicator {
   kind: Kind;
   direction: Direction;
   weight: number;
+  /** Règle 1 : publication légalement obligatoire pour l'entité notée. Manquant
+   *  ⇒ compté missing_data_score. Sinon, manquant ⇒ hors note (fiabilité seule). */
+  mandatory?: boolean;
+  /** Régimes légaux qui imposent la publication (affichage). */
+  mandatory_regimes?: string[];
 }
 export interface Evidence {
   indicator_code: string;
@@ -125,6 +131,9 @@ export interface IndicatorResult {
   /** Indicateur-gate (plafond de dimension) : ne se compte pas comme les autres
    *  — s'il est manquant il n'est pas « noté 0 » mais applique default_ceiling. */
   is_gate?: boolean;
+  /** Publication obligatoire (Règle 1) : si manquant, compté 0 dans la note. */
+  mandatory?: boolean;
+  mandatory_regimes?: string[];
 }
 export interface DimensionResult {
   dimension_code: string;
@@ -132,6 +141,9 @@ export interface DimensionResult {
   score: number;
   confidence: number;
   grade: string;
+  /** false : aucune base de note (ni preuve, ni publication obligatoire) — le
+   *  pilier n'entre pas dans la note globale, mais pèse sur la fiabilité. */
+  rated: boolean;
   applicable_indicators: number;
   covered_indicators: number;
   /** plafond appliqué (gate) si la dimension en a un. */
@@ -146,11 +158,15 @@ export interface GroupResult {
   score: number;
   confidence: number;
   grade: string;
+  rated: boolean;
 }
 export interface ScoreResult {
   score: number;
   confidence: number;
   grade: string;
+  /** false : aucun pilier noté — pas de note, seulement une fiabilité. */
+  rated: boolean;
+  /** Note publiable : notée ET fiabilité >= min_confidence_to_publish (Règle 5). */
   publishable: boolean;
   dimensions: DimensionResult[];
   groups: GroupResult[];
@@ -362,7 +378,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
   const indByCode = new Map(input.applicableIndicators.map((i) => [i.code, i]));
   const dimName = new Map(input.dimensions.map((d) => [d.code, d.name]));
 
-  // Agrégation par dimension (règle 1 : donnée manquante = missing_data_score = 0)
+  // Agrégation par dimension (règle 1 : manquant obligatoire = missing_data_score)
   const dimResults: DimensionResult[] = [];
   const dimScore = new Map<string, number>();
   const dimConf = new Map<string, number>();
@@ -380,47 +396,56 @@ export function computeScore(input: ScoreInput): ScoreResult {
     const scored = inds.filter(
       (i) => i.code !== gateCode && !resByCode.get(i.code)?.display_only,
     );
-    const scoreWeight = scored.reduce((s, i) => s + i.weight, 0);
 
     let scoreNum = 0;
+    let scoreWeight = 0; // poids des indicateurs qui entrent dans la note
     let confNum = 0;
-    let confWeight = 0;
+    let confWeight = 0;  // poids de TOUS les indicateurs applicables (fiabilité)
     let covered = 0;
     const indicators: IndicatorResult[] = [];
 
     for (const ind of inds) {
       const r = resByCode.get(ind.code)!;
       if (ind.code === gateCode) r.is_gate = true;
+      if (ind.mandatory) {
+        r.mandatory = true;
+        r.mandatory_regimes = ind.mandatory_regimes;
+      }
       indicators.push(r);
       if (ind.code === gateCode) continue; // exclu de la moyenne et des compteurs
       if (r.display_only) continue;        // affiché mais hors calcul (controverse non corroborée)
+      confWeight += ind.weight;
       if (r.covered) {
         scoreNum += (r.value ?? 0) * ind.weight;
+        scoreWeight += ind.weight;
         confNum += r.confidence * ind.weight;
         covered++;
       } else {
-        // donnée manquante : score 0, confiance 0 (poids tout de même au dénominateur)
-        scoreNum += input.params.missing_data_score * ind.weight;
+        // Donnée manquante : la fiabilité baisse toujours. La note n'est
+        // pénalisée que si la publication était obligatoire (Règle 1).
         confNum += input.params.missing_data_confidence * ind.weight;
+        if (ind.mandatory) {
+          scoreNum += input.params.missing_data_score * ind.weight;
+          scoreWeight += ind.weight;
+        }
       }
-      confWeight += ind.weight;
     }
 
-    if (scoreWeight === 0 && !gate) continue;
-
-    const avg = scoreWeight > 0 ? scoreNum / scoreWeight : 0;
+    if (scored.length === 0 && !gate) continue;
 
     // Plafond (gate) : valeur du gate si connue, sinon default_ceiling (conservateur).
-    let ceiling = 1;
-    if (gate) {
-      const gr = resByCode.get(gateCode!);
-      ceiling = gr && gr.covered && gr.value !== null ? gr.value : gate.default_ceiling;
-    }
-    const score = clamp01(Math.min(avg, ceiling));
-    const cappedByGate = gate ? score < avg - 1e-9 : false;
+    const gr = gate ? resByCode.get(gateCode!) : undefined;
+    const gateKnown = !!(gr && gr.covered && gr.value !== null);
+    // Noté s'il y a une base : une preuve, un manquant obligatoire, ou un gate
+    // documenté (seul, il fixe la note du pilier : son plafond).
+    const rated = scoreWeight > 0 || gateKnown;
+    const avg = scoreWeight > 0 ? scoreNum / scoreWeight : 1;
+    const ceiling = gate ? (gateKnown ? gr!.value! : gate.default_ceiling) : 1;
+    const score = rated ? clamp01(Math.min(avg, ceiling)) : 0;
+    const cappedByGate = gate && rated ? score < avg - 1e-9 : false;
     const confidence = clamp01(confWeight > 0 ? confNum / confWeight : 0);
 
-    dimScore.set(dimCode, score);
+    if (rated) dimScore.set(dimCode, score);
     dimConf.set(dimCode, confidence);
 
     dimResults.push({
@@ -429,6 +454,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
       score,
       confidence,
       grade: toGrade(score),
+      rated,
       applicable_indicators: scored.length,
       covered_indicators: covered,
       ceiling: gate ? clamp01(ceiling) : undefined,
@@ -437,18 +463,23 @@ export function computeScore(input: ScoreInput): ScoreResult {
     });
   }
 
-  // Score global pondéré par le profil
+  // Score global pondéré par le profil : la note sur les piliers NOTÉS, la
+  // fiabilité sur TOUS les piliers applicables (un pilier sans base la tire vers 0).
   let gScoreNum = 0;
+  let gScoreW = 0;
   let gConfNum = 0;
-  let pwTotal = 0;
+  let gConfW = 0;
   for (const pw of input.profileWeights) {
+    if (!dimConf.has(pw.dimension_code)) continue;
+    gConfNum += dimConf.get(pw.dimension_code)! * pw.weight;
+    gConfW += pw.weight;
     if (!dimScore.has(pw.dimension_code)) continue;
     gScoreNum += dimScore.get(pw.dimension_code)! * pw.weight;
-    gConfNum += dimConf.get(pw.dimension_code)! * pw.weight;
-    pwTotal += pw.weight;
+    gScoreW += pw.weight;
   }
-  const score = pwTotal > 0 ? clamp01(gScoreNum / pwTotal) : 0;
-  const confidence = pwTotal > 0 ? clamp01(gConfNum / pwTotal) : 0;
+  const rated = gScoreW > 0;
+  const score = rated ? clamp01(gScoreNum / gScoreW) : 0;
+  const confidence = gConfW > 0 ? clamp01(gConfNum / gConfW) : 0;
 
   // Fraîcheur : date d'observation la plus récente parmi les preuves retenues.
   let last_observed: string | null = null;
@@ -462,22 +493,26 @@ export function computeScore(input: ScoreInput): ScoreResult {
   const groups: GroupResult[] = [];
   for (const g of input.dimensionGroups) {
     let sNum = 0;
+    let sW = 0;
     let cNum = 0;
-    let wTotal = 0;
+    let cW = 0;
     for (const m of g.members) {
+      if (!dimConf.has(m.dimension_code)) continue;
+      cNum += dimConf.get(m.dimension_code)! * m.weight;
+      cW += m.weight;
       if (!dimScore.has(m.dimension_code)) continue;
       sNum += dimScore.get(m.dimension_code)! * m.weight;
-      cNum += dimConf.get(m.dimension_code)! * m.weight;
-      wTotal += m.weight;
+      sW += m.weight;
     }
-    if (wTotal === 0) continue;
-    const gs = clamp01(sNum / wTotal);
+    if (cW === 0) continue;
+    const gs = sW > 0 ? clamp01(sNum / sW) : 0;
     groups.push({
       code: g.code,
       name: g.name,
       score: gs,
-      confidence: clamp01(cNum / wTotal),
+      confidence: clamp01(cNum / cW),
       grade: toGrade(gs),
+      rated: sW > 0,
     });
   }
 
@@ -485,7 +520,8 @@ export function computeScore(input: ScoreInput): ScoreResult {
     score,
     confidence,
     grade: toGrade(score),
-    publishable: confidence >= input.params.min_confidence_to_publish,
+    rated,
+    publishable: rated && confidence >= input.params.min_confidence_to_publish,
     dimensions: dimResults.sort((a, b) => a.dimension_code.localeCompare(b.dimension_code)),
     groups,
     last_observed,

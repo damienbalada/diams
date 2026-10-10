@@ -2,8 +2,10 @@
 
 > Comment les faits entrent dans DIAMS. Chaque connecteur est du **code pur et
 > déterministe** (parsing + normalisation + rapprochement de noms) : **0 token de
-> modèle**, coût indépendant du nombre de marques. Tout est écrit en `pending` —
-> revue humaine obligatoire avant qu'une preuve compte dans un score.
+> modèle**, coût indépendant du nombre de marques. Le statut dépend du **tier de
+> la source** (`REVIEW_MODEL.md`) : tiers 1-2 publiés directement (reviewer
+> `auto:<connecteur>`, audit par échantillon), tier 3 / crowd en `pending` jusqu'à
+> la revue humaine.
 
 ## Synthèse — quel CSV pour quel connecteur
 
@@ -28,7 +30,7 @@ réels, données fictives) est fourni dans [`examples/`](./examples/).
 
 - **Rapprochement conservateur** (`normalize.names.is_strong_match`) : en cas de
   doute sur l'entité, on saute — jamais de devinette.
-- **Écriture `pending`** (`load.insert_evidence`) : idempotent sur
+- **Statut par tier** (`load.insert_evidence`, `review_status_for`) : idempotent sur
   `(entity, indicator, source, observed_on)` ; relancer un import est sans effet.
 - **Dry-run par défaut** : chaque `import_*` affiche ce qu'il ferait ; `--apply`
   écrit réellement.

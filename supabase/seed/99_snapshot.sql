@@ -23,6 +23,9 @@
 --   political_groups         18
 --   civic_votes              4
 --   civic_positions          35
+--   disclosure_regimes       5
+--   indicator_regimes        11
+--   entity_regimes           0
 -- =============================================================================
 
 begin;
@@ -648,6 +651,40 @@ from (values
 ) as v(slug, parent_slug, pct)
 join entities p on p.slug = v.parent_slug
 where e.slug = v.slug and (e.parent_id is distinct from p.id or e.ownership_pct is distinct from v.pct);
+
+-- Obligations de publication : régimes (Règle 1)
+insert into disclosure_regimes (code, name, jurisdiction, legal_basis, scope, url, in_force_since) values
+  ('EU_CRD_CBCR', 'Déclaration pays par pays des établissements de crédit', 'UE', 'Directive 2013/36/UE (CRD IV), art. 89 ; Code monétaire et financier, art. L511-45 ; décret n° 2014-1657', 'Établissements de crédit, compagnies financières holding et entreprises d''investissement : publication annuelle, par pays d''implantation, de l''activité, du produit net bancaire, des effectifs, du résultat avant impôt, de l''impôt et des subventions publiques reçues.', 'https://eur-lex.europa.eu/eli/dir/2013/36/oj', '2015-01-01'),
+  ('EU_CSRD_W1', 'Rapport de durabilité CSRD — première vague', 'UE', 'Directive (UE) 2022/2464 (CSRD) et normes ESRS (règlement délégué (UE) 2023/2772) ; ordonnance n° 2023-1142 du 6 décembre 2023', 'Grandes entités d''intérêt public de plus de 500 salariés (ex-périmètre NFRD), exercices ouverts dès le 1er janvier 2024. Les filiales couvertes par le rapport consolidé de leur société mère en sont exemptées. Hors ESRS 2, les points de données dépendent de l''analyse de double matérialité.', 'https://eur-lex.europa.eu/eli/dir/2022/2464/oj', '2025-01-01'),
+  ('FR_COPE_ZIMMERMANN', 'Mixité des conseils d''administration', 'FR', 'Loi n° 2011-103 du 27 janvier 2011 ; Code de commerce, art. L225-18-1', 'Sociétés cotées, et sociétés de plus de 250 salariés et 50 M€ de chiffre d''affaires : au moins 40 % de chaque sexe au conseil ; composition publiée.', 'https://www.legifrance.gouv.fr/eli/loi/2011/1/27/2011-103/jo/texte', '2017-01-01'),
+  ('FR_EGAPRO', 'Index de l''égalité professionnelle femmes-hommes', 'FR', 'Code du travail, art. L1142-8 et D1142-4 (loi n° 2018-771 du 5 septembre 2018)', 'Entreprises d''au moins 50 salariés : publication annuelle de l''index et de ses indicateurs, au plus tard le 1er mars, et sur le site du ministère du Travail.', 'https://egapro.travail.gouv.fr/', '2020-03-01'),
+  ('FR_VIGILANCE', 'Plan de vigilance', 'FR', 'Loi n° 2017-399 du 27 mars 2017 ; Code de commerce, art. L225-102-4', 'Sociétés employant, à la clôture de deux exercices consécutifs, au moins 5 000 salariés (avec leurs filiales françaises) ou 10 000 (avec leurs filiales dans le monde) : plan et compte rendu de mise en œuvre publiés dans le rapport de gestion.', 'https://www.legifrance.gouv.fr/eli/loi/2017/3/27/2017-399/jo/texte', '2018-01-01')
+on conflict (code) do update set
+  name = excluded.name,
+  jurisdiction = excluded.jurisdiction,
+  legal_basis = excluded.legal_basis,
+  scope = excluded.scope,
+  url = excluded.url,
+  in_force_since = excluded.in_force_since;
+
+-- Obligations : indicateurs rendus obligatoires
+insert into indicator_regimes (indicator_id, regime_id, note) values
+  ((select id from indicators where code = 'TAX_CBCR_PUBLISHED'), (select id from disclosure_regimes where code = 'EU_CRD_CBCR'), 'Déclaration pays par pays publique.'),
+  ((select id from indicators where code = 'TAX_EFFECTIVE_RATE'), (select id from disclosure_regimes where code = 'EU_CRD_CBCR'), 'Impôt et résultat avant impôt publiés par pays.'),
+  ((select id from indicators where code = 'ENV_GHG_INTENSITY'), (select id from disclosure_regimes where code = 'EU_CSRD_W1'), 'ESRS E1-6, intensité par chiffre d''affaires net.'),
+  ((select id from indicators where code = 'ENV_SCOPE3_DISCLOSED'), (select id from disclosure_regimes where code = 'EU_CSRD_W1'), 'ESRS E1-6 (sous réserve de matérialité du climat).'),
+  ((select id from indicators where code = 'GOV_BOARD_GENDER'), (select id from disclosure_regimes where code = 'EU_CSRD_W1'), 'ESRS 2 GOV-1 (hors matérialité).'),
+  ((select id from indicators where code = 'GOV_BOARD_INDEP'), (select id from disclosure_regimes where code = 'EU_CSRD_W1'), 'ESRS 2 GOV-1 (hors matérialité).'),
+  ((select id from indicators where code = 'LAB_CEO_PAY_RATIO'), (select id from disclosure_regimes where code = 'EU_CSRD_W1'), 'ESRS S1-16, ratio de rémunération totale annuelle.'),
+  ((select id from indicators where code = 'LAB_GENDER_PAYGAP'), (select id from disclosure_regimes where code = 'EU_CSRD_W1'), 'ESRS S1-16 (sous réserve de matérialité).'),
+  ((select id from indicators where code = 'GOV_BOARD_GENDER'), (select id from disclosure_regimes where code = 'FR_COPE_ZIMMERMANN'), 'Composition du conseil.'),
+  ((select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from disclosure_regimes where code = 'FR_EGAPRO'), 'Note globale de l''index.'),
+  ((select id from indicators where code = 'SUP_VIGILANCE_PLAN'), (select id from disclosure_regimes where code = 'FR_VIGILANCE'), 'Plan publié dans le rapport de gestion.')
+on conflict (indicator_id, regime_id) do update set
+  note = excluded.note;
+
+-- Obligations : entités soumises (faits sourcés)
+-- entity_regimes : aucune ligne.
 
 -- Preuves (evidence) — clé : entité + indicateur + source + date
 insert into evidence (entity_id, indicator_id, source_id, observed_on, value_type, value_numeric, value_boolean, value_text, normalized_value, nature, confidence, reviewer, review_status, contested, source_url, excerpt) values
