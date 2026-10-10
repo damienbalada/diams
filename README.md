@@ -61,6 +61,12 @@ supabase db push
 psql "$DATABASE_URL" -f supabase/seed/99_snapshot.sql
 ```
 
+> ⚠️ Projet de production existant : ses migrations ont été appliquées hors CLI,
+> l'historique en base (`supabase_migrations.schema_migrations`) porte d'autres
+> numéros de version que les fichiers. Le schéma, lui, est identique (vérifié le
+> 10/10/2026). Avant tout `supabase db push` sur ce projet, aligner l'historique
+> avec `supabase migration repair --status applied <version>` pour chaque fichier.
+
 `99_snapshot.sql` est généré depuis la production (`node scripts/snapshot-db.mjs`)
 et vérifié rejouable sur une base vierge. Les seeds 01 → 35 sont archivés dans
 `supabase/seed/history/` : ils documentent la curation mais sont périmés.
