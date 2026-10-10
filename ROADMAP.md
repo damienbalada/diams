@@ -64,17 +64,26 @@ bancaire CRD IV, CSRD, Égapro, HATVP).
 **Fait :** 19 établissements (7 têtes de groupe + La Nef + filiales et marques),
 SIREN/LEI vérifiés aux registres ; Égapro pour toutes les entités juridiques
 (déterministe) ; régimes CSRD et CbCR rattachés aux têtes de groupe ; lot 1 de
-preuves curées **en revue** (financement de l'expansion fossile BOCC 2026,
-inscription HATVP).
+preuves curées (financement de l'expansion fossile BOCC 2026, inscription
+HATVP) ; lot 2 depuis les rapports ESEF 2025 : taux effectif d'impôt et
+déclaration pays par pays (connecteur déterministe), écart salarial, ratio de
+rémunération, mixité et indépendance du conseil, publication du Scope 3
+(citations verbatim vérifiées par `verify_curated`).
+
+**Mesure au 10/10/2026 : 6 banques publiables** — La Banque Postale B (77 %),
+Crédit Mutuel Arkéa B (73 %), BNP Paribas B (64 %), BPCE C (58 %),
+Crédit Agricole C (56 %), Société Générale C (55 %) ; fiabilité 32 à 47 %.
 
 **Critère de sortie :** ≥ 15 banques publiables (fiabilité ≥ 60 %), notes
 étalées de A à E, une alternative mieux notée pour chaque grande banque, écarts
 avec les classements ONG (Oxfam, Amis de la Terre…) documentés.
 
 **Collecte restante, par ordre d'impact :**
-1. Données **obligatoires** des 7 têtes de groupe (comptent 0 tant qu'absentes) :
-   CbCR publié + taux effectif (TAX), mixité + indépendance du conseil (GOV),
-   Scope 3 + intensité carbone (ENV), écart salarial + ratio de rémunération (LAB).
+1. Données **obligatoires** restantes (comptent 0 tant qu'absentes) : intensité
+   carbone (seul Arkéa la publie ; Société Générale écrit qu'elle ne la publie
+   pas), ratio de rémunération groupe de BNP Paribas (publié par pays seulement),
+   indépendance du conseil d'Arkéa (présentation ambiguë), et tout Crédit Mutuel
+   Alliance Fédérale (pas de dépôt ESEF 2025 indexé).
 2. Plans de vigilance (régime FR_VIGILANCE à rattacher, avec le plan lui-même).
 3. Petits acteurs (La Nef, Crédit Coopératif, néobanques) : politiques
    d'exclusion, labels (Finansol, B Corp), publication des financements.

@@ -161,6 +161,52 @@ def verify_hatvp(row, client: httpx.Client, sirens: dict[str, str | None]) -> Ve
     return check_hatvp(row, r.json(), sirens.get(row.entity_slug))
 
 
+# --- ESEF : citation verbatim du rapport financier annuel ----------------------
+# Mots qui doivent figurer dans la citation pour qu'elle porte bien sur l'indicateur.
+ESEF_KEYWORDS = {
+    "LAB_GENDER_PAYGAP": [r"[ée]cart", r"r[ée]mun[ée]ration", r"femmes|hommes"],
+    "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian"],
+    "GOV_BOARD_GENDER": [r"femmes", r"conseil"],
+    "GOV_BOARD_INDEP": [r"ind[ée]pendant"],
+    "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|chiffre d.affaires"],
+}
+
+
+def _canon(s: str) -> str:
+    s = s.replace("’", "'").replace(" ", " ").replace(" ", " ")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _value_variants(v: float) -> list[str]:
+    out = {f"{v:.2f}".replace(".", ","), f"{v:.1f}".replace(".", ",")}
+    if float(v).is_integer():
+        out.add(f"{int(v)}")
+    return list(out)
+
+
+def check_esef_quote(row, report_text: str) -> Verdict:
+    m = re.search(r"«\s?(.+?)\s?»\s*$", row.excerpt or "")
+    if not m:
+        return Verdict("NON VÉRIFIABLE", ["pas de citation « … » dans l'extrait"])
+    quote = _canon(m.group(1))
+    found = quote in _canon(report_text)
+    details = [f"citation retrouvée mot pour mot dans le rapport {'✓' if found else '✗'}"]
+    ok = found
+    for kw in ESEF_KEYWORDS.get(row.indicator_code, []):
+        hit = re.search(kw, quote, re.I) is not None
+        ok &= hit
+        details.append(f"la citation porte sur l'indicateur (« {kw} ») {'✓' if hit else '✗'}")
+    if row.value_numeric is not None:
+        flat = re.sub(r"(?<=\d)\s(?=\d{3}(?!\d))", "", quote)  # espaces de milliers seulement
+        hit = any(re.search(rf"(?<![\d,]){re.escape(c)}(?![\d])", flat) for c in _value_variants(row.value_numeric))
+        ok &= hit
+        details.append(f"valeur {row.value_numeric} présente dans la citation {'✓' if hit else '✗'}")
+    elif row.value_boolean is not None:
+        details.append("indicateur oui/non : la présence de la citation suffit")
+    return Verdict("OK" if ok else "ÉCART", details)
+
+
 # --- Application ---------------------------------------------------------------
 def approve(rows) -> int:
     h = {"apikey": config.SUPABASE_SERVICE_ROLE_KEY, "Authorization": f"Bearer {config.SUPABASE_SERVICE_ROLE_KEY}",
@@ -191,6 +237,11 @@ def main() -> None:
     rows, errors = parse_file(args.file)
     if errors:
         raise SystemExit("CSV invalide : " + "; ".join(errors))
+    # Colonne facultative `review_note` : un cas signalé comme jugement à la
+    # compilation reste humain, même si tout concorde avec la source.
+    import csv
+    with open(args.file, newline="", encoding="utf-8-sig") as fh:
+        notes = [(r.get("review_note") or "").strip() for r in csv.DictReader(fh)]
     tables = {}
     if args.bocc_pdf:
         import hashlib
@@ -199,15 +250,22 @@ def main() -> None:
         tables = parse_bocc_pdf(args.bocc_pdf)
     sirens = {e["slug"]: e.get("siren") for e in supabase_client.list_entities()}
 
-    ok_rows, counts = [], {}
-    with httpx.Client(timeout=60) as client:
-        for r in rows:
+    ok_rows, counts, reports = [], {}, {}
+    with httpx.Client(timeout=300) as client:
+        for r, note in zip(rows, notes):
             if r.source_code == "BOCC" and tables:
                 v = verify_bocc(r, tables)
             elif r.source_code == "HATVP":
                 v = verify_hatvp(r, client, sirens)
+            elif r.source_code == "ESEF" and r.source_url:
+                if r.source_url not in reports:
+                    from .connectors.esef import report_text
+                    reports[r.source_url] = report_text(r.source_url, client)
+                v = check_esef_quote(r, reports[r.source_url])
             else:
                 v = Verdict("NON VÉRIFIABLE", [f"aucun vérificateur pour la source {r.source_code}"])
+            if v.status == "OK" and note:
+                v = Verdict("JUGEMENT", v.details + [f"signalé à la compilation : {note}"])
             counts[v.status] = counts.get(v.status, 0) + 1
             print(f"\n[{v.status}] {r.entity_slug} · {r.indicator_code} ({r.source_code})")
             for d in v.details:

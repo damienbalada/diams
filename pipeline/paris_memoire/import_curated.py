@@ -101,11 +101,38 @@ def parse_file(path: str, reviewer: str = DEFAULT_REVIEWER) -> tuple[list[Eviden
     return rows, errors
 
 
+def update_pending(rows: list[EvidenceRow]) -> int:
+    """Corrige des preuves ENCORE EN ATTENTE (même clé) ; une preuve revue n'est jamais touchée."""
+    import httpx
+
+    from . import config
+    from .load import _headers, _lookup_ids
+    n = 0
+    with httpx.Client(timeout=60) as c:
+        ents, inds, srcs = _lookup_ids(c)
+        for r in rows:
+            resp = c.patch(
+                f"{config.SUPABASE_URL}/rest/v1/evidence",
+                params={"entity_id": f"eq.{ents[r.entity_slug]}", "indicator_id": f"eq.{inds[r.indicator_code]}",
+                        "source_id": f"eq.{srcs[r.source_code][0]}", "observed_on": f"eq.{r.observed_on}",
+                        "review_status": "eq.pending"},
+                headers={**_headers(), "Prefer": "return=representation"},
+                json={"value_numeric": r.value_numeric, "value_boolean": r.value_boolean, "value_text": r.value_text,
+                      "normalized_value": r.normalized_value, "confidence": r.confidence,
+                      "source_url": r.source_url, "excerpt": r.excerpt},
+            )
+            resp.raise_for_status()
+            n += len(resp.json())
+    return n
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Import de preuves curées (toujours en revue).")
     parser.add_argument("--file", required=True)
     parser.add_argument("--reviewer", default=DEFAULT_REVIEWER, help="préfixe ai: obligatoire")
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--update-pending", action="store_true",
+                        help="corrige les preuves déjà importées mais encore en attente (jamais celles déjà revues)")
     args = parser.parse_args()
 
     rows, errors = parse_file(args.file, args.reviewer)
@@ -134,6 +161,8 @@ def main() -> None:
     if args.apply:
         stats = insert_evidence(rows)
         print(f"Insérées : {stats['inserted']} · ignorées : {stats['skipped']} (doublon ou code inconnu)")
+        if args.update_pending:
+            print(f"Preuves en attente mises à jour : {update_pending(rows)}")
     else:
         print("(contrôle seulement : relancer avec --apply pour écrire)")
 

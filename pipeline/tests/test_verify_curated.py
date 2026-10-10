@@ -79,6 +79,34 @@ def test_hatvp_fiche_d_une_autre_entite_reste_humaine():
     assert check_hatvp(r, RECORD, "588505354").status == "JUGEMENT"
 
 
+REPORT = ("… 3.1.3.7 Indicateurs de rémunération L’écart de rémunération entre les femmes et les hommes au sein de "
+          "Crédit Agricole S.A. est de 31,68 % en 2025. Intensité de GES - basée sur le marché 2 773,87 tonnes éqCO₂/M€ …")
+
+
+def esef_row(ind, value, quote):
+    return row("x", value, f"Rapport financier annuel 2025 (ESEF) : « {quote} »", ind=ind, src="ESEF")
+
+
+def test_esef_citation_verbatim_valeur_et_indicateur():
+    from paris_memoire.verify_curated import check_esef_quote
+    q = "L'écart de rémunération entre les femmes et les hommes au sein de Crédit Agricole S.A. est de 31,68 % en 2025"
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", 31.68, q), REPORT).status == "OK"
+    q2 = "Intensité de GES - basée sur le marché 2 773,87 tonnes éqCO₂/M€"
+    # deux colonnes côte à côte (2025, 2024) ne fusionnent pas en un seul nombre
+    report = REPORT + " Ratio entre la rémunération la plus élevée et la rémunération médiane des salariés 44,61 48,60"
+    q3 = "Ratio entre la rémunération la plus élevée et la rémunération médiane des salariés 44,61 48,60"
+    assert check_esef_quote(esef_row("LAB_CEO_PAY_RATIO", 44.61, q3), report).status == "OK"
+    assert check_esef_quote(esef_row("ENV_GHG_INTENSITY", 2773.87, q2), REPORT).status == "OK"
+
+
+def test_esef_ecart_si_citation_absente_valeur_differente_ou_hors_sujet():
+    from paris_memoire.verify_curated import check_esef_quote
+    q = "L'écart de rémunération entre les femmes et les hommes au sein de Crédit Agricole S.A. est de 31,68 % en 2025"
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", 31.7, q), REPORT).status == "ÉCART"
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", 31.68, q.replace("31,68", "30,68")), REPORT).status == "ÉCART"
+    assert check_esef_quote(esef_row("GOV_BOARD_INDEP", 31.68, q), REPORT).status == "ÉCART"
+
+
 def test_hatvp_fiche_vide_est_un_ecart():
     r = row("la-nef", None, "Inscrite.", ind="GEO_LOBBYING_TRANSP", src="HATVP")
     assert check_hatvp(r, {"publicationCourante": {}, "exercices": []}, "339799116").status == "ÉCART"

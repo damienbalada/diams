@@ -191,11 +191,29 @@ python -m paris_memoire.import_investments --file inv.csv [--apply]
 python -m paris_memoire.import_curated --file curated/banques_2026-10_lot1.csv [--apply]
 ```
 
+### `import_esef` — rapports financiers annuels balisés (ESEF) → publication auto
+- Recherche par **LEI** sur filings.xbrl.org (dépôts ESEF des autorités de marché).
+- `TAX_EFFECTIVE_RATE` = impôt / résultat avant impôt (faits IFRS sans dimension de
+  l'exercice clos), **seulement si** avant impôt − impôt = résultat net (à 1 %) ;
+  pertes et balisages non standard écartés, jamais devinés.
+- `TAX_CBCR_PUBLISHED` (entités soumises à `EU_CRD_CBCR`) : titre de la section
+  « implantations et activités » (CMF art. L511-45) cité mot pour mot, sommaires
+  et tables de concordance exclus.
+```bash
+python -m paris_memoire.import_esef [--only slug1,slug2] [--apply]
+```
+
 ### `verify_curated` — vérification déterministe contre la source primaire
 - Relit la source de chaque preuve curée et compare chiffre par chiffre : tableaux
   BOCC (PDF ; composantes + total recalculé, empreinte SHA-256 affichée) et fiches
   HATVP (données JSON officielles : SIREN de l'entité, date d'inscription, tranche
   de dépenses, absence d'activité).
+- Rapports ESEF : la citation « … » de l'extrait doit figurer **mot pour mot**
+  dans le rapport, contenir la valeur, et les mots de l'indicateur (ex. « écart »
+  + « rémunération » pour l'écart salarial). Colonne CSV facultative
+  `review_note` : un cas signalé à la compilation reste en `JUGEMENT`.
+- `import_curated --apply --update-pending` corrige une preuve encore en attente
+  (jamais une preuve déjà revue).
 - Verdicts : `OK` (approuvable, reviewer `auto:verify_curated`), `ÉCART`,
   `JUGEMENT` (attribution : la source vise un périmètre plus large que l'entité),
   `NON VÉRIFIABLE`. Seuls les `OK` encore en attente sont approuvés.
