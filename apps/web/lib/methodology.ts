@@ -266,7 +266,7 @@ non « bricolables »).
 
 ## 6. Sources et tiers de fiabilité
 
-Voir \`supabase/seed/03_sources.sql\` pour le registre complet. Règle d'or :
+Voir \`supabase/seed/99_snapshot.sql\` (section « Sources ») pour le registre complet. Règle d'or :
 **CSRD / devoir de vigilance = tier 1 ; presse / PETA = tier 3.**
 
 ---

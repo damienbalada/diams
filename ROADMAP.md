@@ -36,6 +36,24 @@ Deux natures de sources, deux régimes de coût :
   entité non publiable) et **signalements** de lecteurs hors calcul (Règles 6 et 7).
 - Curation manuelle sourcée en cours (CDP, sanctions, controverses) — mais **plafonne** (données derrière paywall, presse inégale).
 
+**Mesure réelle (10/10/2026, moteur exécuté sur toute la base) :**
+
+| | |
+|---|---|
+| Entités | 194 (64 groupes, 130 marques) sur 16 secteurs |
+| Preuves actives | 315 |
+| Fiabilité médiane d'un groupe | **9 %** (max 43 %) |
+| Notes | 185 E, 9 D, aucun A/B/C |
+| Publiables (≥ 30 %) | 6 entités, **1 seul groupe** |
+
+Lecture : à ce niveau de couverture, le classement mesure la **documentation**,
+pas l'éthique — le seul groupe publiable est le mieux documenté, pas le plus
+vertueux. Trois causes : ~4 groupes par secteur (percentile intra-secteur non
+significatif) ; Règle 1 (manquant = 0) qui condamne d'avance les petits acteurs
+sans obligation de publication — précisément les alternatives à recommander ;
+curation manuelle qui plafonne. **Prochaine étape : une verticale complète
+(≥ 15 entités à ≥ 60 % de fiabilité) plutôt que 16 secteurs à moitié.**
+
 **Limite structurelle identifiée :** la curation manuelle ne passe pas à
 l'échelle. La suite passe par l'**ingestion par fichiers/API** via les connecteurs
 (bloquée aujourd'hui par la politique réseau de l'environnement).

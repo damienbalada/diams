@@ -76,6 +76,11 @@ humain, ou sans piste d'audit.
    (tiers 1-2) pour détecter toute dérive d'un connecteur.
 5. **Corroboration (Règle 4)** — une controverse contestée à source unique est
    affichée mais hors calcul tant qu'elle n'est pas corroborée.
+6. **Rien n'existe qu'en base** — aucune écriture SQL directe en production :
+   tout passe par un connecteur ou une migration, et l'état est figé dans
+   `supabase/seed/99_snapshot.sql` (`node scripts/snapshot-db.mjs --check`
+   détecte toute dérive). Une curation manuelle tier 3 reste `pending` comme les
+   autres : saisie directe en `approved` = contournement de la revue.
 
 ## Implications techniques — ✅ implémenté
 

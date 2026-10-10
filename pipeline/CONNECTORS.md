@@ -39,6 +39,11 @@ réels, données fictives) est fourni dans [`examples/`](./examples/).
   intra-secteur et applique la direction. Normaliser à la main fausserait la
   comparaison sectorielle.
 
+- **Instantané après import** : un `--apply` modifie la production ; terminer par
+  `node scripts/snapshot-db.mjs` puis commit (le `--check` échoue tant que ce
+  n'est pas fait). Les fichiers bruts téléchargés (`pipeline/*.csv`, `*.xlsx`)
+  ne sont pas versionnés : l'URL et la date vivent dans chaque evidence.
+
 Colonnes CSV **tolérantes à la casse** ; plusieurs alias acceptés par champ.
 Colonne `source_url` facultative partout (sinon URL par défaut du connecteur).
 

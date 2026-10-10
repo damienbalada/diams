@@ -51,20 +51,31 @@ secteur), `dimensions`, `indicators`, `sources` (avec `tier` de fiabilité),
 `source_tier_config`, `evidence_nature_config`, `scoring_params`. Vues :
 `evidence_active`, `entity_coverage` (= indice de confiance).
 
-## Base de données — appliquer le schéma
+## Base de données — reconstruire
 
-Migrations dans `supabase/migrations/` (ordre chronologique), puis seeds dans
-`supabase/seed/` (ordre numérique 01 → 05) :
+Migrations dans `supabase/migrations/` (ordre chronologique), puis **un seul**
+fichier de données, l'instantané de production :
 
 ```bash
-# via Supabase CLI
 supabase db push
-psql "$DATABASE_URL" -f supabase/seed/01_sectors_dimensions.sql
-psql "$DATABASE_URL" -f supabase/seed/02_indicators.sql
-psql "$DATABASE_URL" -f supabase/seed/03_sources.sql
-psql "$DATABASE_URL" -f supabase/seed/04_entities_luxe.sql
-psql "$DATABASE_URL" -f supabase/seed/05_value_profiles.sql
+psql "$DATABASE_URL" -f supabase/seed/99_snapshot.sql
 ```
+
+`99_snapshot.sql` est généré depuis la production (`node scripts/snapshot-db.mjs`)
+et vérifié rejouable sur une base vierge. Les seeds 01 → 35 sont archivés dans
+`supabase/seed/history/` : ils documentent la curation mais sont périmés.
+
+### Règle : rien n'existe qu'en base
+
+Toute écriture en production passe par un **connecteur** (`pipeline/`) ou une
+**migration** versionnée. Après chaque session de curation ou d'import :
+
+```bash
+node scripts/snapshot-db.mjs --check   # échoue si la base a dérivé du repo
+node scripts/snapshot-db.mjs           # régénère l'instantané, puis commit
+```
+
+Une preuve qui n'est pas dans le repo n'est ni rejouable ni auditable.
 
 ## Roadmap
 

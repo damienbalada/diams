@@ -40,3 +40,10 @@ npm-debug.log*
 .idea/
 .vscode/
 *.swp
+
+# Données brutes téléchargées (exports SBTi, Égapro…) : volumineuses, republiées
+# par leurs producteurs. Ne pas versionner — conserver l'URL et la date dans
+# l'evidence (source_url, observed_on).
+/companies-excel.xlsx
+pipeline/*.csv
+pipeline/*.xlsx
