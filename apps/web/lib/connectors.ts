@@ -13,33 +13,35 @@ export type Connector = {
 };
 
 export const CONNECTORS: Connector[] = [
-  { name: "GLEIF / SIRENE", pillar: "—", produces: "Résolution d'entités (LEI / SIREN)", source: "GLEIF, INSEE", level: "—" },
+  { name: "GLEIF / SIRENE / SEC", pillar: "—", produces: "Identité des entreprises (LEI, SIREN, CIK), confirmée par le registre officiel", source: "GLEIF, INSEE, SEC", level: "—" },
   { name: "OpenFoodFacts / Wikidata", pillar: "—", produces: "Univers de marques + chaînes de détention", source: "OFF, Wikidata", level: "—" },
-  { name: "HATVP", pillar: "GEO", produces: "Lobbying (France)", source: "HATVP", level: "groupe" },
+  { name: "Rapports annuels ESEF", pillar: "TAX, GOV, LAB, ENV, SUP", produces: "Taux effectif d'impôt (faits IFRS balisés) ; données obligatoires CSRD lues et citées mot pour mot : mixité et indépendance du conseil, écart et ratio de rémunération, Scope 3, intensité carbone, plan de vigilance", source: "filings.xbrl.org, AMF (BDIF), rapports annuels légaux", level: "groupe" },
+  { name: "SEC (États-Unis)", pillar: "TAX, LAB, GOV", produces: "Taux effectif d'impôt (XBRL du 10-K) ; ratio PDG / salarié médian et composition du conseil (circulaire DEF 14A)", source: "SEC EDGAR", level: "groupe" },
+  { name: "Égapro", pillar: "LAB", produces: "Index égalité professionnelle femmes-hommes (/100), rapprochement par SIREN exact", source: "Ministère du Travail (Égapro)", level: "groupe ou marque" },
+  { name: "HATVP", pillar: "GEO", produces: "Inscription et dépenses de lobbying (France)", source: "HATVP", level: "groupe" },
   { name: "Yale", pillar: "GEO", produces: "Position Russie", source: "Yale CELI", level: "groupe" },
   { name: "SBTi", pillar: "ENV", produces: "Objectifs climat validés (anti-greenwashing)", source: "Science Based Targets initiative", level: "groupe" },
-  { name: "CDP", pillar: "ENV, WAT", produces: "Notes climat & eau A..D- (barème canonique A=1.00 … D-=0.13, F=0)", source: "CDP", level: "groupe" },
-  { name: "BFFP", pillar: "PLA", produces: "Classement pollueurs plastique — sévérité (gate) qui plafonne la note plastique des pires pollueurs", source: "Break Free From Plastic", level: "groupe ou marque" },
-  { name: "Égapro", pillar: "LAB", produces: "Index égalité professionnelle F/H (/100), rapprochement par SIREN exact", source: "Ministère du Travail (Égapro)", level: "groupe" },
-  { name: "Gouvernance", pillar: "GOV", produces: "Mixité (parité = 1.0) + indépendance du conseil", source: "Déclarations CSRD / ESRS", level: "groupe" },
-  { name: "Fiscalité", pillar: "TAX", produces: "CbCR (oui/non), taux effectif (%), entités en paradis fiscaux", source: "CbCR, états financiers, Tax Justice Network", level: "groupe" },
-  { name: "Benchmarks", pillar: "ANI, SUP", produces: "BBFAW (Tier 1→1.0 … 6→0.10), KnowTheChain (/100), FTI (%)", source: "BBFAW, BHRRC, Fashion Revolution", level: "groupe ou marque" },
-  { name: "Finance éthique", pillar: "INV", produces: "Politique responsable & finance durable (statut) ; financement fossile & participations controversées (valeur brute)", source: "UN PRI, Reclaim Finance", level: "groupe" },
+  { name: "CDP", pillar: "ENV, WAT", produces: "Notes climat & eau A..D- (barème A = 1,00 … D- = 0,13, F = 0)", source: "CDP", level: "groupe" },
+  { name: "BFFP", pillar: "PLA", produces: "Pollueurs plastique : sévérité (plafond) qui borne la note plastique", source: "Break Free From Plastic", level: "groupe ou marque" },
+  { name: "Benchmarks", pillar: "ANI, SUP", produces: "BBFAW (Tier 1 → 1,0 … 6 → 0,10), KnowTheChain (/100), FTI (%)", source: "BBFAW, BHRRC, Fashion Revolution", level: "groupe ou marque" },
+  { name: "Finance éthique", pillar: "INV", produces: "Financement de l'expansion fossile (Banking on Climate Chaos), politiques d'exclusion", source: "BOCC, Reclaim Finance, UN PRI", level: "groupe" },
+  { name: "Labels", pillar: "INV, GOV", produces: "Label Finansol (liste officielle), certification B Corp (annuaire B Lab, site vérifié)", source: "FAIR, B Lab", level: "groupe ou marque" },
+  { name: "ONU (HCDH)", pillar: "GEO", produces: "Base des entreprises liées aux colonies (présence = controverse)", source: "Conseil des droits de l'homme", level: "groupe" },
 ];
 
 export type Guard = { title: string; body: string };
 
 export const GUARDS: Guard[] = [
   {
-    title: "Code pur, 0 token de modèle",
-    body: "Chaque connecteur est déterministe : parsing + normalisation + rapprochement de noms. Aucun appel à un modèle de langage, donc le coût ne dépend pas du nombre de marques — on peut passer à l'échelle sans dérive de facture ni d'aléa.",
+    title: "Des sources officielles, lues par du code",
+    body: "Les connecteurs lisent des données balisées ou des listes officielles, sans modèle de langage : même entrée, même résultat. Les identités (LEI, SIREN, CIK) sont confirmées par le registre, jamais devinées à partir d'un nom.",
   },
   {
-    title: "Rapprochement conservateur",
-    body: "Un fait n'est rattaché à une entité que si les noms correspondent nettement. En cas de doute, on saute : on ne devine jamais à quelle société appartient une donnée.",
+    title: "Chaque chiffre retrouvé mot pour mot",
+    body: "Une donnée lue dans un rapport n'entre que si sa citation figure mot pour mot dans le document déposé et contient la valeur (vérificateur automatique). Les cas douteux (définition voisine, périmètre partiel) sont écartés et justifiés dans un journal public.",
   },
   {
-    title: "Revue humaine avant publication",
-    body: "Aucun connecteur ne publie directement. Toute preuve importée attend en file de revue (statut « pending ») et ne compte dans aucun score tant qu'un humain ne l'a pas validée.",
+    title: "Publication graduée, revue humaine pour le reste",
+    body: "Une source réglementaire ou une ONG auditée, vérifiée, est publiée automatiquement. Un rapport rédigé par l'entreprise elle-même, la presse ou une contribution passent par une revue humaine avant de compter.",
   },
 ];
