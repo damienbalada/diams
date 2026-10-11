@@ -1,4 +1,5 @@
-import { getAllScores, listEntities } from "@/lib/data";
+import { getAllScores, listEntities, listSectors } from "@/lib/data";
+import { rankBySector, sectorAnchor, type SectorRanking } from "@/lib/ranking";
 import { EntitySearch } from "@/components/EntitySearch";
 import type { SearchableEntity } from "@/lib/search";
 
@@ -7,10 +8,13 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   let entities: Awaited<ReturnType<typeof listEntities>> = [];
   let grades = new Map<string, string>();
+  let comparable: SectorRanking[] = [];
   let error: string | null = null;
   try {
-    const [ents, scores] = await Promise.all([listEntities(), getAllScores()]);
+    const [ents, scores, sectors] = await Promise.all([listEntities(), getAllScores(), listSectors()]);
     entities = ents;
+    // Secteurs où un vrai choix existe : au moins deux entités classées.
+    comparable = rankBySector(scores, sectors).ranked.filter((s) => s.groups.length + s.brands.length >= 2);
     // Pas de lettre sous le seuil de fiabilité (Règle 5) : une note mal
     // documentée ne doit pas se lire comme un verdict.
     grades = new Map(scores.filter((s) => s.publishable).map((s) => [s.slug, s.grade]));
@@ -71,6 +75,18 @@ export default async function HomePage() {
           <a className="btn" href="/classement">Voir le classement →</a>
           <a className="btn" href="/civique">DIAMS Civique (votes des partis) →</a>
         </div>
+        {comparable.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <div className="small muted" style={{ marginBottom: 6 }}>Comparer dans un secteur :</div>
+            <div className="row wrap" style={{ gap: 8 }}>
+              {comparable.map((s) => (
+                <a key={s.sector.code} className="badge" href={`/classement#${sectorAnchor(s.sector)}`}>
+                  {s.sector.name} · {s.groups.length + s.brands.length} classées
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {error && (

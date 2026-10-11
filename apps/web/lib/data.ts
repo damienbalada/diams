@@ -40,6 +40,7 @@ export interface EntityScore {
   confidence: number;
   publishable: boolean;
   last_observed: string | null;
+  sector_id: string | null;
 }
 
 async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {
@@ -70,12 +71,21 @@ export async function getAllScores(): Promise<EntityScore[]> {
         confidence: r.confidence,
         publishable: r.publishable,
         last_observed: r.last_observed,
+        sector_id: e.sector_id ?? null,
       } as EntityScore;
     } catch {
       return null;
     }
   });
   return scored.filter((x): x is EntityScore => x !== null);
+}
+
+/** Secteurs (classement par secteur, Règle 6). */
+export async function listSectors(): Promise<{ id: string; code: string; name: string }[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.from("sectors").select("id, code, name");
+  if (error) throw new Error(error.message);
+  return data ?? [];
 }
 
 /** Liste des entités pour la page d'accueil. */

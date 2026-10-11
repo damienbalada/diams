@@ -1,4 +1,5 @@
-import { getAllScores, type EntityScore } from "@/lib/data";
+import { getAllScores, listSectors, type EntityScore } from "@/lib/data";
+import { rankBySector, sectorAnchor, type SectorInfo } from "@/lib/ranking";
 
 export const dynamic = "force-dynamic";
 
@@ -54,28 +55,28 @@ function Table({ rows, ranked = true }: { rows: EntityScore[]; ranked?: boolean 
 
 export default async function ClassementPage() {
   let scores: EntityScore[] = [];
+  let sectors: SectorInfo[] = [];
   let error: string | null = null;
   try {
-    scores = await getAllScores();
+    [scores, sectors] = await Promise.all([getAllScores(), listSectors()]);
   } catch (e) {
     error = (e as Error).message;
   }
-  const byScore = (a: EntityScore, b: EntityScore) => b.score - a.score || b.confidence - a.confidence;
+  // Règle 6 : un tableau par secteur (mêmes indicateurs applicables), groupes et
+  // marques séparés. On ne classe QUE les entités au-dessus du seuil de fiabilité :
+  // une note bâtie sur trop peu de preuves n'est ni bonne ni mauvaise.
+  const { ranked, empty } = rankBySector(scores, sectors);
   const byConfidence = (a: EntityScore, b: EntityScore) => b.confidence - a.confidence;
-  // On ne classe QUE les entités dont la fiabilité dépasse le seuil de publication :
-  // une note basse par manque de données n'est pas un mauvais score, c'est une absence.
-  const ranked = scores.filter((s) => s.publishable);
   const unranked = scores.filter((s) => !s.publishable).sort(byConfidence);
-  const groups = ranked.filter((s) => !s.is_brand).sort(byScore);
-  const brands = ranked.filter((s) => s.is_brand).sort(byScore);
 
   return (
     <main>
       <h1>Classement</h1>
       <p className="muted small">
-        Trié par note (profil « Équilibré »). Seules les entités dont la
-        <strong> fiabilité dépasse 30 %</strong> sont classées : une note basse
-        faute de données n'est pas un mauvais score, c'est une absence de preuves.
+        Par secteur, trié par note (profil « Équilibré »). On ne compare que des entités
+        évaluées sur les mêmes indicateurs : une banque et un fabricant de boissons ne se
+        classent pas l'un contre l'autre. Seules les entités dont la
+        <strong> fiabilité dépasse 30 %</strong> sont classées.
       </p>
 
       {error && (
@@ -85,29 +86,53 @@ export default async function ClassementPage() {
         </div>
       )}
 
-      {groups.length > 0 && (
-        <div className="panel">
-          <h3>Groupes</h3>
-          <Table rows={groups} />
-        </div>
-      )}
-      {brands.length > 0 && (
-        <div className="panel">
-          <h3>Marques</h3>
-          <Table rows={brands} />
-        </div>
+      {ranked.map((s) => (
+        <section className="panel" key={s.sector.id || s.sector.code} id={sectorAnchor(s.sector)}>
+          <div className="row between wrap" style={{ gap: 8 }}>
+            <h2 style={{ margin: 0, fontSize: 18 }}>{s.sector.name}</h2>
+            <span className="muted small">
+              {s.groups.length + s.brands.length} classée(s)
+              {s.unranked > 0 && ` · ${s.unranked} en attente de données`}
+            </span>
+          </div>
+          {s.groups.length > 0 && (
+            <>
+              {s.brands.length > 0 && <h3 className="small muted" style={{ margin: "12px 0 0" }}>Groupes</h3>}
+              <Table rows={s.groups} />
+            </>
+          )}
+          {s.brands.length > 0 && (
+            <>
+              <h3 className="small muted" style={{ margin: "12px 0 0" }}>Marques</h3>
+              <Table rows={s.brands} />
+            </>
+          )}
+        </section>
+      ))}
+
+      {empty.length > 0 && (
+        <details className="panel" style={{ borderStyle: "dashed" }}>
+          <summary className="small">
+            <strong>Secteurs sans entité classée pour l'instant</strong> ({empty.length})
+          </summary>
+          <p className="muted small" style={{ margin: "10px 0 0" }}>
+            {empty.map((s) => `${s.sector.name} (${s.unranked})`).join(" · ")}
+          </p>
+        </details>
       )}
 
       {unranked.length > 0 && (
-        <div className="panel" style={{ borderStyle: "dashed" }}>
-          <h3>Non classées — données insuffisantes</h3>
-          <p className="muted small" style={{ marginBottom: 10 }}>
-            Fiabilité sous le seuil de 30 % : pas assez de preuves publiées pour
-            attribuer une note défendable. Ce n'est pas un jugement négatif — c'est
-            un manque de transparence de l'entité, ou une couverture encore partielle.
+        <details className="panel" style={{ borderStyle: "dashed" }}>
+          <summary className="small">
+            <strong>Non classées — données insuffisantes</strong> ({unranked.length})
+          </summary>
+          <p className="muted small" style={{ margin: "10px 0" }}>
+            Fiabilité sous le seuil de 30 % : pas assez de preuves pour attribuer une note
+            défendable. Ce n'est pas un jugement négatif — c'est un manque de transparence
+            de l'entité, ou une couverture encore partielle.
           </p>
           <Table rows={unranked} ranked={false} />
-        </div>
+        </details>
       )}
     </main>
   );
