@@ -199,8 +199,25 @@ python -m paris_memoire.import_curated --file curated/banques_2026-10_lot1.csv [
 - `TAX_CBCR_PUBLISHED` (entités soumises à `EU_CRD_CBCR`) : titre de la section
   « implantations et activités » (CMF art. L511-45) cité mot pour mot, sommaires
   et tables de concordance exclus.
+- Résultat avant impôt non balisé (présentation française courante) : il est
+  reconstitué par l'identité comptable (résultat net + impôt − activités
+  abandonnées) ; seulement si la charge d'impôt est positive et le taux compris
+  entre 0 et 60 %. L'extrait le dit (« sous-total non balisé, reconstitué »).
+- Montants libellés dans la devise balisée (iso4217), jamais supposée ; exercice
+  clos en fin de mois ; version déposée dans le pays de l'entité en priorité.
 ```bash
 python -m paris_memoire.import_esef [--only slug1,slug2] [--apply]
+```
+
+### `esrs_candidates` — aide à la lecture des états de durabilité (aucune écriture)
+- Repère les passages candidats pour chaque donnée obligatoire (mixité et
+  indépendance du conseil, écart et ratio de rémunération, Scope 3, intensité
+  carbone, plan de vigilance, taux d'impôt) ; `--grep` pour une recherche libre,
+  `--lines N` pour lire un tableau ligne à ligne.
+- Le compilateur écrit la citation dans `curated/groupes_*.csv` ; `verify_curated`
+  la retrouve mot pour mot. Les cas écartés vont dans `curated/groupes_*_notes.md`.
+```bash
+python -m paris_memoire.esrs_candidates --slug loreal --only GOV_BOARD_GENDER,ENV_GHG_INTENSITY
 ```
 
 ### `verify_curated` — vérification déterministe contre la source primaire
@@ -212,6 +229,11 @@ python -m paris_memoire.import_esef [--only slug1,slug2] [--apply]
   dans le rapport, contenir la valeur, et les mots de l'indicateur (ex. « écart »
   + « rémunération » pour l'écart salarial). Colonne CSV facultative
   `review_note` : un cas signalé à la compilation reste en `JUGEMENT`.
+- Un extrait peut contenir plusieurs citations « … » : chacune doit figurer mot
+  pour mot ; mots de l'indicateur et valeur sont cherchés dans leur ensemble.
+  Des colonnes voisines de trois chiffres (« 345 352 ») sont lues comme deux
+  nombres quand l'extrait l'écrit. Plan de vigilance « complet » : la citation
+  doit montrer la cartographie des risques et le dispositif de suivi.
 - Autres documents (rapport annuel PDF ou page HTML d'une entreprise) : la
   citation « … » est cherchée mot pour mot dans le document téléchargé. Une
   citation retrouvée reste en `JUGEMENT` si la source est de tier 3 (rapport

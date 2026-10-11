@@ -36,17 +36,26 @@ class Filing:
     error_count: int
 
 
-def latest_filing(lei: str, client: httpx.Client, max_age_days: int = 550) -> Filing | None:
-    """Dépôt le plus récent (exercice clos depuis moins de ~18 mois), sans erreur de préférence."""
+def _month_end(iso: str) -> bool:
+    return (date.fromisoformat(iso[:10]) + timedelta(days=1)).day == 1
+
+
+def latest_filing(lei: str, client: httpx.Client, max_age_days: int = 550,
+                  prefer_country: str | None = None) -> Filing | None:
+    """Dépôt le plus récent (exercice clos depuis moins de ~18 mois), sans erreur de préférence ;
+    à défaut, la version déposée dans le pays de l'entité (rapport dans sa langue)."""
     r = client.get(API, params={"filter[entity.identifier]": lei, "sort": "-period_end", "page[size]": 10},
                    headers={"Accept": "application/vnd.api+json"})
     r.raise_for_status()
     cutoff = (date.today() - timedelta(days=max_age_days)).isoformat()
-    cands = [x["attributes"] for x in r.json().get("data", []) if (x["attributes"].get("period_end") or "") >= cutoff]
+    # Un exercice se clôt en fin de mois : écarte les dépôts intermédiaires ou atypiques.
+    cands = [x["attributes"] for x in r.json().get("data", [])
+             if (x["attributes"].get("period_end") or "") >= cutoff and _month_end(x["attributes"]["period_end"])]
     if not cands:
         return None
     latest = max(a["period_end"] for a in cands)
-    same = sorted((a for a in cands if a["period_end"] == latest), key=lambda a: (a.get("error_count") or 0))
+    same = sorted((a for a in cands if a["period_end"] == latest),
+                  key=lambda a: (a.get("error_count") or 0, a.get("country") != prefer_country))
     a = same[0]
     return Filing(lei=lei, period_end=a["period_end"], date_added=(a.get("date_added") or "")[:10],
                   json_url=BASE + a["json_url"], report_url=BASE + a["report_url"] if a.get("report_url") else None,
@@ -57,6 +66,7 @@ CONCEPTS = {
     "pbt": "ifrs-full:ProfitLossBeforeTax",
     "tax": "ifrs-full:IncomeTaxExpenseContinuingOperations",
     "net": "ifrs-full:ProfitLoss",
+    "disc": "ifrs-full:ProfitLossFromDiscontinuedOperations",
 }
 
 
@@ -83,12 +93,31 @@ def annual_facts(xbrl_json: dict, period_end: str) -> dict[str, float]:
     return out
 
 
+def annual_currency(xbrl_json: dict, period_end: str) -> str | None:
+    """Devise (ISO 4217) du résultat de l'exercice : les montants de l'extrait
+    sont libellés dans la devise de présentation, jamais supposée."""
+    end_excl = (date.fromisoformat(period_end) + timedelta(days=1)).isoformat()
+    for f in xbrl_json.get("facts", {}).values():
+        d = f.get("dimensions", {})
+        if d.get("concept") not in (CONCEPTS["pbt"], CONCEPTS["net"]):
+            continue
+        if not str(d.get("period") or "").split("/")[-1].startswith(end_excl):
+            continue
+        unit = str(d.get("unit") or "")
+        if unit.startswith("iso4217:"):
+            return unit.split(":", 1)[1]
+    return None
+
+
 @dataclass
 class TaxRate:
     rate_pct: float
     pbt: float
     tax: float
     net: float
+    #: résultat avant impôt reconstitué (net + impôt − activités abandonnées),
+    #: quand l'émetteur ne le balise pas (présentation française courante).
+    derived: bool = False
 
 
 def effective_tax_rate(facts: dict[str, float], tolerance: float = 0.01) -> TaxRate | None:
@@ -98,7 +127,17 @@ def effective_tax_rate(facts: dict[str, float], tolerance: float = 0.01) -> TaxR
     qui vérifie « avant impôt − impôt = net » (à `tolerance` du résultat avant impôt).
     """
     pbt, tax, net = facts.get("pbt"), facts.get("tax"), facts.get("net")
-    if pbt is None or tax is None or net is None or pbt <= 0:
+    if tax is None or net is None:
+        return None
+    if pbt is None:
+        # Pas de sous-total « avant impôt » balisé : identité comptable sur les
+        # activités poursuivies. Sans contre-contrôle possible, on n'accepte
+        # qu'une charge d'impôt positive et un taux plausible.
+        pbt = net + tax - facts.get("disc", 0.0)
+        if tax <= 0 or pbt <= 0 or not 0 <= 100 * tax / pbt <= 60:
+            return None
+        return TaxRate(rate_pct=round(100 * tax / pbt, 1), pbt=pbt, tax=tax, net=net, derived=True)
+    if pbt <= 0:
         return None
     for t in (tax, -tax):
         if abs(pbt - t - net) <= tolerance * abs(pbt):

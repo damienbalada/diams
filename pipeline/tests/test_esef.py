@@ -1,5 +1,5 @@
 """Connecteur ESEF : faits IFRS de l'exercice, taux effectif contrôlé, citation CbCR."""
-from paris_memoire.connectors.esef import annual_facts, cbcr_quote, effective_tax_rate
+from paris_memoire.connectors.esef import annual_currency, annual_facts, cbcr_quote, effective_tax_rate
 
 Y25 = "2025-01-01T00:00:00/2026-01-01T00:00:00"
 Y24 = "2024-01-01T00:00:00/2025-01-01T00:00:00"
@@ -23,9 +23,43 @@ def test_faits_de_l_exercice_sans_dimension():
     assert f == {"pbt": 17065000000.0, "tax": 4207000000.0, "net": 12858000000.0}
 
 
+def test_avant_impot_non_balise_reconstitue_et_signale():
+    tr = effective_tax_rate({"tax": 2363.1, "net": 6133.7})
+    assert tr is not None and tr.derived and tr.rate_pct == 27.8 and round(tr.pbt, 1) == 8496.8
+    tr = effective_tax_rate({"tax": 574.0, "net": 1674.0, "disc": 0.0})
+    assert tr is not None and tr.rate_pct == 25.5
+    # charge d'impôt négative ou perte : ambigu, rien n'est publié
+    assert effective_tax_rate({"tax": -100.0, "net": 900.0}) is None
+    assert effective_tax_rate({"tax": 50.0, "net": -900.0}) is None
+    assert effective_tax_rate({"tax": 900.0, "net": 100.0}) is None   # 90 % : implausible
+
+
+def test_extrait_dit_que_le_sous_total_est_reconstitue():
+    from paris_memoire.connectors.esef import Filing
+    from paris_memoire.import_esef import tax_rate_row
+    f = Filing("X", "2025-12-31", "2026-03-24", "j", None, "v", 0)
+    row = tax_rate_row("loreal", f, effective_tax_rate({"tax": 2363.1e6, "net": 6133.7e6}), "EUR")
+    assert "reconstitué" in row.excerpt and "27,8 %" in row.excerpt
+
+
 def test_taux_effectif_avec_controle_d_integrite():
     tr = effective_tax_rate(annual_facts(XBRL, "2025-12-31"))
     assert tr is not None and tr.rate_pct == 24.7
+
+
+def test_devise_lue_dans_le_balisage_jamais_supposee():
+    assert annual_currency(XBRL, "2025-12-31") == "EUR"
+    usd = {"facts": {"a": {"value": "1", "dimensions": {"concept": "ifrs-full:ProfitLossBeforeTax", "period": Y25, "unit": "iso4217:USD"}}}}
+    assert annual_currency(usd, "2025-12-31") == "USD"
+    assert annual_currency({"facts": {}}, "2025-12-31") is None
+
+
+def test_extrait_libelle_dans_la_devise_du_rapport():
+    from paris_memoire.connectors.esef import Filing, TaxRate
+    from paris_memoire.import_esef import tax_rate_row
+    f = Filing("X", "2025-12-31", "2026-03-01", "j", None, "v", 0)
+    row = tax_rate_row("shell", f, TaxRate(39.1, 29756e6, 11635e6, 18121e6), "USD")
+    assert "29 756 M$" in row.excerpt and "M€" not in row.excerpt
 
 
 def test_charge_d_impot_signee_negativement():

@@ -90,6 +90,15 @@ en vigueur au 10/10/2026 :
 | Devoir de vigilance | loi n° 2017-399 ; C. com. art. L225-102-4 | plan de vigilance |
 | Copé-Zimmermann | loi n° 2011-103 ; C. com. art. L225-18-1 | mixité du conseil |
 
+**Rattachement après lecture complète.** *(Depuis v0.5.1.)* L'obligation CSRD
+n'est rattachée à une entreprise qu'une fois ses six données obligatoires lues
+dans son état de durabilité : trouvées, ou constatées non publiées au niveau du
+groupe (par exemple un écart salarial donné seulement par périmètre). DIAMS ne
+compte jamais 0 un chiffre publié qu'il n'a pas encore lu. Hors de France,
+l'obligation n'est rattachée qu'une fois la transposition nationale sourcée.
+Chaque donnée écartée est justifiée dans un journal versionné
+(`pipeline/curated/*_notes.md`).
+
 **Limite assumée.** Un manquant obligatoire compte 0, que l'entreprise n'ait pas
 publié **ou** que DIAMS n'ait pas encore collecté l'information. Dans les deux cas
 la fiabilité reste basse et la note n'est pas affichée sous le seuil (Règle 5) ;
@@ -280,8 +289,10 @@ Tous les piliers ne s'appliquent pas à tous les secteurs. Trois états distinct
 affichés clairement sur la fiche :
 
 - ✅ **noté** — des preuves existent, le pilier compte.
-- ⬜ **aucune donnée** — pilier applicable mais rien de publié → **noté 0**
-  (règle 1, l'opacité n'est pas récompensée).
+- ⬜ **aucune donnée** — pilier applicable mais rien de publié : **non noté**
+  (hors note globale) et la fiabilité baisse ; ses indicateurs dont la
+  publication est obligatoire comptent 0 (Règle 1, l'opacité n'est pas
+  récompensée).
 - ➖ **non applicable au secteur** — pilier **exclu** du calcul (ni bonus, ni
   malus).
 
@@ -412,6 +423,8 @@ calcul (tables de config) doit être datée et justifiée ici.
   la note ni sur la fiabilité ; base de données ONU
   (HCDH) des entreprises liées aux colonies ; résumé « En bref » de la fiche
   (règles publiées section 3) ; extrait de chaque preuve affiché sur la fiche.
+  Correctif : le pilier Investissements n'est appliqué qu'aux secteurs où il est
+  pertinent (drapeau `inv_relevant`), comme le prévoyait la section 4.
 - **0.5.0 (10/10/2026)** — Règle 1 conditionnée aux obligations légales de
   publication (régimes sourcés) ; Règle 8 : chaque marque notée sur ses propres
   preuves ; Règle 5 : aucune lettre affichée sous le seuil de fiabilité.

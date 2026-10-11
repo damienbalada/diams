@@ -99,6 +99,23 @@ def test_esef_citation_verbatim_valeur_et_indicateur():
     assert check_esef_quote(esef_row("ENV_GHG_INTENSITY", 2773.87, q2), REPORT).status == "OK"
 
 
+def test_plusieurs_citations_toutes_verifiees():
+    from paris_memoire.verify_curated import check_esef_quote
+    report = "3.2 Plan de vigilance 3.2.7 Dispositif de suivi des mesures. Ailleurs : une cartographie des risques achats."
+    ok = esef_row("SUP_VIGILANCE_PLAN", None, "3.2 Plan de vigilance 3.2.7 Dispositif de suivi des mesures » et « une cartographie des risques achats")
+    assert check_esef_quote(ok, report).status == "OK"
+    ko = esef_row("SUP_VIGILANCE_PLAN", None, "3.2 Plan de vigilance 3.2.7 Dispositif de suivi des mesures » et « une cartographie inventée")
+    assert check_esef_quote(ko, report).status == "ÉCART"
+
+
+def test_esef_colonnes_voisines_de_trois_chiffres():
+    from paris_memoire.verify_curated import check_esef_quote
+    report = "Intensité des GES par chiffre d’affaires net tCO 2 e/M€ 345 352 2 Suite"
+    q = "Intensité des GES par chiffre d’affaires net tCO 2 e/M€ 345 352"
+    assert check_esef_quote(esef_row("ENV_GHG_INTENSITY", 352, q), report).status == "OK"
+    assert check_esef_quote(esef_row("ENV_GHG_INTENSITY", 353, q), report).status == "ÉCART"
+
+
 def test_esef_ecart_si_citation_absente_valeur_differente_ou_hors_sujet():
     from paris_memoire.verify_curated import check_esef_quote
     q = "L'écart de rémunération entre les femmes et les hommes au sein de Crédit Agricole S.A. est de 31,68 % en 2025"

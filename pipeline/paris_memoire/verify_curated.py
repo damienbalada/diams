@@ -167,12 +167,16 @@ def verify_hatvp(row, client: httpx.Client, sirens: dict[str, str | None]) -> Ve
 ESEF_KEYWORDS = {
     "INV_FOSSIL_FINANCING": [r"fossile"],
     "INV_RESPONSIBLE_POLICY": [r"exclu"],
-    "LAB_GENDER_PAYGAP": [r"[ée]cart", r"r[ée]mun[ée]ration", r"femmes|hommes"],
-    "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian"],
-    "GOV_BOARD_GENDER": [r"femmes", r"conseil"],
-    "GOV_BOARD_INDEP": [r"ind[ée]pendant"],
+    "LAB_GENDER_PAYGAP": [r"[ée]cart|gap", r"r[ée]mun[ée]ration|salari|pay", r"femmes?|hommes?|genres?|gender|women"],
+    # « ratio de rémunération annuelle totale » : intitulé ESRS S1-16, défini par rapport à la médiane.
+    "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian|r[ée]mun[ée]ration annuelle totale|annual total remuneration"],
+    "GOV_BOARD_GENDER": [r"femmes|administratrices|women|female", r"conseil|board"],
+    "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|chiffre d.affaires"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions d.euros|net revenue"],
+    # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
+    # lus dans le plan lui-même (C. com. L225-102-4 : cinq mesures).
+    "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques", r"suivi|contr[ôo]le du respect|compte rendu"],
 }
 
 
@@ -189,12 +193,16 @@ def _value_variants(v: float) -> list[str]:
 
 
 def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Verdict:
-    m = re.search(r"«\s?(.+?)\s?»\s*$", row.excerpt or "")
-    if not m:
+    # Une ou plusieurs citations « … » : chacune doit figurer mot pour mot ; mots
+    # de l'indicateur et valeur sont cherchés dans leur ensemble.
+    quotes = [_canon(q) for q in re.findall(r"«\s?(.+?)\s?»", row.excerpt or "")]
+    if not quotes:
         return Verdict("NON VÉRIFIABLE", ["pas de citation « … » dans l'extrait"])
-    quote = _canon(m.group(1))
-    found = quote in _canon(report_text)
-    details = [f"citation retrouvée mot pour mot dans le rapport {'✓' if found else '✗'}"]
+    canon_report = _canon(report_text)
+    found = all(q in canon_report for q in quotes)
+    label = "citation retrouvée" if len(quotes) == 1 else f"{len(quotes)} citations retrouvées"
+    details = [f"{label} mot pour mot dans le rapport {'✓' if found else '✗'}"]
+    quote = " … ".join(quotes)
     ok = found
     for kw in ([] if ignore_keywords else ESEF_KEYWORDS.get(row.indicator_code, [])):
         hit = re.search(kw, quote, re.I) is not None
@@ -202,9 +210,15 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Ve
         details.append(f"la citation porte sur l'indicateur (« {kw} ») {'✓' if hit else '✗'}")
     if row.value_numeric is not None and not ignore_keywords:
         flat = re.sub(r"(?<=\d)\s(?=\d{3}(?!\d))", "", quote)  # espaces de milliers seulement
-        hit = any(re.search(rf"(?<![\d,]){re.escape(c)}(?![\d])", flat) for c in _value_variants(row.value_numeric))
-        ok &= hit
-        details.append(f"valeur {row.value_numeric} présente dans la citation {'✓' if hit else '✗'}")
+        pats = [rf"(?<![\d,]){re.escape(c)}(?![\d])" for c in _value_variants(row.value_numeric)]
+        hit = any(re.search(pt, flat) for pt in pats)
+        # Colonnes voisines de 3 chiffres (« 345 352 ») : fusionnées à tort en un
+        # seul nombre ; on accepte la valeur lue comme nombre isolé, la lecture des
+        # colonnes étant écrite dans l'extrait.
+        col = not hit and any(re.search(rf"(?:^|\s){pt}(?=\s|$)", quote) for pt in pats)
+        ok &= hit or col
+        details.append(f"valeur {row.value_numeric} présente dans la citation "
+                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✗'}")
     elif row.value_boolean is not None:
         details.append("indicateur oui/non : la présence de la citation suffit")
     return Verdict("OK" if ok else "ÉCART", details)

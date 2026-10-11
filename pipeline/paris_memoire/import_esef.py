@@ -25,20 +25,28 @@ from .connectors import esef
 from .load import EvidenceRow, insert_evidence
 
 
-def _fmt_m(x: float) -> str:
-    return f"{x / 1e6:,.0f}".replace(",", " ") + " M€"
+_SYMBOL = {"EUR": "M€", "USD": "M$", "GBP": "M£"}
 
 
-def tax_rate_row(slug: str, f: esef.Filing, tr: esef.TaxRate) -> EvidenceRow:
+def _fmt_m(x: float, currency: str = "EUR") -> str:
+    return f"{x / 1e6:,.0f}".replace(",", " ") + " " + _SYMBOL.get(currency, f"M {currency}")
+
+
+def tax_rate_row(slug: str, f: esef.Filing, tr: esef.TaxRate, currency: str = "EUR") -> EvidenceRow:
     year = f.period_end[:4]
     pct = f"{tr.rate_pct:.1f}".replace(".", ",")
     return EvidenceRow(
         entity_slug=slug, indicator_code="TAX_EFFECTIVE_RATE", source_code="ESEF", nature="result",
         observed_on=f.date_added, value_type="numeric", value_numeric=tr.rate_pct, confidence=0.95,
         source_url=f.viewer_url or f.json_url, reviewer="import_esef",
-        excerpt=(f"Rapport financier annuel {year} (ESEF, faits IFRS balisés) : résultat avant impôt {_fmt_m(tr.pbt)}, "
-                 f"impôt sur les bénéfices {_fmt_m(tr.tax)} → taux effectif {pct} %. Contrôle : résultat net "
-                 f"{_fmt_m(tr.net)} = avant impôt − impôt."),
+        excerpt=(f"Rapport financier annuel {year} (ESEF, faits IFRS balisés) : résultat net "
+                 f"{_fmt_m(tr.net, currency)} + impôt sur les bénéfices {_fmt_m(tr.tax, currency)} = résultat avant "
+                 f"impôt {_fmt_m(tr.pbt, currency)} (sous-total non balisé par l'émetteur, reconstitué) → taux "
+                 f"effectif {pct} %.")
+        if tr.derived else
+                (f"Rapport financier annuel {year} (ESEF, faits IFRS balisés) : résultat avant impôt "
+                 f"{_fmt_m(tr.pbt, currency)}, impôt sur les bénéfices {_fmt_m(tr.tax, currency)} → taux effectif "
+                 f"{pct} %. Contrôle : résultat net {_fmt_m(tr.net, currency)} = avant impôt − impôt."),
     )
 
 
@@ -67,21 +75,25 @@ def main() -> None:
 
     rows: list[EvidenceRow] = []
     with httpx.Client(timeout=120) as db, httpx.Client(timeout=300) as web:
-        ents = _get(db, "entities", {"select": "id,slug,lei", "lei": "not.is.null"})
+        ents = _get(db, "entities", {"select": "id,slug,lei,country", "lei": "not.is.null"})
         if args.only:
             keep = set(args.only.split(","))
             ents = [e for e in ents if e["slug"] in keep]
         crd = {r["entity_id"] for r in _get(db, "entity_regimes", {"select": "entity_id,disclosure_regimes!inner(code)",
                                                                     "disclosure_regimes.code": "eq.EU_CRD_CBCR"})}
         for e in sorted(ents, key=lambda x: x["slug"]):
-            f = esef.latest_filing(e["lei"], web)
+            f = esef.latest_filing(e["lei"], web, prefer_country=e.get("country"))
             if f is None:
                 continue
-            facts = esef.annual_facts(web.get(f.json_url).json(), f.period_end)
+            xbrl = web.get(f.json_url).json()
+            facts = esef.annual_facts(xbrl, f.period_end)
             tr = esef.effective_tax_rate(facts)
-            if tr:
-                rows.append(tax_rate_row(e["slug"], f, tr))
-                print(f"✔ {e['slug']:24} {f.period_end}  taux effectif {tr.rate_pct:5.1f} %  (avant impôt {_fmt_m(tr.pbt)})")
+            cur = esef.annual_currency(xbrl, f.period_end)
+            if tr and cur:
+                rows.append(tax_rate_row(e["slug"], f, tr, cur))
+                print(f"✔ {e['slug']:24} {f.period_end}  taux effectif {tr.rate_pct:5.1f} %  (avant impôt {_fmt_m(tr.pbt, cur)})")
+            elif tr:
+                print(f"· {e['slug']:24} {f.period_end}  devise du résultat non balisée : aucune preuve créée")
             else:
                 print(f"· {e['slug']:24} {f.period_end}  triplet IFRS absent ou incohérent : {facts}")
             if e["id"] in crd and f.report_url:
