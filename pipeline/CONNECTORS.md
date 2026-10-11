@@ -178,6 +178,13 @@ python -m paris_memoire.import_ktc [--apply]
 - Budget déclaré : donnée de contexte (direction `contextual`), affichée,
   jamais notée.
 
+### `import_fashion_checker` — Clean Clothes Campaign, salaire vital → `SUP_LIVING_WAGE`
+- Note A à E du salaire vital réellement versé dans les usines fournisseurs
+  (Fashion Checker, données ouvertes Wikirate, édition 2026, 110 marques) :
+  A 1 / B 0,75 / C 0,5 / D 0,25 / E 0 (« ne verse ni ne prétend verser de salaire
+  vital à aucun de ses travailleurs »). Indicateur de groupe et complémentaire.
+- Rapprochement : table explicite seulement (H&M → groupe H&M).
+
 ### `import_fti` — Fashion Transparency Index 2023 → `SUP_FTI_SCORE`
 - Données ouvertes Wikirate (partenaire de Fashion Revolution), 250 marques ;
   score sur 10 ramené en pourcentage. Indicateur complémentaire.

@@ -568,7 +568,12 @@ calcul (tables de config) doit être datée et justifiée ici.
   d'approvisionnement et environnement comptent double. Écart de rémunération
   de H&M (pondéré par poste) confirmé comme non publié. Ratio de rémunération
   d'ENGIE, calculé sur la moyenne faute de médiane calculable, accepté tel que
-  publié ; obligation CSRD rattachée à ENGIE.
+  publié ; obligation CSRD rattachée à ENGIE. Premier indicateur d'impact de la
+  mode : salaire vital réellement versé chez les fournisseurs, noté par le
+  collectif Clean Clothes Campaign (édition 2026, 110 marques ; 106 notées E, «
+  aucun salaire vital versé ni revendiqué », dont H&M, Inditex, Shein, Nike,
+  Adidas, Fast Retailing, Gucci, Hermès, Louis Vuitton). Le classement de l'ONG
+  Remake, envisagé, n'est plus publié (l'organisation a cessé son activité).
 - **0.6.1 (11/10/2026)** — Règle ANI rétablie : dans la mode et le luxe,
   l'exploitation animale est supposée tant qu'elle n'est pas exclue (plafond
   0,40), y compris pour une entité sur laquelle rien d'autre n'est connu ; un

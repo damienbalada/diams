@@ -184,7 +184,12 @@ ESEF_KEYWORDS = {
     # Audit de marques Break Free From Plastic : classement des pollueurs.
     "PLA_POLLUTER": [r"polluter|pollueur"],
     # Recours à des matières animales (plafond du pilier animal).
-    "ANI_EXPLOITATION": [r"cuirs?|peaux?|fourrures?|crocodil|leather|skins?|fur\b"],
+    # Matières (mode, luxe), ingrédients (alimentation), tests (cosmétique).
+    "ANI_EXPLOITATION": [r"cuirs?|peaux?|fourrures?|crocodil|leather|skins?|fur\b|\blaine|\bwool|cachemire|cashmere"
+                         r"|duvet|\bsoie\b|\bsilk\b|\blait|laiti|\bmilk|dairy|viande|\bmeat|\bbeef|b[œo]euf|\bporc\b|pork"
+                         r"|poulet|chicken|volaille|poultry|[œo]eufs?\b|\beggs?\b|\bmiel\b|honey|g[ée]latine|gelatin"
+                         r"|d.origine animale|of animal origin|animal[- ]derived|tests? sur (les )?animaux|animal testing"
+                         r"|tested on animals"],
     "ANI_FUR_FREE": [r"fourrure|fur\b"],
     "GEO_LOBBYING_ALIGN": [r"InfluenceMap|Climate Policy Engagement"],
 }
