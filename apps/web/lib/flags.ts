@@ -35,6 +35,8 @@ export interface Flag {
   source_name?: string;
   source_url?: string;
   observed_on?: string;
+  /** Donnée du groupe reprise par la marque. */
+  inherited_from?: string;
 }
 
 export interface Summary {
@@ -94,6 +96,7 @@ function toFlag(i: IndicatorResult, label: string, reason: FlagReason, fallback:
     source_name: i.source_name ?? i.source_code,
     source_url: i.source_url,
     observed_on: i.observed_on,
+    inherited_from: i.inherited_from,
   };
 }
 

@@ -1,5 +1,5 @@
 import { getAllScores, getPublicStats, listEntities, listSectors } from "@/lib/data";
-import { rankBySector, sectorAnchor, type SectorRanking } from "@/lib/ranking";
+import { onePerGroup, rankBySector, sectorAnchor, type SectorRanking } from "@/lib/ranking";
 import { EntitySearch } from "@/components/EntitySearch";
 import type { SearchableEntity } from "@/lib/search";
 
@@ -82,7 +82,7 @@ export default async function HomePage() {
         </p>
         {rated.length > 0 && (
           <div className="stats">
-            <div className="stat"><strong>{rated.length}</strong><span>entreprises notées</span></div>
+            <div className="stat"><strong>{rated.length}</strong><span>marques et groupes notés</span></div>
             <div className="stat"><strong>{entities.length}</strong><span>marques et groupes suivis</span></div>
             {stats && <div className="stat"><strong>{stats.evidence}</strong><span>preuves sourcées</span></div>}
             <div className="stat"><strong>{ranked.length}</strong><span>secteurs comparables</span></div>
@@ -110,7 +110,7 @@ export default async function HomePage() {
             </p>
             <div className="sector-grid">
               {ranked.map((s) => {
-                const rows = [...s.groups, ...s.brands].sort((a, b) => b.score - a.score).slice(0, 3);
+                const rows = onePerGroup([...s.groups, ...s.brands].sort((a, b) => b.score - a.score)).slice(0, 3);
                 const total = s.groups.length + s.brands.length;
                 return (
                   <a key={s.sector.code} className="sector-card" href={`/classement#${sectorAnchor(s.sector)}`}>

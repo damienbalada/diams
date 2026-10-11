@@ -8,13 +8,14 @@
 // Le test « miroir » (scoring.test.ts) échoue si les deux fichiers divergent.
 //
 // Pipeline :
-//   evidence active PROPRE à l'entité (v0.5 : une marque n'hérite plus du groupe)
+//   evidence active de l'entité, et pour une marque celle de son groupe sur les
+//   indicateurs de groupe (v0.6.0, Règle 8 révisée ; la preuve propre passe devant)
 //     -> normalisation [0,1] (intra-secteur pour le quantitatif)
 //     -> règle 3 (anti-greenwashing : promesse plafonnée, preuve débloque)
 //     -> règle 2 (tiers : poids + plafond de confiance + plancher anti-presse)
 //     -> agrégation par dimension (règle 1 v0.5 : manquant = 0 SI publication
 //        obligatoire ; sinon hors note, mais la fiabilité baisse ; un label
-//        absent est ignoré, v0.5.1)
+//        absent est ignoré, v0.5.1 ; indicateurs complémentaires, v0.6.0)
 //     -> pondération par profil de valeurs
 //     -> score + indice de confiance (séparés) + méta-scores
 // =============================================================================
@@ -62,6 +63,11 @@ export interface Indicator {
   /** Label / certification tiers : présent ⇒ compté comme un résultat ; absent
    *  ⇒ ignoré, ni dans la note ni dans la fiabilité (personne ne doit un label). */
   presence_only?: boolean;
+  /** Hors socle (pas de source publique systématique, ou recensement de
+   *  controverses) : même règle que presence_only, sauf publication obligatoire. */
+  complementary?: boolean;
+  /** Relève du groupe : une marque en reprend les preuves (affichage). */
+  group_level?: boolean;
 }
 export interface Evidence {
   indicator_code: string;
@@ -82,6 +88,8 @@ export interface Evidence {
   /** Ce que dit la source (affichage : la fiche montre le fait, pas seulement un %). */
   excerpt?: string;
   source_name?: string;
+  /** Preuve du groupe reprise par une marque (indicateur de groupe) : son nom. */
+  inherited_from?: string | null;
 }
 export interface ProfileWeight {
   dimension_code: string;
@@ -135,6 +143,8 @@ export interface IndicatorResult {
   raw_value?: number | null;
   /** Valeur relative : nombre de pairs du secteur ayant servi au rang (percentile). */
   peer_count?: number;
+  /** Donnée du groupe reprise par la marque (nom du groupe). */
+  inherited_from?: string;
   capped_by_greenwashing?: boolean;
   floored_by_low_tier?: boolean;
   /** Controverse affichée mais EXCLUE du calcul (source unique non corroborée). */
@@ -379,6 +389,7 @@ function evaluateIndicator(
     excerpt: driver.excerpt,
     raw_value: driver.value_numeric ?? null,
     peer_count: norm.peers,
+    inherited_from: driver.inherited_from ?? undefined,
     capped_by_greenwashing: cappedByGreenwashing || undefined,
     floored_by_low_tier: flooredByLowTier || undefined,
     // controverse présente mais non comptée (source unique non corroborée)
@@ -413,9 +424,11 @@ export function computeScore(input: ScoreInput): ScoreResult {
   const dimsWithIndicators = [...new Set(input.applicableIndicators.map((i) => i.dimension_code))];
 
   for (const dimCode of dimsWithIndicators) {
-    // Un label absent n'existe pas pour l'entité : ni note, ni fiabilité, ni ligne.
+    // Un label ou un indicateur complémentaire absent n'existe pas pour l'entité :
+    // ni note, ni fiabilité, ni ligne — sauf si la loi impose de le publier.
     const inds = input.applicableIndicators.filter(
-      (i) => i.dimension_code === dimCode && !(i.presence_only && !resByCode.get(i.code)?.covered),
+      (i) => i.dimension_code === dimCode
+        && !((i.presence_only || i.complementary) && !i.mandatory && !resByCode.get(i.code)?.covered),
     );
     const gate = gateByDim.get(dimCode);
     const gateCode = gate?.gate_indicator_code;

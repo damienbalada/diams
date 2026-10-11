@@ -2,7 +2,7 @@
 // Lancer : node --test --experimental-strip-types apps/web/lib/ranking.test.ts
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { rankBySector, sectorAnchor, type RankRow, type SectorInfo } from "./ranking.ts";
+import { onePerGroup, rankBySector, sectorAnchor, type RankRow, type SectorInfo } from "./ranking.ts";
 
 const SECTORS: SectorInfo[] = [
   { id: "bank", code: "banking_finance", name: "Banque & Finance" },
@@ -55,4 +55,15 @@ test("classement — secteur inconnu regroupé, ancre stable", () => {
   assert.equal(ranked.length, 1);
   assert.equal(ranked[0].sector.name, "Secteur non renseigné");
   assert.equal(sectorAnchor(SECTORS[0]), "secteur-banking_finance");
+});
+
+test("podium — une seule entité par groupe, la mieux notée", () => {
+  const rows = [
+    row("ariel", "food", 0.83, { is_brand: true, group: "P&G" }),
+    row("pampers", "food", 0.82, { is_brand: true, group: "P&G" }),
+    row("danone", "food", 0.7, { name: "Danone" }),
+    row("evian", "food", 0.68, { is_brand: true, group: "Danone" }),
+    row("pg", "food", 0.6, { name: "P&G" }),
+  ].sort((a, b) => b.score - a.score);
+  assert.deepEqual(onePerGroup(rows).map((r) => r.slug), ["ariel", "danone"]);
 });

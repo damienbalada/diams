@@ -504,6 +504,39 @@ test("fraîcheur — aucune preuve : last_observed null", () => {
   assert.equal(res.last_observed, null);
 });
 
+test("socle — un complémentaire absent est ignoré, sauf s'il est obligatoire", () => {
+  const indicators = [
+    ind("ENV_A", "ENV"),
+    ind("ENV_C", "ENV", { complementary: true }),
+    ind("ENV_M", "ENV", { complementary: true, mandatory: true, mandatory_regimes: ["CRD"] }),
+  ];
+  const res = computeScore(baseInput({
+    applicableIndicators: indicators,
+    evidence: [ev({ indicator_code: "ENV_A", normalized_value: 1.0, confidence: 0.9 })],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const env = res.dimensions[0];
+  assert.deepEqual(env.indicators.map((i) => i.indicator_code), ["ENV_A", "ENV_M"]);
+  assert.equal(env.score, 0.5);                       // l'obligatoire manquant compte 0
+  assert.ok(Math.abs(env.confidence - 0.45) < 1e-9);  // le complémentaire absent ne pèse pas
+});
+
+test("données de groupe — la preuve propre passe devant, l'héritée est signalée", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("GOV_X", "ENV", { group_level: true }), ind("GOV_Y", "ENV", { group_level: true })],
+    evidence: [
+      ev({ indicator_code: "GOV_X", normalized_value: 0.2, specificity: -1, inherited_from: "Groupe" }),
+      ev({ indicator_code: "GOV_X", normalized_value: 0.9, specificity: 0 }),
+      ev({ indicator_code: "GOV_Y", normalized_value: 0.6, specificity: -1, inherited_from: "Groupe" }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const [x, y] = res.dimensions[0].indicators;
+  assert.equal(x.value, 0.9);
+  assert.equal(x.inherited_from, undefined);
+  assert.equal(y.inherited_from, "Groupe");
+});
+
 test("normalisation — écart au plus près de zéro : -30 % n'est pas meilleur que 2 %", () => {
   const peers = { GAP: [-30.1, 2.0, 12.4, 20] };
   const score = (v: number) => computeScore(baseInput({

@@ -14,9 +14,11 @@ tech, automobile, restauration, énergie, banque** (France + international).
 
 1. **Résolution d'entités d'abord.** Une marque n'est pas une entreprise.
    Bottega → Kering, Dior → LVMH. Sans table marque → filiale → groupe avec les
-   % de détention, on ne sait pas à qui va l'argent. C'est le socle. Chaque
-   entité est pourtant **notée sur ses propres preuves** (Règle 8) : la chaîne de
-   détention s'affiche à côté de la note, elle ne la remplace pas.
+   % de détention, on ne sait pas à qui va l'argent. C'est le socle. Une marque
+   reprend les données de son groupe pour ce qui relève du groupe (gouvernance,
+   fiscalité, climat, lobbying…) et reste notée sur ses propres preuves pour ce
+   qui relève du produit (Règle 8) ; la chaîne de détention s'affiche à côté de
+   la note.
 2. **Chaque point de score = une evidence sourcée et datée.** Jamais une opinion.
 3. **Décroissance à 5 ans + fraîcheur affichée.** Un fait de 2014 ne plombe pas
    une entreprise à vie : une evidence n'est « active » que pendant 5 ans après
@@ -67,8 +69,10 @@ baisser la fiabilité. Dans la **note**, tout dépend de l'obligation :
 Un pilier sans aucune preuve **ni** obligation n'est **pas noté** : il sort de la
 note globale mais tire la fiabilité vers le bas.
 
-Exception : un **label ou une certification tiers** absent ne baisse pas la
-fiabilité, car personne ne le doit (voir « Labels et certifications », section 3).
+Exceptions : un **label ou une certification tiers** absent, ou un **indicateur
+complémentaire** absent, ne baisse pas la fiabilité (voir « Labels et
+certifications » et « Socle d'indicateurs », section 3) — sauf, pour le second,
+si la loi impose de le publier.
 
 **Pourquoi.** Ne pas publier ce que la loi impose est un choix, pas une excuse :
 l'opacité est punie. Mais ne pas publier ce que rien n'impose n'en est pas un —
@@ -202,12 +206,25 @@ l'evidence sourcée qu'il a permis de créer. C'est la contribution ouverte sans
 la vulnérabilité du vote : le nombre de personnes qui affirment une chose ne
 change pas sa véracité.
 
-### Règle 8 — Une marque est notée sur ses propres preuves
+### Règle 8 — Ce qui relève du groupe, ce qui relève de la marque
 
-*(Depuis v0.5.0.)* Une marque **n'hérite pas** des preuves de son groupe. Une
-marque de mode qui n'utilise ni cuir ni fourrure ne doit pas porter le plafond
-« exploitation animale » de son propriétaire ; inversement, la vertu d'un groupe
-ne blanchit pas une marque qui n'a rien publié.
+*(Révisée en v0.6.0.)* Certains indicateurs relèvent **par nature du groupe** :
+une marque n'a ni conseil d'administration, ni taux d'impôt, ni registre de
+lobbying, ni plan de vigilance à elle — c'est le groupe qui les publie, et c'est
+lui qui reçoit l'argent. Pour ces indicateurs (drapeau `group_level` :
+gouvernance, fiscalité, lobbying et influence politique, climat et eau au niveau
+du groupe, rémunérations, devoir de vigilance, financements), la marque **reprend
+les preuves de son groupe**, signalées « donnée du groupe » sur la fiche, et ses
+obligations de publication (Règle 1). Une valeur reprise est classée parmi les
+pairs du **secteur du groupe** : la marque porte exactement le rang de son
+groupe. Une preuve propre à la marque passe toujours devant.
+
+Les indicateurs qui relèvent du **produit** restent propres à la marque : bien-être
+animal (et son plafond), plastique, transparence de la chaîne textile, labels.
+Une marque de mode qui n'utilise ni cuir ni fourrure ne porte pas le plafond
+« exploitation animale » de son propriétaire, et la certification d'un groupe ne
+labellise pas ses marques. *(De v0.5.0 à v0.6.0, une marque n'héritait de rien :
+presque aucune n'atteignait le seuil de publication, faute de données propres.)*
 
 La fiche d'une marque affiche **toujours** son groupe propriétaire — avec un lien
 vers sa fiche et sa note — parce que c'est lui qui reçoit l'argent. Une marque
@@ -269,6 +286,23 @@ Personne ne doit un label : son absence n'est **jamais** comptée 0, et elle ne
 baisse pas non plus la fiabilité. L'indicateur n'existe tout simplement pas pour
 l'entité (drapeau `presence_only` en base). Sinon la fiabilité de chaque entité
 dépendrait du nombre de labels que DIAMS suit, pas de ce qu'on sait d'elle.
+
+### Socle d'indicateurs
+
+*(Depuis v0.6.0.)* La fiabilité mesure ce qu'on sait d'une entité **par rapport à
+ce qu'on peut savoir**. Un indicateur pour lequel aucune source publique
+systématique n'existe aujourd'hui (salaire décent, taux de contentieux, présence
+en paradis fiscaux, part recyclée…) ou qui **recense des controverses**
+(sanctions, allégations, liens avec des conflits) est **complémentaire** (drapeau
+`complementary`) : documenté, il compte dans la note comme les autres ; absent, il
+ne baisse ni la note ni la fiabilité — *sauf* si la loi impose de le publier
+(Règle 1 : compté 0). L'absence de controverse recensée n'est pas une preuve de
+vertu : elle ne rapporte rien non plus.
+
+Le **socle**, ce sont tous les autres indicateurs applicables : publications
+obligatoires (CSRD, Égapro, plan de vigilance, ratio de rémunération),
+classements d'organismes établis (CDP, SBTi, KnowTheChain, InfluenceMap…),
+registres publics. C'est sur lui que la fiabilité est calculée.
 
 ---
 
@@ -397,8 +431,8 @@ pas du nombre de marques. Trois garde-fous invariants :
    inconnu restent en `pending` jusqu'à la **revue humaine**.
 3. **Niveau de rattachement explicite.** Gouvernance, fiscalité et note climat sont
    rattachées au **groupe** ; les benchmarks peuvent noter une **marque** (ex. FTI
-   note Gucci). Depuis v0.5.0, une marque n'hérite plus des preuves du groupe
-   (Règle 8).
+   note Gucci). Depuis v0.6.0, une marque reprend les preuves de son groupe pour
+   les seuls indicateurs de groupe (Règle 8).
 
 | Connecteur | Pilier | Indicateur(s) | Source | Niveau |
 |---|---|---|---|---|
@@ -430,10 +464,20 @@ fausserait la comparaison sectorielle.
 
 ## 8. Statut
 
-Document vivant (v`0.5.1`, octobre 2026). Toute modification des paramètres de
+Document vivant (v`0.6.0`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.6.0 (11/10/2026)** — Règle 8 révisée : une marque reprend les preuves et
+  obligations de son groupe pour les indicateurs qui relèvent du groupe
+  (gouvernance, fiscalité, lobbying, climat, rémunérations, vigilance,
+  financements), signalées « donnée du groupe » et classées parmi les pairs du
+  secteur du groupe ; les indicateurs liés au produit (animaux, plastique,
+  textile, labels) restent propres à la marque. Socle d'indicateurs : un
+  indicateur complémentaire (pas de source systématique, ou recensement de
+  controverses) absent ne pèse ni sur la note ni sur la fiabilité, sauf
+  publication obligatoire. Lobbying climat (InfluenceMap) compté dans la note
+  (poids 0,8). Accueil : une seule entité par groupe sur chaque podium.
 - **0.5.1 (11/10/2026)** — Labels et certifications tiers (Finansol, B Corp)
   comptés comme résultats quand ils sont attestés ; leur absence ne pèse ni sur
   la note ni sur la fiabilité ; base de données ONU

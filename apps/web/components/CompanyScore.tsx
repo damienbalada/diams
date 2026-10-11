@@ -274,7 +274,10 @@ function FlagList({ title, tone, items, empty }: { title: string; tone: "good" |
       ) : (
         items.map((f) => (
           <div className="flag" key={f.indicator_code}>
-            <div className="small" style={{ fontWeight: 650 }}>{f.label}</div>
+            <div className="small" style={{ fontWeight: 650 }}>
+              {f.label}
+              {f.inherited_from && <span className="badge" style={{ marginLeft: 6 }}>donnée du groupe {f.inherited_from}</span>}
+            </div>
             <div className="muted small" style={{ marginTop: 2 }}>{f.detail}</div>
             {f.source_url && (
               <div className="small" style={{ marginTop: 3 }}>
@@ -390,6 +393,11 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   {i.capped_by_greenwashing &&<span className="badge warn">engagement plafonné</span>}
                   {i.floored_by_low_tier && <span className="badge warn">source faible</span>}
                   {i.unscored_controversy && <span className="badge warn" title="Source unique non corroborée : signalée mais exclue du calcul de la note.">controverse · hors note</span>}
+                  {i.inherited_from && (
+                    <span className="badge" title="Indicateur qui relève du groupe : la marque reprend la donnée publiée par son groupe propriétaire.">
+                      donnée du groupe {i.inherited_from}
+                    </span>
+                  )}
                   <span className="badge">{i.nature}</span>
                   {i.display_only ? (
                     <span className="muted small">—</span>

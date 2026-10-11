@@ -70,5 +70,20 @@ export function rankBySector<T extends RankRow>(
   };
 }
 
+/**
+ * Meilleure entité de chaque groupe, dans l'ordre donné : une marque reprend les
+ * données de son groupe (Règle 8), un podium de quatre marques du même groupe ne
+ * montrerait qu'un seul choix.
+ */
+export function onePerGroup<T extends RankRow>(rows: T[]): T[] {
+  const seen = new Set<string>();
+  return rows.filter((r) => {
+    const key = r.group ?? r.name;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 /** Ancre stable d'un secteur dans la page de classement. */
 export const sectorAnchor = (s: SectorInfo) => `secteur-${s.code}`;
