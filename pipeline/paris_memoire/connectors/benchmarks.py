@@ -24,6 +24,8 @@ import re
 from dataclasses import dataclass
 
 from ..normalize.names import is_strong_match
+from .flourish import flourish_json as _flourish_json
+from .flourish import flourish_url
 
 NAME_COLS = ("company", "name", "entity", "société", "nom", "brand", "marque")
 TIER_COLS = ("tier", "bbfaw_tier", "niveau")
@@ -187,16 +189,6 @@ class KtcScore:
     score: float
     rank: int | None
     size: int | None
-
-
-def flourish_url(vis_id: int) -> str:
-    return f"https://flo.uri.sh/visualisation/{vis_id}/embed?auto=1"
-
-
-def _flourish_json(html: str, name: str):
-    import json
-    start = html.index(f"{name} = ") + len(name) + 3
-    return json.JSONDecoder().raw_decode(html[start:])[0]
 
 
 def _int(x) -> int | None:
