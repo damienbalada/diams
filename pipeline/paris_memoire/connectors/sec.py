@@ -7,7 +7,10 @@ correspondre au nom légal de l'entité (GLEIF). En cas de doute : on saute.
 Ce que l'on lit, sans interprétation :
 - faits XBRL us-gaap du dernier rapport annuel 10-K : taux effectif d'impôt
   balisé (EffectiveIncomeTaxRateContinuingOperations), contrôlé par
-  impôt / résultat avant impôt (à 0,6 point près) ;
+  impôt / résultat avant impôt (à 0,6 point près ; résultat avant impôt
+  reconstitué en résultat net + impôt quand l'émetteur ne le balise pas) ;
+- faits XBRL ifrs-full du dernier rapport annuel 20-F (émetteurs étrangers en
+  IFRS) : impôt sur le résultat / résultat avant impôt, dans la devise déposée ;
 - les adresses du dernier 10-K et de la dernière circulaire de procuration
   (DEF 14A), où figurent le ratio de rémunération (Reg. S-K Item 402(u)) et
   l'indépendance des administrateurs (Item 407(a)).
@@ -30,6 +33,8 @@ TICKERS: dict[str, str] = {
     "coca-cola": "KO", "pepsico": "PEP", "procter-gamble": "PG", "mondelez": "MDLZ", "kraft-heinz": "KHC",
     "colgate-palmolive": "CL", "kenvue": "KVUE",
     "mcdonalds": "MCD", "starbucks": "SBUX", "yum-brands": "YUM", "rbi": "QSR",
+    # Émetteurs étrangers (rapport annuel 20-F en IFRS)
+    "unilever": "UL", "toyota": "TM", "sony": "SONY", "stellantis": "STLA",
 }
 
 _SUFFIX = {"inc", "incorporated", "corp", "corporation", "company", "co", "the", "plc", "ltd", "limited", "sa"}
@@ -84,11 +89,12 @@ PBT_CONCEPTS = (
 )
 
 
-def _annual(facts: dict, concept: str, unit: str) -> dict[str, dict]:
-    """Faits annuels (≈ 1 an) déposés dans un 10-K, par date de clôture."""
+def _annual(facts: dict, concept: str, unit: str, taxonomy: str = "us-gaap",
+            form: str = "10-K") -> dict[str, dict]:
+    """Faits annuels (≈ 1 an) déposés dans un rapport annuel, par date de clôture."""
     out: dict[str, dict] = {}
-    for x in facts.get("facts", {}).get("us-gaap", {}).get(concept, {}).get("units", {}).get(unit, []):
-        if x.get("form") != "10-K" or not x.get("start"):
+    for x in facts.get("facts", {}).get(taxonomy, {}).get(concept, {}).get("units", {}).get(unit, []):
+        if x.get("form") != form or not x.get("start"):
             continue
         days = (date.fromisoformat(x["end"]) - date.fromisoformat(x["start"])).days
         if 350 <= days <= 380:
@@ -106,6 +112,10 @@ class TaxRate:
     fy_end: str
     filed: str
     accession: str
+    currency: str = "USD"
+    #: "tagged" : taux balisé (10-K) ; "pbt_derived" : taux balisé, résultat avant
+    #: impôt reconstitué ; "ifrs" : impôt / résultat avant impôt d'un 20-F.
+    method: str = "tagged"
 
 
 def effective_tax_rate(facts: dict, tolerance_pt: float = 0.6) -> TaxRate | None:
@@ -116,6 +126,16 @@ def effective_tax_rate(facts: dict, tolerance_pt: float = 0.6) -> TaxRate | None
     for c in PBT_CONCEPTS:
         for end, x in _annual(facts, c, "USD").items():
             pbts.setdefault(end, x)
+    method = "tagged"
+    if not set(rates) & set(taxes) & set(pbts):
+        # Résultat avant impôt non balisé : résultat net (part du groupe et
+        # minoritaires) + impôt, retenu seulement s'il recoupe le taux balisé.
+        for concept in ("ProfitLoss", "NetIncomeLoss"):
+            nets = _annual(facts, concept, "USD")
+            pbts = {e: {**nets[e], "val": nets[e]["val"] + taxes[e]["val"]} for e in set(nets) & set(taxes)}
+            if set(rates) & set(pbts):
+                method = "pbt_derived"
+                break
     common = sorted(set(rates) & set(taxes) & set(pbts))
     if not common:
         return None
@@ -124,4 +144,28 @@ def effective_tax_rate(facts: dict, tolerance_pt: float = 0.6) -> TaxRate | None
     if pbt <= 0 or abs(100 * tax / pbt - rate) > tolerance_pt:
         return None
     return TaxRate(rate_pct=round(rate, 1), tax=tax, pbt=pbt, fy_end=end, filed=rates[end].get("filed", ""),
-                   accession=rates[end].get("accn", ""))
+                   accession=rates[end].get("accn", ""), method=method)
+
+
+def effective_tax_rate_ifrs(facts: dict) -> TaxRate | None:
+    """Dernier 20-F en IFRS : impôt sur le résultat / résultat avant impôt.
+
+    Exercice en perte, ou taux hors de [0 ; 60 %] (année atypique) : pas de taux.
+    """
+    units = facts.get("facts", {}).get("ifrs-full", {}).get("ProfitLossBeforeTax", {}).get("units", {})
+    for cur in units:
+        pbts = _annual(facts, "ProfitLossBeforeTax", cur, "ifrs-full", "20-F")
+        taxes = _annual(facts, "IncomeTaxExpenseContinuingOperations", cur, "ifrs-full", "20-F")
+        common = sorted(set(pbts) & set(taxes))
+        if not common:
+            continue
+        end = common[-1]
+        pbt, tax = pbts[end]["val"], taxes[end]["val"]
+        if pbt <= 0:
+            return None
+        rate = 100 * tax / pbt
+        if not 0 <= rate <= 60:
+            return None
+        return TaxRate(rate_pct=round(rate, 1), tax=tax, pbt=pbt, fy_end=end, filed=pbts[end].get("filed", ""),
+                       accession=pbts[end].get("accn", ""), currency=cur, method="ifrs")
+    return None

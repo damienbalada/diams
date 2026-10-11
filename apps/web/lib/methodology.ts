@@ -361,6 +361,14 @@ animal** est retiré pour la banque ou les boissons ; **Investissements** ne
 concerne que banque/assurance. La pertinence est pilotée par des drapeaux de
 secteur (\`animal_relevant\`, \`plastic_relevant\`, \`water_relevant\`, \`inv_relevant\`).
 
+Un indicateur peut aussi ne valoir que pour une **liste de secteurs** (table
+\`indicator_sectors\`, depuis v0.6.0) : la part des investissements alignés sur la
+taxonomie verte de l'UE ne s'applique qu'à l'énergie et à l'automobile, où elle
+mesure la transition du cœur de métier ; ailleurs (luxe, mode, banque…) la
+taxonomie couvre trop peu d'activités pour dire quoi que ce soit de la conduite
+de l'entreprise. Pour un indicateur de groupe, c'est le secteur du groupe qui
+compte.
+
 ### Pertinence géographique (dispositif national)
 
 *(Depuis v0.5.1.)* Certains indicateurs mesurent le respect d'un instrument
@@ -503,7 +511,11 @@ calcul (tables de config) doit être datée et justifiée ici.
   Benchmarks à périmètre fermé (KnowTheChain, BBFAW) chargés en entier par des
   connecteurs déterministes et rendus complémentaires ; les 16 lignes saisies à
   la main avant ces connecteurs sont retirées (plusieurs contredisaient la donnée
-  publiée : KnowTheChain Coca-Cola 58/100 au lieu de 29).
+  publiée : KnowTheChain Coca-Cola 58/100 au lieu de 29). Impact sectoriel :
+  part des investissements alignés sur la taxonomie verte de l'UE
+  (\`ENV_TAXONOMY_CAPEX\`, obligation \`EU_TAXONOMY_ART8\`), énergie et automobile
+  seulement (pertinence sectorielle par liste), valeur absolue sur le périmètre
+  réglementaire.
 - **0.5.1 (11/10/2026)** — Labels et certifications tiers (Finansol, B Corp)
   comptés comme résultats quand ils sont attestés ; leur absence ne pèse ni sur
   la note ni sur la fiabilité ; base de données ONU

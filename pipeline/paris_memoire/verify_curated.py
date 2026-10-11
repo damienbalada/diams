@@ -177,6 +177,8 @@ ESEF_KEYWORDS = {
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
     # lus dans le plan lui-même (C. com. L225-102-4 : cinq mesures).
     "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques", r"suivi|contr[ôo]le du respect|compte rendu"],
+    # Taxonomie verte UE (art. 8) : part des CapEx ALIGNÉS (pas seulement éligibles).
+    "ENV_TAXONOMY_CAPEX": [r"taxonom", r"capex|capital expenditure", r"align"],
 }
 
 

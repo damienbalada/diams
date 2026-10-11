@@ -1,5 +1,5 @@
 """Connecteur SEC : identité par le nom déposé, taux effectif balisé et contrôlé."""
-from paris_memoire.connectors.sec import effective_tax_rate, norm
+from paris_memoire.connectors.sec import effective_tax_rate, effective_tax_rate_ifrs, norm
 from paris_memoire.import_sec import same_company
 
 
@@ -38,3 +38,28 @@ def test_taux_incoherent_ou_trimestriel_ou_perte_ecarte():
     q = ("2025-12-31", "2025-10-01")
     assert effective_tax_rate(facts([fact(0.156, *q)], [fact(1560, *q)], [fact(10000, *q)])) is None   # trimestre
     assert effective_tax_rate(facts([fact(0.1, *y)], [fact(-100, *y)], [fact(-1000, *y)])) is None    # perte
+
+
+def test_resultat_avant_impot_reconstitue_seulement_s_il_recoupe_le_taux():
+    y = ("2025-12-31", "2025-01-01")
+    base = facts([fact(0.214, *y)], [fact(2334, *y)], [])
+    base["facts"]["us-gaap"]["NetIncomeLoss"] = {"units": {"USD": [fact(8573, *y)]}}
+    tr = effective_tax_rate(base)
+    assert tr is not None and tr.rate_pct == 21.4 and tr.method == "pbt_derived" and tr.pbt == 10907
+    base["facts"]["us-gaap"]["NetIncomeLoss"] = {"units": {"USD": [fact(5000, *y)]}}  # 31,8 % ≠ 21,4 %
+    assert effective_tax_rate(base) is None
+
+
+def ifrs(tax, pbt, cur="EUR", form="20-F"):
+    y = ("2025-12-31", "2025-01-01")
+    return {"facts": {"ifrs-full": {
+        "IncomeTaxExpenseContinuingOperations": {"units": {cur: [fact(tax, *y, form=form)]}},
+        "ProfitLossBeforeTax": {"units": {cur: [fact(pbt, *y, form=form)]}}}}}
+
+
+def test_ifrs_20f_impot_sur_resultat_avant_impot():
+    tr = effective_tax_rate_ifrs(ifrs(2850, 10000))
+    assert tr is not None and tr.rate_pct == 28.5 and tr.currency == "EUR" and tr.method == "ifrs"
+    assert effective_tax_rate_ifrs(ifrs(500, -2000)) is None          # perte
+    assert effective_tax_rate_ifrs(ifrs(7800, 10000)) is None         # 78 % : année atypique
+    assert effective_tax_rate_ifrs(ifrs(2850, 10000, form="6-K")) is None  # semestriel

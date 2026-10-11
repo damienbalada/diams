@@ -90,6 +90,7 @@ async function build() {
     "dimension_gates", "sources", "source_tier_config", "evidence_nature_config", "scoring_params",
     "value_profiles", "profile_weights", "entities", "evidence", "political_groups",
     "civic_votes", "civic_positions", "disclosure_regimes", "indicator_regimes", "entity_regimes",
+    "indicator_sectors",
   ]) T[t] = await fetchAll(t);
 
   const code = (rows, field = "code") => new Map(rows.map((r) => [r.id, r[field]]));
@@ -135,6 +136,11 @@ async function build() {
       lit(r.sector_specific), ref("sectors", "code", sector.get(r.applies_to_sector_id)), lit(r.weight), lit(r.unit), lit(r.methodology),
       lit(r.presence_only), lit(r.jurisdiction), lit(r.complementary ?? false), lit(r.group_level ?? false),
     ])));
+
+  section("Pertinence sectorielle par liste", upsert("indicator_sectors",
+    ["indicator_id", "sector_id"], ["indicator_id", "sector_id"],
+    [...T.indicator_sectors].sort(by((r) => `${ind.get(r.indicator_id)}|${sector.get(r.sector_id)}`)).map((r) =>
+      [ref("indicators", "code", ind.get(r.indicator_id)), ref("sectors", "code", sector.get(r.sector_id))])));
 
   section("Gates (plafonds de pilier)", upsert("dimension_gates",
     ["dimension_id", "gate_indicator_id", "default_ceiling", "notes"], ["dimension_id"],

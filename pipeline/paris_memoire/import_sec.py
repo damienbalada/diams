@@ -24,20 +24,29 @@ from .load import EvidenceRow, insert_evidence
 NAME_ALIASES = {"google": "Alphabet Inc."}
 
 
-def _fmt(x: float) -> str:
-    return f"{x / 1e6:,.0f}".replace(",", " ") + " M$"
+_CUR = {"USD": "M$", "EUR": "M€", "GBP": "M£", "JPY": "M¥"}
+
+
+def _fmt(x: float, currency: str = "USD") -> str:
+    return f"{x / 1e6:,.0f}".replace(",", " ") + " " + _CUR.get(currency, f"M {currency}")
 
 
 def tax_rate_row(slug: str, cik: int, tr: sec.TaxRate) -> EvidenceRow:
     pct = f"{tr.rate_pct:.1f}".replace(".", ",")
     folder = f"https://www.sec.gov/Archives/edgar/data/{cik}/{tr.accession.replace('-', '')}/"
+    tax, pbt = _fmt(tr.tax, tr.currency), _fmt(tr.pbt, tr.currency)
+    if tr.method == "ifrs":
+        excerpt = (f"Rapport annuel 20-F, exercice clos le {tr.fy_end} (SEC, faits XBRL ifrs-full) : impôt sur le "
+                   f"résultat {tax} / résultat avant impôt {pbt} → taux effectif {pct} %.")
+    else:
+        derived = " (résultat net + impôt, sous-total non balisé par l'émetteur)" if tr.method == "pbt_derived" else ""
+        excerpt = (f"Rapport annuel 10-K, exercice clos le {tr.fy_end} (SEC, faits XBRL us-gaap) : taux effectif "
+                   f"d'impôt balisé {pct} %. Contrôle : impôt sur les bénéfices {tax} / résultat avant impôt "
+                   f"{pbt}{derived}.")
     return EvidenceRow(
         entity_slug=slug, indicator_code="TAX_EFFECTIVE_RATE", source_code="SEC_FILING", nature="result",
         observed_on=tr.filed, value_type="numeric", value_numeric=tr.rate_pct, confidence=0.95,
-        source_url=folder, reviewer="import_sec",
-        excerpt=(f"Rapport annuel 10-K, exercice clos le {tr.fy_end} (SEC, faits XBRL us-gaap) : taux effectif "
-                 f"d'impôt balisé {pct} %. Contrôle : impôt sur les bénéfices {_fmt(tr.tax)} / résultat avant impôt "
-                 f"{_fmt(tr.pbt)}."),
+        source_url=folder, reviewer="import_sec", excerpt=excerpt,
     )
 
 
@@ -76,7 +85,8 @@ def main() -> None:
                 print(f"✗ {slug:18} CIK {cik} « {sub.get('name')} » ≠ {names} : ignoré")
                 continue
             proxy = sec.latest_form(sub, "DEF 14A", cik)
-            tr = sec.effective_tax_rate(sec.company_facts(cik, c))
+            facts = sec.company_facts(cik, c)
+            tr = sec.effective_tax_rate(facts) or sec.effective_tax_rate_ifrs(facts)
             if tr:
                 rows.append(tax_rate_row(slug, cik, tr))
                 print(f"✔ {slug:18} CIK {cik:<8} {tr.fy_end}  taux effectif {tr.rate_pct:5.1f} %")

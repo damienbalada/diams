@@ -145,6 +145,31 @@ Un seul CLI, sélection par `--benchmark` :
 python -m paris_memoire.import_benchmarks --benchmark bbfaw --file bbfaw.csv [--apply]
 ```
 
+### `import_ktc` — KnowTheChain, données publiées → `SUP_KNOWTHECHAIN` (publication auto)
+- Lit les données embarquées des trois comparaisons KnowTheChain (visualisations
+  Flourish du BHRRC : alimentation & boissons, habillement, technologies) ;
+  dernière édition publiée par entreprise (éditions de plus de 5 ans écartées).
+- Liste **complète** du benchmark : une entreprise absente n'a pas été évaluée
+  (indicateur complémentaire, v0.6.0). Rattachement aux groupes seulement,
+  table de noms explicite puis correspondance nette.
+- Retire les lignes `curation-v1` de l'indicateur (`remplace:import_ktc`) ; une
+  ligne existante à la même date est remplacée par la donnée publiée.
+```bash
+python -m paris_memoire.import_ktc [--apply]
+```
+
+### `import_bbfaw` — BBFAW, rapport annuel → `ANI_BBFAW_TIER` (publication auto)
+- Lit la figure des tiers du rapport (`connectors/bbfaw.py`) : la colonne d'un
+  nom est donnée par sa position sur la page ; les notes d'impact (A-F),
+  irrégulièrement placées dans le PDF, sont ignorées.
+- Contrôles bloquants : effectif imprimé de chaque tier et tableau des
+  mouvements de tier de la page suivante. Un seul écart et rien n'est écrit.
+- Liste complète (149 entreprises en 2025) : indicateur complémentaire.
+  Retire les lignes `curation-v1` (`remplace:import_bbfaw`).
+```bash
+python -m paris_memoire.import_bbfaw [--pdf rapport.pdf] [--apply]
+```
+
 ---
 
 ## Investissements & Finance éthique (INV)
@@ -281,7 +306,12 @@ python -m paris_memoire.import_ohchr --file A_HRC_63_20.pdf --symbol A/HRC/63/20
 - CIK lu dans la table officielle de la SEC par le ticker (`connectors/sec.py`,
   `TICKERS`) ; la dénomination déposée doit correspondre au nom légal (GLEIF).
 - `TAX_EFFECTIVE_RATE` : taux balisé du dernier 10-K (us-gaap), recoupé par
-  impôt / résultat avant impôt à 0,6 point près.
+  impôt / résultat avant impôt à 0,6 point près (résultat avant impôt
+  reconstitué en résultat net + impôt quand il n'est pas balisé, et retenu
+  seulement s'il recoupe le taux). Émetteurs étrangers (20-F en IFRS :
+  Unilever, Toyota, Sony, Stellantis) : impôt / résultat avant impôt
+  (`ifrs-full`), dans la devise déposée ; exercice en perte ou taux hors
+  [0 ; 60 %] : pas de taux.
 - Affiche la dernière circulaire DEF 14A : ratio PDG / salarié médian (Reg. S-K
   Item 402(u), obligation `US_SEC_PAY_RATIO`), indépendance et mixité du conseil,
   lus pour `curated/` et vérifiés par `verify_curated`.
