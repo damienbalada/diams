@@ -147,3 +147,88 @@ def match_entity(row: BenchmarkRow, entities: list[dict]) -> dict | None:
             if val and is_strong_match(row.company, val):
                 return e
     return None
+
+
+# --- KnowTheChain : données publiées (visualisations Flourish du BHRRC) -------
+#
+# Les classements « Company comparison » du site KnowTheChain (Business & Human
+# Rights Resource Centre) sont des visualisations Flourish dont les données
+# (score total /100, rang, taille du benchmark, par édition) sont embarquées dans
+# la page publiée. On les lit telles quelles : connecteur déterministe, liste
+# COMPLÈTE de chaque benchmark (une entreprise absente n'a pas été évaluée — ce
+# n'est pas une donnée manquante).
+
+KTC_BENCHMARKS = {
+    # code : (identifiant Flourish, libellé, page de la comparaison)
+    "fb": (21711684, "Alimentation & boissons",
+           "https://www.business-humanrights.org/en/from-us/knowthechain/company-comparison-fb/"),
+    "af": (21711826, "Habillement & chaussures",
+           "https://www.business-humanrights.org/en/from-us/knowthechain/company-comparison-af/"),
+    "ict": (21711624, "Technologies (TIC)",
+            "https://www.business-humanrights.org/en/from-us/knowthechain/company-comparison-ict/"),
+}
+# Année de publication de chaque édition (page KnowTheChain du BHRRC : « 2026
+# food and beverage », « 2025 ICT », « 2023 apparel and footwear », « 2023 food
+# and beverage », « 2022 ICT »). Les éditions antérieures ne sont pas reprises
+# (preuve de plus de 5 ans, décotée à zéro).
+KTC_PUBLISHED = {
+    ("fb", "2025-2026"): 2026, ("fb", "2022-2023"): 2023,
+    ("af", "2022-2023"): 2023,
+    ("ict", "2025-2026"): 2025, ("ict", "2022-2023"): 2022,
+}
+
+
+@dataclass
+class KtcScore:
+    company: str
+    benchmark: str
+    edition: str
+    published: int
+    score: float
+    rank: int | None
+    size: int | None
+
+
+def flourish_url(vis_id: int) -> str:
+    return f"https://flo.uri.sh/visualisation/{vis_id}/embed?auto=1"
+
+
+def _flourish_json(html: str, name: str):
+    import json
+    start = html.index(f"{name} = ") + len(name) + 3
+    return json.JSONDecoder().raw_decode(html[start:])[0]
+
+
+def _int(x) -> int | None:
+    try:
+        return int(float(str(x)))
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_ktc_flourish(html: str, benchmark: str) -> list[KtcScore]:
+    """Toutes les lignes (entreprise × édition) d'une comparaison KnowTheChain."""
+    rows = _flourish_json(html, "_Flourish_data")["data"]
+    cols = _flourish_json(html, "_Flourish_data_column_names")["data"]["metadata"]
+    out: list[KtcScore] = []
+    for r in rows:
+        md = dict(zip(cols, r.get("metadata") or []))
+        edition = str(r.get("filter") or "")
+        published = KTC_PUBLISHED.get((benchmark, edition))
+        score = parse_score(md.get("Total Score"))
+        name = (r.get("color_category") or "").strip()
+        if published is None or score is None or not name:
+            continue
+        out.append(KtcScore(name, benchmark, edition, published, score,
+                            _int(md.get("Rank")), _int(md.get("benchmark_size"))))
+    return out
+
+
+def latest_ktc(scores: list[KtcScore]) -> dict[str, KtcScore]:
+    """Dernière édition publiée par entreprise, tous benchmarks confondus."""
+    best: dict[str, KtcScore] = {}
+    for s in scores:
+        cur = best.get(s.company)
+        if cur is None or s.published > cur.published:
+            best[s.company] = s
+    return best

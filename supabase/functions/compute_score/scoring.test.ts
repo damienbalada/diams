@@ -467,6 +467,37 @@ test("gate — non documenté et pilier sans preuve : pilier non noté (pas de p
   assert.ok(!res.dimensions[0].capped_by_gate);
 });
 
+test("socle — pilier sans indicateur connaissable ni plafond documenté : ni note, ni fiabilité", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("ANI_BBFAW_TIER", "ANI", { complementary: true }),
+      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
+      ind("GOV_X", "GOV"),
+    ],
+    evidence: [ev({ indicator_code: "GOV_X", normalized_value: 0.8, confidence: 0.9 })],
+    dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }, { dimension_code: "GOV", weight: 1 }],
+  }));
+  assert.deepEqual(res.dimensions.map((d) => d.dimension_code), ["GOV"]);
+  assert.ok(Math.abs(res.confidence - 0.9) < 1e-9);
+});
+
+test("socle — pilier réduit à son plafond documenté : noté, fiabilité de cette preuve", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("ANI_BBFAW_TIER", "ANI", { complementary: true }),
+      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
+    ],
+    evidence: [ev({ indicator_code: "ANI_EXPLOITATION", normalized_value: 0.2, confidence: 0.8, tier: "audited_ngo" })],
+    dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }],
+  }));
+  const ani = res.dimensions[0];
+  assert.equal(ani.rated, true);
+  assert.equal(ani.score, 0.2);
+  assert.ok(Math.abs(ani.confidence - 0.8) < 1e-9);
+});
+
 test("animal_free — pilier ANI noté sur l'absence d'intrant animal, sans plafond (cas Alpro)", () => {
   // Forme produite par compute_score_input pour une marque animal_free :
   // un seul indicateur ANI (ANI_ANIMAL_FREE), AUCUN gate d'exploitation.

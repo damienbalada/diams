@@ -473,11 +473,13 @@ export function computeScore(input: ScoreInput): ScoreResult {
       }
     }
 
-    if (scored.length === 0 && !gate) continue;
-
     // Plafond (gate) : valeur du gate si connue, sinon default_ceiling (conservateur).
     const gr = gate ? resByCode.get(gateCode!) : undefined;
     const gateKnown = !!(gr && gr.covered && gr.value !== null);
+
+    // Rien de connaissable dans le pilier (aucun indicateur du socle, plafond non
+    // documenté) : il n'existe pas pour l'entité — ni note, ni fiabilité (v0.6.0).
+    if (scored.length === 0 && !gateKnown) continue;
     // Noté s'il y a une base : une preuve, un manquant obligatoire, ou un gate
     // documenté (seul, il fixe la note du pilier : son plafond).
     const rated = scoreWeight > 0 || gateKnown;
@@ -485,7 +487,8 @@ export function computeScore(input: ScoreInput): ScoreResult {
     const ceiling = gate ? (gateKnown ? gr!.value! : gate.default_ceiling) : 1;
     const score = rated ? clamp01(Math.min(avg, ceiling)) : 0;
     const cappedByGate = gate && rated ? score < avg - 1e-9 : false;
-    const confidence = clamp01(confWeight > 0 ? confNum / confWeight : 0);
+    // Pilier réduit à son plafond documenté : sa fiabilité est celle de cette preuve.
+    const confidence = clamp01(confWeight > 0 ? confNum / confWeight : scored.length === 0 ? gr!.confidence : 0);
 
     if (rated) dimScore.set(dimCode, score);
     dimConf.set(dimCode, confidence);

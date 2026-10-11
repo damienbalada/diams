@@ -307,10 +307,21 @@ ne baisse ni la note ni la fiabilité — *sauf* si la loi impose de le publier
 (Règle 1 : compté 0). L'absence de controverse recensée n'est pas une preuve de
 vertu : elle ne rapporte rien non plus.
 
+**Benchmarks à périmètre fermé.** KnowTheChain (travail forcé : 60 sociétés en
+alimentation & boissons, 65 en habillement, 45 en technologies) et le BBFAW
+(bien-être animal : 149 entreprises alimentaires) n'évaluent qu'une liste fermée
+de sociétés. Leurs listes **complètes** sont chargées par des connecteurs
+déterministes, qui lisent les données publiées par ces organismes : une
+entreprise absente n'a pas été évaluée, ce n'est pas une donnée manquée. Ces
+indicateurs sont donc complémentaires.
+
 Le **socle**, ce sont tous les autres indicateurs applicables : publications
 obligatoires (CSRD, Égapro, plan de vigilance, ratio de rémunération),
-classements d'organismes établis (CDP, SBTi, KnowTheChain, InfluenceMap…),
-registres publics. C'est sur lui que la fiabilité est calculée.
+évaluations ouvertes à toutes les grandes entreprises (CDP, SBTi,
+InfluenceMap…), registres publics. C'est sur lui que la fiabilité est calculée.
+Un pilier dont le socle est vide pour une entité (et dont le plafond éventuel
+n'est pas documenté) n'existe pas pour elle : il n'entre ni dans la note, ni
+dans la fiabilité.
 
 ---
 
@@ -487,6 +498,10 @@ calcul (tables de config) doit être datée et justifiée ici.
   controverses) absent ne pèse ni sur la note ni sur la fiabilité, sauf
   publication obligatoire. Lobbying climat (InfluenceMap) compté dans la note
   (poids 0,8). Accueil : une seule entité par groupe sur chaque podium.
+  Benchmarks à périmètre fermé (KnowTheChain, BBFAW) chargés en entier par des
+  connecteurs déterministes et rendus complémentaires ; les 16 lignes saisies à
+  la main avant ces connecteurs sont retirées (plusieurs contredisaient la donnée
+  publiée : KnowTheChain Coca-Cola 58/100 au lieu de 29).
 - **0.5.1 (11/10/2026)** — Labels et certifications tiers (Finansol, B Corp)
   comptés comme résultats quand ils sont attestés ; leur absence ne pèse ni sur
   la note ni sur la fiabilité ; base de données ONU
