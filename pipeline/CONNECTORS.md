@@ -277,6 +277,26 @@ python -m paris_memoire.import_bcorp [--apply]
 python -m paris_memoire.import_ohchr --file A_HRC_63_20.pdf --symbol A/HRC/63/20 --date 2025-09-26 [--apply]
 ```
 
+### `import_sec` — sociétés cotées aux États-Unis (SEC EDGAR) → publication auto
+- CIK lu dans la table officielle de la SEC par le ticker (`connectors/sec.py`,
+  `TICKERS`) ; la dénomination déposée doit correspondre au nom légal (GLEIF).
+- `TAX_EFFECTIVE_RATE` : taux balisé du dernier 10-K (us-gaap), recoupé par
+  impôt / résultat avant impôt à 0,6 point près.
+- Affiche la dernière circulaire DEF 14A : ratio PDG / salarié médian (Reg. S-K
+  Item 402(u), obligation `US_SEC_PAY_RATIO`), indépendance et mixité du conseil,
+  lus pour `curated/` et vérifiés par `verify_curated`.
+- User-Agent identifiant le projet, sans donnée personnelle.
+```bash
+python -m paris_memoire.import_sec [--only apple,meta] [--apply]
+```
+
+### `connectors/bdif` — documents d'enregistrement universels déposés à l'AMF
+- Quand le dépôt ESEF de l'exercice n'est pas indexé par filings.xbrl.org :
+  recherche du DEU (`find_urd(query, exercice, issuer=…)`, émetteur exact) dans la
+  BDIF de l'AMF. Le PDF y est la notice de dépôt ; le document complet est le
+  paquet ESEF (.zip), lu par `verify_curated` (rapport .xhtml, texte seulement).
+- Source `AMF_BDIF` (tier regulatory).
+
 ### `attach_regimes` — assujettissement aux obligations de publication (Règle 1)
 - `--egapro egapro.csv` : **déterministe**. SIREN présent dans une déclaration
   Égapro des 3 dernières années → régime `FR_EGAPRO` (reviewer `auto:attach_regimes`).

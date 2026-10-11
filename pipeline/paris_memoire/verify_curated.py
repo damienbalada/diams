@@ -231,7 +231,11 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Ve
         details.append(f"la citation porte sur l'indicateur (« {kw} ») {'✓' if hit else '✗'}")
     if row.value_numeric is not None and not ignore_keywords:
         flat = re.sub(r"(?<=\d)\s(?=\d{3}(?!\d))", "", quote)  # espaces de milliers seulement
-        pats = [rf"(?<![\d,]){re.escape(c)}(?![\d])" for c in _value_variants(row.value_numeric)]
+        variants = _value_variants(row.value_numeric)
+        # Écart « en faveur des femmes » : publié en valeur absolue, compté négatif.
+        if row.value_numeric < 0 and re.search(r"in favou?r of women|en faveur des femmes", quote, re.I):
+            variants += _value_variants(-row.value_numeric)
+        pats = [rf"(?<![\d,]){re.escape(c)}(?![\d])" for c in variants]
         hit = any(re.search(pt, flat) for pt in pats)
         # Colonnes voisines de 3 chiffres (« 345 352 ») : fusionnées à tort en un
         # seul nombre ; on accepte la valeur lue comme nombre isolé, la lecture des
@@ -252,6 +256,15 @@ def document_text(url: str, client: httpx.Client) -> str:
     from .connectors.sec import UA
     r = client.get(url, timeout=300, follow_redirects=True, headers=UA if "sec.gov" in url else None)
     r.raise_for_status()
+    if url.lower().split("?")[0].endswith(".zip") or "zip" in r.headers.get("content-type", ""):
+        # Paquet ESEF (dépôt AMF) : le rapport est le plus gros .xhtml du dossier reports/.
+        import io
+        import zipfile
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        name = max((i for i in z.infolist() if i.filename.lower().endswith((".xhtml", ".html"))),
+                   key=lambda i: i.file_size).filename
+        raw = z.read(name).decode("utf-8", errors="replace")
+        return re.sub(r"\s+", " ", html.unescape(re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", raw, flags=re.S)))
     if url.lower().split("?")[0].endswith(".pdf") or "pdf" in r.headers.get("content-type", ""):
         import io
         import logging

@@ -65,3 +65,59 @@ L'obligation CSRD n'est rattachée à un groupe qu'une fois ses six données lue
   effectifs cités, recalculé par le vérificateur. Non obligatoire en tant que
   pourcentage (Item 407(a) impose de nommer les administrateurs indépendants) :
   son absence ne compte pas 0.
+
+## Groupes européens hors France (rapports ESEF en anglais, exercice 2025)
+
+Obligation CSRD **non rattachée** : la transposition nationale (Pays-Bas,
+Belgique) n'est pas encore sourcée ; Shell (Royaume-Uni) n'y est pas soumise.
+Leurs données comptent ; leur absence ne compte pas 0.
+
+- **Heineken** : écart salarial total « 30.1% … in favour of women », compté
+  -30,1 (les femmes sont mieux payées en moyenne). L'écart de « 2.1% » cité
+  ailleurs est un écart ajusté : non retenu. Intensité carbone non localisée.
+- **AB InBev** : texte du rapport aux mots coupés (« Rev enue ») ; citations
+  reprises telles quelles. Mixité (« f i ve women … out of a total of 15 ») non
+  lisible par le vérificateur : non retenue. Intensité en t CO2e par million de
+  dollars.
+- **Shell** : intensité carbone publiée en tonnes par tonne de produit, pas par
+  chiffre d'affaires : non retenue.
+- **Stellantis** : ratio « CEO Pay Ratio » de la rémunération du PDG sur la
+  rémunération *moyenne* écarté ; retenu le ratio ESRS S1-16 sur la médiane
+  (120,75). Mixité : 40 % selon la méthode de la directive (UE) 2022/2381
+  (administrateurs non exécutifs ; 4 sièges sur 11 en effectif). Taux d'impôt :
+  exercice en perte.
+
+## LVMH, Kering, Hermès (documents d'enregistrement universels 2025 déposés à l'AMF)
+
+Leurs dépôts ESEF 2025 ne sont pas indexés par filings.xbrl.org : le document
+est lu dans le paquet ESEF déposé à l'AMF (BDIF, source AMF_BDIF).
+
+- **LVMH** : écart de rémunération non ajusté (ESRS S1-16 §97 a) marqué « NM »
+  dans la table de concordance : non publié. Ratio « hors plans d’actions »
+  PDG / médiane (72,9) : définition qui exclut une part de la rémunération, non
+  retenu. Indépendance : 50 % selon le Code AFEP-MEDEF (retenu, comme pour les
+  autres sociétés françaises) ; 64 % selon les critères propres à LVMH. Six
+  données lues : CSRD rattachée (écart et ratio comptent 0).
+- **Kering** : ratio S1-16 (« périmètre mondial », 80 % des salariés) non
+  localisé ; seuls les ratios d'équité France sont chiffrés. Plan de vigilance
+  publié mais structure (cartographie, suivi) non établie par une citation :
+  non retenu. CSRD et vigilance non rattachées pour l'instant.
+- **Hermès** : « Hermès ne calcule pas, à ce stade, l’écart de rémunération non
+  ajusté tel que défini par les ESRS » : non publié. Mixité du conseil : le
+  tableau donne « 46 % » et le rapport à l'assemblée « 54 % de femmes » pour la
+  même date ; incohérence, non retenue. CSRD non rattachée tant que la mixité
+  n'est pas tranchée.
+
+## Carrefour, Danone, Bonduelle (documents d'enregistrement universels déposés à l'AMF)
+
+- **Carrefour** : ratio S1-16 non publié, le rapport l'écrit : « Carrefour n’est
+  pas en mesure de publier cette information n’ayant pas de système centralisé
+  permettant de calculer un salaire médian au niveau du Groupe ». Six données
+  lues : CSRD rattachée (le ratio compte 0).
+- **Danone** : écart de rémunération non ajusté et ratio S1-16 (déclaré
+  « Matériel ») non localisés ; l'« écart de rémunération » de 1,1 % cité dans
+  les objectifs est un écart à poste égal. CSRD non rattachée pour l'instant.
+  Le taux d'impôt affiché est un taux « courant » (retraité) : non retenu.
+- **Bonduelle** (exercice clos le 30 juin 2025) : écart de rémunération déclaré
+  « Non matériel » ; ratio, indépendance et intensité carbone non localisés.
+  Taux d'impôt moyen de 53,1 % sur un exercice atypique : non retenu.

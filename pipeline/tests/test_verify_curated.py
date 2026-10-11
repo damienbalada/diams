@@ -99,6 +99,15 @@ def test_esef_citation_verbatim_valeur_et_indicateur():
     assert check_esef_quote(esef_row("ENV_GHG_INTENSITY", 2773.87, q2), REPORT).status == "OK"
 
 
+def test_ecart_en_faveur_des_femmes_compte_negatif():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "In 2025 , the total gender pay gap at HEINEKEN was 30.1% ( 2024 : 28.4%) in favour of women. The"
+    q = "In 2025 , the total gender pay gap at HEINEKEN was 30.1% ( 2024 : 28.4%) in favour of women"
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -30.1, q), rep).status == "OK"
+    q2 = "In 2025 , the total gender pay gap at HEINEKEN was 30.1%"
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -30.1, q2), rep).status == "ÉCART"  # sens non dit
+
+
 def test_pourcentage_tire_des_effectifs_cites():
     from paris_memoire.verify_curated import check_esef_quote
     rep = "Key elements of our Board independence include: • 11 of 12 director nominees are independent • All"
