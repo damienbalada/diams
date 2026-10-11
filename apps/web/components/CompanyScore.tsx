@@ -407,11 +407,11 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
       )}
       {d.capped_by_gate && d.indicators.some((i) => i.is_gate && !i.covered) && (
         <p className="muted small" style={{ margin: "6px 0 0" }}>
-          Niveau non documenté : dans la mode et le luxe, le recours à des matières animales (cuir, laine,
-          fourrure, duvet…) est supposé tant qu'il n'est pas exclu, et le plafond par défaut s'applique.
+          Niveau non documenté : dans ce secteur, l'exploitation animale (matières, ingrédients, tests)
+          est présumée tant qu'elle n'est pas exclue, et toute exploitation met ce pilier au plus bas.
           Sans autre preuve, le pilier repose sur cette seule présomption : sa fiabilité est nulle et il
-          n'entre pas dans la base de la note. Un label « sans fourrure » ne lève pas le plafond ; seules
-          des matières non animales le lèvent.
+          n'entre pas dans la base de la note. Un label (« sans fourrure », bien-être) ne lève pas ce
+          plancher ; seule une gamme sans intrant animal le lève.
         </p>
       )}
 

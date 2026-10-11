@@ -5,7 +5,7 @@
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : `0.6.1` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : `0.7.0` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -414,31 +414,33 @@ française d'un groupe étranger, qui publie elle-même son index, reste concern
 
 ### Règle ANI — Plafond d'exploitation animale (gate)
 
-Principe antispéciste : **l'exploitation animale est la base**. S'il y a
-exploitation (matières animales : cuir, laine, soie, duvet, fourrure, peaux…),
-la note du pilier ANI est **plafonnée** — le bien-être ne fait que positionner
-la note *sous* ce plafond, il ne le lève pas. Seules des matières non-animales
-le lèvent.
+Principe antispéciste : **l'exploitation animale est la base**, et elle ne
+se mesure pas au degré : *« si une marque utilise et exploite des animaux, sa
+note est au plus bas dans cette catégorie »* (décision de l'éditeur, v0.7.0).
+Toute exploitation — matières animales (cuir, laine, soie, duvet, fourrure,
+peaux), ingrédients d'origine animale (lait, viande, œufs, miel), tests sur
+animaux — met le pilier ANI à **0**, même marginale : il n'y a pas d'excuse de
+marginalité. Le bien-être animal (labels, classements) ne lève pas ce plancher ;
+seule une gamme sans intrant animal le lève.
 
-| Niveau d'exploitation (`ANI_EXPLOITATION`) | Plafond ANI | Note max |
-|---|---:|:--:|
-| `animal_free` (aucune matière animale) | 1.00 | A |
-| `limited` (animal marginal) | 0.55 | C |
-| `extensive` (cuir/laine au cœur) | 0.40 | D |
-| inconnu (défaut secteur mode) | 0.40 | D |
+| Niveau d'exploitation (`ANI_EXPLOITATION`) | Note du pilier ANI |
+|---|---:|
+| aucun intrant animal (`animal_free`) | notée sur ses indicateurs, jusqu'à 100 |
+| exploitation, même marginale | 0 |
+| inconnu (secteur à enjeu animal) | 0 — exploitation présumée |
 
 Mécanisme générique (`dimension_gates`) : un indicateur « gate » borne le score
 d'une dimension sans entrer dans sa moyenne. Si le niveau est inconnu, on
-suppose l'exploitation (plafond 0.40) — anti-opacité. Ce plafond par défaut
-s'applique à **toute** entité de la mode et du luxe, qu'on sache quelque chose
-d'autre sur elle ou non *(v0.6.1)* : sans cela, une enseigne sans aucun label
-échappait au pilier animal, quand celle qui affichait le label « sans fourrure »
-y était plafonnée — un label faisait baisser la note. Le pilier ainsi noté par
-présomption a une fiabilité nulle et n'entre pas dans la base de la note, jusqu'à
-ce que le niveau soit documenté. Pour les autres secteurs à enjeu animal
-(alimentation, cosmétique…), où le niveau ne se documente pas par cet indicateur,
-le plafond borne les preuves existantes sans rien présumer. Les plafonds qui
-valent 1 par défaut (lobbying, plastique) ne présument rien.
+suppose l'exploitation — anti-opacité. Cette présomption s'applique à **toute**
+entité d'un secteur à enjeu animal (alimentation, restauration, hygiène-beauté,
+mode, luxe, horlogerie, vins et spiritueux…), qu'on sache quelque chose d'autre
+sur elle ou non *(v0.6.1, étendue à tous ces secteurs en v0.7.0)* : sans cela,
+une enseigne sans aucun label échappait au pilier animal, quand celle qui
+affichait le label « sans fourrure » y était plafonnée — un label faisait
+baisser la note. Le pilier noté par présomption a une fiabilité nulle et n'entre
+pas dans la base de la note, jusqu'à ce que l'exploitation soit documentée (ou
+exclue). Les plafonds qui valent 1 par défaut (lobbying, plastique) ne présument
+rien.
 
 **Cas d'une marque 100 % végétale (`animal_free`).** Une marque sans aucun
 intrant animal (ex : Alpro) n'exploite pas d'animaux : le postulat d'exploitation
@@ -484,7 +486,11 @@ secteur quand l'impact du secteur s'y concentre (table
 `sector_dimension_weights`, affichée sur la fiche). Aujourd'hui : **énergie,
 pilier climat ×3** — production et vente d'énergies fossiles. Sans ce
 coefficient, une major pétrolière exemplaire sur ses obligations de publication
-obtenait B malgré un impact climatique de premier ordre.
+obtenait B malgré un impact climatique de premier ordre. **Mode et luxe,
+chaîne d'approvisionnement ×2 et environnement ×2** *(v0.7.0)* : la fabrication
+est sous-traitée (salaires, conditions de travail chez les fournisseurs) et
+l'impact environnemental tient aux matières et aux volumes produits. Sans ce
+coefficient, le groupe le plus transparent de la mode jetable obtenait A.
 
 ---
 
@@ -551,10 +557,18 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v`0.6.1`, octobre 2026). Toute modification des paramètres de
+Document vivant (v`0.7.0`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.7.0 (11/10/2026)** — Décisions de l'éditeur. Exploitation animale :
+  toute exploitation, même marginale, met le pilier animal à 0 (le barème
+  « marginal 0,55 / au cœur de l'activité 0,40 » disparaît) ; le niveau inconnu
+  reste présumé, dans tous les secteurs à enjeu animal. Mode et luxe : chaîne
+  d'approvisionnement et environnement comptent double. Écart de rémunération
+  de H&M (pondéré par poste) confirmé comme non publié. Ratio de rémunération
+  d'ENGIE, calculé sur la moyenne faute de médiane calculable, accepté tel que
+  publié ; obligation CSRD rattachée à ENGIE.
 - **0.6.1 (11/10/2026)** — Règle ANI rétablie : dans la mode et le luxe,
   l'exploitation animale est supposée tant qu'elle n'est pas exclue (plafond
   0,40), y compris pour une entité sur laquelle rien d'autre n'est connu ; un
