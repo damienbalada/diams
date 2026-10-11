@@ -453,25 +453,64 @@ test("gate — documenté seul (aucun autre indicateur) : il fixe la note du pil
   assert.equal(ani.confidence, 0); // le gate ne compte pas dans la fiabilité
 });
 
-test("gate — non documenté et pilier sans preuve : pilier non noté (pas de plafond appliqué à rien)", () => {
+test("gate — pertinent mais non documenté, pilier sans preuve : exploitation supposée, plafond par défaut, fiabilité nulle", () => {
   const res = computeScore(baseInput({
     applicableIndicators: [
-      ind("ANI_FUR_FREE", "ANI", { weight: 1 }),
+      ind("ANI_FUR_FREE", "ANI", { weight: 1, presence_only: true }),
       ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
     ],
     evidence: [],
     dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
     profileWeights: [{ dimension_code: "ANI", weight: 1 }],
   }));
-  assert.equal(res.dimensions[0].rated, false);
-  assert.ok(!res.dimensions[0].capped_by_gate);
+  const ani = res.dimensions[0];
+  assert.equal(ani.rated, true);
+  assert.equal(ani.score, 0.40);
+  assert.equal(ani.confidence, 0);
+  assert.equal(res.basis, 0); // une présomption n'est pas une preuve
 });
 
-test("socle — pilier sans indicateur connaissable ni plafond documenté : ni note, ni fiabilité", () => {
+test("gate — un label ne fait jamais baisser la note (même pilier avec ou sans lui)", () => {
+  const input = (withLabel: boolean) => baseInput({
+    applicableIndicators: [
+      ind("ANI_FUR_FREE", "ANI", { weight: 1, presence_only: true }),
+      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
+      ind("GOV_X", "GOV"),
+    ],
+    evidence: [
+      ev({ indicator_code: "GOV_X", normalized_value: 0.9, confidence: 0.9 }),
+      ...(withLabel ? [ev({ indicator_code: "ANI_FUR_FREE", normalized_value: 1, confidence: 0.85 })] : []),
+    ],
+    dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }, { dimension_code: "GOV", weight: 1 }],
+  });
+  const without = computeScore(input(false));
+  const withL = computeScore(input(true));
+  assert.ok(Math.abs(without.score - withL.score) < 1e-9);
+  assert.ok(withL.confidence >= without.confidence);
+});
+
+test("gate — plafond par défaut de 1 (absent = pas d'effet) : rien de présumé, pas de pilier", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("PLA_POLLUTER", "PLA", { weight: 0, kind: "ordinal" }),
+      ind("PLA_REDUCTION", "PLA", { complementary: true }),
+      ind("GOV_X", "GOV"),
+    ],
+    evidence: [ev({ indicator_code: "GOV_X", normalized_value: 0.5, confidence: 0.9 })],
+    dimensionGates: [{ dimension_code: "PLA", gate_indicator_code: "PLA_POLLUTER", default_ceiling: 1 }],
+    profileWeights: [{ dimension_code: "PLA", weight: 1 }, { dimension_code: "GOV", weight: 1 }],
+  }));
+  assert.deepEqual(res.dimensions.map((d) => d.dimension_code), ["GOV"]);
+  assert.equal(res.score, 0.5);
+});
+
+test("socle — pilier sans indicateur connaissable ni gate pertinent : ni note, ni fiabilité", () => {
+  // Secteur à enjeu animal sans indicateur-gate (ex. alimentation) : le plafond
+  // n'existe que pour borner des preuves ; rien de connu, pas de pilier.
   const res = computeScore(baseInput({
     applicableIndicators: [
       ind("ANI_BBFAW_TIER", "ANI", { complementary: true }),
-      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
       ind("GOV_X", "GOV"),
     ],
     evidence: [ev({ indicator_code: "GOV_X", normalized_value: 0.8, confidence: 0.9 })],

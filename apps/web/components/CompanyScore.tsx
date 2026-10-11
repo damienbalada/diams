@@ -405,6 +405,15 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
       {d.capped_by_gate && (
         <span className="badge cap">⛔ Plafonné à {pct(d.ceiling ?? 0)} — {capReason[d.dimension_code] ?? "cause structurelle"}</span>
       )}
+      {d.capped_by_gate && d.indicators.some((i) => i.is_gate && !i.covered) && (
+        <p className="muted small" style={{ margin: "6px 0 0" }}>
+          Niveau non documenté : dans la mode et le luxe, le recours à des matières animales (cuir, laine,
+          fourrure, duvet…) est supposé tant qu'il n'est pas exclu, et le plafond par défaut s'applique.
+          Sans autre preuve, le pilier repose sur cette seule présomption : sa fiabilité est nulle et il
+          n'entre pas dans la base de la note. Un label « sans fourrure » ne lève pas le plafond ; seules
+          des matières non animales le lèvent.
+        </p>
+      )}
 
         <div style={{ marginTop: 8 }}>
           {covered.map((i) => (

@@ -5,7 +5,7 @@
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : `0.5.1` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : `0.6.1` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -429,7 +429,16 @@ le lèvent.
 
 Mécanisme générique (`dimension_gates`) : un indicateur « gate » borne le score
 d'une dimension sans entrer dans sa moyenne. Si le niveau est inconnu, on
-suppose l'exploitation (plafond 0.40) — anti-opacité.
+suppose l'exploitation (plafond 0.40) — anti-opacité. Ce plafond par défaut
+s'applique à **toute** entité de la mode et du luxe, qu'on sache quelque chose
+d'autre sur elle ou non *(v0.6.1)* : sans cela, une enseigne sans aucun label
+échappait au pilier animal, quand celle qui affichait le label « sans fourrure »
+y était plafonnée — un label faisait baisser la note. Le pilier ainsi noté par
+présomption a une fiabilité nulle et n'entre pas dans la base de la note, jusqu'à
+ce que le niveau soit documenté. Pour les autres secteurs à enjeu animal
+(alimentation, cosmétique…), où le niveau ne se documente pas par cet indicateur,
+le plafond borne les preuves existantes sans rien présumer. Les plafonds qui
+valent 1 par défaut (lobbying, plastique) ne présument rien.
 
 **Cas d'une marque 100 % végétale (`animal_free`).** Une marque sans aucun
 intrant animal (ex : Alpro) n'exploite pas d'animaux : le postulat d'exploitation
@@ -542,10 +551,19 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v`0.6.0`, octobre 2026). Toute modification des paramètres de
+Document vivant (v`0.6.1`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.6.1 (11/10/2026)** — Règle ANI rétablie : dans la mode et le luxe,
+  l'exploitation animale est supposée tant qu'elle n'est pas exclue (plafond
+  0,40), y compris pour une entité sur laquelle rien d'autre n'est connu ; un
+  label ne peut plus faire baisser une note (H&M Group était noté A et la marque
+  H&M B, parce que seule la marque, labellisée « sans fourrure », portait le
+  plafond). L'indicateur d'exploitation animale et le label « sans fourrure »
+  concernent aussi les groupes de luxe ; les niveaux documentés d'Hermès, Kering
+  et LVMH (cuirs, peaux exotiques, élevage de crocodiliens) sont alignés sur le
+  barème publié (« extensive » = 0,40 ; ils avaient été saisis à 0).
 - **0.6.0 (11/10/2026)** — Règle 8 révisée : une marque reprend les preuves et
   obligations de son groupe pour les indicateurs qui relèvent du groupe
   (critère : ce que mesure la source — gouvernance, fiscalité, lobbying, climat,

@@ -525,19 +525,31 @@ export function computeScore(input: ScoreInput): ScoreResult {
     // Plafond (gate) : valeur du gate si connue, sinon default_ceiling (conservateur).
     const gr = gate ? resByCode.get(gateCode!) : undefined;
     const gateKnown = !!(gr && gr.covered && gr.value !== null);
+    // Indicateur-gate pertinent pour le secteur de l'entité (mode, luxe) : son
+    // niveau se documente, et tant qu'il ne l'est pas l'exploitation est supposée
+    // (Règle ANI, « anti-opacité ») — le pilier existe toujours, au plafond par
+    // défaut. Sans cela, un label ou un benchmark ferait naître le pilier sous ce
+    // plafond et baisser la note, quand son absence l'éviterait (v0.6.1). Un
+    // plafond par défaut de 1 (lobbying, plastique : absent = pas d'effet) ne
+    // présume rien : le pilier n'existe alors que par ses preuves.
+    const gateApplies = gateKnown
+      || (!!gate && gate.default_ceiling < 1 && inds.some((i) => i.code === gateCode));
 
-    // Rien de connaissable dans le pilier (aucun indicateur du socle, plafond non
-    // documenté) : il n'existe pas pour l'entité — ni note, ni fiabilité (v0.6.0).
-    if (scored.length === 0 && !gateKnown) continue;
+    // Rien de connaissable dans le pilier (aucun indicateur du socle, pas de
+    // gate) : il n'existe pas pour l'entité — ni note, ni fiabilité (v0.6.0).
+    if (scored.length === 0 && !gateApplies) continue;
     // Noté s'il y a une base : une preuve, un manquant obligatoire, ou un gate
-    // documenté (seul, il fixe la note du pilier : son plafond).
-    const rated = scoreWeight > 0 || gateKnown;
+    // (documenté, il fixe la note du pilier ; inconnu, son plafond par défaut).
+    const rated = scoreWeight > 0 || gateApplies;
     const avg = scoreWeight > 0 ? scoreNum / scoreWeight : 1;
     const ceiling = gate ? (gateKnown ? gr!.value! : gate.default_ceiling) : 1;
     const score = rated ? clamp01(Math.min(avg, ceiling)) : 0;
     const cappedByGate = gate && rated ? score < avg - 1e-9 : false;
-    // Pilier réduit à son plafond documenté : sa fiabilité est celle de cette preuve.
-    const confidence = clamp01(confWeight > 0 ? confNum / confWeight : scored.length === 0 ? gr!.confidence : 0);
+    // Pilier réduit à son plafond documenté : sa fiabilité est celle de cette preuve ;
+    // réduit à son plafond par défaut, il est inconnu (fiabilité d'une donnée manquante).
+    const confidence = clamp01(confWeight > 0 ? confNum / confWeight
+      : gateKnown ? gr!.confidence
+      : scored.length === 0 ? input.params.missing_data_confidence : 0);
 
     if (rated) dimScore.set(dimCode, score);
     dimConf.set(dimCode, confidence);
