@@ -52,6 +52,14 @@ test("en bref — un manquant non obligatoire n'est jamais un point de vigilance
   assert.equal(s.concerns.length, 0);
 });
 
+test("en bref — un rang sur trop peu de pairs n'est ni un point fort ni un point de vigilance", () => {
+  const s = summarize(result([
+    ind("TAX", { value: 0.25, raw_value: 32.8, peer_count: 2 }),
+    ind("PAY", { value: 0.1, raw_value: 1739, peer_count: 8 }),
+  ]), names);
+  assert.deepEqual(s.concerns.map((f) => f.indicator_code), ["PAY"]);
+});
+
 test("en bref — certifications à part, jamais une promesse", () => {
   const s = summarize(result([
     ind("GOV_BCORP", { value: 1 }),

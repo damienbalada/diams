@@ -504,6 +504,18 @@ test("fraîcheur — aucune preuve : last_observed null", () => {
   assert.equal(res.last_observed, null);
 });
 
+test("normalisation — le rang intra-secteur expose la taille du groupe de pairs", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("TAX_X", "ENV", { kind: "quantitative", direction: "higher_better" })],
+    evidence: [ev({ indicator_code: "TAX_X", value_numeric: 32.8 })],
+    peerValues: { TAX_X: [32.8, 33.4] },
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const r = res.dimensions[0].indicators[0];
+  assert.equal(r.peer_count, 2);
+  assert.equal(r.raw_value, 32.8);
+});
+
 // --- Quantitatif higher_better (percentile, ex. taux effectif d'imposition) --
 test("normalisation — quantitatif higher_better via percentile intra-secteur", () => {
   const res = computeScore(baseInput({

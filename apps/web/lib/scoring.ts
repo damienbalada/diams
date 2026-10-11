@@ -132,6 +132,8 @@ export interface IndicatorResult {
   /** Extrait de la preuve retenue et sa valeur brute (affichage uniquement). */
   excerpt?: string;
   raw_value?: number | null;
+  /** Valeur relative : nombre de pairs du secteur ayant servi au rang (percentile). */
+  peer_count?: number;
   capped_by_greenwashing?: boolean;
   floored_by_low_tier?: boolean;
   /** Controverse affichée mais EXCLUE du calcul (source unique non corroborée). */
@@ -217,26 +219,27 @@ function percentile(value: number, peers: number[]): number {
   return (below + 0.5 * equal) / n;
 }
 
-/** Normalise une evidence en [0,1] selon l'indicateur. */
+/** Normalise une evidence en [0,1] selon l'indicateur ; `peers` : taille du
+ *  groupe de comparaison quand la valeur est un rang intra-secteur. */
 function normalizeEvidence(
   ind: Indicator,
   ev: Evidence,
   peerValues?: Record<string, number[]>,
-): number {
+): { value: number; peers?: number } {
   // 1) valeur normalisée précalculée = prioritaire (faits normalisés à l'ingestion)
   if (ev.normalized_value !== null && ev.normalized_value !== undefined) {
-    return clamp01(ev.normalized_value);
+    return { value: clamp01(ev.normalized_value) };
   }
   // 2) quantitatif sans normalisation -> percentile intra-secteur live
   if (ind.kind === "quantitative" && ev.value_numeric !== null && ev.value_numeric !== undefined) {
     const peers = peerValues?.[ind.code] ?? [];
     if (peers.length >= 2) {
       const pct = percentile(ev.value_numeric, peers);
-      return clamp01(ind.direction === "lower_better" ? 1 - pct : pct);
+      return { value: clamp01(ind.direction === "lower_better" ? 1 - pct : pct), peers: peers.length };
     }
   }
   // 3) défaut neutre
-  return 0.5;
+  return { value: 0.5 };
 }
 
 /** Évalue un indicateur à partir de son evidence (positives + controverses). */
@@ -308,7 +311,8 @@ function evaluateIndicator(
   const hasResult = positives.some((e) => e.nature === "result");
 
   // Valeur de base
-  let value = best ? normalizeEvidence(ind, best, cfg.peerValues) : 0.5;
+  const norm = best ? normalizeEvidence(ind, best, cfg.peerValues) : { value: 0.5 };
+  let value = norm.value;
 
   // Règle 3 — anti-greenwashing
   let cappedByGreenwashing = false;
@@ -369,6 +373,7 @@ function evaluateIndicator(
     source_name: driver.source_name,
     excerpt: driver.excerpt,
     raw_value: driver.value_numeric ?? null,
+    peer_count: norm.peers,
     capped_by_greenwashing: cappedByGreenwashing || undefined,
     floored_by_low_tier: flooredByLowTier || undefined,
     // controverse présente mais non comptée (source unique non corroborée)

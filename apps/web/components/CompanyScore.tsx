@@ -410,6 +410,11 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   {tierExplain[i.tier ?? ""] ?? "Fiabilité de la source selon son type."}
                 </Tip>
                 {" · "}{frDate(i.observed_on) ?? i.observed_on}
+                {i.peer_count !== undefined && (
+                  <span title="Ce pourcentage est un rang : la valeur publiée comparée à celles des autres entreprises du secteur.">
+                    {" · "}rang parmi {i.peer_count} entreprises du secteur
+                  </span>
+                )}
                 {i.observed_on && i.observed_on < STALE_BEFORE && (
                   <span className="badge warn" style={{ marginLeft: 6 }} title="Preuve de plus de 3 ans — à rafraîchir (décote totale à 5 ans).">donnée ancienne</span>
                 )}

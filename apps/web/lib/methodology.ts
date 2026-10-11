@@ -249,7 +249,10 @@ ni avis :
   affiché à part et jamais doublé en point fort.
 
 Trois points au plus par colonne, chacun avec l'extrait de la source, son lien et
-sa date. Le résumé reste affiché sous le seuil de publication : ce sont des faits
+sa date. Une valeur **relative** (rang de la valeur publiée parmi les entreprises
+du secteur) n'y figure qu'avec au moins 5 pairs : sur deux ou trois entreprises,
+un écart minime suffit à classer « dernier ». La fiche indique, pour chaque
+valeur relative, le nombre d'entreprises comparées. Le résumé reste affiché sous le seuil de publication : ce sont des faits
 sourcés, pas une note (Règle 5).
 
 ### Labels et certifications

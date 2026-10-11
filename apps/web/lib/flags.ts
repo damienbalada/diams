@@ -9,6 +9,9 @@
  *    controverse ou un plafond), controverse signalée hors note (Règle 4), ou
  *    publication obligatoire absente (Règle 1) ;
  *  - certification / label : indicateur de certification documenté comme acquis.
+ *
+ * Une valeur relative (rang dans le secteur) n'est retenue qu'avec au moins
+ * MIN_PEERS pairs : sur un très petit groupe, le rang ne dit rien.
  */
 import type { IndicatorResult, ScoreResult } from "./scoring";
 
@@ -42,6 +45,9 @@ export interface Summary {
 
 const STRONG = 0.7;
 const WEAK = 0.3;
+/** Un rang intra-secteur n'est un signal qu'à partir de ce nombre de pairs :
+ *  avec deux pairs, 0,6 point d'écart suffit à classer « dernier ». */
+export const MIN_PEERS = 5;
 
 const clip = (s: string, n = 220) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
 
@@ -91,6 +97,7 @@ export function summarize(result: ScoreResult, names: Map<string, string>, max =
         continue;
       }
       const v = i.value ?? 0;
+      if (i.peer_count !== undefined && i.peer_count < MIN_PEERS) continue; // rang trop fragile
       if (CERTIFICATIONS[i.indicator_code] && i.nature === "result" && v >= 0.99) {
         certifications.push(toFlag(i, CERTIFICATIONS[i.indicator_code], "high", label));
         continue;
