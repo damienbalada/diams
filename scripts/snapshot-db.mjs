@@ -129,10 +129,11 @@ async function build() {
       [ref("dimension_groups", "code", dgroup.get(r.group_id)), ref("dimensions", "code", dim.get(r.dimension_id)), lit(r.weight)])));
 
   section("Indicateurs", upsert("indicators",
-    ["code", "dimension_id", "name", "kind", "direction", "sector_specific", "applies_to_sector_id", "weight", "unit", "methodology"], ["code"],
+    ["code", "dimension_id", "name", "kind", "direction", "sector_specific", "applies_to_sector_id", "weight", "unit", "methodology", "presence_only"], ["code"],
     [...T.indicators].sort(by((r) => r.code)).map((r) => [
       lit(r.code), ref("dimensions", "code", dim.get(r.dimension_id)), lit(r.name), lit(r.kind), lit(r.direction),
       lit(r.sector_specific), ref("sectors", "code", sector.get(r.applies_to_sector_id)), lit(r.weight), lit(r.unit), lit(r.methodology),
+      lit(r.presence_only),
     ])));
 
   section("Gates (plafonds de pilier)", upsert("dimension_gates",

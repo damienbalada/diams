@@ -7,7 +7,7 @@ export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : \`0.5.0\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.5.1\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -68,6 +68,9 @@ baisser la fiabilité. Dans la **note**, tout dépend de l'obligation :
 
 Un pilier sans aucune preuve **ni** obligation n'est **pas noté** : il sort de la
 note globale mais tire la fiabilité vers le bas.
+
+Exception : un **label ou une certification tiers** absent ne baisse pas la
+fiabilité, car personne ne le doit (voir « Labels et certifications », section 3).
 
 **Pourquoi.** Ne pas publier ce que la loi impose est un choix, pas une excuse :
 l'opacité est punie. Mais ne pas publier ce que rien n'impose n'en est pas un —
@@ -220,6 +223,42 @@ agrégation par DIMENSION  (manquant obligatoire → 0, sinon hors note ; règle
 score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
 \`\`\`
 
+### Lecture de la fiche : « En bref »
+
+*(Depuis v0.5.1.)* La fiche s'ouvre sur un résumé **mécanique**, tiré des seuls
+résultats du moteur (code public \`apps/web/lib/flags.ts\`). Il n'ajoute ni donnée
+ni avis :
+
+- **Point fort** : indicateur compté dans la note, de nature *résultat* (jamais
+  une promesse, Règle 3), valeur ≥ 0,7.
+- **Point de vigilance** : indicateur compté à ≤ 0,3 (controverse et plafond
+  compris), controverse signalée hors note (Règle 4), ou publication
+  **obligatoire** absente, comptée 0 (Règle 1). Une donnée facultative absente
+  n'est **jamais** un point de vigilance.
+- **Certification** : label tiers attesté par la base officielle de l'organisme,
+  affiché à part et jamais doublé en point fort.
+
+Trois points au plus par colonne, chacun avec l'extrait de la source, son lien et
+sa date. Le résumé reste affiché sous le seuil de publication : ce sont des faits
+sourcés, pas une note (Règle 5).
+
+### Labels et certifications
+
+*(Depuis v0.5.1.)* Un label tiers compte comme **résultat** dans son pilier quand
+la base officielle de l'organisme l'atteste :
+
+- **Finansol** (INV, banque) : au moins un placement labellisé **distribué par
+  l'établissement lui-même**. Les sociétés de gestion filiales et les fédérations
+  régionales ne transmettent pas le label à la tête de groupe.
+- **B Corp** (GOV) : certification présente dans l'annuaire B Lab, rattachée
+  seulement après vérification du **domaine du site** déclaré. Un homonyme est
+  écarté, jamais deviné.
+
+Personne ne doit un label : son absence n'est **jamais** comptée 0, et elle ne
+baisse pas non plus la fiabilité. L'indicateur n'existe tout simplement pas pour
+l'entité (drapeau \`presence_only\` en base). Sinon la fiabilité de chaque entité
+dépendrait du nombre de labels que DIAMS suit, pas de ce qu'on sait d'elle.
+
 ---
 
 ## 4. Dimensions
@@ -353,6 +392,9 @@ pas du nombre de marques. Trois garde-fous invariants :
 | Fiscalité | TAX | CbCR (oui/non), taux effectif (%), nb d'entités en paradis fiscaux | CbCR, états financiers, Tax Justice Network | groupe |
 | Benchmarks | ANI, SUP | BBFAW (Tier 1→1.0 … 6→0.10), KnowTheChain (/100), FTI (%) | BBFAW, BHRRC, Fashion Revolution | groupe ou marque |
 | Finance éthique | INV | politique responsable & finance durable (statut) ; financement fossile & participations controversées (valeur brute) | UN PRI, Reclaim Finance | groupe |
+| Finansol | INV | label de finance solidaire (oui seulement) : distributeur nommé dans la liste officielle | FAIR (Finansol) | établissement distributeur |
+| B Corp | GOV | certification B Corp (oui seulement), domaine du site vérifié | annuaire B Lab | entité certifiée |
+| ONU — HCDH | GEO | présence dans la base des entreprises liées aux colonies (controverse), nom exact | Conseil des droits de l'homme (A/HRC/63/20) | entité listée |
 
 Les quantitatifs (taux effectif, présence en paradis fiscaux) sont chargés en
 **valeur brute** : c'est le moteur qui calcule le percentile intra-secteur et
@@ -363,10 +405,15 @@ fausserait la comparaison sectorielle.
 
 ## 8. Statut
 
-Document vivant (v\`0.5.0\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.5.1\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.5.1 (11/10/2026)** — Labels et certifications tiers (Finansol, B Corp)
+  comptés comme résultats quand ils sont attestés ; leur absence ne pèse ni sur
+  la note ni sur la fiabilité ; base de données ONU
+  (HCDH) des entreprises liées aux colonies ; résumé « En bref » de la fiche
+  (règles publiées section 3) ; extrait de chaque preuve affiché sur la fiche.
 - **0.5.0 (10/10/2026)** — Règle 1 conditionnée aux obligations légales de
   publication (régimes sourcés) ; Règle 8 : chaque marque notée sur ses propres
   preuves ; Règle 5 : aucune lettre affichée sous le seuil de fiabilité.

@@ -68,11 +68,17 @@ preuves curées (financement de l'expansion fossile BOCC 2026, inscription
 HATVP) ; lot 2 depuis les rapports ESEF 2025 : taux effectif d'impôt et
 déclaration pays par pays (connecteur déterministe), écart salarial, ratio de
 rémunération, mixité et indépendance du conseil, publication du Scope 3
-(citations verbatim vérifiées par `verify_curated`).
+(citations verbatim vérifiées par `verify_curated`) ; labels et certifications
+attestés par les bases officielles (Finansol : 10 établissements ; B Corp :
+BoursoBank, innocent) ; base ONU (HCDH) des entreprises liées aux colonies
+(A/HRC/63/20 : aucune entité DIAMS listée) ; lot 3 La Nef depuis son rapport
+annuel 2025 (3 preuves en revue humaine : rapport d'entreprise, tier 3). Fiche :
+résumé « En bref » (points forts, points de vigilance, certifications), extrait
+de chaque preuve.
 
-**Mesure au 10/10/2026 : 6 banques publiables** — La Banque Postale B (77 %),
-Crédit Mutuel Arkéa B (73 %), BNP Paribas B (64 %), BPCE C (58 %),
-Crédit Agricole C (56 %), Société Générale C (55 %) ; fiabilité 32 à 47 %.
+**Mesure au 11/10/2026 : 6 banques publiables** — La Banque Postale B (78 %),
+Crédit Mutuel Arkéa B (73 %), BNP Paribas B (66 %), Crédit Agricole C (60 %),
+Société Générale C (59 %), BPCE C (58 %) ; fiabilité 32 à 47 %.
 
 **Critère de sortie :** ≥ 15 banques publiables (fiabilité ≥ 60 %), notes
 étalées de A à E, une alternative mieux notée pour chaque grande banque, écarts
@@ -85,8 +91,10 @@ avec les classements ONG (Oxfam, Amis de la Terre…) documentés.
    indépendance du conseil d'Arkéa (présentation ambiguë), et tout Crédit Mutuel
    Alliance Fédérale (pas de dépôt ESEF 2025 indexé).
 2. Plans de vigilance (régime FR_VIGILANCE à rattacher, avec le plan lui-même).
-3. Petits acteurs (La Nef, Crédit Coopératif, néobanques) : politiques
-   d'exclusion, labels (Finansol, B Corp), publication des financements.
+3. Petits acteurs (La Nef, Crédit Coopératif, néobanques) : labels faits ;
+   restent les politiques d'exclusion (La Nef en revue ; celle du Crédit
+   Coopératif introuvable en ligne) et la publication des financements. Sans
+   obligation CSRD, ils restent sous le seuil de fiabilité : limite structurelle.
 4. Exposition fossile réglementaire (Pillar 3 ESG, CRR art. 449a) en complément
    de BOCC.
 

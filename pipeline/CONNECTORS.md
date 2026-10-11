@@ -212,6 +212,11 @@ python -m paris_memoire.import_esef [--only slug1,slug2] [--apply]
   dans le rapport, contenir la valeur, et les mots de l'indicateur (ex. « écart »
   + « rémunération » pour l'écart salarial). Colonne CSV facultative
   `review_note` : un cas signalé à la compilation reste en `JUGEMENT`.
+- Autres documents (rapport annuel PDF ou page HTML d'une entreprise) : la
+  citation « … » est cherchée mot pour mot dans le document téléchargé. Une
+  citation retrouvée reste en `JUGEMENT` si la source est de tier 3 (rapport
+  d'entreprise, presse) : **le tier 3 n'est jamais approuvé automatiquement**,
+  même vérifié.
 - `import_curated --apply --update-pending` corrige une preuve encore en attente
   (jamais une preuve déjà revue).
 - Verdicts : `OK` (approuvable, reviewer `auto:verify_curated`), `ÉCART`,
@@ -219,6 +224,35 @@ python -m paris_memoire.import_esef [--only slug1,slug2] [--apply]
   `NON VÉRIFIABLE`. Seuls les `OK` encore en attente sont approuvés.
 ```bash
 python -m paris_memoire.verify_curated --file curated/banques_2026-10_lot1.csv --bocc-pdf tables.pdf [--apply]
+```
+
+### `import_finansol` — label Finansol → `INV_SOLIDARITY_LABEL`
+- Liste officielle des placements labellisés (finance-fair.org, toutes les pages).
+- Un placement est rattaché à son **distributeur** par correspondance exacte du
+  nom (`DISTRIBUTORS` dans `connectors/finansol.py`). Sociétés de gestion
+  filiales et fédérations régionales exclues : le label ne remonte pas au groupe.
+- Positifs seulement : une banque absente de la liste n'a pas de preuve (pas de 0).
+```bash
+python -m paris_memoire.import_finansol [--apply]
+```
+
+### `import_bcorp` — certification B Corp → `GOV_BCORP`
+- N'importe que les entités de la liste `VERIFIED` (`connectors/bcorp.py`) : slug
+  DIAMS → fiche B Lab + domaine attendu. Le domaine du site déclaré sur la fiche
+  B Lab doit correspondre, sinon rien n'est écrit (cas « Alpine » : homonyme).
+- `--discover [--only slug]` liste les candidats de l'annuaire **sans rien
+  écrire** : un humain confirme, puis ajoute la paire à `VERIFIED`.
+```bash
+python -m paris_memoire.import_bcorp --discover --only la-nef
+python -m paris_memoire.import_bcorp [--apply]
+```
+
+### `import_ohchr` — base ONU des entreprises liées aux colonies → `GEO_CONFLICT_TIES`
+- Lit l'annexe du rapport du HCDH (PDF fourni : `--file`, `--symbol`, `--date`).
+- Rattachement par nom **exact** normalisé ; une présence = controverse sourcée.
+- A/HRC/63/20 (sept. 2025) : 190 lignes lues sur 214, **aucune entité DIAMS listée**.
+```bash
+python -m paris_memoire.import_ohchr --file A_HRC_63_20.pdf --symbol A/HRC/63/20 --date 2025-09-26 [--apply]
 ```
 
 ### `attach_regimes` — assujettissement aux obligations de publication (Règle 1)

@@ -2,6 +2,7 @@ import { computeScore, type DimensionResult, type ScoreResult } from "@/lib/scor
 import type { Alternative, ScorePayload } from "@/lib/data";
 import { CorrectionForm } from "@/components/CorrectionForm";
 import { Tip } from "@/components/Tip";
+import { summarize, type Flag } from "@/lib/flags";
 
 // Explication de chaque tier de source (fiabilité de la preuve, pas jugement).
 const tierExplain: Record<string, string> = {
@@ -70,6 +71,9 @@ export function CompanyScore({
   const indicatorNames = new Map(
     payload.applicableIndicators.map((i) => [i.code, i.name ?? i.code]),
   );
+
+  // « En bref » : points forts, points de vigilance, certifications (lib/flags.ts).
+  const summary = summarize(result, indicatorNames);
 
   // Piliers NON PERTINENTS pour ce secteur (aucun indicateur applicable) :
   // à distinguer d'un pilier applicable mais sans donnée (lui, noté 0).
@@ -143,7 +147,38 @@ export function CompanyScore({
           </div>
         )}
 
+        {/* Certifications et labels : faits contrôlés par un tiers, chacun cliquable. */}
+        {summary.certifications.length > 0 && (
+          <div className="row wrap" style={{ marginTop: 12, gap: 8 }}>
+            {summary.certifications.map((c) => (
+              <a key={c.indicator_code} className="badge cert" href={c.source_url} target="_blank" rel="noreferrer"
+                 title={c.detail}>
+                ✓ {c.label}
+              </a>
+            ))}
+          </div>
+        )}
+
       </div>
+
+      {/* En bref : lecture des preuves, jamais un avis. */}
+      {(summary.strengths.length > 0 || summary.concerns.length > 0) && (
+        <section className="panel">
+          <div className="row between wrap" style={{ gap: 8, marginBottom: 4 }}>
+            <h2 style={{ margin: 0, fontSize: 17 }}>En bref</h2>
+            <Tip label="Comment ces points sont choisis ?">
+              Aucun avis : ce sont les preuves elles-mêmes. Point fort = résultat mesuré (jamais une
+              promesse) compté dans la note avec au moins 70 %. Point de vigilance = 30 % ou moins,
+              controverse, ou publication obligatoire absente. Chaque point renvoie à sa source datée.
+            </Tip>
+          </div>
+          <div className="brief-grid">
+            <FlagList title="Points forts" tone="good" items={summary.strengths} empty="Aucun résultat documenté à 70 % ou plus pour l'instant." />
+            <FlagList title="Points de vigilance" tone="bad" items={summary.concerns}
+              empty={result.publishable ? "Aucun point de vigilance documenté." : "Rien de documenté à ce jour, mais trop peu de données pour conclure."} />
+          </div>
+        </section>
+      )}
 
       {/* Encart marque ↔ groupe propriétaire */}
       {group && (
@@ -227,6 +262,32 @@ export function CompanyScore({
         Pondération : <strong>{payload.profile.name}</strong>. Méthodologie publique et versionnée.
       </p>
     </main>
+  );
+}
+
+function FlagList({ title, tone, items, empty }: { title: string; tone: "good" | "bad"; items: Flag[]; empty: string }) {
+  return (
+    <div>
+      <h3 className={`brief-title ${tone}`}>{tone === "good" ? "✓" : "!"} {title}</h3>
+      {items.length === 0 ? (
+        <p className="muted small" style={{ margin: "6px 0 0" }}>{empty}</p>
+      ) : (
+        items.map((f) => (
+          <div className="flag" key={f.indicator_code}>
+            <div className="small" style={{ fontWeight: 650 }}>{f.label}</div>
+            <div className="muted small" style={{ marginTop: 2 }}>{f.detail}</div>
+            {f.source_url && (
+              <div className="small" style={{ marginTop: 3 }}>
+                <a href={f.source_url} target="_blank" rel="noreferrer" className="muted" style={{ textDecoration: "underline" }}>
+                  {f.source_name ?? "source"} ↗
+                </a>
+                {f.observed_on && <span className="muted"> · {frDate(f.observed_on)}</span>}
+              </div>
+            )}
+          </div>
+        ))
+      )}
+    </div>
   );
 }
 
@@ -353,6 +414,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   <span className="badge warn" style={{ marginLeft: 6 }} title="Preuve de plus de 3 ans — à rafraîchir (décote totale à 5 ans).">donnée ancienne</span>
                 )}
               </div>
+              {i.excerpt && <p className="excerpt small">{i.excerpt}</p>}
             </div>
           ))}
 

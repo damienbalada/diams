@@ -18,6 +18,12 @@ n'interprète rien) et le risque d'erreur est celui de la source officielle.
 | **3 — press** | articles, extraction de faits (traitement du langage) | **`pending`** | **Oui, avant publication** + corroboration (Règle 4) |
 | **crowd** | contributions communautaires | **`pending`**, poids plancher | **Oui** ; jamais promu sans source vérifiable |
 
+> **Vérifié n'est pas approuvé.** `verify_curated` peut retrouver mot pour mot
+> une citation dans le rapport d'une entreprise : la preuve reste en `pending`.
+> Seul un `OK` sur une source de tier 1-2, sans note de compilation, est approuvé
+> automatiquement. Un rapport d'entreprise (tier 3) est écrit par l'entreprise
+> elle-même : un humain juge toujours ce qu'il prouve.
+
 ### Pourquoi ça résout le goulet
 Les tiers 1-2 (structurés, déterministes) constitueront l'essentiel du volume et
 ne demandent **aucune revue unitaire**. La revue se concentre sur les tiers 3 /

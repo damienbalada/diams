@@ -20,6 +20,7 @@ Usage :
 from __future__ import annotations
 
 import argparse
+import html
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -164,6 +165,8 @@ def verify_hatvp(row, client: httpx.Client, sirens: dict[str, str | None]) -> Ve
 # --- ESEF : citation verbatim du rapport financier annuel ----------------------
 # Mots qui doivent figurer dans la citation pour qu'elle porte bien sur l'indicateur.
 ESEF_KEYWORDS = {
+    "INV_FOSSIL_FINANCING": [r"fossile"],
+    "INV_RESPONSIBLE_POLICY": [r"exclu"],
     "LAB_GENDER_PAYGAP": [r"[ée]cart", r"r[ée]mun[ée]ration", r"femmes|hommes"],
     "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian"],
     "GOV_BOARD_GENDER": [r"femmes", r"conseil"],
@@ -185,7 +188,7 @@ def _value_variants(v: float) -> list[str]:
     return list(out)
 
 
-def check_esef_quote(row, report_text: str) -> Verdict:
+def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Verdict:
     m = re.search(r"«\s?(.+?)\s?»\s*$", row.excerpt or "")
     if not m:
         return Verdict("NON VÉRIFIABLE", ["pas de citation « … » dans l'extrait"])
@@ -193,11 +196,11 @@ def check_esef_quote(row, report_text: str) -> Verdict:
     found = quote in _canon(report_text)
     details = [f"citation retrouvée mot pour mot dans le rapport {'✓' if found else '✗'}"]
     ok = found
-    for kw in ESEF_KEYWORDS.get(row.indicator_code, []):
+    for kw in ([] if ignore_keywords else ESEF_KEYWORDS.get(row.indicator_code, [])):
         hit = re.search(kw, quote, re.I) is not None
         ok &= hit
         details.append(f"la citation porte sur l'indicateur (« {kw} ») {'✓' if hit else '✗'}")
-    if row.value_numeric is not None:
+    if row.value_numeric is not None and not ignore_keywords:
         flat = re.sub(r"(?<=\d)\s(?=\d{3}(?!\d))", "", quote)  # espaces de milliers seulement
         hit = any(re.search(rf"(?<![\d,]){re.escape(c)}(?![\d])", flat) for c in _value_variants(row.value_numeric))
         ok &= hit
@@ -205,6 +208,31 @@ def check_esef_quote(row, report_text: str) -> Verdict:
     elif row.value_boolean is not None:
         details.append("indicateur oui/non : la présence de la citation suffit")
     return Verdict("OK" if ok else "ÉCART", details)
+
+
+def document_text(url: str, client: httpx.Client) -> str:
+    """Texte d'un document public (page web ou PDF), pour vérifier une citation."""
+    r = client.get(url, timeout=300, follow_redirects=True)
+    r.raise_for_status()
+    if url.lower().split("?")[0].endswith(".pdf") or "pdf" in r.headers.get("content-type", ""):
+        import io
+        import logging
+
+        import pypdf
+        logging.getLogger("pypdf").setLevel(logging.ERROR)
+        return "\n".join(p.extract_text() or "" for p in pypdf.PdfReader(io.BytesIO(r.content)).pages)
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", r.text, flags=re.S)))
+
+
+def finalize(v: Verdict, note: str, tier: str | None) -> Verdict:
+    """Seul un OK sur source de tier 1-2, sans note de jugement, est approuvable."""
+    from .load import AUTO_PUBLISH_TIERS
+    if v.status == "OK" and note:
+        return Verdict("JUGEMENT", v.details + [f"signalé à la compilation : {note}"])
+    # Même vérifiée, une source de tier 3 / crowd passe par un humain (REVIEW_MODEL).
+    if v.status == "OK" and tier not in AUTO_PUBLISH_TIERS:
+        return Verdict("JUGEMENT", v.details + [f"source de tier « {tier} » : validation humaine requise"])
+    return v
 
 
 # --- Application ---------------------------------------------------------------
@@ -249,6 +277,9 @@ def main() -> None:
             print(f"PDF BOCC : sha256 {hashlib.sha256(fh.read()).hexdigest()}")
         tables = parse_bocc_pdf(args.bocc_pdf)
     sirens = {e["slug"]: e.get("siren") for e in supabase_client.list_entities()}
+    from .load import _lookup_ids
+    with httpx.Client(timeout=60) as c:
+        tiers = {code: tier for code, (_, tier) in _lookup_ids(c)[2].items()}
 
     ok_rows, counts, reports = [], {}, {}
     with httpx.Client(timeout=300) as client:
@@ -257,15 +288,20 @@ def main() -> None:
                 v = verify_bocc(r, tables)
             elif r.source_code == "HATVP":
                 v = verify_hatvp(r, client, sirens)
-            elif r.source_code == "ESEF" and r.source_url:
+            elif r.source_url and "«" in (r.excerpt or ""):
+                # Citation verbatim d'un document public : rapport ESEF, page web ou PDF.
                 if r.source_url not in reports:
-                    from .connectors.esef import report_text
-                    reports[r.source_url] = report_text(r.source_url, client)
-                v = check_esef_quote(r, reports[r.source_url])
+                    if r.source_code == "ESEF":
+                        from .connectors.esef import report_text
+                        reports[r.source_url] = report_text(r.source_url, client)
+                    else:
+                        reports[r.source_url] = document_text(r.source_url, client)
+                # Un cas signalé « jugement » (ex. définition voisine de l'indicateur)
+                # est vérifié sur la citation et la valeur, puis rendu à l'humain.
+                v = check_esef_quote(r, reports[r.source_url], ignore_keywords=bool(note))
             else:
                 v = Verdict("NON VÉRIFIABLE", [f"aucun vérificateur pour la source {r.source_code}"])
-            if v.status == "OK" and note:
-                v = Verdict("JUGEMENT", v.details + [f"signalé à la compilation : {note}"])
+            v = finalize(v, note, tiers.get(r.source_code))
             counts[v.status] = counts.get(v.status, 0) + 1
             print(f"\n[{v.status}] {r.entity_slug} · {r.indicator_code} ({r.source_code})")
             for d in v.details:

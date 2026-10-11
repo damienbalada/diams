@@ -88,6 +88,32 @@ test("règle 1 — manquant OBLIGATOIRE : tire la note vers le bas (opacité pun
   assert.deepEqual(b.mandatory_regimes, ["CSRD"]);
 });
 
+test("labels (v0.5.1) — absent : ni note, ni fiabilité, ni ligne ; présent : un résultat compté", () => {
+  const indicators = [ind("ENV_A", "ENV"), ind("ENV_LABEL", "ENV", { presence_only: true })];
+  const absent = computeScore(baseInput({
+    applicableIndicators: indicators,
+    evidence: [ev({ indicator_code: "ENV_A", normalized_value: 0.5, confidence: 0.9 })],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const a = absent.dimensions.find((d) => d.dimension_code === "ENV")!;
+  assert.equal(a.score, 0.5);
+  assert.ok(Math.abs(a.confidence - 0.9) < 1e-9);       // le label absent ne baisse pas la fiabilité
+  assert.equal(a.applicable_indicators, 1);
+  assert.equal(a.indicators.some((i) => i.indicator_code === "ENV_LABEL"), false);
+
+  const present = computeScore(baseInput({
+    applicableIndicators: indicators,
+    evidence: [
+      ev({ indicator_code: "ENV_A", normalized_value: 0.5, confidence: 0.9 }),
+      ev({ indicator_code: "ENV_LABEL", normalized_value: 1.0, confidence: 0.8 }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const p = present.dimensions.find((d) => d.dimension_code === "ENV")!;
+  assert.equal(p.score, 0.75);
+  assert.equal(p.covered_indicators, 2);
+});
+
 test("règle 1 — manquant NON obligatoire : hors note, mais la fiabilité baisse", () => {
   const res = computeScore(baseInput({
     applicableIndicators: [ind("ENV_A", "ENV"), ind("ENV_B", "ENV")],

@@ -110,3 +110,14 @@ def test_esef_ecart_si_citation_absente_valeur_differente_ou_hors_sujet():
 def test_hatvp_fiche_vide_est_un_ecart():
     r = row("la-nef", None, "Inscrite.", ind="GEO_LOBBYING_TRANSP", src="HATVP")
     assert check_hatvp(r, {"publicationCourante": {}, "exercices": []}, "339799116").status == "ÉCART"
+
+
+def test_seul_un_ok_de_tier_1_2_sans_note_est_approuvable():
+    from paris_memoire.verify_curated import Verdict, finalize
+    ok = Verdict("OK", [])
+    assert finalize(ok, "", "regulatory").status == "OK"
+    assert finalize(ok, "", "audited_ngo").status == "OK"
+    assert finalize(ok, "", "press").status == "JUGEMENT"      # rapport d'entreprise, presse
+    assert finalize(ok, "", None).status == "JUGEMENT"         # tier inconnu : prudence
+    assert finalize(ok, "définition voisine", "regulatory").status == "JUGEMENT"
+    assert finalize(Verdict("ÉCART", []), "", "regulatory").status == "ÉCART"

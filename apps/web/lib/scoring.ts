@@ -13,7 +13,8 @@
 //     -> règle 3 (anti-greenwashing : promesse plafonnée, preuve débloque)
 //     -> règle 2 (tiers : poids + plafond de confiance + plancher anti-presse)
 //     -> agrégation par dimension (règle 1 v0.5 : manquant = 0 SI publication
-//        obligatoire ; sinon hors note, mais la fiabilité baisse)
+//        obligatoire ; sinon hors note, mais la fiabilité baisse ; un label
+//        absent est ignoré, v0.5.1)
 //     -> pondération par profil de valeurs
 //     -> score + indice de confiance (séparés) + méta-scores
 // =============================================================================
@@ -57,6 +58,9 @@ export interface Indicator {
   mandatory?: boolean;
   /** Régimes légaux qui imposent la publication (affichage). */
   mandatory_regimes?: string[];
+  /** Label / certification tiers : présent ⇒ compté comme un résultat ; absent
+   *  ⇒ ignoré, ni dans la note ni dans la fiabilité (personne ne doit un label). */
+  presence_only?: boolean;
 }
 export interface Evidence {
   indicator_code: string;
@@ -74,7 +78,9 @@ export interface Evidence {
   contested?: boolean;
   source_code?: string;
   source_url?: string;
+  /** Ce que dit la source (affichage : la fiche montre le fait, pas seulement un %). */
   excerpt?: string;
+  source_name?: string;
 }
 export interface ProfileWeight {
   dimension_code: string;
@@ -122,6 +128,10 @@ export interface IndicatorResult {
   observed_on?: string;
   source_code?: string;
   source_url?: string;
+  source_name?: string;
+  /** Extrait de la preuve retenue et sa valeur brute (affichage uniquement). */
+  excerpt?: string;
+  raw_value?: number | null;
   capped_by_greenwashing?: boolean;
   floored_by_low_tier?: boolean;
   /** Controverse affichée mais EXCLUE du calcul (source unique non corroborée). */
@@ -281,6 +291,9 @@ function evaluateIndicator(
       observed_on: driver.observed_on,
       source_code: driver.source_code,
       source_url: driver.source_url,
+      source_name: driver.source_name,
+      excerpt: driver.excerpt,
+      raw_value: driver.value_numeric ?? null,
     };
   }
 
@@ -353,6 +366,9 @@ function evaluateIndicator(
     observed_on: driver.observed_on,
     source_code: driver.source_code,
     source_url: driver.source_url,
+    source_name: driver.source_name,
+    excerpt: driver.excerpt,
+    raw_value: driver.value_numeric ?? null,
     capped_by_greenwashing: cappedByGreenwashing || undefined,
     floored_by_low_tier: flooredByLowTier || undefined,
     // controverse présente mais non comptée (source unique non corroborée)
@@ -387,7 +403,10 @@ export function computeScore(input: ScoreInput): ScoreResult {
   const dimsWithIndicators = [...new Set(input.applicableIndicators.map((i) => i.dimension_code))];
 
   for (const dimCode of dimsWithIndicators) {
-    const inds = input.applicableIndicators.filter((i) => i.dimension_code === dimCode);
+    // Un label absent n'existe pas pour l'entité : ni note, ni fiabilité, ni ligne.
+    const inds = input.applicableIndicators.filter(
+      (i) => i.dimension_code === dimCode && !(i.presence_only && !resByCode.get(i.code)?.covered),
+    );
     const gate = gateByDim.get(dimCode);
     const gateCode = gate?.gate_indicator_code;
 
