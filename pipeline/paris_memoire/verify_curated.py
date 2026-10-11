@@ -20,6 +20,8 @@ Usage :
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import html
 import re
 import unicodedata
@@ -170,7 +172,7 @@ ESEF_KEYWORDS = {
     "LAB_GENDER_PAYGAP": [r"[ée]cart|gap", r"r[ée]mun[ée]ration|salari|pay", r"femmes?|hommes?|genres?|gender|women"],
     # « ratio de rémunération annuelle totale » : intitulé ESRS S1-16, défini par rapport à la médiane.
     "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian|r[ée]mun[ée]ration annuelle totale|annual total remuneration|total remuneration ratio"],
-    "GOV_BOARD_GENDER": [r"femmes|administratrices|women|female", r"conseil|board|director"],
+    "GOV_BOARD_GENDER": [r"femmes|administratrices|f[ée]minisation|women|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
     "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions d.euros|net revenue"],
@@ -223,7 +225,46 @@ def _count_ratio_matches(value: float, quote: str) -> bool:
     return False
 
 
-def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Verdict:
+# Valeur publiée dans une autre devise, convertie en euros au taux annuel moyen de
+# la BCE ; la conversion est écrite dans l'extrait et recalculée ici :
+# « … taux de change annuel moyen 2025 de la BCE (1 € = 11,0663 SEK) : 30 × 11,0663 = 332 ».
+FX_RE = re.compile(r"taux de change annuel moyen (\d{4}) de la BCE \(1 € = ([\d,]+) ([A-Z]{3})\) : "
+                   r"([\d,]+) × ([\d,]+) = ([\d,]+)")
+
+
+def _num(s: str) -> float:
+    return float(s.replace(",", "."))
+
+
+def ecb_annual_rate(currency: str, year: str, client: httpx.Client) -> float:
+    """Taux annuel moyen BCE (unités de devise pour 1 €), série EXR.A.<CUR>.EUR.SP00.A."""
+    r = client.get(f"https://data-api.ecb.europa.eu/service/data/EXR/A.{currency}.EUR.SP00.A",
+                   params={"startPeriod": year, "endPeriod": year, "format": "csvdata"}, timeout=60)
+    r.raise_for_status()
+    rows = list(csv.DictReader(io.StringIO(r.text)))
+    return float(rows[0]["OBS_VALUE"])
+
+
+def check_fx(row, quote: str, rates: dict[tuple[str, str], float]) -> tuple[bool, list[str], float | None]:
+    """Contrôle d'une conversion déclarée : taux = celui de la BCE, montant d'origine
+    cité, produit exact à l'arrondi près, résultat = valeur. Renvoie le montant
+    d'origine, à chercher dans la citation à la place de la valeur."""
+    m = FX_RE.search(row.excerpt or "")
+    if not m:
+        return True, [], None
+    year, rate_s, cur, a_s, rate2_s, c_s = m.groups()
+    rate, a, c = _num(rate_s), _num(a_s), _num(c_s)
+    ecb = rates.get((cur, year))
+    rate_ok = ecb is not None and abs(round(ecb, 4) - rate) < 1e-9 and rate_s == rate2_s
+    calc_ok = abs(a * rate - c) <= 0.5 and row.value_numeric is not None and abs(c - row.value_numeric) < 1e-9
+    return rate_ok and calc_ok, [
+        f"taux {cur} {year} de la BCE {ecb if ecb is not None else 'introuvable'} = taux déclaré {rate_s} {'✓' if rate_ok else '✗'}",
+        f"conversion {a_s} × {rate_s} = {a * rate:.2f} ≈ {c_s} = valeur {'✓' if calc_ok else '✗'}",
+    ], a
+
+
+def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
+                     rates: dict[tuple[str, str], float] | None = None) -> Verdict:
     # Une ou plusieurs citations « … » : chacune doit figurer mot pour mot ; mots
     # de l'indicateur et valeur sont cherchés dans leur ensemble.
     quotes = [_canon(q) for q in re.findall(r"«\s?(.+?)\s?»", row.excerpt or "")]
@@ -239,15 +280,29 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Ve
         hit = re.search(kw, quote, re.I) is not None
         ok &= hit
         details.append(f"la citation porte sur l'indicateur (« {kw} ») {'✓' if hit else '✗'}")
+    # Valeur convertie d'une autre devise : la conversion est contrôlée, puis c'est
+    # le montant d'origine qu'on cherche dans la citation.
+    fx_ok, fx_details, fx_source = check_fx(row, quote, rates or {})
+    ok &= fx_ok
+    details += fx_details
     if row.value_numeric is not None and not ignore_keywords:
         flat = re.sub(r"(?<=\d)\s(?=\d{3}(?!\d))", "", quote)  # espaces de milliers seulement
-        variants = _value_variants(row.value_numeric)
-        # Écart « en faveur des femmes » : publié en valeur absolue, compté négatif.
-        if row.value_numeric < 0 and re.search(r"in favou?r of women|en faveur des femmes", quote, re.I):
+        target = fx_source if fx_source is not None else row.value_numeric
+        variants = _value_variants(target)
+        # Écart « en faveur des femmes » : publié en valeur absolue, compté négatif ;
+        # ou en notation comptable entre parenthèses, « (8,0) % ».
+        if row.value_numeric < 0 and re.search(
+                r"in favou?r of women|en faveur des femmes|higher for (female|women)"
+                r"|sup[ée]rieure? pour les (salari[ée]es )?femmes", quote, re.I):
             variants += _value_variants(-row.value_numeric)
+        if row.value_numeric < 0:
+            variants += [f"({c})" for c in _value_variants(-row.value_numeric)]
         # Le signe compte : 9,9 ne correspond pas à « -9,9 » ; un tiret après une
         # lettre n'est pas un signe (« 1-to-51 »).
-        pats = [rf"(?<![\d,])(?<!(?<![A-Za-z])-){re.escape(c)}(?![\d])" for c in variants]
+        # Une valeur positive collée à une parenthèse ouvrante (« (8,0) % ») est
+        # une négative en notation comptable : elle ne la confirme pas.
+        paren = "" if row.value_numeric < 0 else r"(?<!\()"
+        pats = [rf"(?<![\d,])(?<!(?<![A-Za-z])-){paren}{re.escape(c)}(?![\d])" for c in variants]
         hit = any(re.search(pt, flat) for pt in pats)
         # Colonnes voisines de 3 chiffres (« 345 352 ») : fusionnées à tort en un
         # seul nombre ; on accepte la valeur lue comme nombre isolé, la lecture des
@@ -256,7 +311,7 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Ve
         cnt = (not hit and not col and row.indicator_code in ("GOV_BOARD_INDEP", "GOV_BOARD_GENDER")
                and _count_ratio_matches(row.value_numeric, quote))
         ok &= hit or col or cnt
-        details.append(f"valeur {row.value_numeric} présente dans la citation "
+        details.append(f"valeur {target} présente dans la citation "
                        f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✗'}")
     elif row.value_boolean is not None:
         details.append("indicateur oui/non : la présence de la citation suffit")
@@ -364,7 +419,11 @@ def main() -> None:
                         reports[r.source_url] = document_text(r.source_url, client)
                 # Un cas signalé « jugement » (ex. définition voisine de l'indicateur)
                 # est vérifié sur la citation et la valeur, puis rendu à l'humain.
-                v = check_esef_quote(r, reports[r.source_url], ignore_keywords=bool(note))
+                rates = {}
+                fx = FX_RE.search(r.excerpt or "")
+                if fx:
+                    rates[(fx.group(3), fx.group(1))] = ecb_annual_rate(fx.group(3), fx.group(1), client)
+                v = check_esef_quote(r, reports[r.source_url], ignore_keywords=bool(note), rates=rates)
             else:
                 v = Verdict("NON VÉRIFIABLE", [f"aucun vérificateur pour la source {r.source_code}"])
             v = finalize(v, note, tiers.get(r.source_code))

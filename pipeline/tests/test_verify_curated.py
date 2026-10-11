@@ -117,6 +117,15 @@ def test_ecart_en_faveur_des_femmes_compte_negatif():
     assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -30.1, q), rep).status == "OK"
     q2 = "In 2025 , the total gender pay gap at HEINEKEN was 30.1%"
     assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -30.1, q2), rep).status == "ÉCART"  # sens non dit
+    rep3 = ("Écart de rémunération entre les femmes et les hommes selon la méthodologie de la CSRD (a) Non publié "
+            "(8,0) % (a) Ce tableau montre que la rémunération totale est en moyenne 8,0% supérieur pour les "
+            "salariées femmes que pour les salariés hommes.")
+    q3 = ("Écart de rémunération entre les femmes et les hommes selon la méthodologie de la CSRD » ; « la "
+          "rémunération totale est en moyenne 8,0% supérieur pour les salariées femmes que pour les salariés hommes")
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -8.0, q3), rep3).status == "OK"
+    q4 = "Écart de rémunération entre les femmes et les hommes selon la méthodologie de la CSRD (a) Non publié (8,0) %"
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -8.0, q4), rep3).status == "OK"  # notation comptable
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", 8.0, q4), rep3).status == "ÉCART"
 
 
 def test_pourcentage_tire_des_effectifs_cites():
@@ -178,3 +187,21 @@ def test_seul_un_ok_de_tier_1_2_sans_note_est_approuvable():
     assert finalize(ok, "", None).status == "JUGEMENT"         # tier inconnu : prudence
     assert finalize(ok, "définition voisine", "regulatory").status == "JUGEMENT"
     assert finalize(Verdict("ÉCART", []), "", "regulatory").status == "ÉCART"
+
+
+def test_conversion_de_devise_au_taux_bce():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("GHG intensity per net revenue 1 (tonnes CO2e/SEK m) 2025 2024 2023 2019 Comparison … "
+           "Total GHG emissions (market–based) per net revenue 30 33 32 44 –10.1 –31.7 1. Net revenue")
+    q = ("GHG intensity per net revenue 1 (tonnes CO2e/SEK m) 2025 2024 2023 2019 » ; « "
+         "Total GHG emissions (market–based) per net revenue 30 33 32 44")
+    conv = " ; converti au taux de change annuel moyen 2025 de la BCE (1 € = 11,0663 SEK) : 30 × 11,0663 = 332"
+    r = row("x", 332, f"Rapport annuel 2025 (t CO2e par million de couronnes) : « {q} »{conv}",
+            ind="ENV_GHG_INTENSITY", src="ANNUAL_REPORT")
+    rates = {("SEK", "2025"): 11.0663058823529}
+    assert check_esef_quote(r, rep, rates=rates).status == "OK"
+    assert check_esef_quote(r, rep, rates={("SEK", "2025"): 11.4325}).status == "ÉCART"  # mauvais taux
+    assert check_esef_quote(r, rep, rates={}).status == "ÉCART"                            # taux non vérifié
+    r2 = row("x", 340, f"Rapport annuel 2025 : « {q} »{conv.replace('= 332', '= 340')}",
+             ind="ENV_GHG_INTENSITY", src="ANNUAL_REPORT")
+    assert check_esef_quote(r2, rep, rates=rates).status == "ÉCART"                       # calcul faux

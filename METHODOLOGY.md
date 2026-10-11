@@ -564,6 +564,17 @@ calcul (tables de config) doit être datée et justifiée ici.
   concernent aussi les groupes de luxe ; les niveaux documentés d'Hermès, Kering
   et LVMH (cuirs, peaux exotiques, élevage de crocodiliens) sont alignés sur le
   barème publié (« extensive » = 0,40 ; ils avaient été saisis à 0).
+  Obligation européenne de rapport de durabilité (CSRD, première vague)
+  rattachée à cinq groupes de plus, sur la foi de leur propre rapport (base
+  légale citée) : Danone, AXA, Kering, Hermès, H&M. Hermès déclare ne pas
+  publier encore l'écart de rémunération non ajusté ; H&M publie un écart
+  pondéré par poste (99,7 %), pas l'écart non ajusté exigé : la donnée
+  manquante compte 0 pour les deux (Règle 1). Pas de rattachement quand le
+  groupe publie à titre volontaire (Heineken et Stellantis : directive non
+  transposée aux Pays-Bas, disent-ils) ou au titre d'une autre loi (Inditex :
+  loi espagnole 11/2018) : ce qu'ils publient compte, ce qu'ils omettent est
+  ignoré. Une valeur publiée dans une autre devise est convertie au taux annuel
+  moyen de la BCE, contrôlé à la vérification.
 - **0.6.0 (11/10/2026)** — Règle 8 révisée : une marque reprend les preuves et
   obligations de son groupe pour les indicateurs qui relèvent du groupe
   (critère : ce que mesure la source — gouvernance, fiscalité, lobbying, climat,

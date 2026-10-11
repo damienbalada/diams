@@ -291,6 +291,14 @@ python -m paris_memoire.esrs_candidates --slug loreal --only GOV_BOARD_GENDER,EN
   citation retrouvée reste en `JUGEMENT` si la source est de tier 3 (rapport
   d'entreprise, presse) : **le tier 3 n'est jamais approuvé automatiquement**,
   même vérifié.
+- Valeur publiée dans une autre devise : l'extrait écrit la conversion
+  (« converti au taux de change annuel moyen 2025 de la BCE (1 € = 11,0663 SEK) :
+  30 × 11,0663 = 332 ») ; le taux est relu dans la série officielle de la BCE
+  (EXR, moyenne annuelle), le produit recalculé, et c'est le montant d'origine
+  qu'on cherche dans la citation.
+- Signe : un écart publié « (8,0) % » (notation comptable) ou « supérieur pour
+  les femmes » se lit négatif ; une valeur positive ne peut pas être confirmée
+  par un nombre entre parenthèses.
 - `import_curated --apply --update-pending` corrige une preuve encore en attente
   (jamais une preuve déjà revue).
 - Verdicts : `OK` (approuvable, reviewer `auto:verify_curated`), `ÉCART`,
