@@ -663,6 +663,27 @@ test("base de la note — un obligatoire manquant compte dans la base (il est no
   assert.equal(res.score, 0.5);
 });
 
+test("contexte — un budget de lobbying informe sans noter (ni bonus ni malus)", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("GEO_SPEND", "GEO", { kind: "quantitative", direction: "contextual" }),
+      ind("GEO_T", "GEO"),
+    ],
+    evidence: [
+      ev({ indicator_code: "GEO_SPEND", normalized_value: null, value_numeric: 3_250_000, confidence: 0.9 }),
+      ev({ indicator_code: "GEO_T", normalized_value: 1, confidence: 0.9 }),
+    ],
+    peerValues: { GEO_SPEND: [1e5, 5e5, 1e6, 2e6, 3.25e6, 4e6] },
+    profileWeights: [{ dimension_code: "GEO", weight: 1 }],
+  }));
+  const geo = res.dimensions[0];
+  assert.equal(geo.score, 1);                                   // seul l'indicateur noté compte
+  assert.ok(Math.abs(geo.confidence - 0.9) < 1e-9);             // le budget compte dans la fiabilité
+  const spend = geo.indicators.find((i) => i.indicator_code === "GEO_SPEND")!;
+  assert.equal(spend.informative, true);
+  assert.equal(spend.unrankable, undefined);
+});
+
 test("normalisation — écart au plus près de zéro : -30 % n'est pas meilleur que 2 %", () => {
   const peers = { GAP: [-30.1, 2.0, 12.4, 20] };
   const score = (v: number) => computeScore(baseInput({

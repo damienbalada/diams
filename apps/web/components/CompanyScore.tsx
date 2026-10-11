@@ -418,6 +418,11 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   {i.capped_by_greenwashing &&<span className="badge warn">engagement plafonné</span>}
                   {i.floored_by_low_tier && <span className="badge warn">source faible</span>}
                   {i.unscored_controversy && <span className="badge warn" title="Source unique non corroborée : signalée mais exclue du calcul de la note.">controverse · hors note</span>}
+                  {i.informative && (
+                    <span className="badge" title="Donnée de contexte (par exemple le budget de lobbying déclaré) : ni bonne ni mauvaise en soi. Elle est affichée et compte dans la fiabilité, pas dans la note.">
+                      contexte · hors note
+                    </span>
+                  )}
                   {i.unrankable && (
                     <span className="badge" title="Cette valeur se note par son rang parmi les entreprises du même secteur. Avec moins de 5 entreprises comparables, un rang ne dit rien : la donnée est affichée et compte dans la fiabilité, pas dans la note.">
                       trop peu de pairs pour la classer · hors note
@@ -434,7 +439,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                     </span>
                   )}
                   <span className="badge">{i.nature}</span>
-                  {i.display_only || i.compliance_only || i.unrankable ? (
+                  {i.display_only || i.compliance_only || i.unrankable || i.informative ? (
                     <span className="muted small">—</span>
                   ) : (
                     <strong className="small">{pct(i.value ?? 0)}</strong>

@@ -125,7 +125,7 @@ export function summarize(result: ScoreResult, names: Map<string, string>, max =
         concerns.push(toFlag(i, label, "unscored", "Controverse signalée, non corroborée : affichée mais hors note."));
         continue;
       }
-      if (i.compliance_only || i.unrankable) continue; // obligation respectée, ou rang impossible : hors note
+      if (i.compliance_only || i.unrankable || i.informative) continue; // hors note : obligation respectée, rang impossible, contexte
       const v = i.value ?? 0;
       if (i.peer_count !== undefined && i.peer_count < MIN_PEERS) continue; // rang trop fragile
       if (CERTIFICATIONS[i.indicator_code] && i.nature === "result" && v >= 0.99) {

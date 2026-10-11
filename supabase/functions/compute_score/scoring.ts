@@ -176,6 +176,9 @@ export interface IndicatorResult {
   compliance_only?: boolean;
   /** Valeur brute sans assez de pairs pour la classer : fiabilité seulement. */
   unrankable?: boolean;
+  /** Indicateur de contexte (direction `contextual`, ex. budget de lobbying) :
+   *  affiché, compté dans la fiabilité, jamais dans la note (v0.6.0). */
+  informative?: boolean;
 }
 export interface DimensionResult {
   dimension_code: string;
@@ -397,6 +400,9 @@ function evaluateIndicator(
   // Rang sur trop peu de pairs : il ne dit rien (Total, Engie, Shell seuls dans
   // l'énergie). La valeur est affichée et compte dans la fiabilité, pas dans la note.
   const unrankable = norm.peers !== undefined && norm.peers < (cfg.params.min_peers_for_rank ?? 0);
+  // Indicateur de contexte : ni bon ni mauvais en soi (dépenser plus en lobbying
+  // n'est pas « mieux ») ; il informe, il ne note pas.
+  const informative = ind.direction === "contextual" && controversies.length === 0;
 
   // Confiance de l'indicateur : plafonnée par le tier (règle 2)
   const driver = best ?? [...controversies].sort(sortRecent)[0];
@@ -419,7 +425,8 @@ function evaluateIndicator(
     excerpt: driver.excerpt,
     raw_value: driver.value_numeric ?? null,
     peer_count: norm.peers,
-    unrankable: unrankable || undefined,
+    unrankable: (unrankable && !informative) || undefined,
+    informative: informative || undefined,
     inherited_from: driver.inherited_from ?? undefined,
     capped_by_greenwashing: cappedByGreenwashing || undefined,
     floored_by_low_tier: flooredByLowTier || undefined,
@@ -495,8 +502,8 @@ export function computeScore(input: ScoreInput): ScoreResult {
         r.compliance_only = true;
         confNum += r.confidence * ind.weight;
         covered++;
-      } else if (r.covered && r.unrankable) {
-        // Valeur connue mais impossible à classer : fiabilité seulement.
+      } else if (r.covered && (r.unrankable || r.informative)) {
+        // Valeur connue mais impossible à classer, ou de contexte : fiabilité seulement.
         confNum += r.confidence * ind.weight;
         covered++;
       } else if (r.covered) {
