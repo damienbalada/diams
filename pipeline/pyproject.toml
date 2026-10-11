@@ -7,6 +7,7 @@ dependencies = [
   "httpx>=0.27",
   "python-dotenv>=1.0",
   "pypdf>=5",
+  "cryptography>=42",  # rapports annuels PDF chiffrés (AES), lus par pypdf
 ]
 
 [project.optional-dependencies]

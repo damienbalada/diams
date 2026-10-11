@@ -182,6 +182,8 @@ ESEF_KEYWORDS = {
 
 def _canon(s: str) -> str:
     s = s.replace("’", "'").replace(" ", " ").replace(" ", " ")
+    # Signe moins typographique : « –9.9 % » est la valeur -9,9.
+    s = s.replace("\u2013", "-").replace("\u2212", "-").replace("\u2011", "-")
     return re.sub(r"\s+", " ", s).strip()
 
 
@@ -235,7 +237,9 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Ve
         # Écart « en faveur des femmes » : publié en valeur absolue, compté négatif.
         if row.value_numeric < 0 and re.search(r"in favou?r of women|en faveur des femmes", quote, re.I):
             variants += _value_variants(-row.value_numeric)
-        pats = [rf"(?<![\d,]){re.escape(c)}(?![\d])" for c in variants]
+        # Le signe compte : 9,9 ne correspond pas à « -9,9 » ; un tiret après une
+        # lettre n'est pas un signe (« 1-to-51 »).
+        pats = [rf"(?<![\d,])(?<!(?<![A-Za-z])-){re.escape(c)}(?![\d])" for c in variants]
         hit = any(re.search(pt, flat) for pt in pats)
         # Colonnes voisines de 3 chiffres (« 345 352 ») : fusionnées à tort en un
         # seul nombre ; on accepte la valeur lue comme nombre isolé, la lecture des

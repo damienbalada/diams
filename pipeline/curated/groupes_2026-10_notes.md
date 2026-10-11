@@ -121,3 +121,28 @@ est lu dans le paquet ESEF déposé à l'AMF (BDIF, source AMF_BDIF).
 - **Bonduelle** (exercice clos le 30 juin 2025) : écart de rémunération déclaré
   « Non matériel » ; ratio, indépendance et intensité carbone non localisés.
   Taux d'impôt moyen de 53,1 % sur un exercice atypique : non retenu.
+
+## H&M, adidas (rapports annuels légaux 2025, source ANNUAL_REPORT)
+
+Dépôts ESEF 2025 non indexés (Suède, Allemagne) : rapport annuel publié par
+l'émetteur (état de durabilité ESRS sous assurance limitée). Obligation CSRD
+non rattachée : transpositions suédoise et allemande non sourcées.
+
+- **H&M** : écart salarial publié comme un rapport (« The gender pay gap,
+  expressed as a percentage of the average pay level of male employees, amounted
+  to 99.7 percent ») : en déduire un écart de 0,3 % serait une interprétation,
+  non retenu. Intensité carbone publiée par million de couronnes suédoises
+  (« tonnes CO2e/SEK m ») : incomparable avec les pairs publiant en euros ou en
+  dollars (facteur d'environ 11), non retenue.
+- **adidas** : mixité du conseil de surveillance non chiffrée (seuls les quotas
+  légaux de 30 % sont cités) : non retenue.
+
+## Beiersdorf, BMW (rapports annuels légaux 2025, source ANNUAL_REPORT)
+
+- **Beiersdorf** : déclaration non financière selon le droit allemand (HGB),
+  suivant les ESRS en partie seulement (le rapport le précise). Indépendance :
+  50 % des représentants des actionnaires et 100 % des représentants des
+  salariés ; un taux global en serait déduit : non retenu. Intensité carbone et
+  ratio S1-16 non localisés.
+- **BMW** : ratio S1-16 et intensité carbone déclarés matériels mais non
+  localisés en chiffres. Écart salarial « –9.9% » (en faveur des femmes).

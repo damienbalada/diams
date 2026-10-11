@@ -99,6 +99,17 @@ def test_esef_citation_verbatim_valeur_et_indicateur():
     assert check_esef_quote(esef_row("ENV_GHG_INTENSITY", 2773.87, q2), REPORT).status == "OK"
 
 
+def test_signe_moins_typographique():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "The ↗ Gender Pay Gap was –9.9% (2024:–10.1%)."
+    q = "The ↗ Gender Pay Gap was –9.9%"
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -9.9, q), rep).status == "OK"
+    assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", 9.9, q), rep).status == "ÉCART"
+    rep2 = "Mr. Jassy’s compensation was $2,069,861, resulting in a ratio of those amounts of 1-to-51."
+    q2 = "resulting in a ratio of those amounts of 1-to-51"
+    assert check_esef_quote(esef_row("LAB_CEO_PAY_RATIO", 51, q2 + " » ; « median"), rep2 + " median").status == "OK"
+
+
 def test_ecart_en_faveur_des_femmes_compte_negatif():
     from paris_memoire.verify_curated import check_esef_quote
     rep = "In 2025 , the total gender pay gap at HEINEKEN was 30.1% ( 2024 : 28.4%) in favour of women. The"
