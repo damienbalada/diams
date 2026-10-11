@@ -22,7 +22,8 @@
 export type Tier = "regulatory" | "audited_ngo" | "press" | "crowd";
 export type Nature = "result" | "commitment" | "policy" | "controversy";
 export type Kind = "quantitative" | "categorical" | "binary" | "ordinal";
-export type Direction = "higher_better" | "lower_better" | "contextual";
+/** closer_to_zero : l'objectif est zéro, quel que soit le signe (écart de salaire). */
+export type Direction = "higher_better" | "lower_better" | "closer_to_zero" | "contextual";
 
 export interface TierConfig {
   evidence_weight: number;
@@ -234,6 +235,10 @@ function normalizeEvidence(
   if (ind.kind === "quantitative" && ev.value_numeric !== null && ev.value_numeric !== undefined) {
     const peers = peerValues?.[ind.code] ?? [];
     if (peers.length >= 2) {
+      if (ind.direction === "closer_to_zero") {
+        const pct = percentile(Math.abs(ev.value_numeric), peers.map(Math.abs));
+        return { value: clamp01(1 - pct), peers: peers.length };
+      }
       const pct = percentile(ev.value_numeric, peers);
       return { value: clamp01(ind.direction === "lower_better" ? 1 - pct : pct), peers: peers.length };
     }

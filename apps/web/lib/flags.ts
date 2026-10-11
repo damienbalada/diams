@@ -58,12 +58,38 @@ export const fact = (s: string) => {
   return m ? `« ${m[1]} »` : s;
 };
 
+const fmt = (n: number, digits = 1) => n.toLocaleString("fr-FR", { maximumFractionDigits: digits });
+
+/**
+ * Le fait en une phrase, tirée de la valeur publiée (la citation exacte reste
+ * dans le détail du pilier). Seulement quand la phrase ne dit rien de plus que
+ * la valeur : sinon, on affiche la citation.
+ */
+const DESCRIBE: Record<string, (v: number | null | undefined) => string | null> = {
+  GOV_BOARD_GENDER: (v) => (v == null ? null : `${fmt(v)} % de femmes au conseil.`),
+  GOV_BOARD_INDEP: (v) => (v == null ? null : `${fmt(v)} % d'administrateurs indépendants.`),
+  LAB_CEO_PAY_RATIO: (v) =>
+    v == null ? null : `La rémunération la plus élevée vaut ${fmt(v, 0)} fois la rémunération médiane.`,
+  LAB_GENDER_PAYGAP: (v) =>
+    v == null ? null
+      : v < 0 ? `Les femmes gagnent en moyenne ${fmt(-v)} % de plus que les hommes.`
+      : `Les femmes gagnent en moyenne ${fmt(v)} % de moins que les hommes.`,
+  LAB_EGAPRO_INDEX: (v) => (v == null ? null : `Index Égapro : ${fmt(v, 0)}/100.`),
+  TAX_EFFECTIVE_RATE: (v) => (v == null ? null : `Taux d'impôt effectif : ${fmt(v)} %.`),
+  ENV_GHG_INTENSITY: (v) => (v == null ? null : `${fmt(v, 0)} t CO2e émises par million de chiffre d'affaires.`),
+  ENV_SCOPE3_DISCLOSED: () => "Publie ses émissions indirectes (scope 3), souvent l'essentiel de son empreinte carbone.",
+  SUP_VIGILANCE_PLAN: () => "Plan de vigilance complet : cartographie des risques, alerte et suivi.",
+  GEO_LOBBYING_TRANSP: () => "Déclare ses activités de lobbying dans un registre public.",
+  TAX_CBCR_PUBLISHED: () => "Publie son activité et ses impôts pays par pays.",
+};
+
 function toFlag(i: IndicatorResult, label: string, reason: FlagReason, fallback: string): Flag {
+  const described = i.covered && !i.display_only ? DESCRIBE[i.indicator_code]?.(i.raw_value) : null;
   return {
     indicator_code: i.indicator_code,
     label,
     reason,
-    detail: i.excerpt ? clip(fact(i.excerpt)) : fallback,
+    detail: described ?? (i.excerpt ? clip(fact(i.excerpt)) : fallback),
     value: i.value,
     source_name: i.source_name ?? i.source_code,
     source_url: i.source_url,
@@ -88,7 +114,7 @@ export function summarize(result: ScoreResult, names: Map<string, string>, max =
         if (i.mandatory && !i.is_gate) {
           const regimes = (i.mandatory_regimes ?? []).join(", ");
           concerns.push(toFlag(i, label, "mandatory_missing",
-            `Publication obligatoire${regimes ? ` (${regimes})` : ""} : aucune preuve versée à ce jour, comptée 0.`));
+            `La loi l'oblige à publier cette donnée${regimes ? ` (${regimes})` : ""} ; elle n'a pas été trouvée pour l'ensemble du groupe : comptée 0.`));
         }
         continue;
       }

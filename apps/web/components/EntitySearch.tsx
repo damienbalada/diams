@@ -51,7 +51,7 @@ export function EntitySearch({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={`Rechercher parmi ${entities.length} entités — marque ou groupe`}
+          placeholder={`Une marque, un groupe… (Zara, Danone, BNP) — ${entities.length} suivis`}
           aria-label="Rechercher une marque ou un groupe"
           autoComplete="off"
         />

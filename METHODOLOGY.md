@@ -420,7 +420,10 @@ pas du nombre de marques. Trois garde-fous invariants :
 
 Les quantitatifs (taux effectif, présence en paradis fiscaux) sont chargés en
 **valeur brute** : c'est le moteur qui calcule le percentile intra-secteur et
-applique la direction (`higher_better` / `lower_better`). Normaliser à la main
+applique la direction (`higher_better` / `lower_better`, ou `closer_to_zero` quand
+l'objectif est zéro quel que soit le signe : l'écart de salaire femmes-hommes,
+dont l'égalité est le meilleur rang, qu'il soit en faveur des hommes ou des
+femmes). Normaliser à la main
 fausserait la comparaison sectorielle.
 
 ---
@@ -439,7 +442,8 @@ calcul (tables de config) doit être datée et justifiée ici.
   Correctif : le pilier Investissements n'est appliqué qu'aux secteurs où il est
   pertinent (drapeau `inv_relevant`), comme le prévoyait la section 4.
   Pertinence géographique : Égapro et plan de vigilance ne s'appliquent qu'aux
-  entités françaises. Obligation américaine du ratio PDG / salarié médian
+  entités françaises. Écart de salaire femmes-hommes classé par l'écart à zéro
+  (l'égalité est le meilleur rang, quel que soit le sens de l'écart). Obligation américaine du ratio PDG / salarié médian
   (Reg. S-K Item 402(u)) ajoutée à la Règle 1.
 - **0.5.0 (10/10/2026)** — Règle 1 conditionnée aux obligations légales de
   publication (régimes sourcés) ; Règle 8 : chaque marque notée sur ses propres

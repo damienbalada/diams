@@ -504,6 +504,19 @@ test("fraîcheur — aucune preuve : last_observed null", () => {
   assert.equal(res.last_observed, null);
 });
 
+test("normalisation — écart au plus près de zéro : -30 % n'est pas meilleur que 2 %", () => {
+  const peers = { GAP: [-30.1, 2.0, 12.4, 20] };
+  const score = (v: number) => computeScore(baseInput({
+    applicableIndicators: [ind("GAP", "ENV", { kind: "quantitative", direction: "closer_to_zero" })],
+    evidence: [ev({ indicator_code: "GAP", value_numeric: v })],
+    peerValues: peers,
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  })).dimensions[0].indicators[0].value!;
+  assert.ok(score(2.0) > score(12.4));
+  assert.ok(score(12.4) > score(20));
+  assert.ok(score(20) > score(-30.1)); // 30 % d'écart, même en faveur des femmes : le plus loin de l'égalité
+});
+
 test("normalisation — le rang intra-secteur expose la taille du groupe de pairs", () => {
   const res = computeScore(baseInput({
     applicableIndicators: [ind("TAX_X", "ENV", { kind: "quantitative", direction: "higher_better" })],

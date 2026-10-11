@@ -1,20 +1,25 @@
-import { getAllScores, listEntities, listSectors } from "@/lib/data";
+import { getAllScores, getPublicStats, listEntities, listSectors } from "@/lib/data";
 import { rankBySector, sectorAnchor, type SectorRanking } from "@/lib/ranking";
 import { EntitySearch } from "@/components/EntitySearch";
 import type { SearchableEntity } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
 
+const pct = (x: number) => `${Math.round(x * 100)} %`;
+
 export default async function HomePage() {
   let entities: Awaited<ReturnType<typeof listEntities>> = [];
   let grades = new Map<string, string>();
-  let comparable: SectorRanking[] = [];
+  let ranked: SectorRanking[] = [];
+  let stats: { evidence: number; sources: number } | null = null;
   let error: string | null = null;
   try {
-    const [ents, scores, sectors] = await Promise.all([listEntities(), getAllScores(), listSectors()]);
+    const [ents, scores, sectors, st] = await Promise.all([
+      listEntities(), getAllScores(), listSectors(), getPublicStats().catch(() => null),
+    ]);
     entities = ents;
-    // Secteurs où un vrai choix existe : au moins deux entités classées.
-    comparable = rankBySector(scores, sectors).ranked.filter((s) => s.groups.length + s.brands.length >= 2);
+    stats = st;
+    ranked = rankBySector(scores, sectors).ranked;
     // Pas de lettre sous le seuil de fiabilité (Règle 5) : une note mal
     // documentée ne doit pas se lire comme un verdict.
     grades = new Map(scores.filter((s) => s.publishable).map((s) => [s.slug, s.grade]));
@@ -25,8 +30,6 @@ export default async function HomePage() {
   const name = (e: any) => e.display_name ?? e.legal_name;
   const byName = (a: any, b: any) =>
     String(name(a)).localeCompare(String(name(b)), "fr", { sensitivity: "base" });
-  const groups = entities.filter((e) => !e.is_brand).sort(byName);
-  const brands = entities.filter((e) => e.is_brand).sort(byName);
 
   // Groupe propriétaire de chaque entité : sert à la recherche (« Unilever »
   // doit remonter ses marques) et de sous-titre dans les résultats.
@@ -45,10 +48,12 @@ export default async function HomePage() {
     grade: grades.get(e.slug) ?? null,
   }));
 
-  // Une entité = une ligne. La note lettrée à gauche donne le repère visuel ;
-  // « — » signale une entité pas encore notée (aucune preuve publiée).
+  const rated = entities.filter((e: any) => grades.has(e.slug)).sort(byName);
+  const pending = entities.filter((e: any) => !grades.has(e.slug)).sort(byName);
+
   const Row = (e: any) => {
     const g = grades.get(e.slug);
+    const group = rootName(e);
     return (
       <a key={e.slug} className="ent-row" href={`/entreprise/${e.slug}`}>
         {g ? (
@@ -56,7 +61,10 @@ export default async function HomePage() {
         ) : (
           <span className="grade sm grade-none" title="Pas encore notée">—</span>
         )}
-        <span className="ent-name">{name(e)}</span>
+        <span className="ent-main">
+          <span className="ent-name">{name(e)}</span>
+          {group && <small className="muted">{group}</small>}
+        </span>
         <span className="chev" aria-hidden="true">›</span>
       </a>
     );
@@ -64,30 +72,23 @@ export default async function HomePage() {
 
   return (
     <main className="fiche-stack">
-      <div>
-        <h1 style={{ marginBottom: 8 }}>DIAMS — score éthique des marques</h1>
-        <p className="muted" style={{ margin: 0 }}>
-          <strong>D</strong>ocumented, <strong>I</strong>ndependent, <strong>A</strong>uditable,{" "}
-          <strong>M</strong>ulti-criteria <strong>S</strong>coring. Une note par dimension, un
-          indice de fiabilité affiché à part, et chaque point traçable jusqu'à sa source datée.
+      <section className="hero">
+        <div className="kicker">Score éthique des entreprises</div>
+        <h1>Ce que font vraiment les entreprises que vous faites vivre.</h1>
+        <p className="lead">
+          Chaque note s'appuie sur des preuves officielles, datées et vérifiées mot pour mot
+          dans les documents déposés par les entreprises. Quand les données manquent, on le dit,
+          au lieu de deviner.
         </p>
-        <div className="row wrap" style={{ gap: 10, marginTop: 16 }}>
-          <a className="btn" href="/classement">Voir le classement →</a>
-          <a className="btn" href="/civique">DIAMS Civique (votes des partis) →</a>
-        </div>
-        {comparable.length > 0 && (
-          <div style={{ marginTop: 16 }}>
-            <div className="small muted" style={{ marginBottom: 6 }}>Comparer dans un secteur :</div>
-            <div className="row wrap" style={{ gap: 8 }}>
-              {comparable.map((s) => (
-                <a key={s.sector.code} className="badge" href={`/classement#${sectorAnchor(s.sector)}`}>
-                  {s.sector.name} · {s.groups.length + s.brands.length} classées
-                </a>
-              ))}
-            </div>
+        {rated.length > 0 && (
+          <div className="stats">
+            <div className="stat"><strong>{rated.length}</strong><span>entreprises notées</span></div>
+            <div className="stat"><strong>{entities.length}</strong><span>marques et groupes suivis</span></div>
+            {stats && <div className="stat"><strong>{stats.evidence}</strong><span>preuves sourcées</span></div>}
+            <div className="stat"><strong>{ranked.length}</strong><span>secteurs comparables</span></div>
           </div>
         )}
-      </div>
+      </section>
 
       {error && (
         <div className="panel" style={{ borderColor: "#6b2222" }}>
@@ -97,20 +98,93 @@ export default async function HomePage() {
       )}
 
       <EntitySearch entities={searchable}>
-        {groups.length > 0 && (
+        {ranked.length > 0 && (
           <section>
-            <h2 className="list-title">Groupes <span className="muted">{groups.length}</span></h2>
-            <div className="ent-list">{groups.map(Row)}</div>
+            <div className="row between wrap" style={{ alignItems: "baseline" }}>
+              <h2 className="section-title">Les mieux notées, secteur par secteur</h2>
+              <a className="small muted" href="/classement" style={{ textDecoration: "underline" }}>Classement complet →</a>
+            </div>
+            <p className="muted small" style={{ margin: "0 0 12px" }}>
+              On ne compare que des entreprises du même secteur : une banque et un fabricant de
+              boissons ne sont pas jugés sur les mêmes critères.
+            </p>
+            <div className="sector-grid">
+              {ranked.map((s) => {
+                const rows = [...s.groups, ...s.brands].sort((a, b) => b.score - a.score).slice(0, 3);
+                const total = s.groups.length + s.brands.length;
+                return (
+                  <a key={s.sector.code} className="sector-card" href={`/classement#${sectorAnchor(s.sector)}`}>
+                    <div className="sector-head">
+                      <strong>{s.sector.name}</strong>
+                      <span className="muted small">{total} notée{total > 1 ? "s" : ""}</span>
+                    </div>
+                    {rows.map((r, i) => (
+                      <div className="podium" key={r.slug}>
+                        <span className="rank muted">{i + 1}</span>
+                        <span className={`grade xs grade-${r.grade}`}>{r.grade}</span>
+                        <span className="podium-name">{r.name}</span>
+                        <span className="muted small">{pct(r.score)}</span>
+                      </div>
+                    ))}
+                  </a>
+                );
+              })}
+            </div>
           </section>
         )}
 
-        {brands.length > 0 && (
-          <section>
-            <h2 className="list-title">Marques <span className="muted">{brands.length}</span></h2>
-            <div className="ent-list">{brands.map(Row)}</div>
-          </section>
-        )}
+        <section className="how-grid">
+          <div className="how-card">
+            <div className="how-num">1</div>
+            <strong>Des preuves officielles</strong>
+            <p className="muted small">
+              Rapports annuels déposés auprès des autorités de marché (AMF, SEC), registres publics
+              (Égapro, HATVP), ONG auditées. Chaque chiffre renvoie à son document et à sa date.
+            </p>
+          </div>
+          <div className="how-card">
+            <div className="how-num">2</div>
+            <strong>Le silence se paie, s'il est illégal</strong>
+            <p className="muted small">
+              Une donnée que la loi oblige à publier et qui manque compte zéro. Une donnée facultative
+              absente ne pénalise pas : les petites entreprises ne sont pas condamnées d'avance.
+            </p>
+          </div>
+          <div className="how-card">
+            <div className="how-num">3</div>
+            <strong>La fiabilité, affichée à part</strong>
+            <p className="muted small">
+              Chaque note s'accompagne d'un indice de fiabilité. Sous 30 %, pas de note : trop peu de
+              preuves pour un verdict défendable.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="section-title">Toutes les entreprises</h2>
+          {rated.length > 0 && (
+            <>
+              <h3 className="list-title">Notées <span className="muted">{rated.length}</span></h3>
+              <div className="ent-list">{rated.map(Row)}</div>
+            </>
+          )}
+          {pending.length > 0 && (
+            <details className="pending">
+              <summary>
+                <span>En attente de données <span className="muted">{pending.length}</span></span>
+                <span className="muted small">pas encore assez de preuves publiées pour une note</span>
+              </summary>
+              <div className="ent-list">{pending.map(Row)}</div>
+            </details>
+          )}
+        </section>
       </EntitySearch>
+
+      <p className="muted small" style={{ textAlign: "center", marginTop: 8 }}>
+        <a href="/methodologie" style={{ textDecoration: "underline" }}>Méthodologie publique et versionnée</a>
+        {" · "}
+        <a href="/civique" style={{ textDecoration: "underline" }}>DIAMS Civique (votes des partis)</a>
+      </p>
     </main>
   );
 }

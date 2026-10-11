@@ -16,7 +16,15 @@ const frYearMonth = (iso: string | null) => {
 function Table({ rows, ranked = true }: { rows: EntityScore[]; ranked?: boolean }) {
   return (
     <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+      <table className="rank-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+        <colgroup>
+          {ranked && <col style={{ width: "6%" }} />}
+          <col />
+          <col style={{ width: "12%" }} />
+          <col className="col-hide-mobile" style={{ width: "11%" }} />
+          <col style={{ width: "13%" }} />
+          <col className="col-hide-mobile" style={{ width: "14%" }} />
+        </colgroup>
         <thead>
           <tr className="muted small">
             {ranked && <th style={{ textAlign: "left", padding: "6px 4px" }}>#</th>}

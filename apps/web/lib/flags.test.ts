@@ -29,6 +29,18 @@ test("en bref — points forts ≥ 0,7, vigilance ≤ 0,3, extrait repris", () =
   assert.deepEqual(s.concerns.map((f) => f.indicator_code), ["C"]);
 });
 
+test("en bref — une phrase lisible tirée de la valeur publiée", () => {
+  const s = summarize(result([
+    ind("GOV_BOARD_GENDER", { value: 0.8, raw_value: 40, excerpt: "… « 40 % d’administratrices » …" }),
+    ind("LAB_GENDER_PAYGAP", { value: 0.1, raw_value: -30.1 }),
+    ind("SUP_VIGILANCE_PLAN", { value: 1, excerpt: "« 3.6 Plan de Vigilance 3.6.1 Introduction … »" }),
+  ]), names, 3);
+  const d = Object.fromEntries([...s.strengths, ...s.concerns].map((f) => [f.indicator_code, f.detail]));
+  assert.equal(d.GOV_BOARD_GENDER, "40 % de femmes au conseil.");
+  assert.match(d.SUP_VIGILANCE_PLAN, /cartographie des risques/);
+  assert.equal(d.LAB_GENDER_PAYGAP, "Les femmes gagnent en moyenne 30,1 % de plus que les hommes.");
+});
+
 test("en bref — la citation seule, sans le préambule documentaire", () => {
   const s = summarize(result([
     ind("A", { value: 1, excerpt: "Rapport financier annuel 2025 (ESEF), ESRS 2 GOV-1 : « En 2025, le Conseil se composait de 60 % de femmes »" }),

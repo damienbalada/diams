@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { getSupabase } from "./supabase";
 import { computeScore, type ScoreInput } from "./scoring";
 import {
@@ -53,7 +54,14 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
 }
 
 /** Calcule la note de toutes les entités (pour classement + accueil). */
-export async function getAllScores(): Promise<EntityScore[]> {
+/**
+ * Notes de toutes les entités. Le calcul complet (une requête et un passage du
+ * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
+ * les pages restant rendues à la demande (aucun appel à la base pendant le build).
+ */
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v1"], { revalidate: 600 });
+
+async function computeAllScores(): Promise<EntityScore[]> {
   const entities = await listEntities();
   const scored = await mapWithConcurrency(entities, 6, async (e: any) => {
     try {
@@ -86,6 +94,17 @@ export async function listSectors(): Promise<{ id: string; code: string; name: s
   const { data, error } = await supabase.from("sectors").select("id, code, name");
   if (error) throw new Error(error.message);
   return data ?? [];
+}
+
+/** Chiffres de la page d'accueil : preuves publiées et sources distinctes. */
+export async function getPublicStats(): Promise<{ evidence: number; sources: number } | null> {
+  const supabase = getSupabase();
+  const [ev, src] = await Promise.all([
+    supabase.from("evidence_active").select("id", { count: "exact", head: true }),
+    supabase.from("sources").select("id", { count: "exact", head: true }),
+  ]);
+  if (ev.error || src.error || ev.count == null || src.count == null) return null;
+  return { evidence: ev.count, sources: src.count };
 }
 
 /** Liste des entités pour la page d'accueil. */
