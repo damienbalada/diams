@@ -91,6 +91,7 @@ en vigueur au 10/10/2026 :
 | CSRD — 1re vague | directive (UE) 2022/2464 + ESRS | mixité et indépendance du conseil (ESRS 2), Scope 3 et intensité carbone (E1), écart salarial F/H et ratio de rémunération (S1) |
 | Devoir de vigilance | loi n° 2017-399 ; C. com. art. L225-102-4 | plan de vigilance |
 | Copé-Zimmermann | loi n° 2011-103 ; C. com. art. L225-18-1 | mixité du conseil |
+| Ratio PDG / salarié médian (États-Unis) | Dodd-Frank Act art. 953(b) ; Reg. S-K Item 402(u) | ratio de rémunération |
 
 **Rattachement après lecture complète.** *(Depuis v0.5.1.)* L'obligation CSRD
 n'est rattachée à une entreprise qu'une fois ses six données obligatoires lues
@@ -304,6 +305,15 @@ animal** est retiré pour la banque ou les boissons ; **Investissements** ne
 concerne que banque/assurance. La pertinence est pilotée par des drapeaux de
 secteur (\`animal_relevant\`, \`plastic_relevant\`, \`water_relevant\`, \`inv_relevant\`).
 
+### Pertinence géographique (dispositif national)
+
+*(Depuis v0.5.1.)* Certains indicateurs mesurent le respect d'un instrument
+national : l'index Égapro et le plan de vigilance sont français. Une société
+américaine ne peut pas publier un index Égapro ; compter ce manque abaissait la
+fiabilité de toute entité non française pour rien. Un tel indicateur ne
+s'applique qu'aux entités de son pays (\`indicators.jurisdiction\`). La filiale
+française d'un groupe étranger, qui publie elle-même son index, reste concernée.
+
 ### Règle ANI — Plafond d'exploitation animale (gate)
 
 Principe antispéciste : **l'exploitation animale est la base**. S'il y a
@@ -427,6 +437,9 @@ calcul (tables de config) doit être datée et justifiée ici.
   (règles publiées section 3) ; extrait de chaque preuve affiché sur la fiche.
   Correctif : le pilier Investissements n'est appliqué qu'aux secteurs où il est
   pertinent (drapeau \`inv_relevant\`), comme le prévoyait la section 4.
+  Pertinence géographique : Égapro et plan de vigilance ne s'appliquent qu'aux
+  entités françaises. Obligation américaine du ratio PDG / salarié médian
+  (Reg. S-K Item 402(u)) ajoutée à la Règle 1.
 - **0.5.0 (10/10/2026)** — Règle 1 conditionnée aux obligations légales de
   publication (régimes sourcés) ; Règle 8 : chaque marque notée sur ses propres
   preuves ; Règle 5 : aucune lettre affichée sous le seuil de fiabilité.

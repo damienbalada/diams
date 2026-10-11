@@ -170,7 +170,7 @@ ESEF_KEYWORDS = {
     "LAB_GENDER_PAYGAP": [r"[ée]cart|gap", r"r[ée]mun[ée]ration|salari|pay", r"femmes?|hommes?|genres?|gender|women"],
     # « ratio de rémunération annuelle totale » : intitulé ESRS S1-16, défini par rapport à la médiane.
     "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian|r[ée]mun[ée]ration annuelle totale|annual total remuneration"],
-    "GOV_BOARD_GENDER": [r"femmes|administratrices|women|female", r"conseil|board"],
+    "GOV_BOARD_GENDER": [r"femmes|administratrices|women|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
     "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions d.euros|net revenue"],
@@ -187,9 +187,30 @@ def _canon(s: str) -> str:
 
 def _value_variants(v: float) -> list[str]:
     out = {f"{v:.2f}".replace(".", ","), f"{v:.1f}".replace(".", ",")}
+    out |= {f"{v:.2f}", f"{v:.1f}"}                      # notation anglaise : 17.4
     if float(v).is_integer():
-        out.add(f"{int(v)}")
+        out |= {f"{int(v)}", f"{int(v):,}"}             # 1980 et 1,980
     return list(out)
+
+
+_NUM_WORDS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen "
+    "seventeen eighteen nineteen twenty".split())}
+_NUM_WORDS.update({w: i for i, w in enumerate(
+    "zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize dix-sept "
+    "dix-huit dix-neuf vingt".split())})
+_NUM = r"\d{1,2}|" + "|".join(sorted(_NUM_WORDS, key=len, reverse=True))
+_COUNT = re.compile(rf"\b({_NUM})\b(?:\s+\w+){{0,3}}?\s+(?:of|sur)\s+(?:our\s+|the\s+|its\s+)?({_NUM})\b", re.I)
+
+
+def _count_ratio_matches(value: float, quote: str) -> bool:
+    """« 11 of 12 director nominees », « six femmes Administratrices sur 14 » :
+    le pourcentage déclaré doit être le rapport des effectifs cités."""
+    for m in _COUNT.finditer(quote):
+        a, b = (int(x) if x.isdigit() else _NUM_WORDS.get(x.lower()) for x in m.groups())
+        if a is not None and b and a <= b and abs(round(100 * a / b, 1) - value) <= 0.05:
+            return True
+    return False
 
 
 def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Verdict:
@@ -216,9 +237,11 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Ve
         # seul nombre ; on accepte la valeur lue comme nombre isolé, la lecture des
         # colonnes étant écrite dans l'extrait.
         col = not hit and any(re.search(rf"(?:^|\s){pt}(?=\s|$)", quote) for pt in pats)
-        ok &= hit or col
+        cnt = (not hit and not col and row.indicator_code in ("GOV_BOARD_INDEP", "GOV_BOARD_GENDER")
+               and _count_ratio_matches(row.value_numeric, quote))
+        ok &= hit or col or cnt
         details.append(f"valeur {row.value_numeric} présente dans la citation "
-                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✗'}")
+                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✗'}")
     elif row.value_boolean is not None:
         details.append("indicateur oui/non : la présence de la citation suffit")
     return Verdict("OK" if ok else "ÉCART", details)
@@ -226,7 +249,8 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Ve
 
 def document_text(url: str, client: httpx.Client) -> str:
     """Texte d'un document public (page web ou PDF), pour vérifier une citation."""
-    r = client.get(url, timeout=300, follow_redirects=True)
+    from .connectors.sec import UA
+    r = client.get(url, timeout=300, follow_redirects=True, headers=UA if "sec.gov" in url else None)
     r.raise_for_status()
     if url.lower().split("?")[0].endswith(".pdf") or "pdf" in r.headers.get("content-type", ""):
         import io

@@ -99,6 +99,26 @@ def test_esef_citation_verbatim_valeur_et_indicateur():
     assert check_esef_quote(esef_row("ENV_GHG_INTENSITY", 2773.87, q2), REPORT).status == "OK"
 
 
+def test_pourcentage_tire_des_effectifs_cites():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Key elements of our Board independence include: • 11 of 12 director nominees are independent • All"
+    q = "11 of 12 director nominees are independent"
+    assert check_esef_quote(esef_row("GOV_BOARD_INDEP", 91.7, q), rep).status == "OK"
+    assert check_esef_quote(esef_row("GOV_BOARD_INDEP", 92.0, q), rep).status == "ÉCART"
+    rep2 = "Le Conseil d’Administration d’ENGIE comprend six femmes Administratrices sur 14 membres."
+    q2 = "Conseil d’Administration d’ENGIE comprend six femmes Administratrices sur 14 membres"
+    assert check_esef_quote(esef_row("GOV_BOARD_GENDER", 42.9, q2), rep2).status == "OK"
+
+
+def test_nombres_en_notation_anglaise():
+    from paris_memoire.verify_curated import check_esef_quote
+    report = "For 2025, the ratio of the annual total compensation of our CEO to the median employee was 1,980 to 1."
+    q = "the ratio of the annual total compensation of our CEO to the median employee was 1,980 to 1"
+    assert check_esef_quote(esef_row("LAB_CEO_PAY_RATIO", 1980, q), report).status == "OK"
+    report2 = "Our median employee pay ratio was 533.2:1 in 2025"
+    assert check_esef_quote(esef_row("LAB_CEO_PAY_RATIO", 533.2, "median employee pay ratio was 533.2:1"), report2).status == "OK"
+
+
 def test_plusieurs_citations_toutes_verifiees():
     from paris_memoire.verify_curated import check_esef_quote
     report = "3.2 Plan de vigilance 3.2.7 Dispositif de suivi des mesures. Ailleurs : une cartographie des risques achats."

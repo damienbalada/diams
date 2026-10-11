@@ -47,3 +47,21 @@ L'obligation CSRD n'est rattachée à un groupe qu'une fois ses six données lue
 - **Ratio de rémunération (S1-16)** : « 74,7 », calculé sur la rémunération
   *moyenne* et non médiane (le rapport l'explique). Définition différente, qui
   peut flatter l'entreprise : non retenu.
+
+## Sociétés cotées aux États-Unis (circulaires DEF 14A 2025-2026, SEC)
+
+- Ratio PDG / salarié médian (Reg. S-K Item 402(u)) lu pour 17 sociétés ;
+  l'obligation US_SEC_PAY_RATIO n'est rattachée qu'à ces 17.
+- **Tesla** : dernière circulaire (septembre 2025, exercice 2024) : « the
+  applicable ratio of such amounts for 2024 was 0.00:1 », le PDG n'ayant déclaré
+  aucune rémunération pour 2024. Chiffre officiel mais non représentatif ; non
+  retenu en attendant la circulaire couvrant 2025.
+- **Kraft Heinz** : le tableau du ratio (« 170:1 ») est précédé dans le document
+  déposé de la mention « [pending median employee final Championship
+  eligibility] », qui laisse penser à un chiffre provisoire : non retenu.
+- **Netflix** : deux co-PDG (255 et 252) ; retenu 255, le plus élevé.
+- **Indépendance du conseil** : retenue quand la circulaire la chiffre (« 11 of
+  12 director nominees are independent ») ; le pourcentage est le rapport des
+  effectifs cités, recalculé par le vérificateur. Non obligatoire en tant que
+  pourcentage (Item 407(a) impose de nommer les administrateurs indépendants) :
+  son absence ne compte pas 0.
