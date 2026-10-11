@@ -34,8 +34,13 @@ L'obligation CSRD n'est rattachée à un groupe qu'une fois ses six données lue
 - **Écart de rémunération et ratio (S1-16)** : non localisés dans l'état de
   durabilité. Le rapport cite un écart *ajusté* (« 2,9% en faveur des hommes »),
   qui n'est pas la donnée ESRS (écart non ajusté), et des ratios d'équité
-  France (C. com. L22-10-9), qui ne sont pas le ratio groupe ESRS. CSRD non
-  rattachée tant que ces deux points ne sont pas tranchés.
+  France (C. com. L22-10-9), qui ne sont pas le ratio groupe ESRS. **Tranché le
+  11/10/2026** : la section « Indicateurs d'écart de rémunération » de l'état de
+  durabilité ne donne que l'index Égapro de trois UES françaises (aucun écart non
+  ajusté au niveau du groupe), et la table de concordance renvoie le ratio
+  S1-16 §97 b aux ratios d'équité France. Les deux données sont constatées non
+  publiées au niveau du groupe (même traitement que LVMH et Carrefour) : CSRD
+  rattachée, elles comptent 0.
 - Intensité carbone publiée en t CO2e par million de **dollars** (devise de
   présentation du groupe) : l'unité est écrite dans l'extrait.
 
