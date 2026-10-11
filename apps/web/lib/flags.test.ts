@@ -10,7 +10,7 @@ function ind(code: string, extra: Partial<IndicatorResult>): IndicatorResult {
 }
 function result(indicators: IndicatorResult[]): ScoreResult {
   return {
-    score: 0.5, confidence: 0.5, grade: "C", rated: true, publishable: true, groups: [], last_observed: null,
+    score: 0.5, confidence: 0.5, grade: "C", rated: true, publishable: true, basis: 1, groups: [], last_observed: null,
     dimensions: [{ dimension_code: "X", name: "X", score: 0.5, confidence: 0.5, grade: "C", rated: true,
       applicable_indicators: indicators.length, covered_indicators: indicators.length, indicators }],
   };

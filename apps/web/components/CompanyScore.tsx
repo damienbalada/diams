@@ -48,6 +48,8 @@ export function CompanyScore({
   const result = computeScore(payload);
   const chain = payload.ownership_chain ?? [];
   const minConf = payload.params?.min_confidence_to_publish ?? 0.3;
+  const minBasis = payload.params?.min_basis_to_publish ?? 0;
+  const minBasisTop = payload.params?.min_basis_for_top_grade ?? 0;
 
   // Comparaison marque ↔ groupe propriétaire (deux notes indépendantes depuis
   // v0.5) : piliers notés des deux côtés qui divergent nettement (≥ 20 points).
@@ -68,6 +70,7 @@ export function CompanyScore({
     : [];
   const betterThanGroup = divergences.filter((x) => x.diff >= 0.3);
   // code indicateur -> nom lisible (fourni par compute_score_input)
+  const dimName = new Map((payload.dimensions ?? []).map((d) => [d.code, d.name]));
   const indicatorNames = new Map(
     payload.applicableIndicators.map((i) => [i.code, i.name ?? i.code]),
   );
@@ -130,8 +133,23 @@ export function CompanyScore({
                 <span style={{ width: pct(result.confidence) }} />
               </div>
               <div className="muted small">
-                {pct(result.confidence)} {result.publishable ? "" : `· données insuffisantes (seuil ${pct(minConf)})`}
+                {pct(result.confidence)} {result.publishable ? "" : `· données insuffisantes`}
               </div>
+              <div className="muted small" style={{ marginTop: 4 }}>
+                Base de la note : {pct(result.basis)} du socle
+                <Tip label="Qu'est-ce que la base de la note ?">
+                  La part des indicateurs du socle qui entrent réellement dans la note : documentés et
+                  comparables, ou obligatoires mais absents (comptés 0). Une note n'est publiée que si sa base
+                  atteint {pct(minBasis)} et sa fiabilité {pct(minConf)} ; une note A exige une base d'au
+                  moins {pct(minBasisTop)} : être bien noté sur le peu qu'on sait ne suffit pas.
+                </Tip>
+              </div>
+              {result.capped_by_basis && (
+                <span className="badge warn" style={{ marginTop: 6, display: "inline-block", whiteSpace: "normal", lineHeight: 1.4 }}>
+                  Plafonnée sous A : la note excellente repose sur {pct(result.basis)} du socle seulement
+                  (il en faut {pct(minBasisTop)}).
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -259,7 +277,14 @@ export function CompanyScore({
       )}
 
       <p className="muted small" style={{ marginTop: 8 }}>
-        Pondération : <strong>{payload.profile.name}</strong>. Méthodologie publique et versionnée.
+        Pondération : <strong>{payload.profile.name}</strong>
+        {(payload.materiality ?? []).map((m) => (
+          <span key={m.dimension_code}>
+            {" "}· {dimName.get(m.dimension_code) ?? m.dimension_code} ×{Number(m.multiplier).toLocaleString("fr-FR")} dans
+            ce secteur{m.note ? ` (${m.note})` : ""}
+          </span>
+        ))}
+        . Méthodologie publique et versionnée.
       </p>
     </main>
   );
@@ -393,13 +418,23 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   {i.capped_by_greenwashing &&<span className="badge warn">engagement plafonné</span>}
                   {i.floored_by_low_tier && <span className="badge warn">source faible</span>}
                   {i.unscored_controversy && <span className="badge warn" title="Source unique non corroborée : signalée mais exclue du calcul de la note.">controverse · hors note</span>}
+                  {i.unrankable && (
+                    <span className="badge" title="Cette valeur se note par son rang parmi les entreprises du même secteur. Avec moins de 5 entreprises comparables, un rang ne dit rien : la donnée est affichée et compte dans la fiabilité, pas dans la note.">
+                      trop peu de pairs pour la classer · hors note
+                    </span>
+                  )}
+                  {i.compliance_only && (
+                    <span className="badge" title="La loi impose cette publication à l'entreprise : la faire est une obligation respectée, qui compte dans la fiabilité mais ne rapporte pas de points. L'omettre compterait 0.">
+                      obligation respectée · hors note
+                    </span>
+                  )}
                   {i.inherited_from && (
                     <span className="badge" title="Indicateur qui relève du groupe : la marque reprend la donnée publiée par son groupe propriétaire.">
                       donnée du groupe {i.inherited_from}
                     </span>
                   )}
                   <span className="badge">{i.nature}</span>
-                  {i.display_only ? (
+                  {i.display_only || i.compliance_only || i.unrankable ? (
                     <span className="muted small">—</span>
                   ) : (
                     <strong className="small">{pct(i.value ?? 0)}</strong>
@@ -418,7 +453,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   {tierExplain[i.tier ?? ""] ?? "Fiabilité de la source selon son type."}
                 </Tip>
                 {" · "}{frDate(i.observed_on) ?? i.observed_on}
-                {i.peer_count !== undefined && (
+                {i.peer_count !== undefined && !i.unrankable && (
                   <span title="Ce pourcentage est un rang : la valeur publiée comparée à celles des autres entreprises du secteur.">
                     {" · "}{i.inherited_from
                       ? `rang de ${i.inherited_from} parmi ${i.peer_count} entreprises de son secteur`

@@ -568,6 +568,101 @@ test("données de groupe — la preuve propre passe devant, l'héritée est sign
   assert.equal(y.inherited_from, "Groupe");
 });
 
+test("publication obligatoire respectée : fiabilité oui, note non ; volontaire : comptée", () => {
+  const run = (mandatory: boolean, value: number) => computeScore(baseInput({
+    applicableIndicators: [
+      ind("SUP_A", "SUP"),
+      ind("SUP_PLAN", "SUP", { disclosure: true, mandatory, mandatory_regimes: mandatory ? ["FR"] : [] }),
+    ],
+    evidence: [
+      ev({ indicator_code: "SUP_A", normalized_value: 0.2, confidence: 0.8 }),
+      ev({ indicator_code: "SUP_PLAN", normalized_value: value, confidence: 0.9 }),
+    ],
+    profileWeights: [{ dimension_code: "SUP", weight: 1 }],
+  })).dimensions[0];
+  const ok = run(true, 1);
+  assert.equal(ok.score, 0.2);                              // la conformité ne relève pas la note
+  assert.ok(Math.abs(ok.confidence - 0.85) < 1e-9);         // mais compte dans la fiabilité
+  assert.equal(ok.covered_indicators, 2);
+  assert.equal(ok.indicators.find((i) => i.indicator_code === "SUP_PLAN")!.compliance_only, true);
+  assert.ok(Math.abs(run(false, 1).score - 0.6) < 1e-9);    // volontaire : un plus
+  assert.ok(Math.abs(run(true, 0.5).score - 0.35) < 1e-9);  // obligatoire partiel : compté
+});
+
+test("publication obligatoire respectée, seule dans le pilier : pilier non noté, fiabilité comptée", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("SUP_PLAN", "SUP", { disclosure: true, mandatory: true, mandatory_regimes: ["FR"] }), ind("GOV_X", "GOV")],
+    evidence: [ev({ indicator_code: "SUP_PLAN", normalized_value: 1, confidence: 0.9 }), ev({ indicator_code: "GOV_X", normalized_value: 0.5, confidence: 0.9 })],
+    profileWeights: [{ dimension_code: "SUP", weight: 1 }, { dimension_code: "GOV", weight: 1 }],
+  }));
+  const sup = res.dimensions.find((d) => d.dimension_code === "SUP")!;
+  assert.equal(sup.rated, false);
+  assert.equal(res.score, 0.5);
+  assert.ok(Math.abs(res.confidence - 0.9) < 1e-9);
+});
+
+test("rang — moins de pairs que le minimum : valeur affichée, fiabilité seulement", () => {
+  const run = (peers: number[], min?: number) => computeScore(baseInput({
+    applicableIndicators: [ind("TAX_R", "TAX", { kind: "quantitative", direction: "higher_better" }), ind("TAX_B", "TAX")],
+    evidence: [
+      ev({ indicator_code: "TAX_R", normalized_value: null, value_numeric: 30, confidence: 0.9 }),
+      ev({ indicator_code: "TAX_B", normalized_value: 0.4, confidence: 0.9 }),
+    ],
+    peerValues: { TAX_R: peers },
+    params: { missing_data_score: 0, missing_data_confidence: 0, min_confidence_to_publish: 0.3, ...(min ? { min_peers_for_rank: min } : {}) },
+    profileWeights: [{ dimension_code: "TAX", weight: 1 }],
+  })).dimensions[0];
+  const few = run([10, 20, 30], 5);
+  assert.equal(few.score, 0.4);                                    // le rang sur 3 pairs n'entre pas dans la note
+  assert.ok(Math.abs(few.confidence - 0.9) < 1e-9);                // mais la donnée compte dans la fiabilité
+  assert.equal(few.indicators[0].unrankable, true);
+  assert.equal(few.indicators[0].peer_count, 3);
+  const enough = run([10, 15, 20, 25, 30], 5);
+  assert.ok(enough.score > 0.4 + 1e-9);                            // 5 pairs : rangé et noté
+  assert.equal(enough.indicators[0].unrankable, undefined);
+  assert.equal(run([30]).indicators[0].peer_count, 1);             // sans paramètre : comportement inchangé
+});
+
+test("base de la note — A plafonné et publication refusée quand le socle est trop peu documenté", () => {
+  const params = { missing_data_score: 0, missing_data_confidence: 0, min_confidence_to_publish: 0.3,
+    min_basis_to_publish: 0.3, min_basis_for_top_grade: 0.5 };
+  const indicators = [ind("ENV_A", "ENV"), ind("ENV_B", "ENV"), ind("ENV_C", "ENV"), ind("ENV_D", "ENV")];
+  const run = (n: number) => computeScore(baseInput({
+    applicableIndicators: indicators,
+    evidence: indicators.slice(0, n).map((i) => ev({ indicator_code: i.code, normalized_value: 1, confidence: 1 })),
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+    params,
+  }));
+  const thin = run(1);                       // 1 indicateur sur 4 : base 25 %
+  assert.equal(thin.basis, 0.25);
+  assert.equal(thin.publishable, false);     // sous la base minimale
+  const mid = run(3);                        // 75 % : A possible
+  assert.equal(mid.grade, "A");
+  assert.equal(mid.capped_by_basis, undefined);
+  const two = run(2);                        // 50 % : A possible (seuil atteint)
+  assert.equal(two.grade, "A");
+  const capped = computeScore(baseInput({     // 40 % documenté, tout à 100 % : plafonné sous A
+    applicableIndicators: [...indicators, ind("ENV_E", "ENV")],
+    evidence: indicators.slice(0, 2).map((i) => ev({ indicator_code: i.code, normalized_value: 1, confidence: 1 })),
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+    params,
+  }));
+  assert.equal(capped.capped_by_basis, true);
+  assert.equal(capped.grade, "B");
+  assert.equal(capped.score, 0.79);
+  assert.equal(capped.publishable, true);
+});
+
+test("base de la note — un obligatoire manquant compte dans la base (il est noté 0)", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("LAB_A", "LAB"), ind("LAB_M", "LAB", { mandatory: true, mandatory_regimes: ["X"] })],
+    evidence: [ev({ indicator_code: "LAB_A", normalized_value: 1, confidence: 1 })],
+    profileWeights: [{ dimension_code: "LAB", weight: 1 }],
+  }));
+  assert.equal(res.basis, 1);
+  assert.equal(res.score, 0.5);
+});
+
 test("normalisation — écart au plus près de zéro : -30 % n'est pas meilleur que 2 %", () => {
   const peers = { GAP: [-30.1, 2.0, 12.4, 20] };
   const score = (v: number) => computeScore(baseInput({

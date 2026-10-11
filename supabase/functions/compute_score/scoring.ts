@@ -40,6 +40,15 @@ export interface ScoringParams {
   missing_data_score: number;
   missing_data_confidence: number;
   min_confidence_to_publish: number;
+  /** Pairs minimum pour noter une valeur brute par son rang (v0.6.0). En
+   *  dessous : valeur affichée, fiabilité seulement. Absent : 0 (toujours noté). */
+  min_peers_for_rank?: number;
+  /** Base minimale de la note pour la publier (part du socle qui entre dans la
+   *  note, v0.6.0). Absent : 0. */
+  min_basis_to_publish?: number;
+  /** Base minimale pour une note A ; en dessous, la note est plafonnée juste
+   *  sous A (v0.6.0). Absent : 0. */
+  min_basis_for_top_grade?: number;
 }
 
 export interface Dimension {
@@ -68,6 +77,10 @@ export interface Indicator {
   complementary?: boolean;
   /** Relève du groupe : une marque en reprend les preuves (affichage). */
   group_level?: boolean;
+  /** Indicateur de publication : obligatoire et publié en entier, il ne compte
+   *  que dans la fiabilité (se conformer ne rapporte pas de points) ; volontaire,
+   *  il compte comme les autres (v0.6.0). */
+  disclosure?: boolean;
 }
 export interface Evidence {
   indicator_code: string;
@@ -124,6 +137,8 @@ export interface ScoreInput {
   peerValues?: Record<string, number[]>;
   /** plafonds de dimension pilotés par un indicateur gate. */
   dimensionGates?: DimensionGate[];
+  /** Matérialité sectorielle appliquée aux poids des piliers (affichage). */
+  materiality?: { dimension_code: string; multiplier: number; note?: string }[];
 }
 
 export interface IndicatorResult {
@@ -157,6 +172,10 @@ export interface IndicatorResult {
   /** Publication obligatoire (Règle 1) : si manquant, compté 0 dans la note. */
   mandatory?: boolean;
   mandatory_regimes?: string[];
+  /** Obligation de publication respectée : comptée dans la fiabilité, pas dans la note. */
+  compliance_only?: boolean;
+  /** Valeur brute sans assez de pairs pour la classer : fiabilité seulement. */
+  unrankable?: boolean;
 }
 export interface DimensionResult {
   dimension_code: string;
@@ -189,8 +208,14 @@ export interface ScoreResult {
   grade: string;
   /** false : aucun pilier noté — pas de note, seulement une fiabilité. */
   rated: boolean;
-  /** Note publiable : notée ET fiabilité >= min_confidence_to_publish (Règle 5). */
+  /** Note publiable : notée ET fiabilité >= min_confidence_to_publish ET base
+   *  >= min_basis_to_publish (Règle 5). */
   publishable: boolean;
+  /** Base de la note : part pondérée du socle qui entre effectivement dans la
+   *  note (documentée et notable, ou obligatoire manquante comptée 0). */
+  basis: number;
+  /** Note plafonnée sous A : base trop étroite pour une note excellente. */
+  capped_by_basis?: boolean;
   dimensions: DimensionResult[];
   groups: GroupResult[];
   /** Date d'observation la plus récente parmi les preuves retenues (fraîcheur). */
@@ -252,6 +277,7 @@ function normalizeEvidence(
       const pct = percentile(ev.value_numeric, peers);
       return { value: clamp01(ind.direction === "lower_better" ? 1 - pct : pct), peers: peers.length };
     }
+    return { value: 0.5, peers: peers.length };
   }
   // 3) défaut neutre
   return { value: 0.5 };
@@ -368,6 +394,10 @@ function evaluateIndicator(
 
   value = clamp01(value);
 
+  // Rang sur trop peu de pairs : il ne dit rien (Total, Engie, Shell seuls dans
+  // l'énergie). La valeur est affichée et compte dans la fiabilité, pas dans la note.
+  const unrankable = norm.peers !== undefined && norm.peers < (cfg.params.min_peers_for_rank ?? 0);
+
   // Confiance de l'indicateur : plafonnée par le tier (règle 2)
   const driver = best ?? [...controversies].sort(sortRecent)[0];
   const confidence = clamp01(
@@ -389,6 +419,7 @@ function evaluateIndicator(
     excerpt: driver.excerpt,
     raw_value: driver.value_numeric ?? null,
     peer_count: norm.peers,
+    unrankable: unrankable || undefined,
     inherited_from: driver.inherited_from ?? undefined,
     capped_by_greenwashing: cappedByGreenwashing || undefined,
     floored_by_low_tier: flooredByLowTier || undefined,
@@ -419,6 +450,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
   const dimResults: DimensionResult[] = [];
   const dimScore = new Map<string, number>();
   const dimConf = new Map<string, number>();
+  const dimBasis = new Map<string, number>();
 
   const gateByDim = new Map((input.dimensionGates ?? []).map((g) => [g.dimension_code, g]));
   const dimsWithIndicators = [...new Set(input.applicableIndicators.map((i) => i.dimension_code))];
@@ -457,7 +489,17 @@ export function computeScore(input: ScoreInput): ScoreResult {
       if (ind.code === gateCode) continue; // exclu de la moyenne et des compteurs
       if (r.display_only) continue;        // affiché mais hors calcul (controverse non corroborée)
       confWeight += ind.weight;
-      if (r.covered) {
+      if (r.covered && ind.disclosure && ind.mandatory && (r.value ?? 0) >= 0.999) {
+        // Publication imposée par la loi et faite en entier : la fiabilité monte,
+        // la note n'en tient pas compte (pendant de la Règle 1).
+        r.compliance_only = true;
+        confNum += r.confidence * ind.weight;
+        covered++;
+      } else if (r.covered && r.unrankable) {
+        // Valeur connue mais impossible à classer : fiabilité seulement.
+        confNum += r.confidence * ind.weight;
+        covered++;
+      } else if (r.covered) {
         scoreNum += (r.value ?? 0) * ind.weight;
         scoreWeight += ind.weight;
         confNum += r.confidence * ind.weight;
@@ -492,6 +534,9 @@ export function computeScore(input: ScoreInput): ScoreResult {
 
     if (rated) dimScore.set(dimCode, score);
     dimConf.set(dimCode, confidence);
+    // Part du socle du pilier qui entre dans sa note (un pilier réduit à son
+    // plafond documenté repose entièrement sur lui).
+    dimBasis.set(dimCode, confWeight > 0 ? scoreWeight / confWeight : gateKnown ? 1 : 0);
 
     dimResults.push({
       dimension_code: dimCode,
@@ -514,17 +559,24 @@ export function computeScore(input: ScoreInput): ScoreResult {
   let gScoreW = 0;
   let gConfNum = 0;
   let gConfW = 0;
+  let gBasisNum = 0;
   for (const pw of input.profileWeights) {
     if (!dimConf.has(pw.dimension_code)) continue;
     gConfNum += dimConf.get(pw.dimension_code)! * pw.weight;
+    gBasisNum += (dimBasis.get(pw.dimension_code) ?? 0) * pw.weight;
     gConfW += pw.weight;
     if (!dimScore.has(pw.dimension_code)) continue;
     gScoreNum += dimScore.get(pw.dimension_code)! * pw.weight;
     gScoreW += pw.weight;
   }
   const rated = gScoreW > 0;
-  const score = rated ? clamp01(gScoreNum / gScoreW) : 0;
+  const rawScore = rated ? clamp01(gScoreNum / gScoreW) : 0;
   const confidence = gConfW > 0 ? clamp01(gConfNum / gConfW) : 0;
+  const basis = gConfW > 0 ? clamp01(gBasisNum / gConfW) : 0;
+  // Une note excellente exige une base solide : bien noté sur le peu qu'on sait
+  // ne suffit pas pour un A (même logique que la Règle 3 sur les promesses).
+  const cappedByBasis = rawScore >= 0.8 && basis < (input.params.min_basis_for_top_grade ?? 0);
+  const score = cappedByBasis ? 0.79 : rawScore;
 
   // Fraîcheur : date d'observation la plus récente parmi les preuves retenues.
   let last_observed: string | null = null;
@@ -566,7 +618,10 @@ export function computeScore(input: ScoreInput): ScoreResult {
     confidence,
     grade: toGrade(score),
     rated,
-    publishable: rated && confidence >= input.params.min_confidence_to_publish,
+    publishable: rated && confidence >= input.params.min_confidence_to_publish
+      && basis >= (input.params.min_basis_to_publish ?? 0),
+    basis,
+    capped_by_basis: cappedByBasis || undefined,
     dimensions: dimResults.sort((a, b) => a.dimension_code.localeCompare(b.dimension_code)),
     groups,
     last_observed,

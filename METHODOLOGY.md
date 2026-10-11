@@ -109,6 +109,15 @@ publié **ou** que DIAMS n'ait pas encore collecté l'information. Dans les deux
 la fiabilité reste basse et la note n'est pas affichée sous le seuil (Règle 5) ;
 c'est aussi pourquoi la collecte commence par les données obligatoires.
 
+**Se conformer à la loi ne rapporte pas de points** *(depuis v0.6.0, pendant de
+la Règle 1)*. Pour un indicateur de **publication** (plan de vigilance, émissions
+de scope 3, déclaration pays par pays), quand la loi impose à l'entreprise de
+publier : publié en entier, c'est une obligation respectée — comptée dans la
+fiabilité, pas dans la note ; publié en partie, c'est un manquement partiel,
+compté ; absent, il compte 0. Quand la publication est **volontaire**, elle reste
+un plus. Sans cette règle, un groupe français serait récompensé d'obéir à la loi
+française face à un groupe américain qui n'y est pas soumis.
+
 ### Règle 2 — Solidité des sources : pondérée et plafonnée
 
 Le `tier` de la source conditionne le poids ET le plafond d'impact d'une
@@ -169,6 +178,24 @@ insuffisantes », sans note ni rang, et **sa fiche n'affiche aucune lettre**
 un mauvais résultat, ni — maintenant que les manquants non obligatoires sont
 exclus — comme un bon. Note, fiabilité et fraîcheur sont les **trois axes de
 confiance** affichés séparément.
+
+**Base de la note** *(depuis v0.6.0)*. La fiabilité dit ce qu'on sait d'une
+entité ; la **base** dit sur quelle part du socle sa note repose réellement
+(indicateurs documentés et comparables, plus les obligatoires manquants comptés
+0). Une donnée connue peut ne pas entrer dans la note (obligation respectée, rang
+impossible faute de pairs) : base et fiabilité diffèrent alors. Deux seuils :
+
+- **publication** : base d'au moins **30 %** (`min_basis_to_publish`), en plus
+  de la fiabilité ;
+- **note A** : base d'au moins **50 %** (`min_basis_for_top_grade`) ; en
+  dessous, la note est **plafonnée à 79** (B), et la fiche le dit. Être bien noté
+  sur le peu qu'on sait ne suffit pas pour une note excellente — même logique
+  que la Règle 3 pour les promesses. Avant cette règle, un brasseur qui ne
+  publiait rien sur son conseil ni sur ses salaires obtenait 100/100 sur trois
+  indicateurs favorables.
+
+Un mauvais résultat n'est pas plafonné symétriquement : il repose, le plus
+souvent, sur des obligations légales non tenues (Règle 1).
 
 ### Règle 6 — Comparaison à périmètre égal (alternatives)
 
@@ -433,6 +460,14 @@ Le profil appliqué par défaut est **Équilibré**. La pondération est fixée 
 serveur (pas de réglage libre côté visiteur, pour garder des notes comparables et
 non « bricolables »).
 
+**Matérialité sectorielle** *(depuis v0.6.0, décision de l'éditeur)*. Le poids
+d'un pilier, fixé par le profil, est multiplié par un coefficient propre au
+secteur quand l'impact du secteur s'y concentre (table
+`sector_dimension_weights`, affichée sur la fiche). Aujourd'hui : **énergie,
+pilier climat ×3** — production et vente d'énergies fossiles. Sans ce
+coefficient, une major pétrolière exemplaire sur ses obligations de publication
+obtenait B malgré un impact climatique de premier ordre.
+
 ---
 
 ## 6. Sources et tiers de fiabilité
@@ -487,6 +522,13 @@ dont l'égalité est le meilleur rang, qu'il soit en faveur des hommes ou des
 femmes). Normaliser à la main
 fausserait la comparaison sectorielle.
 
+**Au moins 5 pairs** *(depuis v0.6.0)*. Un rang n'est noté que face à au moins
+cinq entreprises du même secteur ayant publié la même donnée
+(`min_peers_for_rank`). En dessous, il ne dit rien — dans l'énergie, TotalEnergies,
+Engie et Shell seuls se partageaient les rangs 83, 50 et 17 en fiscalité : la
+valeur est affichée et compte dans la fiabilité, pas dans la note. Les rangs
+reviennent à mesure que la collecte élargit le secteur.
+
 ---
 
 ## 8. Statut
@@ -513,7 +555,11 @@ calcul (tables de config) doit être datée et justifiée ici.
   part des investissements alignés sur la taxonomie verte de l'UE
   (`ENV_TAXONOMY_CAPEX`, obligation `EU_TAXONOMY_ART8`), énergie et automobile
   seulement (pertinence sectorielle par liste), valeur absolue sur le périmètre
-  réglementaire.
+  réglementaire. Matérialité sectorielle (énergie : climat ×3). Se conformer à
+  la loi ne rapporte pas de points (publication obligatoire faite : fiabilité
+  seulement). Rang noté seulement face à 5 pairs au moins. Base de la note :
+  publication à partir de 30 % du socle, note A à partir de 50 % (sinon plafond
+  à 79).
 - **0.5.1 (11/10/2026)** — Labels et certifications tiers (Finansol, B Corp)
   comptés comme résultats quand ils sont attestés ; leur absence ne pèse ni sur
   la note ni sur la fiabilité ; base de données ONU
