@@ -2,6 +2,7 @@ import { marked } from "marked";
 import { METHODOLOGY_MD } from "@/lib/methodology";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Méthodologie" };
 
 // La méthodologie est la source versionnée METHODOLOGY.md, embarquée à la
 // compilation (cf. lib/methodology.ts) : aucune lecture de fichier au runtime,

@@ -4,6 +4,15 @@ import { CompanyScore } from "@/components/CompanyScore";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const payload = await getScorePayload(slug).catch(() => null);
+  const name = payload?.entity?.name;
+  return name
+    ? { title: name, description: `${name} : note éthique DIAMS, pilier par pilier, chaque point relié à sa source officielle.` }
+    : { title: "Entité introuvable" };
+}
+
 export default async function CompanyPage({
   params,
 }: {

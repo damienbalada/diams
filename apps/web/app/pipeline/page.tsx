@@ -1,6 +1,7 @@
 import { CONNECTORS, GUARDS } from "@/lib/connectors";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Sources et collecte" };
 
 // Page statique de transparence : décrit comment les faits entrent dans DIAMS.
 // Aucune donnée externe, aucun accès base — c'est une page d'explication.

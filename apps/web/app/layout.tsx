@@ -3,9 +3,15 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "DIAMS — Documented, Independent, Auditable, Multi-criteria Scoring",
+  title: { default: "DIAMS — l'éthique des entreprises, preuves à l'appui", template: "%s · DIAMS" },
   description:
-    "DIAMS : score éthique d'entreprise multi-critères, chaque point traçable jusqu'à sa source datée.",
+    "Une note éthique par entreprise, fondée sur des preuves officielles datées et vérifiées mot pour mot : climat, travail, gouvernance, fiscalité, droits humains.",
+  openGraph: {
+    title: "DIAMS — l'éthique des entreprises, preuves à l'appui",
+    description: "Chaque note renvoie à sa source officielle. Quand les données manquent, on le dit.",
+    locale: "fr_FR",
+    type: "website",
+  },
 };
 
 // Zoom laissé libre (pas de maximum-scale) pour l'accessibilité.

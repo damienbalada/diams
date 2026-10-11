@@ -2,6 +2,7 @@ import { getAllScores, listSectors, type EntityScore } from "@/lib/data";
 import { rankBySector, sectorAnchor, type SectorInfo } from "@/lib/ranking";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Classement par secteur" };
 
 const gradeColor: Record<string, string> = {
   A: "var(--a)", B: "var(--b)", C: "var(--c)", D: "var(--d)", E: "var(--e)",

@@ -162,3 +162,11 @@ non rattachée : transpositions suédoise et allemande non sourcées.
   du conseil de surveillance non localisés.
 - **Mercedes-Benz, Nestlé, Henkel** : rapports 2025 non téléchargeables par un
   programme (accès refusé ou lien chargé en JavaScript) : à collecter.
+
+## Kering (compléments)
+
+- Plan de vigilance : cartographie des risques « réalisée dans le cadre du
+  devoir de vigilance » et dispositif de suivi cités : retenu (complet).
+- Taux d'impôt effectif 2025 de 78,2 % (« du fait, principalement, de la non
+  reconnaissance d'impôts différés ») : année atypique ; le retenir classerait
+  Kering premier en fiscalité : non retenu.
