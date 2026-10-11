@@ -90,7 +90,7 @@ async function build() {
     "dimension_gates", "sources", "source_tier_config", "evidence_nature_config", "scoring_params",
     "value_profiles", "profile_weights", "entities", "evidence", "political_groups",
     "civic_votes", "civic_positions", "disclosure_regimes", "indicator_regimes", "entity_regimes",
-    "indicator_sectors",
+    "indicator_sectors", "sector_dimension_weights",
   ]) T[t] = await fetchAll(t);
 
   const code = (rows, field = "code") => new Map(rows.map((r) => [r.id, r[field]]));
@@ -130,17 +130,22 @@ async function build() {
       [ref("dimension_groups", "code", dgroup.get(r.group_id)), ref("dimensions", "code", dim.get(r.dimension_id)), lit(r.weight)])));
 
   section("Indicateurs", upsert("indicators",
-    ["code", "dimension_id", "name", "kind", "direction", "sector_specific", "applies_to_sector_id", "weight", "unit", "methodology", "presence_only", "jurisdiction", "complementary", "group_level"], ["code"],
+    ["code", "dimension_id", "name", "kind", "direction", "sector_specific", "applies_to_sector_id", "weight", "unit", "methodology", "presence_only", "jurisdiction", "complementary", "group_level", "disclosure"], ["code"],
     [...T.indicators].sort(by((r) => r.code)).map((r) => [
       lit(r.code), ref("dimensions", "code", dim.get(r.dimension_id)), lit(r.name), lit(r.kind), lit(r.direction),
       lit(r.sector_specific), ref("sectors", "code", sector.get(r.applies_to_sector_id)), lit(r.weight), lit(r.unit), lit(r.methodology),
-      lit(r.presence_only), lit(r.jurisdiction), lit(r.complementary ?? false), lit(r.group_level ?? false),
+      lit(r.presence_only), lit(r.jurisdiction), lit(r.complementary ?? false), lit(r.group_level ?? false), lit(r.disclosure ?? false),
     ])));
 
   section("Pertinence sectorielle par liste", upsert("indicator_sectors",
     ["indicator_id", "sector_id"], ["indicator_id", "sector_id"],
     [...T.indicator_sectors].sort(by((r) => `${ind.get(r.indicator_id)}|${sector.get(r.sector_id)}`)).map((r) =>
       [ref("indicators", "code", ind.get(r.indicator_id)), ref("sectors", "code", sector.get(r.sector_id))])));
+
+  section("Matérialité sectorielle", upsert("sector_dimension_weights",
+    ["sector_id", "dimension_id", "multiplier", "note"], ["sector_id", "dimension_id"],
+    [...T.sector_dimension_weights].sort(by((r) => `${sector.get(r.sector_id)}|${dim.get(r.dimension_id)}`)).map((r) =>
+      [ref("sectors", "code", sector.get(r.sector_id)), ref("dimensions", "code", dim.get(r.dimension_id)), lit(r.multiplier), lit(r.note)])));
 
   section("Gates (plafonds de pilier)", upsert("dimension_gates",
     ["dimension_id", "gate_indicator_id", "default_ceiling", "notes"], ["dimension_id"],

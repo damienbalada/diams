@@ -1,48 +1,50 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { basicAuthMatches, isAdmin, isAdminPath } from "./lib/basic-auth";
 
-// Protection au niveau de l'app (indépendante du plan Vercel) : mot de passe
-// HTTP Basic. Garde le site privé tant qu'on ne veut pas le rendre public.
+// Protection au niveau de l'app (indépendante du plan Vercel) : HTTP Basic.
 //
-// Aucun identifiant en dur : SITE_USER / SITE_PASSWORD DOIVENT être définis
-// dans l'environnement (Vercel → Settings → Environment Variables). Si le mot
-// de passe est absent, on refuse tout (fail-closed) plutôt que de retomber sur
-// une valeur par défaut publique — un secret versionné n'est plus un secret.
-// Ce n'est PAS un coffre-fort : juste un mur pendant le développement.
-const USER = process.env.SITE_USER || "diams";
-const PASS = process.env.SITE_PASSWORD;
+// Aucun identifiant en dur : les mots de passe DOIVENT être définis dans
+// l'environnement (Vercel → Settings → Environment Variables). S'ils manquent,
+// on refuse (fail-closed) plutôt que de retomber sur une valeur publique.
+//
+//  - Site : SITE_USER / SITE_PASSWORD tant qu'il est privé. SITE_PUBLIC=1 l'ouvre
+//    au public (lancement presse) : seul le back-office reste protégé.
+//  - Back-office (/admin) : ADMIN_USER / ADMIN_PASSWORD, toujours exigés et
+//    distincts de ceux du site. Les actions serveur du back-office revérifient
+//    ces identifiants (une action Next.js peut être appelée depuis n'importe
+//    quelle adresse : le chemin seul ne suffit pas).
+const SITE_USER = process.env.SITE_USER || "diams";
+const SITE_PASS = process.env.SITE_PASSWORD;
+const SITE_PUBLIC = process.env.SITE_PUBLIC === "1";
 
-/** Comparaison à temps constant (évite de fuiter le secret par timing). */
-function safeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
+const challenge = (realm: string) =>
+  new NextResponse("Authentification requise.", {
+    status: 401,
+    headers: { "WWW-Authenticate": `Basic realm="${realm}", charset="UTF-8"` },
+  });
 
 export function middleware(req: NextRequest) {
-  if (!PASS) {
+  const auth = req.headers.get("authorization");
+
+  if (isAdminPath(req.nextUrl.pathname)) {
+    if (!process.env.ADMIN_PASSWORD) {
+      return new NextResponse(
+        "Back-office fermé : la variable d'environnement ADMIN_PASSWORD n'est pas définie.",
+        { status: 503 },
+      );
+    }
+    return isAdmin(auth) ? NextResponse.next() : challenge("DIAMS administration");
+  }
+
+  if (SITE_PUBLIC) return NextResponse.next();
+  if (!SITE_PASS) {
     return new NextResponse(
       "Configuration incomplète : la variable d'environnement SITE_PASSWORD n'est pas définie.",
       { status: 503 },
     );
   }
-  const auth = req.headers.get("authorization");
-  if (auth?.startsWith("Basic ")) {
-    try {
-      const decoded = atob(auth.slice(6));
-      const idx = decoded.indexOf(":");
-      const u = decoded.slice(0, idx);
-      const p = decoded.slice(idx + 1);
-      if (safeEqual(u, USER) && safeEqual(p, PASS)) return NextResponse.next();
-    } catch {
-      // en-tête malformé -> demande d'authentification
-    }
-  }
-  return new NextResponse("Authentification requise.", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="DIAMS", charset="UTF-8"' },
-  });
+  return basicAuthMatches(auth, SITE_USER, SITE_PASS) ? NextResponse.next() : challenge("DIAMS");
 }
 
 // S'applique à tout sauf les assets statiques.

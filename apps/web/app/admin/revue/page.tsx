@@ -1,16 +1,18 @@
 import { revalidatePath } from "next/cache";
-import { getAdminSupabase, listPendingEvidence, setReviewStatus } from "@/lib/admin";
+import { getAdminSupabase, requireAdmin, listPendingEvidence, setReviewStatus } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
 async function approve(formData: FormData) {
   "use server";
+  await requireAdmin();
   await setReviewStatus(String(formData.get("id")), "approved", "revue-manuelle");
   revalidatePath("/admin/revue");
 }
 
 async function reject(formData: FormData) {
   "use server";
+  await requireAdmin();
   await setReviewStatus(String(formData.get("id")), "rejected", "revue-manuelle");
   revalidatePath("/admin/revue");
 }

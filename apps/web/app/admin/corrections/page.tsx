@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import {
   getAdminSupabase,
+  requireAdmin,
   listPendingCorrections,
   setCorrectionStatus,
 } from "@/lib/admin";
@@ -10,12 +11,14 @@ export const dynamic = "force-dynamic";
 
 async function accept(formData: FormData) {
   "use server";
+  await requireAdmin();
   await setCorrectionStatus(String(formData.get("id")), "accepted");
   revalidatePath("/admin/corrections");
 }
 
 async function reject(formData: FormData) {
   "use server";
+  await requireAdmin();
   await setCorrectionStatus(String(formData.get("id")), "rejected");
   revalidatePath("/admin/corrections");
 }

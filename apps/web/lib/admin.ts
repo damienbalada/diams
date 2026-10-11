@@ -1,6 +1,18 @@
 import "server-only";
+import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
+import { isAdmin } from "./basic-auth";
 import type { CorrectionInput } from "./corrections";
+
+/**
+ * À appeler en tête de chaque action serveur du back-office : une action
+ * Next.js peut être invoquée depuis n'importe quelle adresse, la protection du
+ * chemin /admin par le middleware ne suffit donc pas.
+ */
+export async function requireAdmin(): Promise<void> {
+  const h = await headers();
+  if (!isAdmin(h.get("authorization"))) throw new Error("Accès réservé à l'administration.");
+}
 
 // Back-office UNIQUEMENT. Utilise la service_role (contourne la RLS) :
 // - variable SERVEUR (pas de préfixe NEXT_PUBLIC_) → jamais envoyée au navigateur ;
