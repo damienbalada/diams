@@ -104,7 +104,10 @@ appl as (
     and (d.code <> 'PLA' or (select plastic_relevant from me_wap))
     and (d.code <> 'WAT' or (select water_relevant from me_wap))
     and (d.code <> 'INV' or (select inv_relevant from me_wap))
-    and (i.jurisdiction is null or i.jurisdiction = (select country from me))
+    -- Dispositif national : pour un indicateur de groupe, c'est le pays du groupe
+    -- qui compte (le plan de vigilance de Kering couvre Gucci).
+    and (i.jurisdiction is null
+         or i.jurisdiction = case when i.group_level then (select country from root) else (select country from me) end)
 ),
 ev as (
   select a.code as indicator_code, s.tier, e.nature, e.normalized_value, e.value_numeric,
