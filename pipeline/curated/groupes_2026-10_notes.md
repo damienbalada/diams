@@ -146,3 +146,19 @@ non rattachée : transpositions suédoise et allemande non sourcées.
   ratio S1-16 non localisés.
 - **BMW** : ratio S1-16 et intensité carbone déclarés matériels mais non
   localisés en chiffres. Écart salarial « –9.9% » (en faveur des femmes).
+
+## Unilever (ESEF 2025, en anglais), Volkswagen (rapport annuel 2025)
+
+- **Unilever** (Royaume-Uni, CSRD non applicable) : écart salarial publié
+  « (52) % » ; en notation comptable, les parenthèses signifient une valeur
+  négative (-52 %, femmes mieux payées en moyenne), chiffre très inhabituel :
+  non retenu sans lecture humaine. Ratio britannique PDG / salariés du
+  Royaume-Uni (« 62:1 », obligation UK) non retenu : son périmètre (salaires
+  britanniques) le rend incomparable aux ratios mondiaux des pairs ; retenu le
+  ratio ESRS du groupe (286). « Non-Executive Directors … 80% » n'est pas un
+  taux d'indépendance : non retenu.
+- **Volkswagen** : intensité carbone publiée en kg CO2e par euro (unité
+  différente des pairs, en t/M€) : non retenue. Écart et ratio S1-16, mixité
+  du conseil de surveillance non localisés.
+- **Mercedes-Benz, Nestlé, Henkel** : rapports 2025 non téléchargeables par un
+  programme (accès refusé ou lien chargé en JavaScript) : à collecter.

@@ -104,6 +104,51 @@ l'échelle. La suite passe par l'**ingestion par fichiers/API** via les connecte
 
 ---
 
+### Phase 2 — tous les secteurs, par les dépôts officiels (11/10/2026)
+
+**Méthode** (celle qui a rendu la banque publiable, étendue) : pour chaque groupe
+coté, les données **obligatoires** lues dans ses dépôts officiels, citations
+vérifiées mot pour mot par `verify_curated`, obligations rattachées seulement
+après lecture complète (voir METHODOLOGY.md, Règle 1) ; chaque donnée écartée
+justifiée dans `pipeline/curated/groupes_2026-10_notes.md`.
+
+- **France** : rapports ESEF (filings.xbrl.org) ou documents d'enregistrement
+  universels déposés à l'AMF (BDIF) — L'Oréal, Pernod Ricard, Renault,
+  TotalEnergies, Engie, LVMH, Kering, Hermès, Carrefour, Danone, Bonduelle.
+- **États-Unis** : SEC (taux d'impôt XBRL, ratio PDG / médian Item 402(u),
+  indépendance du conseil) — 19 sociétés.
+- **Europe hors France** : ESEF en anglais (Heineken, AB InBev, Shell,
+  Stellantis, Unilever) ou rapport annuel légal (H&M, adidas, BMW, Beiersdorf,
+  Volkswagen).
+- Correctifs de méthode publiés : pilier Investissements réservé à la finance,
+  pertinence géographique (Égapro, plan de vigilance), labels sans malus,
+  rang intra-secteur jamais présenté comme un signal sous 5 pairs.
+
+**Mesure au 11/10/2026 : 21 entités publiables** (contre 6 la veille) —
+banque 6, énergie 3/3 (TotalEnergies B, Engie B, Shell C), automobile 3 (BMW A,
+Renault B, Stellantis C), grande consommation 3 (L'Oréal B, Danone B,
+Coca-Cola C), mode 2 (H&M B, adidas C), luxe 1 (LVMH C), distribution 1
+(Carrefour B), spiritueux 1 (Pernod Ricard B), tech 1 (Alphabet B).
+
+**Reste à faire, par ordre d'impact :**
+1. **Juste sous le seuil** (27-29 %) : Apple, Microsoft, Heineken, Meta,
+   Amazon, Starbucks, McDonald's. Une ou deux données de plus suffisent ; les
+   dépôts américains n'imposent plus de données climat (règle SEC abandonnée) :
+   passer par leurs rapports de durabilité (tier 3, revue humaine) ou par le CDP.
+2. **Restauration et hygiène-beauté** : aucune entité publiable. Colgate,
+   Kenvue, Beiersdorf, Henkel ; groupes de restauration américains.
+3. **Rapports non téléchargeables par programme** : Mercedes-Benz, Nestlé,
+   Henkel (accès refusé ou lien en JavaScript), Inditex (lien non trouvé) — un
+   téléchargement manuel du PDF suffit ensuite à la vérification.
+4. **Japon, Corée, Suisse, sociétés non cotées** (Toyota, Sony, Samsung,
+   Richemont, Chanel, Mars, Ferrero, Lactalis, IKEA, Schwarz, Decathlon) : pas
+   de dépôt lisible ; EDINET (Japon) demande une clé d'accès.
+5. Lobbying américain : le registre du Sénat (LDA) exige désormais une clé.
+6. API publique `compute_score` : redéployer avec le moteur courant (le champ
+   d'affichage `peer_count` y manque ; les notes sont identiques).
+
+---
+
 ## Axe A — Couverture des données **obligatoires**, juridiction par juridiction
 
 Chaque régime réglementaire = un connecteur déterministe. Ordre proposé (du plus
