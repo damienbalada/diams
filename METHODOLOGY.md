@@ -342,6 +342,15 @@ déterministes, qui lisent les données publiées par ces organismes : une
 entreprise absente n'a pas été évaluée, ce n'est pas une donnée manquée. Ces
 indicateurs sont donc complémentaires.
 
+**Indicateurs nés d'une obligation légale.** L'écart de rémunération non ajusté,
+l'intensité carbone et les émissions de scope 3 (CSRD), la part verte des
+investissements (taxonomie de l'UE) et le ratio de rémunération (CSRD ; Reg. S-K
+aux États-Unis) n'ont qu'une source systématique : l'obligation de les publier.
+Ils ne sont au socle que pour les entreprises qui y sont soumises — là, un
+manquant compte 0 (Règle 1). Ailleurs, publiés volontairement, ils comptent ;
+absents, ils ne pèsent ni sur la note ni sur la fiabilité : rien n'oblige un
+groupe américain ou japonais à les publier.
+
 Le **socle**, ce sont tous les autres indicateurs applicables : publications
 obligatoires (CSRD, Égapro, plan de vigilance, ratio de rémunération),
 évaluations ouvertes à toutes les grandes entreprises (CDP, SBTi,
@@ -567,6 +576,10 @@ calcul (tables de config) doit être datée et justifiée ici.
   citations vérifiées mot pour mot (Break Free From Plastic, rapports annuels
   déposés à l'AMF, InfluenceMap) ; 52 lignes invérifiables sont remises en
   attente (hors des notes) jusqu'à vérification ; aucune n'est supprimée.
+  Indicateurs nés d'une obligation légale (écart de rémunération, ratio de
+  rémunération, intensité carbone, scope 3, taxonomie) au socle seulement pour
+  les entreprises qui y sont soumises ; Global Commitment (plastique), liste
+  fermée close en 2025 : complémentaire.
 - **0.5.1 (11/10/2026)** — Labels et certifications tiers (Finansol, B Corp)
   comptés comme résultats quand ils sont attestés ; leur absence ne pèse ni sur
   la note ni sur la fiabilité ; base de données ONU
