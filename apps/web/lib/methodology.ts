@@ -213,19 +213,27 @@ change pas sa véracité.
 *(Révisée en v0.6.0.)* Certains indicateurs relèvent **par nature du groupe** :
 une marque n'a ni conseil d'administration, ni taux d'impôt, ni registre de
 lobbying, ni plan de vigilance à elle — c'est le groupe qui les publie, et c'est
-lui qui reçoit l'argent. Pour ces indicateurs (drapeau \`group_level\` :
-gouvernance, fiscalité, lobbying et influence politique, climat et eau au niveau
-du groupe, rémunérations, devoir de vigilance, financements), la marque **reprend
+lui qui reçoit l'argent. Le critère : **ce que mesure la source**. Pour les
+indicateurs dont la source ne mesure que le groupe (drapeau \`group_level\` :
+gouvernance, fiscalité, lobbying et influence politique, climat et eau,
+rémunérations et pratiques sociales internes, devoir de vigilance, liste
+fournisseurs, allégations, financements, mais aussi plastique — Break Free From
+Plastic attribue les déchets audités au groupe propriétaire, le Global Commitment
+évalue ses engagements — et politique de bien-être animal évaluée par le BBFAW),
+la marque **reprend
 les preuves de son groupe**, signalées « donnée du groupe » sur la fiche, et ses
 obligations de publication (Règle 1). Une valeur reprise est classée parmi les
 pairs du **secteur du groupe** : la marque porte exactement le rang de son
 groupe. Une preuve propre à la marque passe toujours devant.
 
-Les indicateurs qui relèvent du **produit** restent propres à la marque : bien-être
-animal (et son plafond), plastique, transparence de la chaîne textile, labels.
-Une marque de mode qui n'utilise ni cuir ni fourrure ne porte pas le plafond
-« exploitation animale » de son propriétaire, et la certification d'un groupe ne
-labellise pas ses marques. *(De v0.5.0 à v0.6.0, une marque n'héritait de rien :
+Restent propres à la marque les indicateurs qui relèvent du **produit** ou que la
+source mesure marque par marque : matières animales (fourrure, cuir, peaux
+exotiques, laine, duvet) et plafond d'exploitation animale, transparence textile
+(Fashion Transparency Index), matières (Textile Exchange), labels, et l'index
+Égapro (dû par chaque société employeuse). Une marque de mode qui n'utilise ni
+cuir ni fourrure ne porte pas le plafond « exploitation animale » de son
+propriétaire, une marque 100 % végétale sort du pilier animal de son groupe, et
+la certification d'un groupe ne labellise pas ses marques. *(De v0.5.0 à v0.6.0, une marque n'héritait de rien :
 presque aucune n'atteignait le seuil de publication, faute de données propres.)*
 
 La fiche d'une marque affiche **toujours** son groupe propriétaire — avec un lien
@@ -472,10 +480,11 @@ calcul (tables de config) doit être datée et justifiée ici.
 **Journal :**
 - **0.6.0 (11/10/2026)** — Règle 8 révisée : une marque reprend les preuves et
   obligations de son groupe pour les indicateurs qui relèvent du groupe
-  (gouvernance, fiscalité, lobbying, climat, rémunérations, vigilance,
+  (critère : ce que mesure la source — gouvernance, fiscalité, lobbying, climat,
+  eau, rémunérations, vigilance, plastique, politique animale BBFAW,
   financements), signalées « donnée du groupe » et classées parmi les pairs du
-  secteur du groupe ; les indicateurs liés au produit (animaux, plastique,
-  textile, labels) restent propres à la marque. Socle d'indicateurs : un
+  secteur du groupe ; les indicateurs liés au produit (matières animales,
+  transparence textile, labels, Égapro) restent propres à la marque. Socle d'indicateurs : un
   indicateur complémentaire (pas de source systématique, ou recensement de
   controverses) absent ne pèse ni sur la note ni sur la fiabilité, sauf
   publication obligatoire. Lobbying climat (InfluenceMap) compté dans la note

@@ -420,7 +420,9 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                 {" · "}{frDate(i.observed_on) ?? i.observed_on}
                 {i.peer_count !== undefined && (
                   <span title="Ce pourcentage est un rang : la valeur publiée comparée à celles des autres entreprises du secteur.">
-                    {" · "}rang parmi {i.peer_count} entreprises du secteur
+                    {" · "}{i.inherited_from
+                      ? `rang de ${i.inherited_from} parmi ${i.peer_count} entreprises de son secteur`
+                      : `rang parmi ${i.peer_count} entreprises du secteur`}
                   </span>
                 )}
                 {i.observed_on && i.observed_on < STALE_BEFORE && (
