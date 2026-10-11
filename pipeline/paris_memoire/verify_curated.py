@@ -179,6 +179,12 @@ ESEF_KEYWORDS = {
     "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques", r"suivi|contr[ôo]le du respect|compte rendu"],
     # Taxonomie verte UE (art. 8) : part des CapEx ALIGNÉS (pas seulement éligibles).
     "ENV_TAXONOMY_CAPEX": [r"taxonom", r"capex|capital expenditure", r"align"],
+    # Audit de marques Break Free From Plastic : classement des pollueurs.
+    "PLA_POLLUTER": [r"polluter|pollueur"],
+    # Recours à des matières animales (plafond du pilier animal).
+    "ANI_EXPLOITATION": [r"cuirs?|peaux?|fourrures?|crocodil|leather|skins?|fur\b"],
+    "ANI_FUR_FREE": [r"fourrure|fur\b"],
+    "GEO_LOBBYING_ALIGN": [r"InfluenceMap|Climate Policy Engagement"],
 }
 
 
@@ -260,7 +266,10 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False) -> Ve
 def document_text(url: str, client: httpx.Client) -> str:
     """Texte d'un document public (page web ou PDF), pour vérifier une citation."""
     from .connectors.sec import UA
-    r = client.get(url, timeout=300, follow_redirects=True, headers=UA if "sec.gov" in url else None)
+    # Identifiant déclaré : certains sites refusent celui, par défaut, de la
+    # bibliothèque HTTP ; la SEC exige le sien.
+    ua = UA if "sec.gov" in url else {"User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)"}
+    r = client.get(url, timeout=300, follow_redirects=True, headers=ua)
     r.raise_for_status()
     if url.lower().split("?")[0].endswith(".zip") or "zip" in r.headers.get("content-type", ""):
         # Paquet ESEF (dépôt AMF) : le rapport est le plus gros .xhtml du dossier reports/.

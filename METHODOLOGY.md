@@ -559,7 +559,14 @@ calcul (tables de config) doit être datée et justifiée ici.
   la loi ne rapporte pas de points (publication obligatoire faite : fiabilité
   seulement). Rang noté seulement face à 5 pairs au moins. Base de la note :
   publication à partir de 30 % du socle, note A à partir de 50 % (sinon plafond
-  à 79).
+  à 79). Indicateurs de contexte (budget de lobbying) : affichés, jamais notés.
+  **Audit de la saisie initiale** : les 248 lignes approuvées sans vérification
+  (curation-v1) ont été remplacées par des connecteurs lisant la donnée publiée
+  (KnowTheChain, BBFAW, KSE « Leave Russia », CDP 2025, Registre de transparence
+  UE, SBTi, Fashion Transparency Index 2023, Fur Free Retailer) ou par des
+  citations vérifiées mot pour mot (Break Free From Plastic, rapports annuels
+  déposés à l'AMF, InfluenceMap) ; 52 lignes invérifiables sont remises en
+  attente (hors des notes) jusqu'à vérification ; aucune n'est supprimée.
 - **0.5.1 (11/10/2026)** — Labels et certifications tiers (Finansol, B Corp)
   comptés comme résultats quand ils sont attestés ; leur absence ne pèse ni sur
   la note ni sur la fiabilité ; base de données ONU

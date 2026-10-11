@@ -158,6 +158,33 @@ python -m paris_memoire.import_benchmarks --benchmark bbfaw --file bbfaw.csv [--
 python -m paris_memoire.import_ktc [--apply]
 ```
 
+### `import_kse` — KSE Institute « Leave Russia » → `GEO_RUSSIA_EXIT` (publication auto)
+- Liste complète (plus de 4 000 entreprises) servie par le site lui-même ; statut
+  de chaque groupe : sortie effective 1,0 ; annoncée 0,85 ; suspension 0,7 ;
+  réduction 0,4 ; investissements gelés 0,2 ; activité poursuivie 0. Indicateur
+  complémentaire (une entreprise absente n'était pas présente en Russie).
+- Rapprochement : table explicite, puis nom exact ; jamais d'inclusion (« T&T
+  Group » ne doit pas désigner H&M).
+
+### `import_cdp_scores` — CDP, notes publiques de l'année → `ENV_CDP_CLIMATE`, `WAT_CDP`
+- Liste complète publiée par CDP (plus de 30 000 entreprises, visualisation
+  Flourish de la page « Scores and A Lists ») ; la lettre est lue dans le nom
+  de l'icône. « Did not disclose » = F (sollicitée, n'a pas répondu) ;
+  « Not Scored » et « See disclosing organisation » : pas de note.
+
+### `import_eu_register` — Registre de transparence de l'UE → `GEO_LOBBYING_TRANSP`, `GEO_LOBBYING_SPEND`
+- Export ouvert complet (XML 1.1, plus de 100 Mo, références de caractères de
+  contrôle neutralisées) ; catégorie « entreprises et groupes » seulement.
+- Budget déclaré : donnée de contexte (direction `contextual`), affichée,
+  jamais notée.
+
+### `import_fti` — Fashion Transparency Index 2023 → `SUP_FTI_SCORE`
+- Données ouvertes Wikirate (partenaire de Fashion Revolution), 250 marques ;
+  score sur 10 ramené en pourcentage. Indicateur complémentaire.
+
+### `import_fur_free` — Fur Free Retailer → `ANI_FUR_FREE` (label)
+- Liste des membres publiée par le programme ; un label : présent, il compte.
+
 ### `import_bbfaw` — BBFAW, rapport annuel → `ANI_BBFAW_TIER` (publication auto)
 - Lit la figure des tiers du rapport (`connectors/bbfaw.py`) : la colonne d'un
   nom est donnée par sa position sur la page ; les notes d'impact (A-F),
