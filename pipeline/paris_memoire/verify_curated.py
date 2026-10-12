@@ -268,6 +268,40 @@ def trend_score(rate_pct: float) -> float:
     return round(max(0.0, min(1.0, -rate_pct / TREND_FULL)), 4)
 
 
+# Variante : l'entreprise publie une variation en pourcentage depuis l'année de
+# référence (« 19% CO2 reduction vs. 2022 baseline in Scope 1, 2 and 3 »).
+# « … rythme annuel moyen (2022 → 2025, 3 ans) : (1 − 19 %)^(1/3) − 1 = −6,78 % »
+TREND_PCT_RE = re.compile(r"rythme annuel moyen \((\d{4}) → (\d{4}), (\d+) ans?\) : \(1 ([−+-]) ([\d,]+) %\)"
+                          r"\^\(1/(\d+)\) − 1 = ([−-]?[\d,]+) %")
+
+
+def check_trend_pct(row, quote: str) -> tuple[bool, list[str], bool]:
+    m = TREND_PCT_RE.search(row.excerpt or "")
+    if not m:
+        return True, [], False
+    y0, y1, n_s, sign, pct_s, n2_s, r_s = m.groups()
+    n = int(n_s)
+    pct = float(pct_s.replace(",", "."))
+    change = -pct if sign in "−-" else pct
+    rate = (pow(1 + change / 100, 1 / n) - 1) * 100
+    stated = float(r_s.replace("−", "-").replace(",", "."))
+    pct_forms = {pct_s, pct_s.replace(",", "."), f"{pct:g}"}
+    present = any(re.search(rf"(?<![\d.,]){re.escape(f)}\s?%", quote) for f in pct_forms)
+    years_ok = int(y1) - int(y0) == n and n_s == n2_s and n > 0 and (y0 in quote)
+    calc_ok = abs(rate - stated) <= 0.01
+    value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
+    norm_ok = row.normalized_value is not None and abs(row.normalized_value - trend_score(stated)) < 1e-3
+    span_ok = n >= TREND_MIN_YEARS_FOR_DECLINE or stated >= 0
+    ok = present and years_ok and calc_ok and value_ok and norm_ok and span_ok
+    return ok, [
+        f"variation {sign}{pct_s} % présente dans la citation {'✓' if present else '✗'}",
+        f"{y0} → {y1} = {n} an(s), année de référence citée {'✓' if years_ok else '✗'}",
+        f"durée suffisante pour une baisse ({n} an(s)) {'✓' if span_ok else '✗'}",
+        f"rythme recalculé {rate:.2f} % = déclaré {stated} % {'✓' if calc_ok else '✗'}",
+        f"valeur et note ({trend_score(stated)}) conformes {'✓' if value_ok and norm_ok else '✗'}",
+    ], True
+
+
 def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
     """Contrôle du rythme déclaré : années cohérentes, deux totaux présents dans la
     citation, calcul exact, valeur et note conformes. Le dernier booléen dit si la
@@ -349,6 +383,8 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
     ok &= fx_ok
     details += fx_details
     tr_ok, tr_details, tr_active = check_trend(row, quote)
+    if not tr_active:
+        tr_ok, tr_details, tr_active = check_trend_pct(row, quote)
     ok &= tr_ok
     details += tr_details
     if row.value_numeric is not None and not ignore_keywords and not tr_active:

@@ -278,3 +278,17 @@ def test_effectifs_en_notation_barre():
     q = "Director Nominee Highlights Board Composition 4 /10 women 6 /10 men"
     assert check_esef_quote(esef_row("GOV_BOARD_GENDER", 40.0, q), rep).status == "OK"
     assert check_esef_quote(esef_row("GOV_BOARD_GENDER", 45.0, q), rep).status == "ÉCART"
+
+
+
+def test_rythme_depuis_une_variation_publiee():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Reach net zero across our value chain by 2040 2025 progress and results 19% CO 2 reduction vs. 2022 baseline in Scope 1, 2 and 3 emissions"
+    q = "2025 progress and results 19% CO 2 reduction vs. 2022 baseline in Scope 1, 2 and 3 emissions"
+    calc = " ; rythme annuel moyen (2022 → 2025, 3 ans) : (1 − 19 %)^(1/3) − 1 = −6,78 %"
+    x = row("x", -6.78, f"Rapport : « {q} »{calc}", ind="ENV_GHG_TREND", src="ESEF")
+    x.normalized_value = 1.0
+    assert check_esef_quote(x, rep).status == "OK"
+    y = row("x", -6.78, f"Rapport : « {q} »{calc.replace('19 %', '29 %')}", ind="ENV_GHG_TREND", src="ESEF")
+    y.normalized_value = 1.0
+    assert check_esef_quote(y, rep).status == "ÉCART"   # pourcentage absent de la citation
