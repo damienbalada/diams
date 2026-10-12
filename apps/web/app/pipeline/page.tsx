@@ -68,12 +68,13 @@ export default function PipelinePage() {
       <div className="panel">
         <h3>Niveau de rattachement</h3>
         <p className="muted small">
-          Gouvernance, fiscalité et climat sont publiés au niveau du{" "}
-          <strong>groupe</strong>. Certains benchmarks notent directement une{" "}
-          <strong>marque</strong> (le Fashion Transparency Index note Gucci). Une marque
-          est notée sur <strong>ses propres preuves</strong>, sans hériter de celles de
-          son groupe ; sa fiche affiche toujours le groupe propriétaire et sa note,
-          parce que c'est lui qui reçoit l'argent.
+          Gouvernance, fiscalité, climat, lobbying et salaires chez les fournisseurs sont
+          publiés au niveau du <strong>groupe</strong> : une marque reprend ces données de
+          son groupe, signalées « donnée du groupe » sur sa fiche. Ce qui relève du produit
+          reste propre à la marque : matières et exploitation animales, transparence textile,
+          labels (l'indice de transparence de la mode note directement Gucci). La fiche d'une
+          marque affiche toujours le groupe propriétaire et sa note, parce que c'est lui qui
+          reçoit l'argent.
         </p>
       </div>
     </main>

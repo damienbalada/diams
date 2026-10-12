@@ -1,7 +1,8 @@
 # Méthodologie — DIAMS
 
-> **DIAMS** — **D**ocumented, **I**ndependent, **A**uditable, **M**ulti-criteria
-> **S**coring. Score éthique multi-critères et **traçable** : chaque point de note
+> **DIAMS** — **D**ocumenté, **I**ndépendant, **A**uditable, **M**ulticritère,
+> **S**ourcé (en anglais : *Documented, Independent, Auditable, Multi-criteria
+> Scoring*). Score éthique multi-critères et **traçable** : chaque point de note
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 

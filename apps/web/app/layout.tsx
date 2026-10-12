@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <div className="container">
           <header className="row between" style={{ marginBottom: 24 }}>
-            <a href="/" title="Documented, Independent, Auditable, Multi-criteria Scoring">
+            <a href="/" title="Documenté, Indépendant, Auditable, Multicritère, Sourcé">
               <strong>DIAMS</strong>
             </a>
             <span className="row" style={{ gap: 14 }}>

@@ -31,7 +31,7 @@ function Table({ rows, ranked = true }: { rows: EntityScore[]; ranked?: boolean 
             {ranked && <th style={{ textAlign: "left", padding: "6px 4px" }}>#</th>}
             <th style={{ textAlign: "left", padding: "6px 4px" }}>Entité</th>
             <th style={{ textAlign: "center", padding: "6px 4px" }}>Note</th>
-            <th className="col-hide-mobile" style={{ textAlign: "right", padding: "6px 4px" }}>Score</th>
+            <th className="col-hide-mobile" style={{ textAlign: "right", padding: "6px 4px" }}>Sur 100</th>
             <th style={{ textAlign: "right", padding: "6px 4px" }}>Fiabilité</th>
             <th className="col-hide-mobile" style={{ textAlign: "right", padding: "6px 4px" }}>Mis à jour</th>
           </tr>

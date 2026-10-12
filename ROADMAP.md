@@ -226,9 +226,10 @@ il exclut la majorité des utilisateurs comme des contributeurs de la revue
 Séquence : **FR seul** → **FR + EN** (le temps de la transition européenne) →
 **EN par défaut** + locales.
 
-Déjà acquis : la glose de l'acronyme est **déjà en anglais** (*Documented,
-Independent, Auditable, Multi-criteria Scoring*) et DIAMS se lit à l'identique
-dans les deux langues — la bascule ne coûtera aucun rebranding.
+Déjà acquis : l'acronyme se glose dans les deux langues avec les mêmes lettres
+(*Documenté, Indépendant, Auditable, Multicritère, Sourcé* ; *Documented,
+Independent, Auditable, Multi-criteria Scoring*) — la bascule ne coûtera aucun
+rebranding.
 
 Reste à faire, le jour J : extraire les libellés dans des fichiers de traduction
 (aucune chaîne en dur), traduire `METHODOLOGY.md` (le plus gros volume), et
