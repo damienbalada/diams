@@ -269,3 +269,12 @@ def test_baisse_sur_un_an_refusee_hausse_acceptee():
     assert check_esef_quote(baisse, rep).status == "ÉCART"
     hausse = r("Total GHG emissions (market-based) million tonnes 1,142 1,166 and 887.4 828.5", " ; rythme annuel moyen (2024 → 2025, 1 an) : (887,4 / 828,5)^(1/1) − 1 = 7,11 %", 7.11, 0.0)
     assert check_esef_quote(hausse, rep).status == "OK"
+
+
+
+def test_effectifs_en_notation_barre():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Director Nominee Highlights Board Composition 4 /10 women 6 /10 men 3 /10 members"
+    q = "Director Nominee Highlights Board Composition 4 /10 women 6 /10 men"
+    assert check_esef_quote(esef_row("GOV_BOARD_GENDER", 40.0, q), rep).status == "OK"
+    assert check_esef_quote(esef_row("GOV_BOARD_GENDER", 45.0, q), rep).status == "ÉCART"

@@ -222,10 +222,13 @@ _NUM = r"\d{1,2}|" + "|".join(sorted(_NUM_WORDS, key=len, reverse=True))
 _COUNT = re.compile(rf"\b({_NUM})\b(?:\s+\w+){{0,3}}?\s+(?:of|sur)\s+(?:our\s+|the\s+|its\s+)?({_NUM})\b", re.I)
 
 
+_SLASH = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2})\b")
+
+
 def _count_ratio_matches(value: float, quote: str) -> bool:
-    """« 11 of 12 director nominees », « six femmes Administratrices sur 14 » :
-    le pourcentage déclaré doit être le rapport des effectifs cités."""
-    for m in _COUNT.finditer(quote):
+    """« 11 of 12 director nominees », « six femmes Administratrices sur 14 »,
+    « 4 /10 women » : le pourcentage déclaré doit être le rapport des effectifs cités."""
+    for m in list(_COUNT.finditer(quote)) + list(_SLASH.finditer(quote)):
         a, b = (int(x) if x.isdigit() else _NUM_WORDS.get(x.lower()) for x in m.groups())
         if a is not None and b and a <= b and abs(round(100 * a / b, 1) - value) <= 0.05:
             return True

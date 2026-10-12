@@ -23,6 +23,22 @@ from .connectors import sbti
 from .load import EvidenceRow, insert_evidence
 
 
+def _label_fr(label: str) -> str:
+    """Statut SBTi en français (le statut d'origine reste dans value_text)."""
+    low = label.lower()
+    if "removed" in low:
+        return " : engagement retiré"
+    if "commit" in low:
+        return " : engagement à en fixer un"
+    if "validated" in low or "targets set" in low:
+        return " validé"
+    return f" : {label}"
+
+
+def _classif_fr(c: str) -> str:
+    return c.replace("Well-below 2°C", "bien en dessous de 2 °C").replace("1.5°C", "1,5 °C").replace("2°C", "2 °C")
+
+
 def build_rows(entities: list[dict], sbti_rows: list[sbti.SbtiRow], observed_on: str) -> list[EvidenceRow]:
     rows: list[EvidenceRow] = []
     for e in entities:
@@ -37,8 +53,8 @@ def build_rows(entities: list[dict], sbti_rows: list[sbti.SbtiRow], observed_on:
             value_text=m.label, normalized_value=m.normalized_value, confidence=0.85,
             source_url=sbti.SBTI_SOURCE_URL,
             excerpt=(f"SBTi, export « Companies taking action » (consulté le {observed_on[8:10]}/{observed_on[5:7]}/{observed_on[:4]}) : "
-                     f"« {m.company} » — objectif de court terme : {m.label}"
-                     + (f" ({m.classification})" if m.classification else "")
+                     f"« {m.company} » — objectif de court terme{_label_fr(m.label)}"
+                     + (f" ({_classif_fr(m.classification)})" if m.classification else "")
                      + (" (engagement retiré)." if m.nature == "result"
                         else " (objectif validé par la SBTi : un engagement sur l'avenir, pas un résultat)."
                         if m.normalized_value >= 0.6 else " (engagement à fixer un objectif, non encore validé).")),

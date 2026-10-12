@@ -525,7 +525,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
             </div>
           ))}
 
-          {covered.length === 0 && missing.length === 0 && (
+          {covered.length === 0 && missing.length === 0 && !d.indicators.some((i) => i.is_gate) && (
             <p className="muted small">Aucun indicateur applicable à ce pilier.</p>
           )}
         </div>

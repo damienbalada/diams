@@ -29,7 +29,7 @@ def test_kse_cards_status_and_unknown_skipped():
     assert rows[1].name == "L'Oreal" and rows[0].statement == "Transfer of the dairy business."
     assert fr_date(rows[0].decision_date) == "17/05/2024"
     r = build_row("danone", rows[0], "2026-10-11")
-    assert r.normalized_value == 1.0 and "Exit Completed" in r.excerpt and "17/05/2024" in r.excerpt
+    assert r.normalized_value == 1.0 and "sortie effective" in r.excerpt and "17/05/2024" in r.excerpt
 
 
 def test_kse_matching_exact_only():

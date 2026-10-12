@@ -53,9 +53,16 @@ export const MIN_PEERS = 5;
 
 const clip = (s: string, n = 220) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
 
-/** Le fait lui-même : la citation « … » si l'extrait en contient une (le contexte
- *  documentaire reste affiché dans le détail du pilier), sinon l'extrait entier. */
+/** Le fait lui-même. Quand l'extrait le résume en français après la citation
+ *  (« H&M » — note E : la marque ne verse…), c'est ce résumé ; sinon la citation
+ *  « … » (le contexte documentaire reste affiché dans le détail du pilier), sinon
+ *  l'extrait entier. */
 export const fact = (s: string) => {
+  const tail = s.match(/»\s*—\s*([^«»;]+)/);
+  if (tail) {
+    const t = tail[1].trim().replace(/\s*:$/, "");
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
   const m = s.match(/«\s*([\s\S]+?)\s*»/);
   return m ? `« ${m[1]} »` : s;
 };
@@ -83,6 +90,10 @@ const DESCRIBE: Record<string, (v: number | null | undefined) => string | null> 
   SUP_VIGILANCE_PLAN: () => "Plan de vigilance complet : cartographie des risques, alerte et suivi.",
   GEO_LOBBYING_TRANSP: () => "Déclare ses activités de lobbying dans un registre public.",
   TAX_CBCR_PUBLISHED: () => "Publie son activité et ses impôts pays par pays.",
+  ENV_GHG_TREND: (v) =>
+    v == null ? null
+      : v >= 0 ? `Émissions totales en hausse de ${fmt(v)} % par an.`
+      : `Émissions totales en baisse de ${fmt(-v)} % par an.`,
 };
 
 function toFlag(i: IndicatorResult, label: string, reason: FlagReason, fallback: string): Flag {

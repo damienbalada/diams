@@ -94,7 +94,7 @@ def build_row(slug: str, c: kse.KseCompany, today: str) -> EvidenceRow:
         value_text=c.status, normalized_value=kse.STATUS_VALUE[c.status], confidence=0.8,
         source_url=f"https://leave-russia.org/{c.slug}",
         excerpt=(f"KSE Institute, base « Leave Russia » (consultée le {dt.date.fromisoformat(today):%d/%m/%Y}) : "
-                 f"« {c.name} » — {c.status} ({kse.STATUS_FR[c.status]}){detail}"),
+                 f"« {c.name} » — {kse.STATUS_FR[c.status]}{detail}"),
         reviewer="import_kse",
     )
 
