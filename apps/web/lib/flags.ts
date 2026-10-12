@@ -58,7 +58,9 @@ const clip = (s: string, n = 220) => (s.length > n ? `${s.slice(0, n - 1).trimEn
  *  « … » (le contexte documentaire reste affiché dans le détail du pilier), sinon
  *  l'extrait entier. */
 export const fact = (s: string) => {
-  const tail = s.match(/»\s*—\s*([^«»;]+)/);
+  // Résumé en français juste après la citation (« X » — sortie effective ; …),
+  // ou en fin d'extrait (… (Sweden), climat — note A.).
+  const tail = s.match(/»\s*—\s*([^«»;]+)/) ?? s.match(/—\s*([^«»;—]+?)\s*$/);
   if (tail) {
     const t = tail[1].trim().replace(/\s*:$/, "");
     return t.charAt(0).toUpperCase() + t.slice(1);

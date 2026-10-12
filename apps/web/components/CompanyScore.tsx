@@ -382,7 +382,9 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
         <div className="pillar-name">
           {d.name}
           <small>
-            fiabilité {pct(d.confidence)} · {d.covered_indicators}/{d.applicable_indicators} indicateurs
+            fiabilité {pct(d.confidence)} · {d.applicable_indicators === 0 && d.indicators.some((i) => i.is_gate)
+              ? (d.indicators.some((i) => i.is_gate && i.covered) ? "niveau d'exploitation documenté" : "niveau d'exploitation présumé")
+              : `${d.covered_indicators}/${d.applicable_indicators} indicateurs`}
             <Tip label="Fiabilité de ce pilier">
               {d.covered_indicators} indicateur(s) documenté(s) sur {d.applicable_indicators} applicables.
               Tout manquant fait baisser la <strong>fiabilité</strong>. Dans la <strong>note</strong>, seuls
@@ -481,7 +483,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   {tierExplain[i.tier ?? ""] ?? "Fiabilité de la source selon son type."}
                 </Tip>
                 {" · "}{frDate(i.observed_on) ?? i.observed_on}
-                {i.peer_count !== undefined && !i.unrankable && (
+                {i.peer_count !== undefined && !i.unrankable && !i.informative && (
                   <span title="Ce pourcentage est un rang : la valeur publiée comparée à celles des autres entreprises du secteur.">
                     {" · "}{i.inherited_from
                       ? `rang de ${i.inherited_from} parmi ${i.peer_count} entreprises de son secteur`
