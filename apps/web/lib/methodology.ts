@@ -677,8 +677,14 @@ calcul (tables de config) doit être datée et justifiée ici.
   8 groupes de l'alimentation et de l'hygiène, de L'Oréal −37 % à Coca-Cola).
   Fiabilité : un indicateur complémentaire documenté ne peut plus la faire
   baisser. Gouvernance : indépendance et mixité des conseils de Meta et Mondelez
-  calculées depuis l'effectif cité. Preuves héritées sans citation retirées,
-  motif écrit (recensements non datés, articles de presse, pages d'accueil).
+  calculées depuis l'effectif cité, puis Apple, Amazon, Kenvue, Starbucks
+  (indépendance) et McDonald's, Restaurant Brands, Kraft Heinz (mixité). Preuves
+  héritées sans citation retirées, motif écrit (recensements non datés, articles
+  de presse, pages d'accueil) ; il en reste 2 sur 51 (site de Starbucks fermé
+  aux programmes, plan de vigilance de Decathlon introuvable). Rapport de l'ONU
+  A/HRC/59/23 : citations exactes pour Google, Amazon, Microsoft, BNP Paribas
+  (affichées hors note). Liste des fournisseurs : non comptée dans la mode,
+  où l'indice de transparence l'évalue déjà.
 - **0.7.2 (13/10/2026)** — Sanctions : l'indicateur ne retient plus que des
   décisions officielles (Commission européenne, autorités de protection des
   données), notées par la gravité de l'amende ; les anciennes lignes, sourcées
