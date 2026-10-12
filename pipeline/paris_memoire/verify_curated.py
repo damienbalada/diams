@@ -194,6 +194,8 @@ ESEF_KEYWORDS = {
                          r"|tested on animals"],
     "ANI_FUR_FREE": [r"fourrure|fur\b"],
     "GEO_LOBBYING_ALIGN": [r"InfluenceMap|Climate Policy Engagement"],
+    # Décision officielle d'une autorité : amende, ou infraction constatée sans amende.
+    "GOV_SANCTIONS": [r"fine[ds]?\b|amende|sanction"],
 }
 
 
@@ -342,6 +344,46 @@ def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
     ], True
 
 
+# Sanction d'une autorité : la gravité suit le montant de l'amende, relu dans la
+# citation officielle. « amende de 74,9 M€ » ↔ « Stellantis 50% €74 934 000 ».
+SANCTION_TIERS = ((1e9, 0.9), (1e8, 0.7), (0.0, 0.5))
+_SANCTION_VT = re.compile(r"amendes? de (?:plus de )?([\d ]+(?:,\d+)?) (M|Md)€")
+_EUR_EN = re.compile(r"€\s?(\d{1,3}(?:[ ,]\d{3})+|\d+(?:\.\d+)?)(?:\s?(billion|million))?", re.I)
+
+
+def sanction_severity(amount_eur: float) -> float:
+    """Amende d'au moins 1 Md€ = 0,9 ; de 100 M€ à 1 Md€ = 0,7 ; moins (ou infraction
+    sans amende, immunité de clémence) = 0,5."""
+    return next(sev for floor, sev in SANCTION_TIERS if amount_eur >= floor)
+
+
+def check_sanction(row, quote: str) -> tuple[bool, list[str]]:
+    vt = row.value_text or ""
+    if "immunité" in vt:
+        cited = re.search(r"not fined|immunity|immunité", quote, re.I) is not None
+        norm_ok = row.normalized_value is not None and abs(row.normalized_value - 0.5) < 1e-9
+        return cited and norm_ok, [
+            f"infraction constatée sans amende (immunité) citée {'✓' if cited else '✗'}",
+            f"sévérité 0,5 {'✓' if norm_ok else '✗'}"]
+    m = _SANCTION_VT.search(vt)
+    if not m:
+        return False, [f"montant illisible dans « {vt} » ✗"]
+    num_s, unit = m.groups()
+    decimals = len(num_s.split(",")[1]) if "," in num_s else 0
+    stated = float(num_s.replace(" ", "").replace(",", "."))
+    scale = 1e9 if unit == "Md" else 1e6
+    quoted = []
+    for n_s, word in _EUR_EN.findall(quote):
+        n = float(n_s.replace(" ", "").replace(",", "")) * {"billion": 1e9, "million": 1e6}.get(word.lower(), 1)
+        quoted.append(n)
+    present = any(round(q / scale, decimals) == stated for q in quoted)
+    sev = sanction_severity(stated * scale)
+    norm_ok = row.normalized_value is not None and abs(row.normalized_value - sev) < 1e-9
+    return present and norm_ok, [
+        f"montant {num_s} {unit}€ retrouvé dans la citation {'✓' if present else '✗'}",
+        f"sévérité {sev} conforme au barème {'✓' if norm_ok else '✗'}"]
+
+
 def check_fx(row, quote: str, rates: dict[tuple[str, str], float]) -> tuple[bool, list[str], float | None]:
     """Contrôle d'une conversion déclarée : taux = celui de la BCE, montant d'origine
     cité, produit exact à l'arrondi près, résultat = valeur. Renvoie le montant
@@ -387,6 +429,10 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         tr_ok, tr_details, tr_active = check_trend_pct(row, quote)
     ok &= tr_ok
     details += tr_details
+    if row.indicator_code == "GOV_SANCTIONS":
+        sc_ok, sc_details = check_sanction(row, quote)
+        ok &= sc_ok
+        details += sc_details
     if row.value_numeric is not None and not ignore_keywords and not tr_active:
         flat = re.sub(r"(?<=\d)\s(?=\d{3}(?!\d))", "", quote)  # espaces de milliers seulement
         target = fx_source if fx_source is not None else row.value_numeric
@@ -420,8 +466,32 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
     return Verdict("OK" if ok else "ÉCART", details)
 
 
+_PRESSCORNER = re.compile(r"ec\.europa\.eu/commission/presscorner/detail/([a-z]{2})/([a-z]+)_(\d{2})_(\d+)", re.I)
+
+
+def presscorner_text(url: str, client: httpx.Client) -> str | None:
+    """Communiqué de la Commission européenne : la page publique est une application
+    JavaScript ; son texte officiel est servi par l'interface du « press corner »
+    (même référence, IP/25/1992). Titre, sous-titre et corps, balises retirées."""
+    m = _PRESSCORNER.search(url)
+    if not m:
+        return None
+    lang, kind, yy, num = m.groups()
+    ref = f"{kind.upper()}/{yy}/{num}"
+    r = client.get("https://ec.europa.eu/commission/presscorner/api/documents",
+                   params={"reference": ref, "language": lang}, timeout=120,
+                   headers={"User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)"})
+    r.raise_for_status()
+    doc = r.json().get("docuLanguageResource") or {}
+    raw = " ".join(str(doc.get(k) or "") for k in ("title", "subtitle", "htmlContent"))
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", raw)))
+
+
 def document_text(url: str, client: httpx.Client) -> str:
     """Texte d'un document public (page web ou PDF), pour vérifier une citation."""
+    pc = presscorner_text(url, client)
+    if pc is not None:
+        return pc
     from .connectors.sec import UA
     # Identifiant déclaré : certains sites refusent celui, par défaut, de la
     # bibliothèque HTTP ; la SEC exige le sien.

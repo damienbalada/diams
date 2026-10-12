@@ -306,6 +306,15 @@ python -m paris_memoire.esrs_candidates --slug loreal --only GOV_BOARD_GENDER,EN
 - Signe : un écart publié « (8,0) % » (notation comptable) ou « supérieur pour
   les femmes » se lit négatif ; une valeur positive ne peut pas être confirmée
   par un nombre entre parenthèses.
+- Sanctions (`GOV_SANCTIONS`) : la valeur texte écrit le montant en français
+  (« amende de 74,9 M€ ») ; le montant est relu parmi les sommes en euros de la
+  citation (« Stellantis 50% €74 934 000 », « €1.8 billion »), arrondi à la
+  précision écrite, et la gravité recalculée (≥ 1 Md€ = 0,9 ; ≥ 100 M€ = 0,7 ;
+  sinon 0,5). Infraction sans amende (« immunité ») : la citation doit le dire.
+  Communiqués de la Commission européenne : l'adresse publique
+  `ec.europa.eu/commission/presscorner/detail/en/ip_25_1992` est une application
+  JavaScript ; le texte officiel est lu par l'interface du « press corner »
+  (`/api/documents?reference=IP/25/1992`).
 - `import_curated --apply --update-pending` corrige une preuve encore en attente
   (jamais une preuve déjà revue).
 - Verdicts : `OK` (approuvable, reviewer `auto:verify_curated`), `ÉCART`,

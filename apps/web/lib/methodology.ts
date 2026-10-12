@@ -8,7 +8,7 @@ export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : \`0.7.1\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.7.2\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -202,6 +202,45 @@ protège le label du reproche de parti pris tout en préservant la transparence.
 > spéciale de l'ONU (source contestée, non recoupée par la base « consensus »
 > OHCHR) sont **affichées mais non comptées** tant qu'aucune source consensus
 > ou décision de justice ne corrobore.
+
+### Décisions d'autorités : sanctions et allégations trompeuses
+
+*(v0.7.2)* Deux indicateurs de controverse ne retiennent **que des décisions
+officielles** de moins de 5 ans, citées mot pour mot depuis le communiqué de
+l'autorité ; jamais un article de presse ou un recensement d'ONG.
+
+| Indicateur | Décision retenue | Gravité |
+|---|---|---:|
+| Sanctions d'une autorité (\`GOV_SANCTIONS\`, gouvernance) | amende d'au moins 1 Md€ | 0,9 |
+| — concurrence, marchés numériques, données personnelles | de 100 M€ à 1 Md€ | 0,7 |
+| | moins de 100 M€, ou infraction constatée sans amende (immunité de clémence) | 0,5 |
+| Allégations environnementales trompeuses (\`ENV_GREENWASHING\`) | amende d'une autorité de protection des consommateurs | 0,8 |
+| | engagements de retrait obtenus après enquête, sans sanction | 0,5 |
+
+- La note de l'indicateur est 0,5 × (1 − gravité) : 0,05 pour une amende d'au
+  moins 1 Md€, 0,25 pour une amende de moins de 100 M€.
+- **Plusieurs décisions : la plus grave compte**, et c'est elle que la fiche
+  affiche.
+- La sanction est rattachée à **l'entité nommée par la décision** : la marque
+  Gucci (prix de revente imposés), pas tout le groupe Kering ; une sanction du
+  groupe (Stellantis) vaut pour ses marques.
+- **Une infraction constatée compte, même sans amende** : Mercedes-Benz, qui a
+  dénoncé l'entente sur le recyclage des véhicules (2002-2017) et n'a donc pas
+  été condamnée à payer, y a participé pendant quinze ans.
+- Indicateurs complémentaires : une entreprise jamais sanctionnée n'est pas
+  pénalisée, mais n'en tire aucun point.
+- La vérification automatique retrouve chaque citation dans le communiqué
+  officiel (Commission européenne : texte servi par l'interface publique du
+  « press corner », sa salle de presse en ligne), relit le montant cité et
+  recalcule la gravité ; une gravité qui ne correspond pas au montant bloque
+  l'approbation.
+- **Limite connue.** Comme tout indicateur, une sanction pèse d'autant plus que
+  le pilier gouvernance compte peu d'autres données : chez Toyota, Mercedes-Benz,
+  Apple, Meta ou Mondelez, la composition du conseil n'est pas encore relevée
+  (publiée en graphique ou dans des rapports non téléchargeables par un
+  programme), si bien que la sanction fait seule la note du pilier, avec une
+  fiabilité de 33 %. À même amende, BMW (conseil documenté) perd 6 points,
+  Toyota 15.
 
 ### Règle 5 — Seuil de publication (classement)
 
@@ -600,10 +639,18 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.7.1\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.7.2\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.7.2 (13/10/2026)** — Sanctions : l'indicateur ne retient plus que des
+  décisions officielles (Commission européenne, autorités de protection des
+  données), notées par la gravité de l'amende ; les anciennes lignes, sourcées
+  par la presse et dont un montant était faux, sont retirées. Premières
+  décisions : 17 (Google 2,95 Md€, Apple 1,8 Md€, Meta 1,2 Md€, Mondelez
+  337,5 M€, Gucci 119,7 M€, Volkswagen 127,7 M€, entente des constructeurs sur
+  le recyclage des véhicules…). Plusieurs controverses : la fiche affiche la plus
+  grave, celle qui fixe la pénalité.
 - **0.7.1 (12/10/2026)** — Décisions de l'éditeur : un objectif climat validé
   par la SBTi est un engagement (Règle 3), plus un résultat ; nouvel indicateur
   de résultat, l'évolution réelle des émissions totales (scopes 1, 2 et 3),

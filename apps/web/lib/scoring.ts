@@ -404,8 +404,13 @@ function evaluateIndicator(
   // n'est pas « mieux ») ; il informe, il ne note pas.
   const informative = ind.direction === "contextual" && controversies.length === 0;
 
-  // Confiance de l'indicateur : plafonnée par le tier (règle 2)
-  const driver = best ?? [...controversies].sort(sortRecent)[0];
+  // Confiance de l'indicateur : plafonnée par le tier (règle 2). Sans preuve
+  // positive, la fiche montre la controverse qui fixe la pénalité (la plus grave),
+  // puis la plus récente à gravité égale.
+  const penaltyOf = (c: Evidence) =>
+    clamp01(c.normalized_value ?? 0.6) * cfg.tierConfig[c.tier].evidence_weight;
+  const sortSevere = (a: Evidence, b: Evidence) => penaltyOf(b) - penaltyOf(a) || sortRecent(a, b);
+  const driver = best ?? [...controversies].sort(sortSevere)[0];
   const confidence = clamp01(
     Math.min(driver.confidence, cfg.tierConfig[driver.tier].max_confidence),
   );

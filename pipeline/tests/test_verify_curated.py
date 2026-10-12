@@ -292,3 +292,24 @@ def test_rythme_depuis_une_variation_publiee():
     y = row("x", -6.78, f"Rapport : « {q} »{calc.replace('19 %', '29 %')}", ind="ENV_GHG_TREND", src="ESEF")
     y.normalized_value = 1.0
     assert check_esef_quote(y, rep).status == "ÉCART"   # pourcentage absent de la citation
+
+
+def test_sanction_gravite_relue_dans_la_citation():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("The Commission has fined 15 major car manufacturers. The breakdown of the fines imposed on each party is as "
+           "follows: Stellantis 50% €74 934 000 BMW €24 587 000. The European Commission has fined Google €2.95 billion "
+           "for breaching EU antitrust rules. Mercedes-Benz was not fined, as it revealed the cartel")
+
+    def s(slug, vt, norm, q):
+        x = row(slug, None, f"Commission européenne : « {q} »", ind="GOV_SANCTIONS", src="EU_COMPETITION")
+        x.value_numeric, x.value_text, x.normalized_value, x.nature = None, vt, norm, "controversy"
+        return x
+    assert check_esef_quote(s("stellantis", "amende de 74,9 M€ (entente)", 0.5, "The Commission has fined 15 major car manufacturers » ; « Stellantis 50% €74 934 000"), rep).status == "OK"
+    assert check_esef_quote(s("google", "amende de 2,95 Md€ (abus)", 0.9,
+                              "The European Commission has fined Google €2.95 billion"), rep).status == "OK"
+    # Gravité surévaluée, ou montant absent de la citation : écart.
+    assert check_esef_quote(s("bmw", "amende de 24,6 M€ (entente)", 0.7, "The Commission has fined 15 major car manufacturers » ; « BMW €24 587 000"), rep).status == "ÉCART"
+    assert check_esef_quote(s("bmw", "amende de 34,6 M€ (entente)", 0.5, "The Commission has fined 15 major car manufacturers » ; « BMW €24 587 000"), rep).status == "ÉCART"
+    # Immunité de clémence : infraction constatée, sans amende.
+    assert check_esef_quote(s("mercedes-benz", "infraction constatée, immunité d'amende (clémence)", 0.5,
+                              "Mercedes-Benz was not fined, as it revealed the cartel"), rep).status == "OK"

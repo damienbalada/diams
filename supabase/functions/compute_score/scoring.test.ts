@@ -286,6 +286,21 @@ test("règle 4 — une controverse regulatory seule (adjudiquée) pénalise mêm
   assert.equal(rb.value, 0);
 });
 
+test("plusieurs sanctions : la plus grave fixe la pénalité ET s'affiche, même si une autre est plus récente", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("GOV_S", "ENV", { complementary: true })],
+    evidence: [
+      ev({ indicator_code: "GOV_S", nature: "controversy", normalized_value: 0.9, observed_on: "2024-03-04", source_code: "EU", excerpt: "1,8 Md€" }),
+      ev({ indicator_code: "GOV_S", nature: "controversy", normalized_value: 0.7, observed_on: "2025-04-23", source_code: "EU", excerpt: "500 M€" }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const r = res.dimensions[0].indicators[0];
+  assert.ok(Math.abs(r.value! - 0.05) < 1e-9);   // 0,5 × (1 − 0,9)
+  assert.equal(r.excerpt, "1,8 Md€");
+  assert.equal(r.observed_on, "2024-03-04");
+});
+
 test("règle 4 — résultat + controverse contestée non corroborée : le résultat compte, controverse signalée", () => {
   const res = computeScore(baseInput({
     applicableIndicators: [ind("GEO_A", "ENV")],
