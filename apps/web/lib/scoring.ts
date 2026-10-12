@@ -487,6 +487,11 @@ export function computeScore(input: ScoreInput): ScoreResult {
     let scoreWeight = 0; // poids des indicateurs qui entrent dans la note
     let confNum = 0;
     let confWeight = 0;  // poids de TOUS les indicateurs applicables (fiabilité)
+    // Fiabilité du socle seul (sans les indicateurs complémentaires documentés) :
+    // une donnée complémentaire, même de source moins solide, ne doit jamais rendre
+    // le pilier « moins fiable » qu'il ne l'était sans elle (v0.7.3).
+    let coreConfNum = 0;
+    let coreConfWeight = 0;
     let covered = 0;
     const indicators: IndicatorResult[] = [];
 
@@ -501,29 +506,35 @@ export function computeScore(input: ScoreInput): ScoreResult {
       if (ind.code === gateCode) continue; // exclu de la moyenne et des compteurs
       if (r.display_only) continue;        // affiché mais hors calcul (controverse non corroborée)
       confWeight += ind.weight;
+      let conf: number;
       if (r.covered && ind.disclosure && ind.mandatory && (r.value ?? 0) >= 0.999) {
         // Publication imposée par la loi et faite en entier : la fiabilité monte,
         // la note n'en tient pas compte (pendant de la Règle 1).
         r.compliance_only = true;
-        confNum += r.confidence * ind.weight;
+        conf = r.confidence;
         covered++;
       } else if (r.covered && (r.unrankable || r.informative)) {
         // Valeur connue mais impossible à classer, ou de contexte : fiabilité seulement.
-        confNum += r.confidence * ind.weight;
+        conf = r.confidence;
         covered++;
       } else if (r.covered) {
         scoreNum += (r.value ?? 0) * ind.weight;
         scoreWeight += ind.weight;
-        confNum += r.confidence * ind.weight;
+        conf = r.confidence;
         covered++;
       } else {
         // Donnée manquante : la fiabilité baisse toujours. La note n'est
         // pénalisée que si la publication était obligatoire (Règle 1).
-        confNum += input.params.missing_data_confidence * ind.weight;
+        conf = input.params.missing_data_confidence;
         if (ind.mandatory) {
           scoreNum += input.params.missing_data_score * ind.weight;
           scoreWeight += ind.weight;
         }
+      }
+      confNum += conf * ind.weight;
+      if (!((ind.presence_only || ind.complementary) && !ind.mandatory)) {
+        coreConfNum += conf * ind.weight;
+        coreConfWeight += ind.weight;
       }
     }
 
@@ -552,9 +563,14 @@ export function computeScore(input: ScoreInput): ScoreResult {
     const cappedByGate = gate && rated ? score < avg - 1e-9 : false;
     // Pilier réduit à son plafond documenté : sa fiabilité est celle de cette preuve ;
     // réduit à son plafond par défaut, il est inconnu (fiabilité d'une donnée manquante).
-    const confidence = clamp01(confWeight > 0 ? confNum / confWeight
+    const withAll = confWeight > 0 ? confNum / confWeight
       : gateKnown ? gr!.confidence
-      : scored.length === 0 ? input.params.missing_data_confidence : 0);
+      : scored.length === 0 ? input.params.missing_data_confidence : 0;
+    // Fiabilité qu'aurait le pilier sans ses indicateurs complémentaires documentés
+    // (socle seul, ou plafond documenté seul) : plancher de sa fiabilité.
+    const withoutComplementary = coreConfWeight > 0 ? coreConfNum / coreConfWeight
+      : gateKnown ? gr!.confidence : null;
+    const confidence = clamp01(withoutComplementary !== null ? Math.max(withAll, withoutComplementary) : withAll);
 
     if (rated) dimScore.set(dimCode, score);
     dimConf.set(dimCode, confidence);

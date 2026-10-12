@@ -194,6 +194,8 @@ ESEF_KEYWORDS = {
                          r"|tested on animals"],
     "ANI_FUR_FREE": [r"fourrure|fur\b"],
     "GEO_LOBBYING_ALIGN": [r"InfluenceMap|Climate Policy Engagement"],
+    # Évolution du plastique vierge (tonnage absolu, pas par unité vendue).
+    "PLA_REDUCTION": [r"plasti", r"vierge|virgin"],
     # Décision officielle d'une autorité : amende, ou infraction constatée sans amende.
     "GOV_SANCTIONS": [r"fine[ds]?\b|fining|amende|sanction"],
 }
@@ -285,6 +287,14 @@ TREND_PCT_RE = re.compile(r"rythme annuel moyen \((\d{4}) → (\d{4}), (\d+) ans
                           r"\^\(1/(\d+)\) − 1 = ([−-]?[\d,]+) %")
 
 
+def _trend_norm_ok(row, stated: float) -> bool:
+    """Émissions : note fixée par le seuil 1,5 °C. Autres rythmes (plastique vierge) :
+    pas de note précalculée, la valeur est classée entre pairs du secteur."""
+    if row.indicator_code == "ENV_GHG_TREND":
+        return row.normalized_value is not None and abs(row.normalized_value - trend_score(stated)) < 1e-3
+    return row.normalized_value is None
+
+
 def check_trend_pct(row, quote: str) -> tuple[bool, list[str], bool]:
     m = TREND_PCT_RE.search(row.excerpt or "")
     if not m:
@@ -296,11 +306,14 @@ def check_trend_pct(row, quote: str) -> tuple[bool, list[str], bool]:
     rate = (pow(1 + change / 100, 1 / n) - 1) * 100
     stated = float(r_s.replace("−", "-").replace(",", "."))
     pct_forms = {pct_s, pct_s.replace(",", "."), f"{pct:g}"}
-    present = any(re.search(rf"(?<![\d.,]){re.escape(f)}\s?%", quote) for f in pct_forms)
+    joined = re.sub(r"(\d) ([.,]\d)", r"\1\2", quote)   # « 17 .7 % » (extraction de PDF)
+    # « (29) % » : baisse en notation comptable (rapport annuel d'Unilever).
+    paren = r"\)?" if sign in "−-" else ""
+    present = any(re.search(rf"(?<![\d.,]){re.escape(f)}{paren}\s?%", x) for f in pct_forms for x in (quote, joined))
     years_ok = int(y1) - int(y0) == n and n_s == n2_s and n > 0 and (y0 in quote)
     calc_ok = abs(rate - stated) <= 0.01
     value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
-    norm_ok = row.normalized_value is not None and abs(row.normalized_value - trend_score(stated)) < 1e-3
+    norm_ok = _trend_norm_ok(row, stated)
     span_ok = n >= TREND_MIN_YEARS_FOR_DECLINE or stated >= 0
     ok = present and years_ok and calc_ok and value_ok and norm_ok and span_ok
     return ok, [
@@ -367,6 +380,43 @@ def check_ratio(row, quote: str) -> tuple[bool, list[str], bool]:
     ], True
 
 
+# Variante : l'entreprise publie des variations d'une année sur l'autre (« 6% » en
+# 2025, « 5% » en 2024) ; elles sont composées.
+# « … rythme annuel moyen (2023 → 2025, 2 ans) : ((1 − 5 %) × (1 − 6 %))^(1/2) − 1 = −5,50 % »
+TREND_YOY_RE = re.compile(r"rythme annuel moyen \((\d{4}) → (\d{4}), (\d+) ans?\) : "
+                          r"\(((?:\(1 [−+-] [\d,]+ %\)(?: × )?){2,})\)\^\(1/(\d+)\) − 1 = ([−-]?[\d,]+) %")
+
+
+def check_trend_yoy(row, quote: str) -> tuple[bool, list[str], bool]:
+    m = TREND_YOY_RE.search(row.excerpt or "")
+    if not m:
+        return True, [], False
+    y0, y1, n_s, inner, n2_s, r_s = m.groups()
+    n = int(n_s)
+    factors = re.findall(r"\(1 ([−+-]) ([\d,]+) %\)", inner)
+    prod = 1.0
+    present = True
+    for sign, pct_s in factors:
+        pct = float(pct_s.replace(",", "."))
+        prod *= 1 + (-pct if sign in "−-" else pct) / 100
+        forms = {pct_s, pct_s.replace(",", "."), f"{pct:g}"}
+        present &= any(re.search(rf"(?<![\d.,]){re.escape(f)}\s?%", quote) for f in forms)
+    rate = (pow(prod, 1 / n) - 1) * 100
+    stated = float(r_s.replace("−", "-").replace(",", "."))
+    years_ok = int(y1) - int(y0) == n == len(factors) and n_s == n2_s
+    calc_ok = abs(rate - stated) <= 0.01
+    value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
+    norm_ok = _trend_norm_ok(row, stated)
+    span_ok = n >= TREND_MIN_YEARS_FOR_DECLINE or stated >= 0
+    ok = present and years_ok and calc_ok and value_ok and norm_ok and span_ok
+    return ok, [
+        f"variations annuelles {', '.join(s + p for s, p in factors)} % présentes dans la citation {'✓' if present else '✗'}",
+        f"{y0} → {y1} = {n} an(s), une variation par année {'✓' if years_ok else '✗'}",
+        f"rythme recalculé {rate:.2f} % = déclaré {stated} % {'✓' if calc_ok else '✗'}",
+        f"valeur et note conformes {'✓' if value_ok and norm_ok else '✗'}",
+    ], True
+
+
 def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
     """Contrôle du rythme déclaré : années cohérentes, deux totaux présents dans la
     citation, calcul exact, valeur et note conformes. Le dernier booléen dit si la
@@ -392,7 +442,7 @@ def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
     years_ok = int(y1) - int(y0) == n and n_s == n2_s and n > 0
     calc_ok = abs(rate - stated) <= 0.01
     value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
-    norm_ok = row.normalized_value is not None and abs(row.normalized_value - trend_score(stated)) < 1e-3
+    norm_ok = _trend_norm_ok(row, stated)
     # Une baisse ne vaut preuve que sur deux ans au moins (une année peut tenir aux
     # ventes ou à la météo) ; une hausse, même sur un an, montre que les émissions
     # ne baissent pas.
@@ -519,6 +569,8 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
     tr_ok, tr_details, tr_active = check_trend(row, quote)
     if not tr_active:
         tr_ok, tr_details, tr_active = check_trend_pct(row, quote)
+    if not tr_active:
+        tr_ok, tr_details, tr_active = check_trend_yoy(row, quote)
     if not tr_active:
         tr_ok, tr_details, tr_active = check_except(row, quote)
     if not tr_active:

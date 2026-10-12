@@ -96,6 +96,10 @@ const DESCRIBE: Record<string, (v: number | null | undefined) => string | null> 
     v == null ? null
       : v >= 0 ? `Émissions totales en hausse de ${fmt(v)} % par an.`
       : `Émissions totales en baisse de ${fmt(-v)} % par an.`,
+  PLA_REDUCTION: (v) =>
+    v == null ? null
+      : v >= 0 ? `Plastique vierge en hausse de ${fmt(v)} % par an.`
+      : `Plastique vierge en baisse de ${fmt(-v)} % par an.`,
 };
 
 function toFlag(i: IndicatorResult, label: string, reason: FlagReason, fallback: string): Flag {

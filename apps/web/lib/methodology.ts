@@ -8,7 +8,7 @@ export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : \`0.7.2\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.7.3\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -416,7 +416,11 @@ en paradis fiscaux, part recyclée…) ou qui **recense des controverses**
 \`complementary\`) : documenté, il compte dans la note comme les autres ; absent, il
 ne baisse ni la note ni la fiabilité — *sauf* si la loi impose de le publier
 (Règle 1 : compté 0). L'absence de controverse recensée n'est pas une preuve de
-vertu : elle ne rapporte rien non plus.
+vertu : elle ne rapporte rien non plus. *(v0.7.3)* Documenté, il ne peut pas
+non plus **baisser** la fiabilité du pilier : une donnée tirée d'un rapport
+volontaire (fiabilité plafonnée) s'ajoute à la note, mais la fiabilité retenue
+est au moins celle qu'aurait le pilier sans elle. Savoir davantage ne rend
+jamais une fiche « moins fiable ».
 
 **Benchmarks à périmètre fermé.** KnowTheChain (travail forcé : 60 sociétés en
 alimentation & boissons, 65 en habillement, 45 en technologies) et le BBFAW
@@ -544,6 +548,20 @@ sur la promesse). Contrairement à l'animal, l'absence de classement **ne
 présume pas** le pire (plafond par défaut 1.0) : seules les marques explicitement
 classées sont plafonnées.
 
+**Évolution réelle du plastique vierge** (\`PLA_REDUCTION\`, *v0.7.3*). Sous ce
+plafond, le pilier est noté sur le résultat : l'évolution du tonnage de
+plastique vierge publiée par l'entreprise, ramenée à un rythme annuel moyen
+(r = (1 + variation)^(1/années) − 1), puis classée entre pairs du secteur (la
+baisse la plus rapide obtient la meilleure note). Tonnage absolu seulement :
+une baisse « par unité vendue » ne dit rien du plastique mis sur le marché. Une
+baisse ne compte que sur deux ans au moins. Premières données (2025) : L'Oréal
+−37 % depuis 2019, Unilever −29 % depuis 2019, Nestlé −28 % depuis 2018,
+Danone −17,7 % depuis 2019, PepsiCo −5 % puis −6 % (2024, 2025), Procter &
+Gamble −14 % depuis l'exercice 2017-18, Mondelez −11,5 % depuis 2020, Coca-Cola
+2,83 millions de tonnes en 2023, 2,71 en 2025. Avant la v0.7.3, l'indicateur
+notait la signature de l'engagement de la Fondation Ellen MacArthur, une
+promesse : aucune preuve n'avait été approuvée.
+
 ### Méta-score « Bien-être du vivant »
 
 Philosophie : **les humains sont des animaux**. On couvre tout le vivant. Le
@@ -650,10 +668,17 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.7.2\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.7.3\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.7.3 (13/10/2026)** — Plastique : l'évolution réelle du tonnage de
+  plastique vierge remplace la signature d'un engagement (premières données :
+  8 groupes de l'alimentation et de l'hygiène, de L'Oréal −37 % à Coca-Cola).
+  Fiabilité : un indicateur complémentaire documenté ne peut plus la faire
+  baisser. Gouvernance : indépendance et mixité des conseils de Meta et Mondelez
+  calculées depuis l'effectif cité. Preuves héritées sans citation retirées,
+  motif écrit (recensements non datés, articles de presse, pages d'accueil).
 - **0.7.2 (13/10/2026)** — Sanctions : l'indicateur ne retient plus que des
   décisions officielles (Commission européenne, autorités de protection des
   données), notées par la gravité de l'amende ; les anciennes lignes, sourcées

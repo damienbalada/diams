@@ -286,6 +286,35 @@ test("règle 4 — une controverse regulatory seule (adjudiquée) pénalise mêm
   assert.equal(rb.value, 0);
 });
 
+test("un indicateur complémentaire documenté ne baisse jamais la fiabilité du pilier", () => {
+  const base = {
+    applicableIndicators: [ind("ENV_A", "ENV"), ind("ENV_C", "ENV", { complementary: true })],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  };
+  const sans = computeScore(baseInput({ ...base, evidence: [ev({ indicator_code: "ENV_A", normalized_value: 0.5, confidence: 0.9 })] }));
+  const avec = computeScore(baseInput({
+    ...base,
+    evidence: [
+      ev({ indicator_code: "ENV_A", normalized_value: 0.5, confidence: 0.9 }),
+      ev({ indicator_code: "ENV_C", normalized_value: 0.8, tier: "press", confidence: 0.9 }),   // plafonnée à 0,45
+    ],
+  }));
+  assert.equal(avec.dimensions[0].confidence, sans.dimensions[0].confidence);
+  assert.ok(avec.score > sans.score);   // la donnée compte dans la note
+});
+
+test("pilier réduit à son plafond documenté : une donnée complémentaire ne baisse pas sa fiabilité", () => {
+  const gates = [{ dimension_code: "ENV", gate_indicator_code: "ENV_G", default_ceiling: 1 }];
+  const inds = [ind("ENV_G", "ENV", { kind: "categorical" }), ind("ENV_C", "ENV", { complementary: true })];
+  const g = ev({ indicator_code: "ENV_G", nature: "controversy", normalized_value: 0.6, tier: "audited_ngo", confidence: 0.9 });
+  const sans = computeScore(baseInput({ applicableIndicators: inds, dimensionGates: gates, evidence: [g], profileWeights: [{ dimension_code: "ENV", weight: 1 }] }));
+  const avec = computeScore(baseInput({
+    applicableIndicators: inds, dimensionGates: gates, profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+    evidence: [g, ev({ indicator_code: "ENV_C", normalized_value: 0.3, tier: "press", confidence: 0.9 })],
+  }));
+  assert.ok(avec.dimensions[0].confidence >= sans.dimensions[0].confidence - 1e-12);
+});
+
 test("plusieurs sanctions : la plus grave fixe la pénalité ET s'affiche, même si une autre est plus récente", () => {
   const res = computeScore(baseInput({
     applicableIndicators: [ind("GOV_S", "ENV", { complementary: true })],

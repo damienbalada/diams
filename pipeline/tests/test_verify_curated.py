@@ -403,3 +403,31 @@ def test_note_normalisee_de_la_mixite_controlee():
     assert check_esef_quote(x, rep).status == "OK"
     x.normalized_value = 0.4   # 40 % rapporté à 100 au lieu de la parité
     assert check_esef_quote(x, rep).status == "ÉCART"
+
+
+def test_plastique_vierge_rythme_classe_entre_pairs():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("Entre 2019 et 2025 , il a ainsi réduit de 10.1 % son utilisation d’emballages en plastique et de 17 .7 % "
+           "son utilisation de plastique vierge issu de ressources fossiles.")
+    q = "Entre 2019 et 2025 , il a ainsi réduit de 10.1 % son utilisation d’emballages en plastique et de 17 .7 % son utilisation de plastique vierge issu de ressources fossiles"
+    calc = " ; rythme annuel moyen (2019 → 2025, 6 ans) : (1 − 17,7 %)^(1/6) − 1 = −3,19 %"
+    x = row("danone", -3.19, f"Rapport : « {q} »{calc}", ind="PLA_REDUCTION", src="ESEF")
+    x.normalized_value = None
+    assert check_esef_quote(x, rep).status == "OK"
+    x.normalized_value = 0.76   # pas de note de seuil : classement entre pairs
+    assert check_esef_quote(x, rep).status == "ÉCART"
+
+
+def test_plastique_vierge_variations_annuelles_composees():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("Target metrics 2030 Target 2025 2024 2023 Comments Achieve an average of 2% year-over-year reduction in "
+           "our absolute tonnage of virgin plastics through 2030 2% YOY 6%1 5%1 Goal refined in 2025")
+    q = "Achieve an average of 2% year-over-year reduction in our absolute tonnage of virgin plastics through 2030 2% YOY 6%1 5%1"
+    calc = " ; rythme annuel moyen (2023 → 2025, 2 ans) : ((1 − 5 %) × (1 − 6 %))^(1/2) − 1 = −5,50 %"
+    x = row("pepsico", -5.5, f"Données : « {q} »{calc}", ind="PLA_REDUCTION", src="COMPANY_REPORT")
+    x.normalized_value = None
+    assert check_esef_quote(x, rep).status == "OK"
+    y = row("pepsico", -5.5, f"Données : « {q} »" + calc.replace("2023 → 2025, 2 ans", "2022 → 2025, 3 ans").replace("^(1/2)", "^(1/3)"),
+            ind="PLA_REDUCTION", src="COMPANY_REPORT")
+    y.normalized_value = None
+    assert check_esef_quote(y, rep).status == "ÉCART"   # trois ans pour deux variations
