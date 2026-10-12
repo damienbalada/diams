@@ -369,3 +369,37 @@ def test_montants_en_euros_toutes_ecritures():
     assert has("une sanction de 187,5 millions d'euros", 1.875e8)
     assert has("d'une amende de 100 000 euros", 1e5)
     assert has("Stellantis 50% €74 934 000", 74_934_000)
+
+
+def test_independance_tous_sauf_le_pdg():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("To elect the twelve directors nominated by our board of directors. All of our director nominees are "
+           "independent, with the exception of our CEO.")
+    q = "To elect the twelve directors nominated by our board of directors » ; « All of our director nominees are independent, with the exception of our CEO"
+    ok = row("meta", 91.7, f"Circulaire : « {q} » ; calcul : (12 − 1) / 12 = 91,7 %", ind="GOV_BOARD_INDEP", src="SEC_FILING")
+    assert check_esef_quote(ok, rep).status == "OK"
+    faux = row("meta", 92.7, f"Circulaire : « {q} » ; calcul : (12 − 1) / 12 = 92,7 %", ind="GOV_BOARD_INDEP", src="SEC_FILING")
+    assert check_esef_quote(faux, rep).status == "ÉCART"
+    autre = row("meta", 90.9, f"Circulaire : « {q} » ; calcul : (11 − 1) / 11 = 90,9 %", ind="GOV_BOARD_INDEP", src="SEC_FILING")
+    assert check_esef_quote(autre, rep).status == "ÉCART"   # effectif 11 non cité
+
+
+def test_mixite_depuis_deux_effectifs_cites():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("The Board nominated each of the 10 incumbent directors listed here. The Director nominees vary in age "
+           "from 59 to 70, include four women, and collectively bring a range of professional and life experiences")
+    q = "The Board nominated each of the 10 incumbent directors listed here » ; « The Director nominees vary in age from 59 to 70, include four women"
+    ok = row("mondelez", 40.0, f"Circulaire : « {q} » ; calcul : 4 / 10 = 40 %", ind="GOV_BOARD_GENDER", src="SEC_FILING")
+    assert check_esef_quote(ok, rep).status == "OK"
+    faux = row("mondelez", 50.0, f"Circulaire : « {q} » ; calcul : 5 / 10 = 50 %", ind="GOV_BOARD_GENDER", src="SEC_FILING")
+    assert check_esef_quote(faux, rep).status == "ÉCART"   # « cinq » n'est pas cité
+
+
+def test_note_normalisee_de_la_mixite_controlee():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Notre conseil compte 40 % de femmes administratrices."
+    x = row("x", 40.0, "Rapport : « Notre conseil compte 40 % de femmes administratrices »", ind="GOV_BOARD_GENDER", src="ESEF")
+    x.normalized_value = 0.8
+    assert check_esef_quote(x, rep).status == "OK"
+    x.normalized_value = 0.4   # 40 % rapporté à 100 au lieu de la parité
+    assert check_esef_quote(x, rep).status == "ÉCART"

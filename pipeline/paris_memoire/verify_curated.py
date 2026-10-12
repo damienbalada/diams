@@ -199,6 +199,14 @@ ESEF_KEYWORDS = {
 }
 
 
+# Barèmes de normalisation fixes (méthodologie) : mixité rapportée à la parité,
+# indépendance en part du conseil.
+NORMALIZE = {
+    "GOV_BOARD_GENDER": lambda v: min(1.0, v / 50),
+    "GOV_BOARD_INDEP": lambda v: v / 100,
+}
+
+
 def _canon(s: str) -> str:
     s = s.replace("’", "'").replace(" ", " ").replace(" ", " ")
     # Signe moins typographique : « –9.9 % » est la valeur -9,9.
@@ -301,6 +309,61 @@ def check_trend_pct(row, quote: str) -> tuple[bool, list[str], bool]:
         f"durée suffisante pour une baisse ({n} an(s)) {'✓' if span_ok else '✗'}",
         f"rythme recalculé {rate:.2f} % = déclaré {stated} % {'✓' if calc_ok else '✗'}",
         f"valeur et note ({trend_score(stated)}) conformes {'✓' if value_ok and norm_ok else '✗'}",
+    ], True
+
+
+# Conseil « tous indépendants sauf le PDG » : la part est calculée depuis l'effectif cité.
+# « … calcul : (12 − 1) / 12 = 91,7 % » ; la citation donne l'effectif (« twelve directors »)
+# et l'exception (« with the exception of our CEO »).
+EXCEPT_RE = re.compile(r"calcul : \((\d+) − (\d+)\) / (\d+) = ([\d,]+) %")
+_EXCEPT_PHRASE = re.compile(r"with the exception of|\bexcept\b|other than|\bsauf\b|à l'exception", re.I)
+
+
+def check_except(row, quote: str) -> tuple[bool, list[str], bool]:
+    m = EXCEPT_RE.search(row.excerpt or "")
+    if not m:
+        return True, [], False
+    n_s, k_s, n2_s, v_s = m.groups()
+    n, k = int(n_s), int(k_s)
+    words = [w for w, i in _NUM_WORDS.items() if i == n]
+    size_cited = re.search(rf"\b{n}\b", quote) is not None or any(
+        re.search(rf"\b{re.escape(w)}\b", quote, re.I) for w in words)
+    exception = _EXCEPT_PHRASE.search(quote) is not None
+    stated = float(v_s.replace(",", "."))
+    calc_ok = n_s == n2_s and 0 < k <= 2 and abs(round(100 * (n - k) / n, 1) - stated) < 1e-9
+    value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
+    ok = size_cited and exception and calc_ok and value_ok
+    return ok, [
+        f"effectif {n} cité {'✓' if size_cited else '✗'}",
+        f"exception citée (« sauf … ») {'✓' if exception else '✗'}",
+        f"part recalculée ({n} − {k}) / {n} = {round(100 * (n - k) / n, 1)} % = valeur {'✓' if calc_ok and value_ok else '✗'}",
+    ], True
+
+
+# Part calculée depuis deux effectifs cités dans des phrases distinctes :
+# « the 10 incumbent directors » … « include four women » → « calcul : 4 / 10 = 40 % ».
+RATIO_RE = re.compile(r"calcul : (\d+) / (\d+) = ([\d,]+) %")
+
+
+def _cited(n: int, quote: str) -> bool:
+    words = [w for w, i in _NUM_WORDS.items() if i == n]
+    return re.search(rf"(?<![\d,.]){n}(?!\d)(?![.,]\d)", quote) is not None or any(
+        re.search(rf"\b{re.escape(w)}\b", quote, re.I) for w in words)
+
+
+def check_ratio(row, quote: str) -> tuple[bool, list[str], bool]:
+    m = RATIO_RE.search(row.excerpt or "")
+    if not m:
+        return True, [], False
+    a_s, b_s, v_s = m.groups()
+    a, b = int(a_s), int(b_s)
+    stated = float(v_s.replace(",", "."))
+    both = _cited(a, quote) and _cited(b, quote)
+    calc_ok = 0 < a <= b and abs(round(100 * a / b, 1) - stated) < 1e-9
+    value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
+    return both and calc_ok and value_ok, [
+        f"effectifs {a} et {b} cités {'✓' if both else '✗'}",
+        f"part recalculée {a} / {b} = {round(100 * a / b, 1) if b else '—'} % = valeur {'✓' if calc_ok and value_ok else '✗'}",
     ], True
 
 
@@ -456,6 +519,10 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
     tr_ok, tr_details, tr_active = check_trend(row, quote)
     if not tr_active:
         tr_ok, tr_details, tr_active = check_trend_pct(row, quote)
+    if not tr_active:
+        tr_ok, tr_details, tr_active = check_except(row, quote)
+    if not tr_active:
+        tr_ok, tr_details, tr_active = check_ratio(row, quote)
     ok &= tr_ok
     details += tr_details
     if row.indicator_code == "GOV_SANCTIONS":
@@ -492,6 +559,13 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
                        f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✗'}")
     elif row.value_boolean is not None:
         details.append("indicateur oui/non : la présence de la citation suffit")
+    # Note normalisée imposée par le barème de l'indicateur : recalculée.
+    rule = NORMALIZE.get(row.indicator_code)
+    if rule and row.value_numeric is not None and row.normalized_value is not None:
+        expected = rule(row.value_numeric)
+        norm_ok = abs(expected - row.normalized_value) <= 0.002
+        ok &= norm_ok
+        details.append(f"note normalisée {row.normalized_value} = barème {round(expected, 3)} {'✓' if norm_ok else '✗'}")
     return Verdict("OK" if ok else "ÉCART", details)
 
 
