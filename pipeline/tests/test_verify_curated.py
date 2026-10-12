@@ -254,3 +254,18 @@ def test_delegation_tier3_seulement_si_verifie():
     assert finalize(ok, "", "crowd", delegated=True).status == "JUGEMENT"      # jamais le tier crowd
     assert finalize(Verdict("ÉCART", []), "", "press", delegated=True).status == "ÉCART"
     assert finalize(ok, "note", "press", delegated=True).status == "JUGEMENT"  # jugement signalé : humain
+
+
+
+def test_baisse_sur_un_an_refusee_hausse_acceptee():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Total GHG emissions (market-based) million tonnes 1,142 1,166 and 887.4 828.5"
+    def r(q, calc, value, norm):
+        x = row("x", value, f"Rapport : « {q} »{calc}", ind="ENV_GHG_TREND", src="ESEF")
+        x.normalized_value = norm
+        return x
+    baisse = r("Total GHG emissions (market-based) million tonnes 1,142 1,166",
+               " ; rythme annuel moyen (2024 → 2025, 1 an) : (1142 / 1166)^(1/1) − 1 = −2,06 %", -2.06, 0.4905)
+    assert check_esef_quote(baisse, rep).status == "ÉCART"
+    hausse = r("Total GHG emissions (market-based) million tonnes 1,142 1,166 and 887.4 828.5", " ; rythme annuel moyen (2024 → 2025, 1 an) : (887,4 / 828,5)^(1/1) − 1 = 7,11 %", 7.11, 0.0)
+    assert check_esef_quote(hausse, rep).status == "OK"

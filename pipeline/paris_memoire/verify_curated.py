@@ -256,6 +256,7 @@ def ecb_annual_rate(currency: str, year: str, client: httpx.Client) -> float:
 TREND_RE = re.compile(r"rythme annuel moyen \((\d{4}) → (\d{4}), (\d+) ans?\) : \(([\d.,]+) / ([\d.,]+)\)"
                       r"\^\(1/(\d+)\) − 1 = ([−-]?[\d,]+) %")
 TREND_FULL = 4.2  # baisse annuelle (en %) qui vaut la note pleine : trajectoire 1,5 °C de la SBTi
+TREND_MIN_YEARS_FOR_DECLINE = 2  # une baisse sur une seule année ne prouve pas une trajectoire
 
 
 def trend_score(rate_pct: float) -> float:
@@ -289,8 +290,13 @@ def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
     calc_ok = abs(rate - stated) <= 0.01
     value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
     norm_ok = row.normalized_value is not None and abs(row.normalized_value - trend_score(stated)) < 1e-3
-    ok = present and years_ok and calc_ok and value_ok and norm_ok
+    # Une baisse ne vaut preuve que sur deux ans au moins (une année peut tenir aux
+    # ventes ou à la météo) ; une hausse, même sur un an, montre que les émissions
+    # ne baissent pas.
+    span_ok = n >= TREND_MIN_YEARS_FOR_DECLINE or stated >= 0
+    ok = present and years_ok and calc_ok and value_ok and norm_ok and span_ok
     return ok, [
+        f"durée suffisante pour une baisse ({n} an(s), minimum {TREND_MIN_YEARS_FOR_DECLINE}) {'✓' if span_ok else '✗'}",
         f"totaux {last_s} et {base_s} présents dans la citation {'✓' if present else '✗'}",
         f"{y0} → {y1} = {n} an(s) {'✓' if years_ok else '✗'}",
         f"rythme recalculé {rate:.2f} % = déclaré {stated} % {'✓' if calc_ok else '✗'}",
@@ -479,11 +485,22 @@ def main() -> None:
             elif r.source_url and "«" in (r.excerpt or ""):
                 # Citation verbatim d'un document public : rapport ESEF, page web ou PDF.
                 if r.source_url not in reports:
-                    if r.source_code == "ESEF":
-                        from .connectors.esef import report_text
-                        reports[r.source_url] = report_text(r.source_url, client)
-                    else:
-                        reports[r.source_url] = document_text(r.source_url, client)
+                    try:
+                        if r.source_code == "ESEF":
+                            from .connectors.esef import report_text
+                            reports[r.source_url] = report_text(r.source_url, client)
+                        else:
+                            reports[r.source_url] = document_text(r.source_url, client)
+                    except httpx.HTTPError as err:
+                        # Source momentanément inaccessible (refus, délai) : la preuve reste
+                        # en attente, les autres lignes sont vérifiées.
+                        reports[r.source_url] = None
+                        print(f"  source inaccessible ({type(err).__name__}) : {r.source_url}")
+                if reports[r.source_url] is None:
+                    v = Verdict("NON VÉRIFIABLE", ["source inaccessible au moment de la vérification"])
+                    counts[v.status] = counts.get(v.status, 0) + 1
+                    print(f"\n[{v.status}] {r.entity_slug} · {r.indicator_code} ({r.source_code})")
+                    continue
                 # Un cas signalé « jugement » (ex. définition voisine de l'indicateur)
                 # est vérifié sur la citation et la valeur, puis rendu à l'humain.
                 rates = {}

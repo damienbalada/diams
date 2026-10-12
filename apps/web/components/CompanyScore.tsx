@@ -29,6 +29,14 @@ const STALE_BEFORE = new Date(Date.now() - 3 * 365 * 24 * 3600 * 1000)
   .slice(0, 10);
 
 // Raison du plafond d'un pilier (gate), par dimension.
+// Nature de la preuve, en français (les codes restent en base).
+const natureLabel: Record<string, string> = {
+  result: "résultat",
+  commitment: "engagement",
+  policy: "politique",
+  controversy: "controverse",
+};
+
 const capReason: Record<string, string> = {
   ANI: "exploitation animale",
   PLA: "pollueur plastique majeur",
@@ -447,7 +455,13 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                       donnée du groupe {i.inherited_from}
                     </span>
                   )}
-                  <span className="badge">{i.nature}</span>
+                  {i.nature && (
+                    <span className="badge" title={i.nature === "commitment"
+                      ? "Promesse sur l'avenir (objectif, engagement) : comptée à 40 % et plafonnée, jamais l'équivalent d'un résultat."
+                      : undefined}>
+                      {natureLabel[i.nature] ?? i.nature}
+                    </span>
+                  )}
                   {i.display_only || i.compliance_only || i.unrankable || i.informative ? (
                     <span className="muted small">—</span>
                   ) : (
@@ -458,10 +472,10 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
               <div className="muted small" style={{ marginTop: 3 }}>
                 {i.source_url ? (
                   <a href={i.source_url} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
-                    <span className={`tier-${i.tier}`} title={tierExplain[i.tier ?? ""] ?? ""}>{i.source_code}</span> ↗
+                    <span className={`tier-${i.tier}`} title={tierExplain[i.tier ?? ""] ?? ""}>{i.source_name ?? i.source_code}</span> ↗
                   </a>
                 ) : (
-                  <span className={`tier-${i.tier}`} title={tierExplain[i.tier ?? ""] ?? ""}>{i.source_code}</span>
+                  <span className={`tier-${i.tier}`} title={tierExplain[i.tier ?? ""] ?? ""}>{i.source_name ?? i.source_code}</span>
                 )}
                 <Tip label="Fiabilité de cette source">
                   {tierExplain[i.tier ?? ""] ?? "Fiabilité de la source selon son type."}

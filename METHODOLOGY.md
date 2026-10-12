@@ -5,7 +5,7 @@
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : `0.7.0` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : `0.7.1` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -147,6 +147,37 @@ La `nature` de l'evidence module sa valeur et plafonne l'indicateur :
 
 **Une promesse rapporte peu, une preuve rapporte plein.** Tant qu'aucune
 evidence `result` ne confirme, l'indicateur est plafonné.
+
+**Un objectif, même validé, est une promesse** *(v0.7.1, décision de
+l'éditeur)*. Les objectifs climat validés par la SBTi sont des engagements sur
+l'avenir : comptés à 40 % (objectif aligné sur 1,5 °C), 24 % (autre objectif
+validé) ou 20 % (engagement à en fixer un). La preuve est ailleurs :
+l'**évolution réelle des émissions** (indicateur `ENV_GHG_TREND`), le résultat
+du pilier climat. Avant cette règle, Shein, dont les émissions augmentent,
+obtenait 100 sur l'environnement grâce à son seul objectif validé.
+
+### Évolution réelle des émissions (`ENV_GHG_TREND`)
+
+Rythme annuel moyen d'évolution des émissions totales publiées par
+l'entreprise (scopes 1, 2 et 3), entre l'année de référence et la dernière année
+publiée dans un même tableau : r = (E dernière / E référence)^(1/années) − 1.
+
+| Rythme annuel | Note |
+|---|---:|
+| baisse de 4,2 % par an ou plus (trajectoire 1,5 °C de la SBTi) | 1 |
+| baisse plus lente | proportionnelle |
+| pas de baisse, ou hausse | 0 |
+
+- Poids 1,5, le plus lourd du pilier climat : c'est son résultat.
+- **Une baisse ne compte que sur deux ans au moins** (sur une seule année, elle
+  peut tenir aux ventes, aux prix ou à la météo) ; une hausse compte quelle que
+  soit la durée : elle montre que les émissions ne baissent pas.
+- Ne s'applique pas à la banque et à l'assurance : leurs émissions sont surtout
+  financées, sur un périmètre qui change d'une année à l'autre.
+- Sources : le rapport réglementé (état de durabilité CSRD, rapport annuel
+  légal) ; hors de l'Union, le rapport volontaire de l'entreprise (niveau 3).
+- Les deux totaux sont cités mot pour mot ; le rythme et la note sont recalculés
+  par la vérification automatique.
 
 ### Règle 4 — Corroboration des controverses (anti-parti-pris)
 
@@ -499,6 +530,15 @@ coefficient, le groupe le plus transparent de la mode jetable obtenait A.
 Voir `supabase/seed/99_snapshot.sql` (section « Sources ») pour le registre complet. Règle d'or :
 **CSRD / devoir de vigilance = tier 1 ; presse / PETA = tier 3.**
 
+**Rapports volontaires des entreprises (niveau 3).** Hors de l'Union, aucun
+rapport de durabilité n'est imposé : les émissions d'Apple, Microsoft, Shein ou
+PepsiCo ne figurent que dans leurs rapports volontaires (source
+`COMPANY_REPORT`). Ce sont des déclarations de l'entreprise, à confiance
+plafonnée. L'éditeur a délégué leur validation (11/10/2026), à une condition :
+la citation est retrouvée **mot pour mot** dans le document, et les calculs sont
+refaits par la vérification automatique. Ces preuves portent l'étiquette de
+relecture `delegue-editeur:verifie-mot-pour-mot`.
+
 ---
 
 ## 7. Ingestion — connecteurs déterministes
@@ -557,10 +597,21 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v`0.7.0`, octobre 2026). Toute modification des paramètres de
+Document vivant (v`0.7.1`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.7.1 (12/10/2026)** — Décisions de l'éditeur : un objectif climat validé
+  par la SBTi est un engagement (Règle 3), plus un résultat ; nouvel indicateur
+  de résultat, l'évolution réelle des émissions totales (scopes 1, 2 et 3),
+  notée sur la trajectoire 1,5 °C (−4,2 % par an). Premières données : 21
+  groupes, dont Shein (+23 % en un an), Microsoft (+10 % par an depuis 2020),
+  Google (+9 % par an depuis 2019), Amazon (+8 % par an), Volkswagen (+7 %),
+  Hermès (+0,8 % par an depuis 2018) ; Apple, Danone, Kering, H&M, LVMH,
+  Renault, Stellantis, Engie, Pernod Ricard, Mondelez en baisse de plus de
+  4,2 % par an. Une baisse sur une seule année ne compte pas. Noms des sources
+  affichés en français. Rapports volontaires des entreprises : source de
+  niveau 3, validation déléguée sous condition de vérification mot pour mot.
 - **0.7.0 (11/10/2026)** — Décisions de l'éditeur. Exploitation animale :
   toute exploitation, même marginale, met le pilier animal à 0 (le barème
   « marginal 0,55 / au cœur de l'activité 0,40 » disparaît) ; le niveau inconnu
