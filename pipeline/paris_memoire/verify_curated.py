@@ -177,6 +177,7 @@ ESEF_KEYWORDS = {
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
     "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions d.euros|net revenue"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
+    "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
     # lus dans le plan lui-même (C. com. L225-102-4 : cinq mesures).
     "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques", r"suivi|contr[ôo]le du respect|compte rendu"],
