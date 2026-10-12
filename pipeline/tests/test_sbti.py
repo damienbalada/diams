@@ -1,4 +1,4 @@
-﻿import textwrap
+import textwrap
 
 import pytest
 
@@ -23,12 +23,15 @@ def test_parse_csv_statuses(tmp_path):
     """)
     rows = parse_csv(path)
     by_company = {r.company: r for r in rows}
+    # Un objectif validé reste un engagement sur l'avenir (v0.7.1) ; s'engager à
+    # en fixer un vaut moitié moins ; retirer son engagement est un fait.
     assert by_company["Kering"].normalized_value == 1.0
-    assert by_company["Kering"].nature == "result"
+    assert by_company["Kering"].nature == "commitment"
     assert by_company["Hermes International"].normalized_value == 0.6
     assert by_company["Chanel Limited"].nature == "commitment"
-    assert by_company["Chanel Limited"].normalized_value == 1.0
+    assert by_company["Chanel Limited"].normalized_value == 0.5
     assert by_company["Removed Co"].normalized_value == 0.0
+    assert by_company["Removed Co"].nature == "result"
     assert "Unknown Co" not in by_company
 
 
@@ -42,7 +45,7 @@ def test_parse_csv_real_export_headers(tmp_path):
     rows = parse_csv(path)
     by_company = {r.company: r for r in rows}
     assert by_company["Kering"].normalized_value == 1.0
-    assert by_company["Kering"].nature == "result"
+    assert by_company["Kering"].nature == "commitment"
     assert by_company["Nestle"].nature == "commitment"
 
 

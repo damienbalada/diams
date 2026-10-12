@@ -176,6 +176,7 @@ ESEF_KEYWORDS = {
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
     "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions d.euros|net revenue"],
+    "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
     # lus dans le plan lui-même (C. com. L225-102-4 : cinq mesures).
     "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques", r"suivi|contr[ôo]le du respect|compte rendu"],
@@ -250,6 +251,53 @@ def ecb_annual_rate(currency: str, year: str, client: httpx.Client) -> float:
     return float(rows[0]["OBS_VALUE"])
 
 
+# Évolution des émissions : rythme annuel moyen recalculé depuis deux totaux cités.
+# « … rythme annuel moyen (2019 → 2025, 6 ans) : (6855000 / 10227000)^(1/6) − 1 = −6,45 % »
+TREND_RE = re.compile(r"rythme annuel moyen \((\d{4}) → (\d{4}), (\d+) ans?\) : \(([\d.,]+) / ([\d.,]+)\)"
+                      r"\^\(1/(\d+)\) − 1 = ([−-]?[\d,]+) %")
+TREND_FULL = 4.2  # baisse annuelle (en %) qui vaut la note pleine : trajectoire 1,5 °C de la SBTi
+
+
+def trend_score(rate_pct: float) -> float:
+    """1 si baisse ≥ 4,2 %/an, 0 si pas de baisse, linéaire entre les deux."""
+    return round(max(0.0, min(1.0, -rate_pct / TREND_FULL)), 4)
+
+
+def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
+    """Contrôle du rythme déclaré : années cohérentes, deux totaux présents dans la
+    citation, calcul exact, valeur et note conformes. Le dernier booléen dit si la
+    formule est présente (la valeur, calculée, n'est alors pas cherchée telle quelle)."""
+    m = TREND_RE.search(row.excerpt or "")
+    if not m:
+        return True, [], False
+    y0, y1, n_s, last_s, base_s, n2_s, r_s = m.groups()
+    n = int(n_s)
+    # Totaux écrits sans séparateur de milliers ; virgule = décimale (« 265,1 »).
+    last, base = float(last_s.replace(",", ".")), float(base_s.replace(",", "."))
+    rate = (pow(last / base, 1 / n) - 1) * 100 if base > 0 else float("nan")
+    stated = float(r_s.replace("−", "-").replace(",", "."))
+    flat = re.sub(r"(?<=\d)[\s,](?=\d{3}(?!\d))", "", quote)
+    def forms(x: float) -> list[str]:
+        # Écritures possibles d'un total : 6855000, 6,855,000, 6 855 000, 265,1, 265.1
+        out = _value_variants(x)
+        if float(x).is_integer():
+            out.append(f"{int(x):,}".replace(",", " "))
+        return out
+    present = all(any(re.search(rf"(?<![\d.,]){re.escape(v)}(?![\d])", f) for v in forms(x) for f in (flat, quote))
+                  for x in (last, base))
+    years_ok = int(y1) - int(y0) == n and n_s == n2_s and n > 0
+    calc_ok = abs(rate - stated) <= 0.01
+    value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
+    norm_ok = row.normalized_value is not None and abs(row.normalized_value - trend_score(stated)) < 1e-3
+    ok = present and years_ok and calc_ok and value_ok and norm_ok
+    return ok, [
+        f"totaux {last_s} et {base_s} présents dans la citation {'✓' if present else '✗'}",
+        f"{y0} → {y1} = {n} an(s) {'✓' if years_ok else '✗'}",
+        f"rythme recalculé {rate:.2f} % = déclaré {stated} % {'✓' if calc_ok else '✗'}",
+        f"valeur et note ({trend_score(stated)}) conformes {'✓' if value_ok and norm_ok else '✗'}",
+    ], True
+
+
 def check_fx(row, quote: str, rates: dict[tuple[str, str], float]) -> tuple[bool, list[str], float | None]:
     """Contrôle d'une conversion déclarée : taux = celui de la BCE, montant d'origine
     cité, produit exact à l'arrondi près, résultat = valeur. Renvoie le montant
@@ -290,7 +338,10 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
     fx_ok, fx_details, fx_source = check_fx(row, quote, rates or {})
     ok &= fx_ok
     details += fx_details
-    if row.value_numeric is not None and not ignore_keywords:
+    tr_ok, tr_details, tr_active = check_trend(row, quote)
+    ok &= tr_ok
+    details += tr_details
+    if row.value_numeric is not None and not ignore_keywords and not tr_active:
         flat = re.sub(r"(?<=\d)\s(?=\d{3}(?!\d))", "", quote)  # espaces de milliers seulement
         target = fx_source if fx_source is not None else row.value_numeric
         variants = _value_variants(target)
@@ -350,11 +401,20 @@ def document_text(url: str, client: httpx.Client) -> str:
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", r.text, flags=re.S)))
 
 
-def finalize(v: Verdict, note: str, tier: str | None) -> Verdict:
-    """Seul un OK sur source de tier 1-2, sans note de jugement, est approuvable."""
+#: Étiquette de relecture des preuves de tier 3 approuvées par délégation de
+#: l'éditeur (« valide pour moi », 11/10/2026) : seulement vérifiées mot pour mot.
+DELEGATED_REVIEWER = "delegue-editeur:verifie-mot-pour-mot"
+
+
+def finalize(v: Verdict, note: str, tier: str | None, delegated: bool = False) -> Verdict:
+    """Seul un OK sur source de tier 1-2, sans note de jugement, est approuvable.
+    Avec la délégation de l'éditeur, un OK de tier 3 (rapport volontaire de
+    l'entreprise) l'est aussi, sous une étiquette distincte ; jamais le tier « crowd »."""
     from .load import AUTO_PUBLISH_TIERS
     if v.status == "OK" and note:
         return Verdict("JUGEMENT", v.details + [f"signalé à la compilation : {note}"])
+    if v.status == "OK" and tier == "press" and delegated:
+        return Verdict("OK-DÉLÉGUÉ", v.details + ["tier 3 : approuvé par délégation de l'éditeur (vérifié mot pour mot)"])
     # Même vérifiée, une source de tier 3 / crowd passe par un humain (REVIEW_MODEL).
     if v.status == "OK" and tier not in AUTO_PUBLISH_TIERS:
         return Verdict("JUGEMENT", v.details + [f"source de tier « {tier} » : validation humaine requise"])
@@ -362,7 +422,7 @@ def finalize(v: Verdict, note: str, tier: str | None) -> Verdict:
 
 
 # --- Application ---------------------------------------------------------------
-def approve(rows) -> int:
+def approve(rows, reviewer: str = "auto:verify_curated") -> int:
     h = {"apikey": config.SUPABASE_SERVICE_ROLE_KEY, "Authorization": f"Bearer {config.SUPABASE_SERVICE_ROLE_KEY}",
          "Content-Type": "application/json"}
     base = f"{config.SUPABASE_URL}/rest/v1"
@@ -375,7 +435,7 @@ def approve(rows) -> int:
                            params={"entity_id": f"eq.{ents[r.entity_slug]}", "indicator_id": f"eq.{inds[r.indicator_code]}",
                                    "source_id": f"eq.{srcs[r.source_code]}", "observed_on": f"eq.{r.observed_on}",
                                    "review_status": "eq.pending"},
-                           json={"review_status": "approved", "reviewer": "auto:verify_curated"})
+                           json={"review_status": "approved", "reviewer": reviewer})
             resp.raise_for_status()
             n += len(resp.json())
     return n
@@ -386,6 +446,8 @@ def main() -> None:
     parser.add_argument("--file", required=True)
     parser.add_argument("--bocc-pdf", help="PDF des tableaux BOCC (sector-tables)")
     parser.add_argument("--apply", action="store_true", help="approuve les preuves OK encore en attente")
+    parser.add_argument("--delegue", action="store_true",
+                        help="délégation de l'éditeur : approuve aussi les preuves de tier 3 vérifiées mot pour mot")
     args = parser.parse_args()
 
     rows, errors = parse_file(args.file)
@@ -407,7 +469,7 @@ def main() -> None:
     with httpx.Client(timeout=60) as c:
         tiers = {code: tier for code, (_, tier) in _lookup_ids(c)[2].items()}
 
-    ok_rows, counts, reports = [], {}, {}
+    ok_rows, delegated_rows, counts, reports = [], [], {}, {}
     with httpx.Client(timeout=300) as client:
         for r, note in zip(rows, notes):
             if r.source_code == "BOCC" and tables:
@@ -431,16 +493,20 @@ def main() -> None:
                 v = check_esef_quote(r, reports[r.source_url], ignore_keywords=bool(note), rates=rates)
             else:
                 v = Verdict("NON VÉRIFIABLE", [f"aucun vérificateur pour la source {r.source_code}"])
-            v = finalize(v, note, tiers.get(r.source_code))
+            v = finalize(v, note, tiers.get(r.source_code), delegated=args.delegue)
             counts[v.status] = counts.get(v.status, 0) + 1
             print(f"\n[{v.status}] {r.entity_slug} · {r.indicator_code} ({r.source_code})")
             for d in v.details:
                 print(f"    {d}")
             if v.status == "OK":
                 ok_rows.append(r)
+            elif v.status == "OK-DÉLÉGUÉ":
+                delegated_rows.append(r)
     print("\nBilan : " + ", ".join(f"{k} {n}" for k, n in sorted(counts.items())))
     if args.apply:
         print(f"Approuvées (auto:verify_curated) : {approve(ok_rows)}")
+        if delegated_rows:
+            print(f"Approuvées par délégation ({DELEGATED_REVIEWER}) : {approve(delegated_rows, DELEGATED_REVIEWER)}")
     else:
         print("(contrôle seulement : --apply approuve les seules preuves OK)")
 

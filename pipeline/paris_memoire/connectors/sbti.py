@@ -5,11 +5,13 @@ https://sciencebasedtargets.org/companies-taking-action (XLSX ou CSV).
 
 Produit ENV_SBTI_VALIDATED (objectif de court terme, « near term »). Le cœur
 anti-greenwashing du pilier ENV :
-  * « Validated Targets » (ex-« Targets Set ») + 1.5°C -> 1.0, nature=result
-  * « Validated Targets » (autre classification)       -> 0.6, nature=result
-  * « Commitment to Set Targets » (ex-« Committed »)   -> 1.0, nature=commitment
-      (le moteur applique alors le multiplicateur promesse x0.4 + plafond 0.5)
+  * « Validated Targets » (ex-« Targets Set ») + 1.5°C -> 1.0, nature=commitment
+  * « Validated Targets » (autre classification)       -> 0.6, nature=commitment
+  * « Commitment to Set Targets » (ex-« Committed »)   -> 0.5, nature=commitment
   * « Commitment Removed » (engagement retiré)         -> 0.0, nature=result
+Un objectif, même validé, reste une promesse sur l'avenir (décision de l'éditeur,
+v0.7.1) : le moteur lui applique le multiplicateur des engagements (x0.4) et
+son plafond (0.5). La preuve est la baisse réelle des émissions (ENV_GHG_TREND).
 
 Rapprochement : LEI d'abord (identifiant légal, colonne `lei` de l'export), puis
 égalité exacte des noms normalisés, résultat unique exigé. Jamais d'inclusion :
@@ -54,9 +56,9 @@ def _interpret(status: str, classification: str) -> tuple[float, str] | None:
     s = status.strip().lower()
     c = classification.strip().lower()
     if "targets set" in s or s == "set" or "validated" in s:
-        return (1.0, "result") if c.startswith("1.5") else (0.6, "result")
+        return (1.0, "commitment") if c.startswith("1.5") else (0.6, "commitment")
     if "committed" in s or "commitment to set" in s:
-        return (1.0, "commitment")
+        return (0.5, "commitment")
     if "removed" in s:
         return (0.0, "result")
     return None

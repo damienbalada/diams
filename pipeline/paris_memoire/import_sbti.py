@@ -39,7 +39,9 @@ def build_rows(entities: list[dict], sbti_rows: list[sbti.SbtiRow], observed_on:
             excerpt=(f"SBTi, export « Companies taking action » (consulté le {observed_on[8:10]}/{observed_on[5:7]}/{observed_on[:4]}) : "
                      f"« {m.company} » — objectif de court terme : {m.label}"
                      + (f" ({m.classification})" if m.classification else "")
-                     + f" ({'résultat validé' if m.nature == 'result' else 'engagement non encore validé'})."),
+                     + (" (engagement retiré)." if m.nature == "result"
+                        else " (objectif validé par la SBTi : un engagement sur l'avenir, pas un résultat)."
+                        if m.normalized_value >= 0.6 else " (engagement à fixer un objectif, non encore validé).")),
             reviewer="import_sbti",
         ))
     return rows

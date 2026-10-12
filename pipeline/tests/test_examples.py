@@ -30,7 +30,7 @@ def test_example_cdp():
 def test_example_sbti():
     recs = sbti.parse_csv(str(EXAMPLES / "sbti.csv"))
     assert len(recs) == 2
-    assert recs[0].nature == "result"
+    assert recs[0].nature == "commitment"  # un objectif validé reste un engagement (v0.7.1)
 
 
 def test_example_bffp():

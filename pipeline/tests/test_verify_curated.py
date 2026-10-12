@@ -205,3 +205,52 @@ def test_conversion_de_devise_au_taux_bce():
     r2 = row("x", 340, f"Rapport annuel 2025 : « {q} »{conv.replace('= 332', '= 340')}",
              ind="ENV_GHG_INTENSITY", src="ANNUAL_REPORT")
     assert check_esef_quote(r2, rep, rates=rates).status == "ÉCART"                       # calcul faux
+
+
+def test_rythme_annuel_des_emissions_recalcule():
+    from paris_memoire.verify_curated import check_esef_quote, trend_score
+    rep = ("Total GHG emissions (market–based) (tCO 2e) 6,855,000 7,831,000 7,548,000 10,227,000 –12.5 –33 "
+           "1. For Scope 3 emissions")
+    q = "Total GHG emissions (market–based) (tCO 2e) 6,855,000 7,831,000 7,548,000 10,227,000"
+    calc = " ; rythme annuel moyen (2019 → 2025, 6 ans) : (6855000 / 10227000)^(1/6) − 1 = −6,45 %"
+    def r(value, norm, c=calc):
+        x = row("x", value, f"Rapport 2025 (colonnes 2025, 2024, 2023, 2019) : « {q} »{c}",
+                ind="ENV_GHG_TREND", src="ANNUAL_REPORT")
+        x.normalized_value = norm
+        return x
+    assert trend_score(-6.45) == 1.0 and trend_score(2.0) == 0.0 and trend_score(-2.1) == 0.5
+    assert check_esef_quote(r(-6.45, 1.0), rep).status == "OK"
+    assert check_esef_quote(r(-6.45, 0.8), rep).status == "ÉCART"                      # note fausse
+    assert check_esef_quote(r(-5.0, 1.0, calc.replace("−6,45", "−5,00")), rep).status == "ÉCART"  # calcul faux
+    assert check_esef_quote(r(-6.45, 1.0, calc.replace("6 ans", "5 ans")), rep).status == "ÉCART"  # années
+    assert check_esef_quote(r(-6.45, 1.0, calc.replace("6855000", "6855001")), rep).status == "ÉCART"  # total absent
+
+
+def test_rythme_avec_totaux_decimaux():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Émissions totales de GES Location-Based 265,1 145,2 157,2 Émissions totales de GES Market-Based"
+    q = "Émissions totales de GES Location-Based 265,1 145,2 157,2"
+    calc = " ; rythme annuel moyen (2017 → 2025, 8 ans) : (145,2 / 265,1)^(1/8) − 1 = −7,25 %"
+    x = row("x", -7.25, f"Rapport (Mt) : « {q} »{calc}", ind="ENV_GHG_TREND", src="ESEF")
+    x.normalized_value = 1.0
+    assert check_esef_quote(x, rep).status == "OK"
+
+
+def test_rythme_avec_espaces_de_milliers():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Émissions totales de GES (scope 2 market-based) 622 429 747 810 658 455 - 11,9 %"
+    q = "Émissions totales de GES (scope 2 market-based) 622 429 747 810 658 455"
+    calc = " ; rythme annuel moyen (2018 → 2025, 7 ans) : (658455 / 622429)^(1/7) − 1 = 0,81 %"
+    x = row("x", 0.81, f"DEU (colonnes 2018, 2024, 2025) : « {q} »{calc}", ind="ENV_GHG_TREND", src="AMF_BDIF")
+    x.normalized_value = 0.0
+    assert check_esef_quote(x, rep).status == "OK"
+
+
+def test_delegation_tier3_seulement_si_verifie():
+    from paris_memoire.verify_curated import Verdict, finalize
+    ok = Verdict("OK", ["citation retrouvée ✓"])
+    assert finalize(ok, "", "press").status == "JUGEMENT"                      # sans délégation : humain
+    assert finalize(ok, "", "press", delegated=True).status == "OK-DÉLÉGUÉ"    # délégation : approuvable
+    assert finalize(ok, "", "crowd", delegated=True).status == "JUGEMENT"      # jamais le tier crowd
+    assert finalize(Verdict("ÉCART", []), "", "press", delegated=True).status == "ÉCART"
+    assert finalize(ok, "note", "press", delegated=True).status == "JUGEMENT"  # jugement signalé : humain
