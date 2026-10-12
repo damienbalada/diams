@@ -229,6 +229,17 @@ l'autorité ; jamais un article de presse ou un recensement d'ONG.
   été condamnée à payer, y a participé pendant quinze ans.
 - Indicateurs complémentaires : une entreprise jamais sanctionnée n'est pas
   pénalisée, mais n'en tire aucun point.
+- **Autorités couvertes** (relevé systématique des groupes suivis depuis
+  octobre 2021) : Commission européenne (concurrence, marchés et services
+  numériques ; tous ses communiqués d'amende), Commission irlandaise de
+  protection des données (autorité chef de file des géants du numérique en
+  Europe), CNIL (tant qu'elle publie le nom de l'entreprise sanctionnée : ses
+  anciennes décisions sont anonymisées et ne peuvent plus être citées),
+  Autorité de la concurrence française, autorité italienne de la concurrence
+  et des consommateurs (AGCM). Pas encore couvertes : les autorités
+  américaines (FTC, ministère de la Justice, SEC) et les autres autorités
+  nationales européennes. Légifrance, qui publie les délibérations de la CNIL,
+  bloque les programmes : seules les actualités de la CNIL sont lues.
 - La vérification automatique retrouve chaque citation dans le communiqué
   officiel (Commission européenne : texte servi par l'interface publique du
   « press corner », sa salle de presse en ligne), relit le montant cité et
@@ -647,10 +658,13 @@ calcul (tables de config) doit être datée et justifiée ici.
   décisions officielles (Commission européenne, autorités de protection des
   données), notées par la gravité de l'amende ; les anciennes lignes, sourcées
   par la presse et dont un montant était faux, sont retirées. Premières
-  décisions : 17 (Google 2,95 Md€, Apple 1,8 Md€, Meta 1,2 Md€, Mondelez
-  337,5 M€, Gucci 119,7 M€, Volkswagen 127,7 M€, entente des constructeurs sur
-  le recyclage des véhicules…). Plusieurs controverses : la fiche affiche la plus
-  grave, celle qui fixe la pénalité.
+  décisions : 32 (Google 2,95 Md€, Apple 1,8 Md€, Meta 1,2 Md€, Amazon
+  1,128 Md€ en Italie, Google 403 M€ et LinkedIn 310 M€ en Irlande, Mondelez
+  337,5 M€, Google 325 M€ et Shein 150 M€ par la CNIL, Gucci 119,7 M€,
+  TotalEnergies 115,8 M€ pour l'entente sur les carburants en Corse, Volkswagen
+  127,7 M€, entente des constructeurs sur le recyclage des véhicules…).
+  Plusieurs controverses : la fiche affiche la plus grave, celle qui fixe la
+  pénalité.
 - **0.7.1 (12/10/2026)** — Décisions de l'éditeur : un objectif climat validé
   par la SBTi est un engagement (Règle 3), plus un résultat ; nouvel indicateur
   de résultat, l'évolution réelle des émissions totales (scopes 1, 2 et 3),

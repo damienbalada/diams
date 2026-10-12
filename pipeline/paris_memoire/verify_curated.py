@@ -195,7 +195,7 @@ ESEF_KEYWORDS = {
     "ANI_FUR_FREE": [r"fourrure|fur\b"],
     "GEO_LOBBYING_ALIGN": [r"InfluenceMap|Climate Policy Engagement"],
     # Décision officielle d'une autorité : amende, ou infraction constatée sans amende.
-    "GOV_SANCTIONS": [r"fine[ds]?\b|amende|sanction"],
+    "GOV_SANCTIONS": [r"fine[ds]?\b|fining|amende|sanction"],
 }
 
 
@@ -348,7 +348,39 @@ def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
 # citation officielle. « amende de 74,9 M€ » ↔ « Stellantis 50% €74 934 000 ».
 SANCTION_TIERS = ((1e9, 0.9), (1e8, 0.7), (0.0, 0.5))
 _SANCTION_VT = re.compile(r"amendes? de (?:plus de )?([\d ]+(?:,\d+)?) (M|Md)€")
-_EUR_EN = re.compile(r"€\s?(\d{1,3}(?:[ ,]\d{3})+|\d+(?:\.\d+)?)(?:\s?(billion|million))?", re.I)
+# Montant en euros, quelle que soit l'écriture du communiqué : « €1.8 billion », « EUR 114,681,657 »,
+# « 98,635,416.67 euro », « € 1,128 billion » (virgule décimale), « 150 millions d'euros »,
+# « 100 000 euros ». Chaque nombre est lu à l'anglaise et à la française ; le montant
+# déclaré doit correspondre à l'une des lectures.
+_AMOUNT = r"\d{1,3}(?:[ ,.\u00a0\u202f]\d{3})*(?:[.,]\d+)?"
+_SCALE_WORD = r"billion|million|milliards?|millions?"
+_EUR_LEAD = re.compile(rf"(?:€|\bEUR)\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?", re.I)
+_EUR_TRAIL = re.compile(rf"(?<![\d,.])({_AMOUNT})\s?(?:({_SCALE_WORD})\s?)?(?:d'\s?)?euros?\b", re.I)
+_SCALE = {"billion": 1e9, "million": 1e6, "milliard": 1e9, "milliards": 1e9, "millions": 1e6}
+
+
+def _readings(n_s: str) -> list[float]:
+    """« 1,128 » : 1128 à l'anglaise, 1,128 à la française ; « 98,635,416.67 » : anglaise seule."""
+    s = re.sub(r"[ \u00a0\u202f]", "", n_s)
+    out = []
+    for txt in (s.replace(",", ""), s.replace(".", "").replace(",", ".")):
+        try:
+            out.append(float(txt))
+        except ValueError:
+            pass
+    return out
+
+
+def euro_amounts(quote: str) -> list[float]:
+    found = []
+    for rx in (_EUR_LEAD, _EUR_TRAIL):
+        for n_s, word in rx.findall(quote):
+            found += [n * _SCALE.get(word.lower(), 1) for n in _readings(n_s)]
+    # Tableau dont l'en-tête donne l'unité : « Montants des sanctions (en euros) TEMF 115 820 000 ».
+    if re.search(r"\((?:en )?euros\)|\(in (?:EUR|euros?)\)", quote, re.I):
+        for n_s in re.findall(r"(?<![\d,.])\d{1,3}(?:[ \u00a0\u202f]\d{3}){2,}(?!\d)", quote):
+            found += _readings(n_s)
+    return found
 
 
 def sanction_severity(amount_eur: float) -> float:
@@ -372,10 +404,7 @@ def check_sanction(row, quote: str) -> tuple[bool, list[str]]:
     decimals = len(num_s.split(",")[1]) if "," in num_s else 0
     stated = float(num_s.replace(" ", "").replace(",", "."))
     scale = 1e9 if unit == "Md" else 1e6
-    quoted = []
-    for n_s, word in _EUR_EN.findall(quote):
-        n = float(n_s.replace(" ", "").replace(",", "")) * {"billion": 1e9, "million": 1e6}.get(word.lower(), 1)
-        quoted.append(n)
+    quoted = euro_amounts(quote)
     present = any(round(q / scale, decimals) == stated for q in quoted)
     sev = sanction_severity(stated * scale)
     norm_ok = row.normalized_value is not None and abs(row.normalized_value - sev) < 1e-9

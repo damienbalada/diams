@@ -313,3 +313,59 @@ def test_sanction_gravite_relue_dans_la_citation():
     # Immunité de clémence : infraction constatée, sans amende.
     assert check_esef_quote(s("mercedes-benz", "infraction constatée, immunité d'amende (clémence)", 0.5,
                               "Mercedes-Benz was not fined, as it revealed the cartel"), rep).status == "OK"
+
+
+def test_sanction_montant_en_francais():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("Le 1 er septembre 2025, la CNIL a sanctionné la société INFINITE STYLES SERVICES CO. LIMITED, filiale "
+           "irlandaise du groupe SHEIN, d'une amende de 150 millions d'euros pour avoir déposé des cookies. "
+           "la CNIL a sanctionné la société SAMARITAINE SAS d'une amende de 100 000 euros")
+
+    def s(vt, norm, q):
+        x = row("shein", None, f"CNIL : « {q} »", ind="GOV_SANCTIONS", src="GDPR_DPA")
+        x.value_numeric, x.value_text, x.normalized_value, x.nature = None, vt, norm, "controversy"
+        return x
+    q = "filiale irlandaise du groupe SHEIN, d'une amende de 150 millions d'euros"
+    assert check_esef_quote(s("amende de 150 M€ (cookies)", 0.7, q), rep).status == "OK"
+    assert check_esef_quote(s("amende de 150 M€ (cookies)", 0.9, q), rep).status == "ÉCART"
+    assert check_esef_quote(s("amende de 0,1 M€ (caméras)", 0.5,
+                              "SAMARITAINE SAS d'une amende de 100 000 euros"), rep).status == "OK"
+
+
+def test_sanction_tableau_en_euros():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("l'Autorité de la concurrence inflige une sanction de 187,5 millions d'euros à TotalEnergies Marketing "
+           "France, à deux sociétés du groupe Rubis et à EG Retail. Entreprises Montants des sanctions (en euros) "
+           "TEMF 115 820 000 Rubis 64 670 000")
+    q = ("inflige une sanction de 187,5 millions d'euros à TotalEnergies Marketing France » ; « "
+         "Montants des sanctions (en euros) TEMF 115 820 000")
+    x = row("totalenergies", None, f"Autorité de la concurrence : « {q} »", ind="GOV_SANCTIONS", src="FR_COMPETITION")
+    x.value_numeric, x.value_text, x.normalized_value, x.nature = None, "amende de 115,8 M€ (entente)", 0.7, "controversy"
+    assert check_esef_quote(x, rep).status == "OK"
+    x.value_text = "amende de 64,7 M€ (entente)"   # montant d'une autre société, absent de la citation
+    assert check_esef_quote(x, rep).status == "ÉCART"
+
+
+def test_sanction_virgule_decimale_devant_billion():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Italian Competition Authority: Amazon fined over € 1,128 billion for abusing its dominant position"
+    x = row("amazon", None, f"AGCM : « {rep} »", ind="GOV_SANCTIONS", src="IT_COMPETITION")
+    x.value_numeric, x.value_text, x.normalized_value, x.nature = None, "amende de 1,13 Md€ (abus)", 0.9, "controversy"
+    assert check_esef_quote(x, rep).status == "OK"
+
+
+def test_montants_en_euros_toutes_ecritures():
+    from paris_memoire.verify_curated import euro_amounts
+    def has(q, v):
+        return any(abs(x - v) < 0.5 for x in euro_amounts(q))
+    assert has("fined Apple over €1.8 billion", 1.8e9)
+    assert has("Amazon fined over € 1,128 billion", 1.128e9)
+    assert has("fines are therefore equal to EUR 114,681,657 for the Apple Group", 114_681_657)
+    assert has("imposed a 98,635,416.67 euro fine on Apple Inc.", 98_635_416.67)
+    assert has("Amazon EU S.àr.l. 1 million euro for the misleading advertising", 1e6)
+    assert has("a fine of EUR 10 million jointly and severally", 1e7)
+    assert has("Meta Platforms Inc. EUR 3.5 million for two unfair commercial practices", 3.5e6)
+    assert has("d'une amende de 150 millions d'euros", 1.5e8)
+    assert has("une sanction de 187,5 millions d'euros", 1.875e8)
+    assert has("d'une amende de 100 000 euros", 1e5)
+    assert has("Stellantis 50% €74 934 000", 74_934_000)
