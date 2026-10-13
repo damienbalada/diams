@@ -59,7 +59,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v41"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v42"], { revalidate: 600 });
 
 async function computeAllScores(): Promise<EntityScore[]> {
   const entities = await listEntities();

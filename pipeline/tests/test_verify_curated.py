@@ -541,3 +541,13 @@ def test_president_independant_compte_pour_un():
     q2 = "As at 31 December 2025, the Unilever Board comprised ten Directors: the Chair, two Executive Directors and seven independent Non-Executive Directors"
     sans = row("unilever", 80.0, f"Rapport : « {q2} » ; calcul : (7 + 1) / 10 = 80,0 %", ind="GOV_BOARD_INDEP", src="ESEF")
     assert check_esef_quote(sans, rep).status == "ÉCART"   # indépendance du président non citée
+
+
+def test_effectif_publie_en_trois_parties():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "The Board has 1 executive director, 6 non-executive directors and 3 independent directors."
+    q = "The Board has 1 executive director, 6 non-executive directors and 3 independent directors"
+    ok = row("lotus", 30.0, f"Rapport : « {q} » ; calcul : 3 / (1 + 6 + 3) = 30,0 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(ok, rep).status == "OK"
+    faux = row("lotus", 27.3, f"Rapport : « {q} » ; calcul : 3 / (1 + 7 + 3) = 27,3 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(faux, rep).status == "ÉCART"   # « 7 » n'est pas cité

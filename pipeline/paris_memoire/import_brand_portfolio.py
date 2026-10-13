@@ -20,7 +20,9 @@ Usage :
     python -m paris_memoire.import_brand_portfolio --file curated/marques_X.csv           # contrôle
     python -m paris_memoire.import_brand_portfolio --file curated/marques_X.csv --apply   # écriture
 CSV : brand_slug, brand_name, group_slug, sector_code, source_kind (legal|website),
-      source_url, doc, quote, observed_on, animal_free (vide|true)
+      source_url, doc, quote, observed_on, animal_free (vide|true), display_name (facultatif :
+      nom affiché quand deux marques homonymes coexistent, ex. « Lotus (papier) » ; le
+      contrôle porte toujours sur brand_name)
 """
 from __future__ import annotations
 
@@ -138,7 +140,8 @@ def main() -> None:
             if b is None:
                 resp = db.post(f"{config.SUPABASE_URL}/rest/v1/entities",
                                headers={**_h(), "Prefer": "return=representation"},
-                               json={"slug": r["brand_slug"], "legal_name": r["brand_name"], "display_name": r["brand_name"],
+                               json={"slug": r["brand_slug"], "legal_name": r["brand_name"],
+                                     "display_name": (r.get("display_name") or "").strip() or r["brand_name"],
                                      "parent_id": g["id"], "ownership_pct": 100, "country": g.get("country"),
                                      "sector_id": sectors[r["sector_code"]], "is_brand": True,
                                      "animal_free": (r.get("animal_free") or "").strip().lower() == "true"})

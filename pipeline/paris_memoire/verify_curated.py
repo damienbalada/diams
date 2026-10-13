@@ -175,7 +175,7 @@ ESEF_KEYWORDS = {
     "GOV_BOARD_GENDER": [r"femmes|administratrices|f[ée]minisation|women|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
@@ -373,7 +373,7 @@ def check_except(row, quote: str) -> tuple[bool, list[str], bool]:
 # Effectif publié en deux parties (« two executive directors and 13 non-executive
 # directors ») : « calcul : 13 / (2 + 13) = 86,7 % », chaque partie citée ; de même
 # au numérateur (« calcul : (6 + 3) / 12 = 75 % »).
-_TERM = r"(\d+|\(\d+ \+ \d+\))"
+_TERM = r"(\d+|\(\d+(?: \+ \d+)+\))"
 RATIO_RE = re.compile(rf"calcul : {_TERM} / {_TERM} = ([\d,]+) %")
 
 

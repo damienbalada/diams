@@ -41,6 +41,10 @@ ALIASES = {
     "schwarz-gruppe": "Schwarz Group GmbH",
     # DIAMS suit le groupe Ingka (magasins IKEA) : sa société mère est Ingka Holding.
     "ikea": "Ingka Holding B.V.",
+    "reckitt": "Reckitt Benckiser",
+    # Carlsberg A/S répond au CDP par sa filiale opérationnelle à 100 %, qui porte
+    # l'ensemble des brasseries du groupe.
+    "carlsberg": "Carlsberg Breweries A/S",
 }
 # Rapprochement ambigu (entité CDP incertaine) : on s'abstient.
 SKIP = {
