@@ -106,8 +106,8 @@ def main() -> None:
     config.require_supabase()
     rows = list(csv.DictReader(open(args.file, encoding="utf-8")))
     with httpx.Client(timeout=120) as db, httpx.Client(timeout=300) as web:
-        ents = {e["slug"]: e for e in db.get(f"{config.SUPABASE_URL}/rest/v1/entities", headers=_h(),
-                                             params={"select": "id,slug,is_brand,parent_id,country"}).json()}
+        from .supabase_client import get_all
+        ents = {e["slug"]: e for e in get_all(db, "entities", {"select": "id,slug,is_brand,parent_id,country"}, _h())}
         sectors = {s["code"]: s["id"] for s in db.get(f"{config.SUPABASE_URL}/rest/v1/sectors", headers=_h(),
                                                       params={"select": "id,code"}).json()}
         cache: dict[str, str | None] = {}

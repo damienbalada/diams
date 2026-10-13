@@ -110,7 +110,7 @@ def main() -> None:
         print(f"{len(entries)} entreprises lues, effectifs {counts}, {len(moves)} mouvements contrôlés")
         if issues:
             raise SystemExit("Lecture non conforme, rien n'est écrit :\n  " + "\n  ".join(issues))
-        ents = _rest(c, "GET", "entities", params={"select": "id,slug,legal_name,display_name,parent_id"}).json()
+        ents = supabase_client.get_all(c, "entities", {"select": "id,slug,legal_name,display_name,parent_id"})
         groups = [e for e in ents if not e.get("parent_id")]
         rows = []
         for e in entries:

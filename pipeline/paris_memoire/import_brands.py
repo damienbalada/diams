@@ -54,9 +54,8 @@ def load_entities_with_aliases(client: httpx.Client) -> list[dict]:
     config.require_supabase()
     h = {"apikey": config.SUPABASE_SERVICE_ROLE_KEY,
          "Authorization": f"Bearer {config.SUPABASE_SERVICE_ROLE_KEY}"}
-    ents = client.get(f"{config.SUPABASE_URL}/rest/v1/entities",
-                      params={"select": "id,slug,display_name,legal_name,is_brand"},
-                      headers=h).json()
+    from .supabase_client import get_all
+    ents = get_all(client, "entities", {"select": "id,slug,display_name,legal_name,is_brand"}, h)
     aliases = client.get(f"{config.SUPABASE_URL}/rest/v1/entity_aliases",
                          params={"select": "entity_id,alias"}, headers=h).json()
     by_id: dict[str, list[str]] = {}

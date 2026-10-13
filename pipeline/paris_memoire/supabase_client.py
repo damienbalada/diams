@@ -20,18 +20,34 @@ def _headers() -> dict[str, str]:
     }
 
 
+#: L'API renvoie au plus 1 000 lignes par appel (réglage par défaut de Supabase).
+PAGE = 1000
+
+
+def get_all(client: httpx.Client, table: str, params: dict[str, Any], headers: dict[str, str] | None = None) -> list[dict[str, Any]]:
+    """Toutes les lignes d'une table, page par page (tri stable sur l'identifiant,
+    sauf tri explicite), au lieu des seules 1 000 premières."""
+    out: list[dict[str, Any]] = []
+    base = dict(params)
+    base.setdefault("order", "id.asc")
+    offset = 0
+    while True:
+        r = client.get(f"{config.SUPABASE_URL}/rest/v1/{table}", params={**base, "limit": PAGE, "offset": offset},
+                       headers=headers or _headers())
+        r.raise_for_status()
+        rows = r.json()
+        out += rows
+        if len(rows) < PAGE:
+            return out
+        offset += PAGE
+
+
 def list_entities(client: httpx.Client | None = None) -> list[dict[str, Any]]:
     """Toutes les entités avec leurs identifiants actuels."""
     config.require_supabase()
     c = client or httpx.Client(timeout=30)
     try:
-        r = c.get(
-            f"{config.SUPABASE_URL}/rest/v1/entities",
-            params={"select": "id,slug,legal_name,display_name,country,lei,siren,is_brand"},
-            headers=_headers(),
-        )
-        r.raise_for_status()
-        return r.json()
+        return get_all(c, "entities", {"select": "id,slug,legal_name,display_name,country,lei,siren,is_brand"})
     finally:
         if client is None:
             c.close()

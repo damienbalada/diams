@@ -127,7 +127,7 @@ def main() -> None:
         for s in scores:
             by_name.setdefault(s.company, []).append(s)
             by_norm.setdefault(normalize_name(s.company), []).append(s)
-        ents = _rest(c, "GET", "entities", params={"select": "slug,legal_name,display_name,parent_id"}).json()
+        ents = supabase_client.get_all(c, "entities", {"select": "slug,legal_name,display_name,parent_id"})
         rows: list[EvidenceRow] = []
         for g in (e for e in ents if not e.get("parent_id")):
             s = match(g["slug"], [g[k] for k in ("display_name", "legal_name") if g.get(k)], by_name, by_norm)

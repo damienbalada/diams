@@ -75,7 +75,8 @@ def main() -> None:
 
     rows: list[EvidenceRow] = []
     with httpx.Client(timeout=120) as db, httpx.Client(timeout=300) as web:
-        ents = _get(db, "entities", {"select": "id,slug,lei,country", "lei": "not.is.null"})
+        from .supabase_client import get_all
+        ents = get_all(db, "entities", {"select": "id,slug,lei,country", "lei": "not.is.null"})
         if args.only:
             keep = set(args.only.split(","))
             ents = [e for e in ents if e["slug"] in keep]

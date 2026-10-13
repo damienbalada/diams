@@ -93,7 +93,7 @@ def main() -> None:
         scores = fetch_all(c)
         latest = bm.latest_ktc(scores)
         print(f"{len(scores)} lignes KnowTheChain, {len(latest)} entreprises (dernière édition)")
-        ents = _rest(c, "GET", "entities", params={"select": "id,slug,legal_name,display_name,parent_id"}).json()
+        ents = supabase_client.get_all(c, "entities", {"select": "id,slug,legal_name,display_name,parent_id"})
         groups = [e for e in ents if not e.get("parent_id")]
         rows: list[EvidenceRow] = []
         for name, s in sorted(latest.items()):

@@ -47,13 +47,14 @@ def _headers() -> dict[str, str]:
 def _lookup_ids(client: httpx.Client) -> tuple[dict, dict, dict]:
     """Maps slug->entity_id, code->indicator_id, code->source_id."""
     base = f"{config.SUPABASE_URL}/rest/v1"
-    ents = client.get(f"{base}/entities", params={"select": "id,slug"}, headers=_headers())
+    from .supabase_client import get_all
+    ents = get_all(client, "entities", {"select": "id,slug"}, _headers())
     inds = client.get(f"{base}/indicators", params={"select": "id,code"}, headers=_headers())
     srcs = client.get(f"{base}/sources", params={"select": "id,code,tier"}, headers=_headers())
-    for r in (ents, inds, srcs):
+    for r in (inds, srcs):
         r.raise_for_status()
     return (
-        {e["slug"]: e["id"] for e in ents.json()},
+        {e["slug"]: e["id"] for e in ents},
         {i["code"]: i["id"] for i in inds.json()},
         {s["code"]: (s["id"], s.get("tier")) for s in srcs.json()},
     )

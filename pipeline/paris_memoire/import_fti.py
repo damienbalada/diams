@@ -100,7 +100,7 @@ def main() -> None:
         by_norm: dict[str, list[str]] = {}
         for n in scores:
             by_norm.setdefault(normalize_name(n), []).append(n)
-        ents = _rest(c, "GET", "entities", params={"select": "slug,legal_name,display_name"}).json()
+        ents = supabase_client.get_all(c, "entities", {"select": "slug,legal_name,display_name"})
         rows = []
         for e in ents:
             name = match(e, scores, by_norm)

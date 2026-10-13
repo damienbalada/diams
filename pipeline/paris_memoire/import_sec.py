@@ -66,8 +66,8 @@ def main() -> None:
     slugs = args.only.split(",") if args.only else list(sec.TICKERS)
     rows: list[EvidenceRow] = []
     with httpx.Client(timeout=120) as c:
-        ents = {e["slug"]: e for e in c.get(f"{config.SUPABASE_URL}/rest/v1/entities",
-                                             params={"select": "slug,legal_name,lei"}, headers=h).json()}
+        from .supabase_client import get_all
+        ents = {e["slug"]: e for e in get_all(c, "entities", {"select": "slug,legal_name,lei"}, h)}
         index = sec.company_index(c)
         for slug in slugs:
             e, ticker = ents.get(slug), sec.TICKERS.get(slug)

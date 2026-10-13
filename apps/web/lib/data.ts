@@ -65,7 +65,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v59"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v60"], { revalidate: 600 });
 
 async function computeAllScores(): Promise<EntityScore[]> {
   const entities = await listEntities();
@@ -115,16 +115,36 @@ export async function getPublicStats(): Promise<{ evidence: number; sources: num
   return { evidence: ev.count, sources: src.count };
 }
 
+/**
+ * Toutes les lignes d'une requête, page par page : l'API renvoie au plus 1 000
+ * lignes par appel (réglage par défaut de Supabase) et la base en compte davantage.
+ * La requête doit être triée sur une clé unique pour que les pages ne se chevauchent pas.
+ */
+const PAGE = 1000;
+async function selectAll<T>(
+  page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await page(from, from + PAGE - 1);
+    if (error) throw new Error(error.message);
+    out.push(...(data ?? []));
+    if (!data || data.length < PAGE) return out;
+  }
+}
+
 /** Liste des entités pour la page d'accueil. */
 export async function listEntities() {
   const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("entities")
-    .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id")
-    .order("is_brand")
-    .order("display_name");
-  if (error) throw new Error(error.message);
-  return data ?? [];
+  return selectAll((from, to) =>
+    supabase
+      .from("entities")
+      .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id")
+      .order("is_brand")
+      .order("display_name")
+      .order("id")
+      .range(from, to),
+  );
 }
 
 // --- Index de propriété (chargé une fois, réutilisé) -------------------------
@@ -145,11 +165,18 @@ interface EntityRow {
  */
 async function loadEntityIndex() {
   const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("entities")
-    .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id");
-  if (error || !data) return null;
-  const rows = data as EntityRow[];
+  let rows: EntityRow[];
+  try {
+    rows = await selectAll<EntityRow>((from, to) =>
+      supabase
+        .from("entities")
+        .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id")
+        .order("id")
+        .range(from, to),
+    );
+  } catch {
+    return null;
+  }
   const byId = new Map(rows.map((e) => [e.id, e]));
   const bySlug = new Map(rows.map((e) => [e.slug, e]));
   /** Remonte jusqu'au groupe racine (peut être l'entité elle-même). */

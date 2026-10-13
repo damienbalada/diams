@@ -108,7 +108,7 @@ def main() -> None:
         print(f"{len(answers)} marques notées en {args.year}")
         if len(answers) < 100:
             raise SystemExit("Liste incomplète : rien n'est écrit.")
-        slugs = {e["slug"] for e in _rest(c, "GET", "entities", params={"select": "slug"}).json()}
+        slugs = {e["slug"] for e in supabase_client.get_all(c, "entities", {"select": "slug"})}
         rows = []
         for name, slug in ALIASES.items():
             if name not in answers or slug not in slugs:

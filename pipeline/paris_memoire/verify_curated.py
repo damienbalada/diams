@@ -780,7 +780,8 @@ def approve(rows, reviewer: str = "auto:verify_curated") -> int:
     base = f"{config.SUPABASE_URL}/rest/v1"
     n = 0
     with httpx.Client(timeout=60) as c:
-        ids = lambda t, k: {x[k]: x["id"] for x in c.get(f"{base}/{t}", params={"select": f"id,{k}"}, headers=h).json()}  # noqa: E731
+        from .supabase_client import get_all
+        ids = lambda t, k: {x[k]: x["id"] for x in get_all(c, t, {"select": f"id,{k}"}, h)}  # noqa: E731
         ents, inds, srcs = ids("entities", "slug"), ids("indicators", "code"), ids("sources", "code")
         for r in rows:
             resp = c.patch(f"{base}/evidence", headers={**h, "Prefer": "return=representation"},

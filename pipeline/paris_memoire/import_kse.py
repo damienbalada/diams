@@ -124,7 +124,7 @@ def main() -> None:
         print(f"{len(companies)} entreprises dans la liste KSE")
         if len(companies) < 3000:
             raise SystemExit("Liste incomplète (moins de 3 000 entreprises) : rien n'est écrit.")
-        ents = _rest(c, "GET", "entities", params={"select": "id,slug,legal_name,display_name,parent_id"}).json()
+        ents = supabase_client.get_all(c, "entities", {"select": "id,slug,legal_name,display_name,parent_id"})
         groups = [e for e in ents if not e.get("parent_id")]
         rows, seen = [], set()
         for co in companies:
