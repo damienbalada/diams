@@ -8,7 +8,7 @@ export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : \`0.7.3\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.7.4\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -193,6 +193,10 @@ publiée dans un même tableau : r = (E dernière / E référence)^(1/années) �
   soit la durée : elle montre que les émissions ne baissent pas.
 - Ne s'applique pas à la banque et à l'assurance : leurs émissions sont surtout
   financées, sur un périmètre qui change d'une année à l'autre.
+- **Une baisse due aux cessions ne compte pas** *(validé par l'éditeur le
+  13/10/2026)* : quand les émissions d'un pétrolier baissent surtout parce qu'il a
+  vendu des actifs ou moins d'énergie (Shell, TotalEnergies), les émissions changent
+  de propriétaire sans disparaître ; aucune baisse n'est retenue.
 - Sources : le rapport réglementé (état de durabilité CSRD, rapport annuel
   légal) ; hors de l'Union, le rapport volontaire de l'entreprise (niveau 3).
 - Les deux totaux sont cités mot pour mot ; le rythme et la note sont recalculés
@@ -235,8 +239,18 @@ l'autorité ; jamais un article de presse ou un recensement d'ONG.
 
 - La note de l'indicateur est 0,5 × (1 − gravité) : 0,05 pour une amende d'au
   moins 1 Md€, 0,25 pour une amende de moins de 100 M€.
-- **Plusieurs décisions : la plus grave compte**, et c'est elle que la fiche
-  affiche.
+- **Plusieurs décisions : la plus grave compte** dans l'indicateur, et c'est elle
+  que la fiche affiche.
+- **Retrait de points sur la note globale** *(v0.7.4, décision de l'éditeur du
+  13/10/2026 : « une règle plus sévère »)*. Une condamnation n'est pas une affaire
+  de gouvernance parmi d'autres : en plus de l'indicateur, **chaque décision**
+  retire des points à la note globale (sur 100), selon l'amende — **15 points** à
+  partir de 1 milliard d'euros, **8** à partir de 100 millions, **3** sinon
+  (amende moindre, infraction constatée, immunité de clémence). Les décisions
+  s'additionnent, dans la limite de **25 points**. Avant la v0.7.4, une amende d'un
+  milliard ne coûtait que 5 à 7 points ; Apple (cinq décisions, dont 1,8 Md€ de la
+  Commission européenne en 2024), Google ou Meta en perdent désormais 25. La fiche affiche le retrait et
+  chaque décision, avec sa source.
 - La sanction est rattachée à **l'entité nommée par la décision** : la marque
   Gucci (prix de revente imposés), pas tout le groupe Kering ; une sanction du
   groupe (Stellantis) vaut pour ses marques.
@@ -702,10 +716,22 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.7.3\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.7.4\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.7.4 (13/10/2026)** — Décisions de l'éditeur. Sanctions : chaque décision
+  officielle de moins de 5 ans retire 15, 8 ou 3 points à la note globale selon
+  l'amende (cumul plafonné à 25), en plus de l'indicateur de gouvernance. Les
+  versions 0.7.2 (sanctions limitées aux décisions officielles) et 0.7.3
+  (plastique vierge, fiabilité jamais baissée par une donnée complémentaire,
+  règle du « publié ») sont validées, de même que le refus des chiffres publiés
+  sur un seul sous-périmètre, la présomption d'exploitation animale tant qu'aucune
+  preuve contraire n'existe (Pernod Ricard, L'Oréal) et le refus de compter une
+  baisse d'émissions due aux cessions (Shell, TotalEnergies). Composition des
+  conseils : la part d'indépendants reprend ce que l'entreprise déclare, citation
+  à l'appui (président déclaré indépendant compris) ; l'effet sur la note globale
+  reste inférieur à un point.
 - **0.7.3 (13/10/2026)** — Plastique : l'évolution réelle du tonnage de
   plastique vierge remplace la signature d'un engagement (premières données :
   8 groupes de l'alimentation et de l'hygiène, de L'Oréal −37 % à Coca-Cola).

@@ -894,3 +894,35 @@ test("toGrade — seuils", () => {
   assert.equal(toGrade(0.2), "D");
   assert.equal(toGrade(0.1), "E");
 });
+
+// --- v0.7.4 : sanction officielle = points retirés à la note globale ---------
+test("sanctions — retrait par décision selon la gravité, cumul plafonné, doublons ignorés", () => {
+  const malus = { sanction_malus_severe: 15, sanction_malus_major: 8, sanction_malus_other: 3, sanction_malus_cap: 25 };
+  const inds = [ind("ENV_A", "ENV"), ind("GOV_SANCTIONS", "GOV", { complementary: true })];
+  const pw = [{ dimension_code: "ENV", weight: 1 }, { dimension_code: "GOV", weight: 1 }];
+  const sanc = (sev: number, date: string, url: string, tier: Tier = "regulatory") =>
+    ev({ indicator_code: "GOV_SANCTIONS", nature: "controversy", normalized_value: sev, observed_on: date, tier, source_url: url });
+  const base = [ev({ indicator_code: "ENV_A", normalized_value: 0.9, confidence: 0.9 })];
+  const sans = computeScore(baseInput({ applicableIndicators: inds, profileWeights: pw, evidence: base, params: { ...params, ...malus } }));
+  const un = computeScore(baseInput({
+    applicableIndicators: inds, profileWeights: pw, params: { ...params, ...malus },
+    evidence: [...base, sanc(0.9, "2024-03-04", "u1")],
+  }));
+  assert.equal(un.sanction_malus?.points, 15);
+  // le pilier gouvernance baisse aussi (indicateur), puis 15 points sont retirés
+  const deux = computeScore(baseInput({
+    applicableIndicators: inds, profileWeights: pw, params: { ...params, ...malus },
+    evidence: [...base, sanc(0.9, "2024-03-04", "u1"), sanc(0.9, "2024-03-04", "u1"), sanc(0.7, "2025-04-23", "u2"), sanc(0.9, "2025-09-05", "u3")],
+  }));
+  assert.equal(deux.sanction_malus?.items.length, 3);           // doublon compté une fois
+  assert.equal(deux.sanction_malus?.points, 25);                 // 15 + 15 + 8 plafonné à 25
+  assert.equal(deux.sanction_malus?.capped, true);
+  const presse = computeScore(baseInput({
+    applicableIndicators: inds, profileWeights: pw, params: { ...params, ...malus },
+    evidence: [...base, sanc(0.9, "2024-03-04", "u1", "press")],
+  }));
+  assert.equal(presse.sanction_malus, undefined);                // seule une autorité compte
+  const sansParam = computeScore(baseInput({ applicableIndicators: inds, profileWeights: pw, evidence: [...base, sanc(0.9, "2024-03-04", "u1")] }));
+  assert.equal(sansParam.sanction_malus, undefined);
+  assert.ok(sans.score - un.score > 0.15 - 1e-9);
+});

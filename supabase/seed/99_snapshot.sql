@@ -15,7 +15,7 @@
 --   sources                  59
 --   source_tier_config       4
 --   evidence_nature_config   4
---   scoring_params           7
+--   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
 --   entities                 210
@@ -323,7 +323,11 @@ insert into scoring_params (key, value, description) values
   ('min_confidence_to_publish', 0.3, 'Confiance minimale d''une fiche pour affichage public.'),
   ('min_peers_for_rank', 5, 'Nombre minimal de pairs du secteur pour noter une valeur brute par son rang ; en dessous : affichée, fiabilité seulement (v0.6.0).'),
   ('missing_data_confidence', 0, 'Confiance d''une dimension sans evidence active.'),
-  ('missing_data_score', 0, 'Règle 1 : score d''une dimension sans evidence active (pénalisant).')
+  ('missing_data_score', 0, 'Règle 1 : score d''une dimension sans evidence active (pénalisant).'),
+  ('sanction_malus_cap', 25, 'Plafond du retrait cumulé pour sanctions (v0.7.4).'),
+  ('sanction_malus_major', 8, 'Points retirés par décision officielle d''amende d''au moins 100 M€ (v0.7.4).'),
+  ('sanction_malus_other', 3, 'Points retirés par autre décision officielle (amende moindre, infraction constatée, immunité de clémence) (v0.7.4).'),
+  ('sanction_malus_severe', 15, 'Points retirés à la note globale (sur 100) par décision officielle d''amende d''au moins 1 Md€ (v0.7.4).')
 on conflict (key) do update set
   value = excluded.value,
   description = excluded.description;

@@ -49,6 +49,12 @@ export interface ScoringParams {
   /** Base minimale pour une note A ; en dessous, la note est plafonnée juste
    *  sous A (v0.6.0). Absent : 0. */
   min_basis_for_top_grade?: number;
+  /** Sanction officielle récente : points retirés à la note globale (sur 100),
+   *  selon la gravité de la décision (v0.7.4). Absents : aucun retrait. */
+  sanction_malus_severe?: number;   // amende ≥ 1 Md€ (gravité ≥ 0,9)
+  sanction_malus_major?: number;    // amende ≥ 100 M€ (gravité ≥ 0,7)
+  sanction_malus_other?: number;    // autre décision (gravité < 0,7)
+  sanction_malus_cap?: number;      // plafond du retrait cumulé
 }
 
 export interface Dimension {
@@ -207,6 +213,22 @@ export interface DimensionResult {
   informational?: boolean;
   indicators: IndicatorResult[];
 }
+export interface SanctionMalusItem {
+  points: number;
+  severity: number;
+  observed_on: string;
+  excerpt?: string;
+  source_url?: string;
+  source_name?: string;
+  inherited_from?: string;
+}
+export interface SanctionMalus {
+  /** Total retiré (sur 100), plafonné. */
+  points: number;
+  /** Le plafond a limité le retrait. */
+  capped: boolean;
+  items: SanctionMalusItem[];
+}
 export interface GroupResult {
   code: string;
   name: string;
@@ -229,6 +251,8 @@ export interface ScoreResult {
   basis: number;
   /** Note plafonnée sous A : base trop étroite pour une note excellente. */
   capped_by_basis?: boolean;
+  /** Points retirés à la note globale pour des sanctions officielles récentes. */
+  sanction_malus?: SanctionMalus;
   dimensions: DimensionResult[];
   groups: GroupResult[];
   /** Date d'observation la plus récente parmi les preuves retenues (fraîcheur). */
@@ -450,6 +474,37 @@ function evaluateIndicator(
   };
 }
 
+/** Retrait de points pour sanctions officielles (v0.7.4) : une décision comptée une
+ *  fois (même source et même date), points selon sa gravité, cumul plafonné. */
+function sanctionMalus(input: ScoreInput): SanctionMalus | undefined {
+  const p = input.params;
+  const severe = p.sanction_malus_severe ?? 0;
+  const major = p.sanction_malus_major ?? 0;
+  const other = p.sanction_malus_other ?? 0;
+  if (severe + major + other <= 0) return undefined;
+  if (!input.applicableIndicators.some((i) => i.code === "GOV_SANCTIONS")) return undefined;
+  const seen = new Set<string>();
+  const items: SanctionMalusItem[] = [];
+  for (const e of input.evidence) {
+    if (e.indicator_code !== "GOV_SANCTIONS" || e.nature !== "controversy" || e.tier !== "regulatory") continue;
+    const key = `${e.source_url ?? ""}|${e.observed_on}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const sev = clamp01(e.normalized_value ?? 0.5);
+    const points = sev >= 0.9 - 1e-9 ? severe : sev >= 0.7 - 1e-9 ? major : other;
+    if (points <= 0) continue;
+    items.push({
+      points, severity: sev, observed_on: e.observed_on, excerpt: e.excerpt, source_url: e.source_url,
+      source_name: e.source_name, inherited_from: e.inherited_from ?? undefined,
+    });
+  }
+  if (items.length === 0) return undefined;
+  items.sort((a, b) => b.points - a.points || b.observed_on.localeCompare(a.observed_on));
+  const total = items.reduce((s, i) => s + i.points, 0);
+  const cap = p.sanction_malus_cap ?? Infinity;
+  return { points: Math.min(total, cap), capped: total > cap, items };
+}
+
 /** Calcule le score complet d'une entité pour un profil donné. */
 export function computeScore(input: ScoreInput): ScoreResult {
   // Index evidence par indicateur
@@ -639,7 +694,13 @@ export function computeScore(input: ScoreInput): ScoreResult {
     gScoreW += pw.weight;
   }
   const rated = gScoreW > 0;
-  const rawScore = rated ? clamp01(gScoreNum / gScoreW) : 0;
+  const weighted = rated ? clamp01(gScoreNum / gScoreW) : 0;
+  // Sanction officielle grave (v0.7.4) : elle ne pèse pas seulement dans le pilier
+  // gouvernance, elle retire des points à la note globale, selon le montant de
+  // l'amende, décision par décision (cumul plafonné). Seules comptent les décisions
+  // d'autorités (source réglementaire) de moins de 5 ans.
+  const sanction_malus = rated ? sanctionMalus(input) : undefined;
+  const rawScore = clamp01(weighted - (sanction_malus?.points ?? 0) / 100);
   const confidence = gConfW > 0 ? clamp01(gConfNum / gConfW) : 0;
   const basis = gConfW > 0 ? clamp01(gBasisNum / gConfW) : 0;
   // Une note excellente exige une base solide : bien noté sur le peu qu'on sait
@@ -691,6 +752,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
       && basis >= (input.params.min_basis_to_publish ?? 0),
     basis,
     capped_by_basis: cappedByBasis || undefined,
+    sanction_malus,
     dimensions: dimResults.sort((a, b) => a.dimension_code.localeCompare(b.dimension_code)),
     groups,
     last_observed,

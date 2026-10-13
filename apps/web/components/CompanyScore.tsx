@@ -158,6 +158,33 @@ export function CompanyScore({
                   (il en faut {pct(minBasisTop)}).
                 </span>
               )}
+              {result.sanction_malus && (
+                <details className="small" style={{ marginTop: 6 }}>
+                  <summary>
+                    <span className="badge warn" style={{ whiteSpace: "normal", lineHeight: 1.4 }}>
+                      Sanctions officielles : −{result.sanction_malus.points} points sur la note globale
+                      {result.sanction_malus.capped ? " (plafond atteint)" : ""}
+                    </span>
+                  </summary>
+                  <p className="muted small" style={{ margin: "6px 0 4px" }}>
+                    Chaque décision d'une autorité de moins de 5 ans retire des points selon l'amende :
+                    15 à partir de 1 milliard d'euros, 8 à partir de 100 millions, 3 sinon (cumul plafonné à 25).
+                    Elle pèse aussi dans le pilier gouvernance.
+                  </p>
+                  <ul className="small" style={{ margin: 0, paddingLeft: 18 }}>
+                    {result.sanction_malus.items.map((it, k) => (
+                      <li key={k} style={{ marginBottom: 4 }}>
+                        <strong>−{it.points}</strong> · {frDate(it.observed_on) ?? it.observed_on}
+                        {it.inherited_from ? ` · décision visant ${it.inherited_from}` : ""}
+                        {it.excerpt ? ` — ${it.excerpt}` : ""}
+                        {it.source_url && (
+                          <> <a href={it.source_url} target="_blank" rel="noreferrer">source ↗</a></>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
             </div>
           </div>
         </div>
