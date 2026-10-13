@@ -445,3 +445,18 @@ def test_conversion_d_unite_et_nombres_a_espaces():
     q2 = "Résultat avant impôt 6 052 5 325 +13,6 % Impôt sur les bénéfices -1 834 -1 201"
     y = row("cm", 30.3, f"Rapport : « {q2} » ; calcul : 1834 / 6052 = 30,3 %", ind="TAX_EFFECTIVE_RATE", src="AMF_BDIF")
     assert check_esef_quote(y, rep).status == "OK"
+
+
+def test_taux_d_impot_recalcule_depuis_des_montants_a_l_anglaise():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Profit before income taxes 650,574 802,505 Income tax expense (191,421) (218,364) Profit for the year 459,153 584,141"
+    q = "Profit before income taxes 650,574 802,505 Income tax expense (191,421) (218,364)"
+    ok = row("fast-retailing", 27.2, f"Résultats annuels : « {q} » ; calcul : 218364 / 802505 = 27,2 %",
+             ind="TAX_EFFECTIVE_RATE", src="ANNUAL_REPORT")
+    assert check_esef_quote(ok, rep).status == "OK"
+    faux = row("fast-retailing", 29.4, f"Résultats annuels : « {q} » ; calcul : 191421 / 650574 = 29,4 %",
+               ind="TAX_EFFECTIVE_RATE", src="ANNUAL_REPORT")
+    assert check_esef_quote(faux, rep).status == "OK"        # exercice précédent : cité, donc vérifiable
+    absent = row("fast-retailing", 27.0, f"Résultats annuels : « {q} » ; calcul : 218364 / 808000 = 27,0 %",
+                 ind="TAX_EFFECTIVE_RATE", src="ANNUAL_REPORT")
+    assert check_esef_quote(absent, rep).status == "ÉCART"   # 808 000 n'est pas cité

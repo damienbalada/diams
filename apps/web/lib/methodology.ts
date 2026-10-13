@@ -673,6 +673,14 @@ dont l'égalité est le meilleur rang, qu'il soit en faveur des hommes ou des
 femmes). Normaliser à la main
 fausserait la comparaison sectorielle.
 
+Le **taux effectif d'impôt** est celui des comptes consolidés : charge d'impôt
+rapportée au résultat avant impôt, tel que le groupe le publie, ou recalculé à
+partir de ces deux lignes (le calcul est écrit sur la fiche). Il est retenu tel
+quel, même déformé, et la cause publiée est citée (Kering, 78,2 % en 2025 :
+impôts différés non reconnus sur les pertes d'Alexander McQueen). Un exercice
+**en perte avant impôt** n'a pas de taux interprétable : aucune preuve n'est
+créée (Renault, Stellantis et Kraft Heinz en 2025), et la donnée reste manquante.
+
 **Au moins 5 pairs** *(depuis v0.6.0)*. Un rang n'est noté que face à au moins
 cinq entreprises du même secteur ayant publié la même donnée
 (\`min_peers_for_rank\`). En dessous, il ne dit rien — dans l'énergie, TotalEnergies,

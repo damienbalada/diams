@@ -361,7 +361,8 @@ RATIO_RE = re.compile(r"calcul : (\d+) / (\d+) = ([\d,]+) %")
 def _cited(n: int, quote: str) -> bool:
     words = [w for w, i in _NUM_WORDS.items() if i == n]
     flat = re.sub(r"(?<=\d)[ \u00a0\u202f](?=\d{3}(?!\d))", "", quote)
-    return any(re.search(rf"(?<![\d,.]){n}(?!\d)(?![.,]\d)", x) for x in (quote, flat)) or any(
+    flat_en = re.sub(r"(?<=\d),(?=\d{3}(?!\d))", "", quote)   # notation anglaise : 802,505
+    return any(re.search(rf"(?<![\d,.]){n}(?!\d)(?![.,]\d)", x) for x in (quote, flat, flat_en)) or any(
         re.search(rf"\b{re.escape(w)}\b", quote, re.I) for w in words)
 
 
