@@ -748,6 +748,34 @@ Document vivant (v\`0.7.4\`, octobre 2026). Toute modification des paramètres d
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **13/10/2026 (couverture des marques, rayons non alimentaires et vins)** — Sans
+  changement de calcul. Lots 58 à 69 :
+  - **Vins** : maisons Boisset, La Vieille Ferme (famille Perrin), J.P. Chenet (Grands
+    Chais de France).
+  - **Fromages** : dix fromages de Savencia (Boursault, Le Mottin, Pié d'Angloys…),
+    tirés des mentions de marques déposées de son portail.
+  - **Petites et moyennes entreprises de la liste du Nutri-Score** : séries
+    complémentaires (homonymes départagés par l'activité agroalimentaire et
+    l'effectif, noms proches relus un à un, fabricants de 6 à 9 salariés).
+  - **Jouets, papeterie, électroménager, électronique** : VTech, Smoby, Playmobil,
+    Pilot, Clairefontaine, Bosch électroménager, Beko, Hisense, TCL, Kärcher.
+  - **Groupes dont la marque porte le nom** : HP, Canon, LG, Epson, Lenovo,
+    Nintendo, Ubisoft, LEGO, Ravensburger, Maped, Michelin… La fiche du groupe sert
+    alors de fiche de marque.
+
+  **Écartées** :
+  - marques sous licence : Whirlpool, exploitée en Europe par Beko Europe ; Franck
+    Provost Expert, exploitée par L'Oréal ;
+  - domaines repris par un revendeur de noms de domaine, dont l'éditeur n'a aucun
+    lien avec la marque (raid.fr, vigor.fr, monsavon.com) ;
+  - homonymes : signal.fr, une entreprise de signalétique ; seni.fr, une entreprise de
+    nettoyage ;
+  - Tupperware : propriété de la marque incertaine depuis la faillite du groupe.
+
+  **Technique** : une marque sans donnée propre étant notée uniquement à partir de son
+  groupe racine, sa note n'est plus recalculée pour chaque marque, mais une seule fois
+  par groupe racine, secteur et pays. Le résultat est identique (vérifié), et le
+  calcul de l'accueil est divisé par deux.
 - **13/10/2026 (couverture des marques, liste officielle du Nutri-Score)** — Sans
   changement de calcul. Nouvelle source d'appartenance : la liste publiée par Santé
   publique France, « Entreprises et marques utilisant le Nutri-Score en France »
