@@ -39,11 +39,12 @@ ALIASES = {
     "barilla": "Barilla Holding SpA",
     "axa": "AXA Group",
     "schwarz-gruppe": "Schwarz Group GmbH",
+    # DIAMS suit le groupe Ingka (magasins IKEA) : sa société mère est Ingka Holding.
+    "ikea": "Ingka Holding B.V.",
 }
 # Rapprochement ambigu (entité CDP incertaine) : on s'abstient.
 SKIP = {
     "ab-inbev",                         # « Anheuser Busch InBev » enregistré aux États-Unis : entité incertaine
-    "ikea",                             # Ingka Holding (distribution) n'est pas Inter IKEA
     "credit-mutuel-alliance-federale",  # BFCM, holding, pas le groupe
 }
 GENERIC = {"group", "groupe", "holding", "holdings", "international", "company", "corporation"}

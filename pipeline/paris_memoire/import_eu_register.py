@@ -51,9 +51,12 @@ ALIASES = {
     "richemont": "Richemont International SA",
     "mondelez": "Mondelez Europe GmbH",
     "fast-retailing": "UNIQLO EUROPE LTD",
+    # Groupe Ingka (magasins IKEA), suivi sous ce nom ; « Inter Ikea Systems BV » est le
+    # franchiseur, un autre groupe.
+    "ikea": "Ingka Services A.B.",
 }
 # Groupes inscrits sous plusieurs entités distinctes ou entité incertaine : on s'abstient.
-SKIP = {"sony", "ikea", "credit-mutuel-arkea", "credit-mutuel-alliance-federale"}
+SKIP = {"sony", "credit-mutuel-arkea", "credit-mutuel-alliance-federale"}
 GENERIC = {"group", "groupe", "holding", "holdings", "international", "company", "corporation"}
 
 
