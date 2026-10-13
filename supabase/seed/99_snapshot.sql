@@ -18,7 +18,7 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 1384
+--   entities                 1387
 --   evidence                 1914
 --   political_groups         18
 --   civic_votes              4
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 1120
+--   entity_ownership_sources 1123
 -- =============================================================================
 
 begin;
@@ -614,6 +614,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('carrefour-city', 'Carrefour City', 'Carrefour City', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
   ('carrefour-contact', 'Carrefour Contact', 'Carrefour Contact', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
   ('carrefour-express', 'Carrefour Express', 'Carrefour Express', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
+  ('carrefour-halal', 'Carrefour Halal', 'Carrefour Halal', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('carrefour-market', 'Carrefour Market', 'Carrefour Market', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
   ('carrefour-sensation', 'Carrefour Sensation', 'Carrefour Sensation', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('carte-dor', 'Carte d''Or', 'Carte d''Or', null, null, 'NL', (select id from sectors where code = 'food'), true, false),
@@ -1258,6 +1259,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('mondelez', 'Mondelez International, Inc.', 'Mondelez', '549300DV9GIB88LZ5P30', null, 'US', (select id from sectors where code = 'fmcg_group'), false, false),
   ('monique-ranou', 'Monique Ranou', 'Monique Ranou', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('monkey-47', 'Monkey 47', 'Monkey 47', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
+  ('monop', 'monop’', 'Monop''', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
   ('monopoly', 'Monopoly', 'Monopoly', null, null, 'US', (select id from sectors where code = 'toys_games'), true, false),
   ('monoprix', 'Monoprix', 'Monoprix', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
   ('monoprix-bio', 'Monoprix Bio', 'Monoprix Bio', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
@@ -1662,6 +1664,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('terroirs-et-vignerons-de-champagne', 'Terroirs et Vignerons de Champagne', 'Terroirs et Vignerons de Champagne (Nicolas Feuillatte)', '969500VQT0M6HPW6B710', '775611924', 'FR', (select id from sectors where code = 'wines_spirits'), false, false),
   ('tesla', 'Tesla, Inc.', 'Tesla', '54930043XZGB27CTOV49', null, 'US', (select id from sectors where code = 'automotive'), false, false),
   ('tetra', 'Tetra', 'Tetra (aquariophilie)', null, null, 'US', (select id from sectors where code = 'pet_care'), true, false),
+  ('tex-carrefour', 'Tex', 'Tex (vêtements Carrefour)', null, null, 'FR', (select id from sectors where code = 'fashion_leather'), true, false),
   ('teyssier', 'Teyssier', 'Teyssier (salaisons)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('thai-union', 'Thai Union Group Public Company Limited', 'Thai Union', '25490047VDGNFMEYZW95', null, 'TH', (select id from sectors where code = 'food'), false, false),
   ('the-botanist', 'The Botanist', 'The Botanist', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
@@ -1962,6 +1965,7 @@ from (values
   ('carrefour-city', 'carrefour', 100::numeric),
   ('carrefour-contact', 'carrefour', 100::numeric),
   ('carrefour-express', 'carrefour', 100::numeric),
+  ('carrefour-halal', 'carrefour', 100::numeric),
   ('carrefour-market', 'carrefour', 100::numeric),
   ('carrefour-sensation', 'carrefour', 100::numeric),
   ('carte-dor', 'magnum-ice-cream-company', 100::numeric),
@@ -2483,6 +2487,7 @@ from (values
   ('moncigale', 'marie-brizard', 100::numeric),
   ('monique-ranou', 'mousquetaires', 100::numeric),
   ('monkey-47', 'pernod-ricard', 100::numeric),
+  ('monop', 'casino', 100::numeric),
   ('monopoly', 'hasbro', 100::numeric),
   ('monoprix', 'casino', 100::numeric),
   ('monoprix-bio', 'casino', 100::numeric),
@@ -2816,6 +2821,7 @@ from (values
   ('tena', 'essity', 100::numeric),
   ('terre-ditalia', 'carrefour', 100::numeric),
   ('tetra', 'spectrum-brands', 100::numeric),
+  ('tex-carrefour', 'carrefour', 100::numeric),
   ('teyssier', 'euralis', 100::numeric),
   ('the-botanist', 'remy-cointreau', 100::numeric),
   ('the-glendronach', 'brown-forman', 100::numeric),
@@ -3266,6 +3272,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'carrefour-city'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Ils se répartissent entre les six grands formats : 325 hypermarchés Carrefour, 1 052 supermarchés Carrefour Market, 115 supermarchés Match, 5 084 magasins de proximité (Carrefour City, Carrefour Contact, Carrefour Express, Bio c’Bon, etc.), 157 magasins de cash & carry (Promocash et Atacadão) et 33 magasins soft discount (Supeco) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'carrefour-contact'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Ils se répartissent entre les six grands formats : 325 hypermarchés Carrefour, 1 052 supermarchés Carrefour Market, 115 supermarchés Match, 5 084 magasins de proximité (Carrefour City, Carrefour Contact, Carrefour Express, Bio c’Bon, etc.), 157 magasins de cash & carry (Promocash et Atacadão) et 33 magasins soft discount (Supeco) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'carrefour-express'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Ils se répartissent entre les six grands formats : 325 hypermarchés Carrefour, 1 052 supermarchés Carrefour Market, 115 supermarchés Match, 5 084 magasins de proximité (Carrefour City, Carrefour Contact, Carrefour Express, Bio c’Bon, etc.), 157 magasins de cash & carry (Promocash et Atacadão) et 33 magasins soft discount (Supeco) »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'carrefour-halal'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour, déposé auprès de l''AMF : « Pour la marque Carrefour Halal en France, un étourdissement réversible ou un soulagement des souffrances est pratiqué »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'carrefour-market'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Ils se répartissent entre les six grands formats : 325 hypermarchés Carrefour, 1 052 supermarchés Carrefour Market, 115 supermarchés Match, 5 084 magasins de proximité (Carrefour City, Carrefour Contact, Carrefour Express, Bio c’Bon, etc.), 157 magasins de cash & carry (Promocash et Atacadão) et 33 magasins soft discount (Supeco) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'carrefour-sensation'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Il ambitionne de faire de la marque Carrefour Sensation Végétal la première marque de ce secteur en France »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'carte-dor'), (select id from entities where slug = 'magnum-ice-cream-company'), 'https://filings.xbrl.org/25490052LLF3XH6G9847/2025-12-31/ESEF/NL/0/25490052LLF3XH6G9847-2025-12-31-1-en/reports/25490052LLF3XH6G9847-2025-12-31-1-en.xhtml', 'Rapport annuel 2025 de The Magnum Ice Cream Company (format ESEF, en anglais) : « Market-speciﬁc innovations also contributed to strong growth: • Türkiye: successful launch of Magnum Dubai, Volcano, Plombir and Carte d’Or Chunkies »', '2026-10-13', 'auto:verify_ownership'),
@@ -3785,6 +3792,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'monopoly'), (select id from entities where slug = 'hasbro'), 'https://www.sec.gov/Archives/edgar/data/46080/000004608026000011/has-20251228.htm', 'Rapport annuel 10-K 2025 de Hasbro déposé à la SEC (autorité boursière américaine) : « including MAGIC: THE GATHERING, MONOPOLY, HASBRO GAMES, PLAY-DOH, TRANSFORMERS, DUNGEONS & DRAGONS, NERF, and PEPPA PIG »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'monoprix-bio'), (select id from entities where slug = 'casino'), 'https://filings.xbrl.org/969500VHL8F83GBL6L29/2024-12-31/ESEF/FR/0/969500VHL8F83GBL6L29-2024-12-31-0-fr/reports/969500VHL8F83GBL6L29-2024-12-31-0-fr.xhtml', 'Rapport annuel 2024 du groupe Casino (document d''enregistrement universel, format ESEF) : « Les marques déploient une large offre de produits certifiés Agriculture Biologique avec les marques propres Monoprix Bio, Franprix Bio, Casino Bio et les magasins Naturalia. »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'monoprix'), (select id from entities where slug = 'casino'), 'https://filings.xbrl.org/969500VHL8F83GBL6L29/2024-12-31/ESEF/FR/0/969500VHL8F83GBL6L29-2024-12-31-0-fr/reports/969500VHL8F83GBL6L29-2024-12-31-0-fr.xhtml', 'Document d''enregistrement universel 2024 du groupe Casino (format électronique officiel ESEF) : « Les activités du Groupe reposent principalement sur un portefeuille de marques singulières et complémentaires qui inclut Monoprix, Franprix, Naturalia, Casino, Spar, Vival et Cdiscount »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'monop'), (select id from entities where slug = 'casino'), 'https://filings.xbrl.org/969500VHL8F83GBL6L29/2024-12-31/ESEF/FR/0/969500VHL8F83GBL6L29-2024-12-31-0-fr/reports/969500VHL8F83GBL6L29-2024-12-31-0-fr.xhtml', 'Rapport annuel 2024 du groupe Casino (document d''enregistrement universel, format ESEF) : « Depuis 2005, Monoprix a également lancé les marques monop’ et monop’Daily, visant des segments spécifiques avec des offres pratiques dans des zones urbaines à fort trafic. »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'monster-energy'), (select id from entities where slug = 'monster-beverage'), 'https://www.sec.gov/Archives/edgar/data/865752/000110465926020831/mnst-20251231x10k.htm', 'Rapport annuel 10-K 2025 de Monster Beverage déposé à la SEC (autorité boursière américaine) : « drink beverages, primarily under the following brand names: ● ​ ​ ​ ​Monster Energy® »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'monster-high'), (select id from entities where slug = 'mattel'), 'https://www.sec.gov/Archives/edgar/data/63276/000162828026010716/mat-20251231.htm', 'Rapport annuel 10-K 2025 de Mattel déposé à la SEC (autorité boursière américaine) : « Dolls —including brands such as Barbie , American Girl , Disney Princess , Disney Frozen , Monster High, Polly Pocket »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'monster-munch'), (select id from entities where slug = 'intersnack-france'), 'https://www.vico.fr/mentions-legales/', 'Mentions légales du site officiel de la marque Vico (menu « Nos marques ») : « Nos marques Tous nos produits Vico Vico Pop Vico chips de lentilles Curly Monster Munch Natur’ & Bon Baff Mes instants Vico Nous rejoindre Mentions légales Bienvenue sur le site vico.fr édité et géré par Intersnack France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
@@ -4113,6 +4121,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'tena'), (select id from entities where slug = 'essity'), 'https://filings.xbrl.org/549300G8E6YUVJ1DA153/2024-12-31/ESEF/SE/0/essi-2024-12-31-0-sv/reports/essi-2024-12-31-0-sv.xhtml', 'Rapport annuel 2024 d''Essity (format électronique officiel ESEF, en suédois) : « global marknadsledare med varumärkena Tork och TENA »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'terre-ditalia'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Carrefour a pour objectif de renforcer la présence de ses marques propres locales (Reflets de France et Terre d’Italia, etc.) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'tetra'), (select id from entities where slug = 'spectrum-brands'), 'https://www.sec.gov/Archives/edgar/data/109177/000010917725000043/spb-20250930.htm', 'Rapport annuel 10-K 2025 (exercice clos le 30/09/2025) de Spectrum Brands déposé à la SEC (autorité boursière américaine) : « most Tetra® aquatics nutrition and care products manufactured in our Melle, Germany facility »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'tex-carrefour'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour, déposé auprès de l''AMF : « de la certification RWS auprès de l’ensemble des fournisseurs de la marque Tex »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'teyssier'), (select id from entities where slug = 'euralis'), 'https://www.euralis.fr/', 'Site officiel du groupe coopératif Euralis (menu « Nos marques ») : « Nos marques Lidea Maison Montfort Rougié Stalaven Qualité Traiteur Teyssier La Table des Producteurs Point Vert / Magasin Vert Terranimo Artegusto »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'the-botanist'), (select id from entities where slug = 'remy-cointreau'), 'https://filings.xbrl.org/5493004V6A3Z027YT216/2026-03-31/ESEF/FR/0/remycointreau-2026-03-31-1-fr/reports/remycointreau-2026-03-31-1-fr.xhtml', 'Document d''enregistrement universel 2025-2026 de Rémy Cointreau (format électronique officiel ESEF) : « Les marques ainsi regroupées sont : Cointreau, Metaxa, St-Rémy, Mount Gay, Ponche Kuba, Bruichladdich, The Botanist, Westland, Le Domaine des Hautes Glaces, Belle de Brillet et Telmont »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'the-glendronach'), (select id from entities where slug = 'brown-forman'), 'https://www.sec.gov/Archives/edgar/data/14693/000001469326000024/bfb-20260430.htm', 'Rapport annuel 10-K 2026 (exercice clos le 30/04/2026) de Brown-Forman déposé à la SEC (autorité boursière américaine) : « Principal Brands Jack Daniel’s Tennessee Whiskey el Jimador New Mix RTD Jack Daniel’s RTD 1 el Jimador Tequilas 4 Jack Daniel’s Tennessee Honey Herradura Tequilas 5 Gentleman Jack Rare Tennessee Whiskey Old Forester Kentucky Straight Bourbon Whisky Jack Daniel’s Tennessee Apple Old Forester Whiskey Row Series Jack Daniel’s Tennessee Blackberry Old Forester Single Barrel Straight Bourbon Whisky Jack Daniel’s Tennessee Fire Diplomático Rums 5 Jack Daniel’s Single Barrel Collection 2 Gin Mare 5 Jack Daniel’s Bonded Series 3 Chambord Liqueur Jack Daniel’s Sinatra Select The Glendronach Single Malt Scotch Whiskies »', '2026-10-13', 'auto:verify_ownership'),
