@@ -780,6 +780,17 @@ calcul (tables de config) doit être datée et justifiée ici.
     - Newell : Contigo, Sistema, Crockpot, Elmer's ;
     - Irwin, Bostitch, Stérimar ;
     - AB InBev : bières de sa liste officielle pour la France.
+  - **Sociétés françaises cotées** (documents déposés à l'AMF ou rapports financiers
+    annuels) :
+    - Lanson-BCC : mixité, indépendance et impôt du groupe ; ses maisons Philipponnat,
+      De Venoge, Besserat de Bellefon, Boizel, Chanoine, Tsarine et Alexandre Bonnet ;
+      Heidsieck & Co Monopole, cédée par Maison Pommery le 05/01/2026 ;
+    - Maison Pommery & Associés : mixité, indépendance déclarée, taux d'impôt publié
+      (négatif, cession exonérée citée) ;
+    - AdVini, nouveau groupe : Laroche, L'Oratoire des Papes, Gassier, Ogier ;
+    - Fleury Michon : gouvernance ; marque Paso.
+
+  À la fin de la session : 964 marques publiables sur 1 671.
 
   **En attente d'un humain** : l'inscription HATVP de la holding « Les Mousquetaires »
   (SIREN 789 169 323, distinct de celui d'ITM Entreprises, racine en base).
