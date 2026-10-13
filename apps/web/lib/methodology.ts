@@ -748,6 +748,51 @@ Document vivant (v\`0.7.4\`, octobre 2026). Toute modification des paramètres d
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **14/10/2026 (notation des groupes très présents en rayon)** — Sans changement de
+  calcul. Rappel de la Règle 8 : une marque ne reprend de son groupe racine que les
+  indicateurs « de groupe » ; un groupe publiable n'a donc pas toujours des marques
+  publiables (l'index Egapro, par exemple, n'est pas transmis). Le suivi se fait
+  désormais au niveau des marques : 861 marques publiables sur 1 641 au début de la
+  session, plus de 940 à la fin.
+  - **Gouvernance, impôt, plan de vigilance**, tirés de documents réglementaires ou
+    publiés par l'entreprise :
+    - Mousquetaires : évaluation extra-financière EthiFinance publiée par le groupe ;
+    - Ebro Foods : rapport de gouvernance sur le modèle officiel de l'autorité boursière
+      espagnole ;
+    - Casino : document d'enregistrement 2024 ;
+    - Bel : document d'enregistrement 2024 d'Unibel, sa holding ;
+    - Newell Brands : circulaire déposée à la SEC ;
+    - LDC : taux d'impôt, rapport ESEF ;
+    - Auchan : plan de vigilance 2025 et rapport financier 2024 d'ELO.
+  - **Registres** : HATVP (Ecotone, Euralis, Panzani, DIM, Wattwiller, Herta, Saint
+    Louis Sucre) ; registre de transparence de l'UE (Groupement Les Mousquetaires,
+    Suntory Global Spirits, Suntory Beverage & Food Europe) ; SBTi (Auchan Retail).
+  - **Vérificateur mot pour mot** (règles déterministes, chacune testée) :
+    - « une » vaut 1 ;
+    - « femme », « administratrice » et « Sexe Féminin » désignent la mixité ;
+    - un conseil déclaré sans aucun administrateur indépendant vaut 0 % ;
+    - une exception nommée à part (« is not considered an independent ») compte seulement
+      si la citation affirme aussi que tous les autres administrateurs sont indépendants ;
+    - un montant écrit avec des espaces de milliers est reconnu même quand une autre
+      colonne le suit ;
+    - une page PDF illisible (image trop volumineuse) est ignorée au lieu de faire
+      échouer la lecture.
+  - **Marques** (lots 75 à 77, rapports déposés à la SEC) :
+    - Mattel : Pictionary, Blokus, Thomas & Friends… ;
+    - Newell : Contigo, Sistema, Crockpot, Elmer's ;
+    - Irwin, Bostitch, Stérimar ;
+    - AB InBev : bières de sa liste officielle pour la France.
+
+  **En attente d'un humain** : l'inscription HATVP de la holding « Les Mousquetaires »
+  (SIREN 789 169 323, distinct de celui d'ITM Entreprises, racine en base).
+
+  **Écartés** :
+  - l'homonyme « Alma » (éditeur de logiciels, sans lien avec les eaux) ;
+  - les marques de la page française de Kenvue, qui sont des marques américaines ;
+  - la mixité du conseil d'Agrial (« une agricultrice » sur 30 : formulation que le
+    contrôle déterministe ne peut pas lire) ;
+  - le rattachement de Flora Food France et de Suntory Beverage & Food à leur groupe,
+    faute de preuve publique.
 - **13/10/2026 (couverture des marques, rayons non alimentaires et vins)** — Sans
   changement de calcul. Lots 58 à 69 :
   - **Vins** : maisons Boisset, La Vieille Ferme (famille Perrin), J.P. Chenet (Grands
