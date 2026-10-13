@@ -724,6 +724,18 @@ calcul (tables de config) doit être datée et justifiée ici.
   donnée déclarée non matérielle. Plan de vigilance : obligation rattachée à six
   banques et plans relevés (BNP Paribas, Société Générale, Crédit Agricole, BPCE,
   Crédit Mutuel, Arkéa) ; La Banque Postale relève du plan de La Poste.
+  Suite du 13/10/2026 (lots 45 à 52, sans changement de barème) : taux effectif
+  d'impôt de 11 groupes (taux publié tel quel, cause citée ; exercice en perte
+  sans taux) ; composition de 15 conseils (président indépendant à sa nomination
+  compté parmi les indépendants quand le rapport le dit) ; plans de vigilance
+  d'AXA, Bonduelle, Lactalis et de La Banque Postale (plan du groupe La Poste) ;
+  exploitation animale documentée pour Lactalis, Bel, Ferrero, Fast Retailing,
+  Mars et The Magnum Ice Cream Company ; propriétaires à jour (Kellogg's chez
+  Mars, Magnum et Ben & Jerry's chez The Magnum Ice Cream Company). Une donnée
+  déclarée non matérielle s'affiche avec son motif, y compris quand elle est
+  seule dans son pilier (pilier « pour information »). Un rapport volontaire
+  présenté comme légal a été reclassé (Samsung, indépendance du conseil, désormais
+  tirée de son rapport d'activité légal).
 - **0.7.2 (13/10/2026)** — Sanctions : l'indicateur ne retient plus que des
   décisions officielles (Commission européenne, autorités de protection des
   données), notées par la gravité de l'amende ; les anciennes lignes, sourcées
