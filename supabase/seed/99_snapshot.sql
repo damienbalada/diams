@@ -18,7 +18,7 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 1346
+--   entities                 1348
 --   evidence                 1910
 --   political_groups         18
 --   civic_votes              4
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 1086
+--   entity_ownership_sources 1088
 -- =============================================================================
 
 begin;
@@ -611,6 +611,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('carrefour-express', 'Carrefour Express', 'Carrefour Express', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
   ('carrefour-market', 'Carrefour Market', 'Carrefour Market', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
   ('carrefour-sensation', 'Carrefour Sensation', 'Carrefour Sensation', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('carte-dor', 'Carte d''Or', 'Carte d''Or', null, null, 'NL', (select id from sectors where code = 'food'), true, false),
   ('carte-noire', 'Carte Noire', 'Carte Noire', null, null, 'FR', (select id from sectors where code = 'beverages'), true, false),
   ('carte-noire-sas', 'Carte Noire SAS', 'Carte Noire SAS', null, '813978038', 'FR', (select id from sectors where code = 'beverages'), false, false),
   ('cartier', 'Cartier International SNC', 'Cartier', null, null, 'FR', (select id from sectors where code = 'watches_jewelry'), true, false),
@@ -1217,6 +1218,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('michoko', 'Michoko', 'Michoko', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('microsoft', 'Microsoft Corporation', 'Microsoft', 'INR2EJN1ERAN0W5ZP974', null, 'US', (select id from sectors where code = 'tech_electronics'), false, false),
   ('mikado', 'Mikado', 'Mikado', null, null, 'US', (select id from sectors where code = 'food'), true, false),
+  ('miko', 'Miko', 'Miko (glaces)', null, null, 'NL', (select id from sectors where code = 'food'), true, false),
   ('milka', 'Milka', 'Milka', null, null, 'DE', (select id from sectors where code = 'food'), true, false),
   ('milky-way', 'Milky Way', 'Milky Way', null, null, 'US', (select id from sectors where code = 'food'), true, false),
   ('milleret', 'Milleret', 'Milleret (fromages)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
@@ -1923,6 +1925,7 @@ from (values
   ('carrefour-express', 'carrefour', 100::numeric),
   ('carrefour-market', 'carrefour', 100::numeric),
   ('carrefour-sensation', 'carrefour', 100::numeric),
+  ('carte-dor', 'magnum-ice-cream-company', 100::numeric),
   ('carte-noire', 'carte-noire-sas', 100::numeric),
   ('cartier', 'richemont', 100::numeric),
   ('casamigos', 'diageo', 100::numeric),
@@ -2408,6 +2411,7 @@ from (values
   ('michel-et-augustin-marque', 'michel-et-augustin', 100::numeric),
   ('michoko', 'carambar-co', 100::numeric),
   ('mikado', 'mondelez', 100::numeric),
+  ('miko', 'magnum-ice-cream-company', 100::numeric),
   ('milka', 'mondelez', 100::numeric),
   ('milky-way', 'mars', 100::numeric),
   ('milleret', 'fromagerie-milleret', 100::numeric),
@@ -3193,6 +3197,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'carrefour-express'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Ils se répartissent entre les six grands formats : 325 hypermarchés Carrefour, 1 052 supermarchés Carrefour Market, 115 supermarchés Match, 5 084 magasins de proximité (Carrefour City, Carrefour Contact, Carrefour Express, Bio c’Bon, etc.), 157 magasins de cash & carry (Promocash et Atacadão) et 33 magasins soft discount (Supeco) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'carrefour-market'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Ils se répartissent entre les six grands formats : 325 hypermarchés Carrefour, 1 052 supermarchés Carrefour Market, 115 supermarchés Match, 5 084 magasins de proximité (Carrefour City, Carrefour Contact, Carrefour Express, Bio c’Bon, etc.), 157 magasins de cash & carry (Promocash et Atacadão) et 33 magasins soft discount (Supeco) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'carrefour-sensation'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Il ambitionne de faire de la marque Carrefour Sensation Végétal la première marque de ce secteur en France »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'carte-dor'), (select id from entities where slug = 'magnum-ice-cream-company'), 'https://filings.xbrl.org/25490052LLF3XH6G9847/2025-12-31/ESEF/NL/0/25490052LLF3XH6G9847-2025-12-31-1-en/reports/25490052LLF3XH6G9847-2025-12-31-1-en.xhtml', 'Rapport annuel 2025 de The Magnum Ice Cream Company (format ESEF, en anglais) : « Market-speciﬁc innovations also contributed to strong growth: • Türkiye: successful launch of Magnum Dubai, Volcano, Plombir and Carte d’Or Chunkies »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'carte-noire'), (select id from entities where slug = 'carte-noire-sas'), 'https://www.cartenoire.fr/fr/mentions-legales', 'Mentions légales du site officiel de la marque Carte Noire : « » sont proposés par : CARTE NOIRE SAS , au capital de 103 830 406 Euros, 58, avenue Emile Zola – 92100 BOULOGNE-BILLANCOURT, FRANCE RCS NANTERRE n° 813 978 038 N° TVA intracommunautaire : FR 60 813 978 »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'cartier'), (select id from entities where slug = 'richemont'), 'https://www.richemont.com/media/ud3bety3/richemont-fy26-annual-report.pdf', 'Rapport annuel 2026 de Richemont (exercice clos le 31/03/2026, en anglais) : « The Group’s luxury goods interests encompass some of the most prestigious names in the industry, including Cartier, Van Cleef & Arpels, Piaget, Vacheron Constantin, Jaeger-LeCoultre, IWC Schaffhausen and Montblanc »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'casamigos'), (select id from entities where slug = 'diageo'), 'https://filings.xbrl.org/213800ZVIELEA55JMJ32/2026-06-30/ESEF/GB/0/213800ZVIELEA55JMJ32-2026-06-30/reports/213800ZVIELEA55JMJ32-2026-06-30-T01.html', 'Rapport annuel 2026 de Diageo (format électronique officiel ESEF, exercice clos le 30/06/2026, en anglais) : « Casamigos tequila United States 604 604 McDowell''s No.1 whisky, rum and brandy India 336 371 Don Julio tequila United States 292 270 »', '2026-10-13', 'auto:verify_ownership'),
@@ -3673,6 +3678,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'michel-et-augustin-marque'), (select id from entities where slug = 'michel-et-augustin'), 'https://www.micheletaugustin.com/blog/nos-garanties-tres-legales', 'Mentions légales (« Nos garanties très légales ») du site officiel de Michel et Augustin : « Siret : 47920546000039 APE :4638B MICHEL ET AUGUSTIN – 70 Rue du Gouverneur Général Éboué 92130 Issy-les-Moulineaux »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'michoko'), (select id from entities where slug = 'carambar-co'), 'https://www.carambarco.com/', 'Site officiel de Carambar & Co (page d''accueil, liste « Tous nos produits ») : « Tous nos produits Carambar Lutti Poulain Krema Michoko Terry''s Vichy La pie qui chante Malabar Dulciora »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'mikado'), (select id from entities where slug = 'mondelez'), 'https://www.mavieencouleurs.fr/marques', 'Page Nos marques du site Ma vie en couleurs, propriété de Mondelez Europe Services et de Mondelez France (d''après ses mentions légales) : « Nos Marques Apéritifs et biscuits salés Belin TUC RITZ Biscuits et goûters belVita Petit Déjeuner Granola Grany LU Mikado Milka Biscuit Oreo Découvrez les produits iconiques de LU Napolitain LULU Pépito Véritable Petit Beurre Petit Ecolier Prince Biscottes et Tartines Cracotte Heudebert Pelletier Chocolats Côte d''Or Milka Green and Black''s »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'miko'), (select id from entities where slug = 'magnum-ice-cream-company'), 'https://filings.xbrl.org/25490052LLF3XH6G9847/2025-12-31/ESEF/NL/0/25490052LLF3XH6G9847-2025-12-31-1-en/reports/25490052LLF3XH6G9847-2025-12-31-1-en.xhtml', 'Rapport annuel 2025 de The Magnum Ice Cream Company (format ESEF, en anglais), liste des filiales : la société française Cogesal-Miko SAS : « France Cogesal-Miko SAS (#) Magnum ICC Retail Operations France SAS »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'milka'), (select id from entities where slug = 'mondelez'), 'https://www.mondelezinternational.com/our-brands/', 'Page des marques du site officiel de Mondelez International (en anglais) : « Our Brands See All Brands Chocolate 5 Star Alpen Gold Cadbury Cadbury Dairy Milk Côte d''Or Daim Freia Hu Lacta Marabou Milka Toblerone »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'milky-way'), (select id from entities where slug = 'mars'), 'https://www.mars.com/our-brands/all-brands', 'Page de toutes les marques du site officiel de Mars (en anglais) : « MILKY WAY MILKY WAY Created in 1923 and designed to capture the taste of malted milk shakes »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'milleret'), (select id from entities where slug = 'fromagerie-milleret'), 'https://www.fromagerie-milleret.com/mentions-legales/', 'Mentions légales du site officiel de la Fromagerie Milleret : « Le présent site est la propriété de la Fromagerie Milleret, SA. Société Fromagerie MILLERET (SIRET : 426.250.023.00014) »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
