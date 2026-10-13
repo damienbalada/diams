@@ -172,7 +172,7 @@ ESEF_KEYWORDS = {
     "LAB_GENDER_PAYGAP": [r"[ée]cart|gap", r"r[ée]mun[ée]ration|salari|pay", r"femmes?|hommes?|genres?|gender|women"],
     # « ratio de rémunération annuelle totale » : intitulé ESRS S1-16, défini par rapport à la médiane.
     "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian|r[ée]mun[ée]ration annuelle totale|annual total remuneration|total remuneration ratio"],
-    "GOV_BOARD_GENDER": [r"femmes|administratrices|f[ée]minisation|women|female", r"conseil|board|director"],
+    "GOV_BOARD_GENDER": [r"femmes?|administratrices?|f[ée]minisation|wom[ae]n|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
     "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b"],
@@ -230,6 +230,7 @@ _NUM_WORDS = {w: i for i, w in enumerate(
 _NUM_WORDS.update({w: i for i, w in enumerate(
     "zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize dix-sept "
     "dix-huit dix-neuf vingt".split())})
+_NUM_WORDS["une"] = 1   # féminin : « une seule femme … sur 12 membres »
 _NUM = r"\d{1,2}|" + "|".join(sorted(_NUM_WORDS, key=len, reverse=True))
 _COUNT = re.compile(rf"\b({_NUM})\b(?:\s+\w+){{0,3}}?\s+(?:of|sur)\s+(?:our\s+|the\s+|its\s+)?({_NUM})\b", re.I)
 
@@ -238,6 +239,12 @@ _COUNT = re.compile(rf"\b({_NUM})\b(?:\s+\w+){{0,3}}?\s+(?:of|sur)\s+(?:our\s+|t
 _ALL_INDEP = re.compile(r"\ball (?:the )?(?:other )?(?:members of the board(?: of directors)?|board members|directors|members)\b"
                         r"[^.;]{0,40}?\bare independent\b|l.ensemble (?:de ses|des) membres (?:du conseil[^.;]{0,30})?est ind[ée]pendant",
                         re.I)
+
+
+# Conseil sans aucun membre indépendant, déclaré comme tel (valeur 0 %).
+_NO_INDEP = re.compile(r"\babsence d.administrateurs? ind[ée]pendants?\b|\baucun(?:e)? (?:administrat(?:eur|rice)|membre)s? "
+                       r"(?:du conseil )?(?:n.est )?ind[ée]pendante?s?\b|\bno independent (?:directors|board members)\b"
+                       r"|\bnone of (?:the|our|its) directors (?:is|are) independent\b", re.I)
 
 
 _SLASH = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2})\b")
@@ -687,9 +694,12 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         # « The Chair and all members of the Board of Directors are independent » : 100 %.
         tous = (not hit and not col and not cnt and row.indicator_code == "GOV_BOARD_INDEP"
                 and row.value_numeric == 100 and _ALL_INDEP.search(quote) is not None)
-        ok &= hit or col or cnt or tous
+        # « Absence d’administrateurs indépendants » : 0 %.
+        aucun = (not hit and not col and not cnt and not tous and row.indicator_code == "GOV_BOARD_INDEP"
+                 and row.value_numeric == 0 and _NO_INDEP.search(quote) is not None)
+        ok &= hit or col or cnt or tous or aucun
         details.append(f"valeur {target} présente dans la citation "
-                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✓ (tous les membres déclarés indépendants)' if tous else '✗'}")
+                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✓ (tous les membres déclarés indépendants)' if tous else '✓ (aucun membre indépendant déclaré)' if aucun else '✗'}")
     elif row.value_boolean is not None:
         details.append("indicateur oui/non : la présence de la citation suffit")
     # Note normalisée imposée par le barème de l'indicateur : recalculée.

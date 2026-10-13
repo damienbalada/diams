@@ -1,0 +1,3 @@
+entity_slug,indicator_code,source_code,nature,observed_on,value_type,value_numeric,value_boolean,value_text,normalized_value,confidence,source_url,excerpt,review_note
+ecotone-france,GEO_LOBBYING_TRANSP,HATVP,result,2026-10-14,boolean,,true,,1,0.9,https://www.hatvp.fr/fiche-organisation/?organisation=343173647,ECOTONE FRANCE inscrit au répertoire des représentants d'intérêts depuis le 08/07/2025 ; dépenses déclarées pour 2024 : 25 000 à 50 000 €.,
+euralis,GEO_LOBBYING_TRANSP,HATVP,result,2026-10-14,boolean,,true,,1,0.9,https://www.hatvp.fr/fiche-organisation/?organisation=775637861,EURALIS COOP inscrit au répertoire des représentants d'intérêts depuis le 23/04/2018.,

@@ -584,3 +584,28 @@ def test_denominateur_hors_representants_des_salaries():
     assert check_esef_quote(ok, rep).status == "OK"
     faux = row("ldc", 25.0, f"Rapport : « {q} » ; calcul : 4 / (17 − 1) = 25,0 %", ind="GOV_BOARD_INDEP", src="ESEF")
     assert check_esef_quote(faux, rep).status == "ÉCART"   # « 1 » n'est pas cité
+
+
+def test_conseil_sans_independant_et_une_seule_femme():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("Pas de parité au Conseil : une seule femme était administratrice en 2025 ( sur 12 membres). "
+           "Absence d’administrateurs indépendants : les membres du Conseil sont uniquement des adhérents. "
+           "Des administrateurs indépendants siègent au comité d'audit.")
+    zero = row("mousquetaires", 0, "Rapport : « Absence d’administrateurs indépendants : les membres du Conseil sont "
+               "uniquement des adhérents »", ind="GOV_BOARD_INDEP", src="COMPANY_REPORT")
+    assert check_esef_quote(zero, rep).status == "OK"
+    # La règle ne vaut que pour 0 % : une autre valeur doit être citée.
+    dix = row("mousquetaires", 10, "Rapport : « Absence d’administrateurs indépendants : les membres du Conseil sont "
+              "uniquement des adhérents »", ind="GOV_BOARD_INDEP", src="COMPANY_REPORT")
+    assert check_esef_quote(dix, rep).status == "ÉCART"
+    # Une phrase qui mentionne des indépendants ne vaut pas 0 %.
+    faux = row("mousquetaires", 0, "Rapport : « Des administrateurs indépendants siègent au comité d'audit »",
+               ind="GOV_BOARD_INDEP", src="COMPANY_REPORT")
+    assert check_esef_quote(faux, rep).status == "ÉCART"
+    une = row("mousquetaires", 8.3, "Rapport : « Pas de parité au Conseil : une seule femme était administratrice en "
+              "2025 ( sur 12 membres) » ; calcul : 1 / 12 = 8,3 %", ind="GOV_BOARD_GENDER", src="COMPANY_REPORT")
+    v = check_esef_quote(une, rep)
+    assert v.status == "OK", v.details
+    deux = row("mousquetaires", 16.7, "Rapport : « Pas de parité au Conseil : une seule femme était administratrice en "
+               "2025 ( sur 12 membres) » ; calcul : 2 / 12 = 16,7 %", ind="GOV_BOARD_GENDER", src="COMPANY_REPORT")
+    assert check_esef_quote(deux, rep).status == "ÉCART"
