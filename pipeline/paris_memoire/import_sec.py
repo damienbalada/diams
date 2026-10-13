@@ -21,7 +21,7 @@ from .connectors import sec
 from .load import EvidenceRow, insert_evidence
 
 #: Nom déposé à la SEC quand il diffère du nom d'usage de l'entité (contrôlé à la main).
-NAME_ALIASES = {"google": "Alphabet Inc.", "mattel": "MATTEL INC /DE/"}
+NAME_ALIASES = {"google": "Alphabet Inc.", "mattel": "MATTEL INC /DE/", "church-dwight": "CHURCH & DWIGHT CO INC /DE/"}
 
 
 _CUR = {"USD": "M$", "EUR": "M€", "GBP": "M£", "JPY": "M¥"}
