@@ -746,6 +746,25 @@ Document vivant (v`0.7.4`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **13/10/2026 (couverture des marques, suite)** — Sans changement de calcul.
+  70 groupes et 232 marques de plus, chacune rattachée par une preuve citée
+  vérifiée mot pour mot : 17 groupes cotés (jouets Mattel et Hasbro, piles
+  Energizer, rasoirs Wilkinson, Post-it et Scotch-Brite de 3M, Sharpie et Spontex
+  de Newell, Black+Decker, Monster, Jack Daniel's, Weetabix, champagnes
+  Laurent-Perrier, William Peel et San José de Marie Brizard, Philips, De'Longhi,
+  Twinings, Ovomaltine et Primark d'ABF, Lindt, Electrolux), 8 groupes non cotés
+  suivis par le CDP ou la SBTi (Thai Union pour Petit Navire, Perfetti Van Melle,
+  Laïta, Pierre Fabre, Sofidel, Eckes-Granini, McCain, Labeyrie), et 45 sociétés
+  françaises identifiées par les mentions légales des sites de leurs marques
+  (Banania, Brossard, Cémoi, Sodebo, Daunat, Lorina, St-Yorre, Label 5, Taittinger,
+  Connétable, Starwax…), SIREN vérifié dans l'annuaire officiel des entreprises.
+  Deux secteurs nouveaux, « Jouets & Jeux » et « Équipement de la maison », sans
+  exploitation animale présumée. Les marques sous licence (Scrabble hors
+  Amérique du Nord, Braun en petit électroménager, Varta hors Amérique latine et
+  Asie) ne sont pas rattachées au licencié ; les marques en copropriété (Mamie
+  Nova, Régilait) ne le sont à aucun des copropriétaires. Vérification
+  automatique : intensité carbone publiée en kilogrammes par euro, colonnes de
+  ratios de rémunération (« 137:1 126:1 ») non fusionnées en milliers.
 - **13/10/2026 (couverture des marques)** — Sans changement de calcul. Chaque
   rattachement marque → groupe porte désormais sa preuve citée (« Appartenance
   prouvée », Règle 8) ; les 131 marques rattachées avant cette règle l'ont reçue.
