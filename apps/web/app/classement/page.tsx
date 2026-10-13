@@ -136,8 +136,9 @@ export default async function ClassementPage() {
             <strong>Non classées — données insuffisantes</strong> ({unranked.length})
           </summary>
           <p className="muted small" style={{ margin: "10px 0" }}>
-            Fiabilité sous le seuil de 30 % : pas assez de preuves pour attribuer une note
-            défendable. Ce n'est pas un jugement négatif — c'est un manque de transparence
+            Pas assez de preuves pour attribuer une note défendable : fiabilité sous 30 %, ou
+            moins de 30 % du socle d'indicateurs documenté (base de la note, voir la
+            méthodologie). Ce n'est pas un jugement négatif — c'est un manque de transparence
             de l'entité, ou une couverture encore partielle.
           </p>
           <Table rows={unranked} ranked={false} />
