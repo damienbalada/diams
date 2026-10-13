@@ -373,12 +373,19 @@ def check_except(row, quote: str) -> tuple[bool, list[str], bool]:
 # Effectif publié en deux parties (« two executive directors and 13 non-executive
 # directors ») : « calcul : 13 / (2 + 13) = 86,7 % », chaque partie citée ; de même
 # au numérateur (« calcul : (6 + 3) / 12 = 75 % »).
-_TERM = r"(\d+|\(\d+(?: \+ \d+)+\))"
+_TERM = r"(\d+|\(\d+(?: [+−] \d+)+\))"
 RATIO_RE = re.compile(rf"calcul : {_TERM} / {_TERM} = ([\d,]+) %")
 
 
 def _parts(term: str) -> list[int]:
     return [int(x) for x in re.findall(r"\d+", term)]
+
+
+def _value(term: str) -> int:
+    """Valeur d'un terme : nombre, somme « (a + b) » ou différence « (a − b) »
+    (ex. membres du conseil hors représentants des salariés : (17 − 2))."""
+    nums = _parts(term)
+    return nums[0] - sum(nums[1:]) if "−" in term else sum(nums)
 
 
 _CHAIR_INDEP = re.compile(r"\bChair(?:man|woman|person)?\b(?: of the Board)? (?:was|is) (?:considered |deemed |determined )?"
@@ -400,7 +407,7 @@ def check_ratio(row, quote: str) -> tuple[bool, list[str], bool]:
         return True, [], False
     a_s, b_s, v_s = m.groups()
     num, parts = _parts(a_s), _parts(b_s)
-    a, b = sum(num), sum(parts)
+    a, b = _value(a_s), _value(b_s)
     stated = float(v_s.replace(",", "."))
     # Au numérateur d'une somme, le président déclaré indépendant compte pour 1
     # (« the Chair was considered to be independent on appointment »).

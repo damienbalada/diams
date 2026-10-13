@@ -551,3 +551,13 @@ def test_effectif_publie_en_trois_parties():
     assert check_esef_quote(ok, rep).status == "OK"
     faux = row("lotus", 27.3, f"Rapport : « {q} » ; calcul : 3 / (1 + 7 + 3) = 27,3 %", ind="GOV_BOARD_INDEP", src="ESEF")
     assert check_esef_quote(faux, rep).status == "ÉCART"   # « 7 » n'est pas cité
+
+
+def test_denominateur_hors_representants_des_salaries():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Le Conseil de Surveillance est composé de 17 membres dont 4 membres sont indépendants et 2 sont des représentants des salariés."
+    q = "Le Conseil de Surveillance est composé de 17 membres dont 4 membres sont indépendants et 2 sont des représentants des salariés"
+    ok = row("ldc", 26.7, f"Rapport : « {q} » ; calcul : 4 / (17 − 2) = 26,7 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(ok, rep).status == "OK"
+    faux = row("ldc", 25.0, f"Rapport : « {q} » ; calcul : 4 / (17 − 1) = 25,0 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(faux, rep).status == "ÉCART"   # « 1 » n'est pas cité
