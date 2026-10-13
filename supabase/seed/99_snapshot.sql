@@ -18,7 +18,7 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 2017
+--   entities                 2020
 --   evidence                 2019
 --   political_groups         18
 --   civic_votes              4
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 1556
+--   entity_ownership_sources 1558
 -- =============================================================================
 
 begin;
@@ -414,6 +414,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('acqua-panna', 'Acqua Panna', 'Acqua Panna', null, null, 'CH', (select id from sectors where code = 'beverages'), true, false),
   ('actimel', 'Actimel', 'Actimel', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('activia', 'Activia', 'Activia', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('activilong', 'Activilong', 'Activilong', null, null, 'FR', (select id from sectors where code = 'personal_care'), true, false),
   ('adelie', 'ADELIE', 'ADELIE', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('adidas', 'adidas AG', 'adidas', '549300JSX0Z4CW0V5023', null, 'DE', (select id from sectors where code = 'fashion_leather'), false, false),
   ('adrien-delbos', 'ADRIEN DELBOS', 'ADRIEN DELBOS', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
@@ -473,6 +474,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('antonin-rodet', 'Antonin Rodet', 'Antonin Rodet', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('aoste', 'AOSTE', 'Aoste', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('apaisyl', 'Apaisyl', 'Apaisyl', null, null, 'US', (select id from sectors where code = 'personal_care'), true, false),
+  ('apericube', 'Apéricube', 'Apéricube', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('aperivrais', 'Apérivrais', 'Apérivrais', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('aperol', 'Aperol', 'Aperol', null, null, 'IT', (select id from sectors where code = 'wines_spirits'), true, false),
   ('apifruit', 'Apifruit', 'Apifruit (Frugam)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
@@ -1431,6 +1433,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('labello', 'Labello', 'Labello', null, null, 'DE', (select id from sectors where code = 'personal_care'), true, false),
   ('labeyrie', 'Labeyrie Fine Foods', 'Labeyrie Fine Foods', '9695006DAQ2QM2EZ8H43', '414816967', 'FR', (select id from sectors where code = 'food'), false, false),
   ('labeyrie-marque', 'Labeyrie', 'Labeyrie', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('labomai', 'Miss Antilles International', 'Labomai (Miss Antilles International)', null, '327235818', 'FR', (select id from sectors where code = 'personal_care'), false, false),
   ('laboratoire-meme', 'Laboratoire MÊME', 'Laboratoire MÊME', null, null, 'FR', (select id from sectors where code = 'personal_care'), true, false),
   ('laboratoire-nuxe', 'Laboratoire Nuxe', 'Laboratoire Nuxe', '969500DA9ENESR18X363', '642060123', 'FR', (select id from sectors where code = 'personal_care'), false, false),
   ('laboure-roi', 'Labouré Roi', 'Labouré-Roi', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
@@ -2439,6 +2442,7 @@ from (values
   ('acqua-panna', 'nestle', 100::numeric),
   ('actimel', 'danone', 100::numeric),
   ('activia', 'danone', 100::numeric),
+  ('activilong', 'labomai', 100::numeric),
   ('adelie', 'mousquetaires', 100::numeric),
   ('adrien-delbos', 'aldi-france', 100::numeric),
   ('advance-affinity', 'affinity-petcare', 100::numeric),
@@ -2482,6 +2486,7 @@ from (values
   ('antonin-rodet', 'grands-vins-jean-claude-boisset', 100::numeric),
   ('aoste', 'campofrio-france', 100::numeric),
   ('apaisyl', 'procter-gamble', 100::numeric),
+  ('apericube', 'groupe-bel', 100::numeric),
   ('aperivrais', 'savencia', 100::numeric),
   ('aperol', 'campari', 100::numeric),
   ('apifruit', 'frugam', 100::numeric),
@@ -4179,6 +4184,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'acqua-panna'), (select id from entities where slug = 'nestle'), 'https://www.nestle.com/sites/default/files/2026-02/annual-review-2025-en.pdf', 'Revue annuelle 2025 de Nestlé (document volontaire publié par le groupe, en anglais) : « The Water category includes the world’s #1 sparkling water brand, S.Pellegrino, as well as other international premium water brands, such as Perrier and Acqua Panna »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'actimel'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « point de vue santé, nature et impacts sociaux : • une riche plateforme de marques mondiales telles qu’ Aptamil , Actimel , Activia , Danone , YoPro , Neocate, Nutricia et evian , auxquelles s’ajoutent des marques locales de premier »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'activia'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « santé, nature et impacts sociaux : • une riche plateforme de marques mondiales telles qu’ Aptamil , Actimel , Activia , Danone , YoPro , Neocate, Nutricia et evian , auxquelles s’ajoutent des marques locales de premier plan, • une »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'activilong'), (select id from entities where slug = 'labomai'), 'https://activilong.com/policies/legal-notice', 'Mentions légales du site officiel de la marque Activilong (soins capillaires) : « Le site internet https://activilong.com/fr/ (ci-après le « Site ») est édité par la société LABOMAI »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'adelie'), (select id from entities where slug = 'mousquetaires'), 'https://www.santepubliquefrance.fr/sites/default/files/rdd/document/Entreprises-et-marques-engagees-en-faveur-de-nutri-score-France-20260224.pdf', 'Liste officielle de Santé publique France « Entreprises et marques utilisant le Nutri-Score en France » (janvier 2026, déclarations des entreprises) : marques déclarées par la société Intermarché (groupement Les Mousquetaires) : « Intermarché RANOU, PATURAGES, PAQUITO, SAINT ELOI, ODYSSEE, FIORINI, JEAN ROZE, VOLAE, BOUTON D''OR, ITINERAIRE DES SAVEURS, ADELIE, LOOK, CHABRIOR, KINGSBRAU, TOP BUDGET, IVORIA, planteur des tropiques, regain, elodie, cotterley, copitaine cook, ondine, sainte marguerite, netto, ITINERAIRE DE NOS REGIONS, MERCI! »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'adrien-delbos'), (select id from entities where slug = 'aldi-france'), 'https://www.santepubliquefrance.fr/sites/default/files/rdd/document/Entreprises-et-marques-engagees-en-faveur-de-nutri-score-France-20260224.pdf', 'Liste officielle de Santé publique France « Entreprises et marques utilisant le Nutri-Score en France » (janvier 2026, déclarations des entreprises) : marques déclarées par la société ALDI Centrale d’achat et Cie SCS (Aldi France) : « ALDI Centrale d’achat et Cie SCS Les Doris, Drizz, All seasons, Chevrefin, Conquérant, Swing, Golden bridge, Mr frites, Baccara, ADRIEN DELBOS, ALBONA, ARCHIPEL, ARIZONA, ASIA, GREEN, GARDEN, BELLE D''ALSACE, BERGER COMTOIS, BISTRO''VITE, Bon & Vég, BON-RI, GOLDEN POWER, GOLDEN POWER, DEL RIO BOUCHERIE St Clément CASA MORANDO CHAMPRE CHANTOISEAU, etc. »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'advance-affinity'), (select id from entities where slug = 'affinity-petcare'), 'https://affinity-petcare.com/en/our-brands', 'Page « Our brands » du site officiel d''Affinity Petcare (en anglais) : « Our brands Healthy and balanced recipes tailored to your dog or cat Quality nutrition for all Ultima Advance Brekkies Libra Pride in our brands »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
@@ -4222,6 +4228,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'antonin-rodet'), (select id from entities where slug = 'grands-vins-jean-claude-boisset'), 'https://www.boisset.fr/fr/mentions-legales.r-425/', 'Mentions légales du site officiel de la famille Boisset (« Ce site Internet est la propriété de société GRANDS VINS JEAN CLAUDE BOISSET ») : menu « Domaines & Maisons » listant les maisons du groupe : « Domaines & Maisons FRANCE ETATS-UNIS Bourgogne Jean-Claude Boisset J. Moreau & Fils Labouré Roi Alex Gambal Bouchard Aîné & Fils Ropiteau Frères Antonin Rodet Domaine de la Bressande Beaujolais Château de Pierreux Mommessin Jura Domaine Maire & Fils Michel Tissot & Fils Rhône Bonpas Gabriel Meffre Louis Bernard La Châsse Château Grand Escalion Provence Villa Moncigale Languedoc Maison Fortant Effervescents Louis Bouillot Charles de Fère »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'aoste'), (select id from entities where slug = 'campofrio-france'), 'https://www.santepubliquefrance.fr/sites/default/files/rdd/document/Entreprises-et-marques-engagees-en-faveur-de-nutri-score-France-20260224.pdf', 'Liste officielle de Santé publique France « Entreprises et marques utilisant le Nutri-Score en France » (janvier 2026, déclarations des entreprises) : marques déclarées par la société Aoste SNC (Campofrío France) : « AOSTE SNC COCHONOU, AOSTE »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'apaisyl'), (select id from entities where slug = 'procter-gamble'), 'https://fr.pg.com/marques-et-produits/', 'Page « Marques » du site officiel de Procter & Gamble France (« Les marques de P&G sont reconnues pour l’excellence de leurs produits ») : « Gamme Apaisyl CONSULTER LE SITE »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'apericube'), (select id from entities where slug = 'groupe-bel'), 'https://www.groupe-bel.com/nos-marques/nos-marques-locales/', 'Page « Nos marques locales » du site officiel du groupe Bel (« plus de 25 marques locales à forte image ») : « France APÉRICUBE® «Le cube de vos moments conviviaux». Depuis 1960, Apéricube® est le petit cube plein de saveurs »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'aperivrais'), (select id from entities where slug = 'savencia'), 'https://www.quiveutdufromage.com/', 'Page d''accueil du portail Qui veut du fromage, édité par Savencia Produits Laitiers France selon ses mentions légales (https://www.quiveutdufromage.com/nf/legals) : « DES MARQUES À DÉVORER Apérivrais Brebiou Bresse Bleu »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'aperol'), (select id from entities where slug = 'campari'), 'https://filings.xbrl.org/213800ED5AN2J56N6Z02/2025-12-31/ESEF/NL/0/davidecamparimilano-2025-12-31-0-en/reports/davidecamparimilano-2025-12-31-0-en.xhtml', 'Rapport annuel 2025 de Campari Group (format électronique officiel ESEF, en anglais) : « The classification of brands within Campari Group’s portfolio strategy is as follows: Champion Aperol Aperol is the flagship brand »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'apifruit'), (select id from entities where slug = 'frugam'), 'https://www.santepubliquefrance.fr/sites/default/files/rdd/document/Entreprises-et-marques-engagees-en-faveur-de-nutri-score-France-20260224.pdf', 'Liste officielle de Santé publique France « Entreprises et marques utilisant le Nutri-Score en France » (janvier 2026, déclarations des entreprises) : marques déclarées par la société FRUGAM SAS : « FRUGAM SAS Apifruit »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
