@@ -43,3 +43,8 @@ def test_ecart_si_la_marque_n_est_pas_dans_la_citation_ou_le_document():
 def test_signes_de_marque_deposee_ignores():
     assert name_in_quote("Ben's Original", "brands like Ben’s Original™, Dolmio ®")
     assert name_in_quote("Dolmio", "brands like Ben’s Original™, Dolmio®")
+
+
+def test_nom_ecrit_comme_un_nom_de_domaine():
+    assert name_in_quote("Géant Vert", "ce site internet https://www.geantvert.fr/ édité par General Mills France")
+    assert not name_in_quote("Géant Vert", "un géantvertical")

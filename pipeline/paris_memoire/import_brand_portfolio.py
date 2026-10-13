@@ -52,7 +52,9 @@ def name_in_quote(name: str, quote: str) -> bool:
     """Le nom de la marque figure dans la citation, en mot entier (casse et accents
     ignorés ; « & » et « and », tirets et espaces équivalents)."""
     n, q = _fold(name), _fold(quote)
-    variants = {n, n.replace("&", "and"), n.replace("-", " "), n.replace(" ", "-"), n.replace("'", "’")}
+    # Forme sans espaces : nom de domaine du site de la marque (« geantvert.fr »).
+    variants = {n, n.replace("&", "and"), n.replace("-", " "), n.replace(" ", "-"), n.replace("'", "’"),
+                re.sub(r"[\s'’-]", "", n)}
     return any(re.search(rf"(?<![\w]){re.escape(v)}(?![\w])", q) for v in variants if v)
 
 
