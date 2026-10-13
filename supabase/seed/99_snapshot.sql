@@ -18,7 +18,7 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 1242
+--   entities                 1251
 --   evidence                 1876
 --   political_groups         18
 --   civic_votes              4
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 997
+--   entity_ownership_sources 1006
 -- =============================================================================
 
 begin;
@@ -986,6 +986,14 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('kiehls', 'Kiehl''s', 'Kiehl''s', null, null, 'FR', (select id from sectors where code = 'beauty_fragrance'), true, false),
   ('kimberly-clark', 'Kimberly-Clark Corporation', 'Kimberly-Clark', 'MP3J6QPYPGN75NVW2S34', null, 'US', (select id from sectors where code = 'personal_care'), false, false),
   ('kinder', 'Kinder', 'Kinder', null, null, 'IT', (select id from sectors where code = 'food'), true, false),
+  ('kinder-bueno', 'Kinder Bueno', 'Kinder Bueno', null, null, 'LU', (select id from sectors where code = 'food'), true, false),
+  ('kinder-country', 'Kinder Country', 'Kinder Country', null, null, 'LU', (select id from sectors where code = 'food'), true, false),
+  ('kinder-delice', 'Kinder Delice', 'Kinder Délice', null, null, 'LU', (select id from sectors where code = 'food'), true, false),
+  ('kinder-joy', 'Kinder Joy', 'Kinder Joy', null, null, 'LU', (select id from sectors where code = 'food'), true, false),
+  ('kinder-maxi', 'Kinder Maxi', 'Kinder Maxi', null, null, 'LU', (select id from sectors where code = 'food'), true, false),
+  ('kinder-pingui', 'Kinder Pingui', 'Kinder Pingui', null, null, 'LU', (select id from sectors where code = 'food'), true, false),
+  ('kinder-schoko-bons', 'Kinder Schoko-Bons', 'Kinder Schoko-Bons', null, null, 'LU', (select id from sectors where code = 'food'), true, false),
+  ('kinder-surprise', 'Kinder Surprise', 'Kinder Surprise', null, null, 'LU', (select id from sectors where code = 'food'), true, false),
   ('king-c-gillette', 'King C Gillette', 'King C Gillette', null, null, 'US', (select id from sectors where code = 'personal_care'), true, false),
   ('kiri', 'Kiri', 'Kiri', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('kitekat', 'Kitekat', 'Kitekat', null, null, 'US', (select id from sectors where code = 'pet_care'), true, false),
@@ -1236,6 +1244,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('officine-universelle-buly', 'Officine Universelle Buly', 'Officine Universelle Buly', null, null, 'FR', (select id from sectors where code = 'beauty_fragrance'), true, false),
   ('ogx', 'OGX', 'OGX', null, null, 'US', (select id from sectors where code = 'personal_care'), true, false),
   ('oikos', 'Oikos', 'Oikos', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('okay-essuie-tout', 'Okay', 'Okay (essuie-tout)', null, null, 'SE', (select id from sectors where code = 'home_care'), true, false),
   ('olay', 'Olay', 'Olay', null, null, 'US', (select id from sectors where code = 'personal_care'), true, false),
   ('old-el-paso', 'Old El Paso', 'Old El Paso', null, null, 'US', (select id from sectors where code = 'food'), true, false),
   ('old-spice', 'Old Spice', 'Old Spice', null, null, 'US', (select id from sectors where code = 'personal_care'), true, false),
@@ -2118,6 +2127,14 @@ from (values
   ('kiddylicious', 'lotus-bakeries', 100::numeric),
   ('kiehls', 'loreal', 100::numeric),
   ('kinder', 'ferrero', 100::numeric),
+  ('kinder-bueno', 'ferrero', 100::numeric),
+  ('kinder-country', 'ferrero', 100::numeric),
+  ('kinder-delice', 'ferrero', 100::numeric),
+  ('kinder-joy', 'ferrero', 100::numeric),
+  ('kinder-maxi', 'ferrero', 100::numeric),
+  ('kinder-pingui', 'ferrero', 100::numeric),
+  ('kinder-schoko-bons', 'ferrero', 100::numeric),
+  ('kinder-surprise', 'ferrero', 100::numeric),
   ('king-c-gillette', 'procter-gamble', 100::numeric),
   ('kiri', 'groupe-bel', 100::numeric),
   ('kitekat', 'mars', 100::numeric),
@@ -2322,6 +2339,7 @@ from (values
   ('officine-universelle-buly', 'lvmh', 100::numeric),
   ('ogx', 'kenvue', 100::numeric),
   ('oikos', 'danone', 100::numeric),
+  ('okay-essuie-tout', 'essity', 100::numeric),
   ('olay', 'procter-gamble', 100::numeric),
   ('old-el-paso', 'general-mills', 100::numeric),
   ('old-spice', 'procter-gamble', 100::numeric),
@@ -3294,6 +3312,14 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'kfc'), (select id from entities where slug = 'yum-brands'), 'https://www.sec.gov/Archives/edgar/data/1041061/000104106126000084/yum-20251231.htm', 'Rapport annuel 10-K 2025 de Yum! Brands déposé à la SEC (autorité boursière américaine) : « brands and overall business and/or growth prospects. We regard our registered trademarks (e.g., Yum! Brands®, KFC®, Taco Bell®, Pizza Hut® and Habit®), unregistered trademarks, copyrightable works, inventions, software, domain »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'kiddylicious'), (select id from entities where slug = 'lotus-bakeries'), 'https://filings.xbrl.org/5493004C0K34IFI67I03/2025-12-31/ESEF/BE/1/5493004C0K34IFI67I03-2025-12-31-1-en/reports/5493004C0K34IFI67I03-2025-12-31-1-en.xhtml', 'Rapport annuel 2025 de Lotus Bakeries (format électronique officiel ESEF, en anglais) : « the Group offers a range of better-for-you snacking brands, including nākd. ® , TREK ® , BEAR ® , Kiddylicious ® and Peter’s Yard ® »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'kiehls'), (select id from entities where slug = 'loreal'), 'https://filings.xbrl.org/529900JI1GG6F7RKVI53/2025-12-31/ESEF/FR/0/loreal-2025-12-31-1-fr/reports/loreal-2025-12-31-1-fr.xhtml', 'Document d''enregistrement universel 2025 de L''Oréal (format électronique officiel ESEF) : « La Division orchestre un portefeuille unique de marques prestigieuses : marques généralistes emblématiques, marques couture aspirationnelles et marques alternatives ou spécialisées (Lancôme, Yves Saint Laurent Beauté, Armani Beauty, Kiehl''s, Helena Rubinstein, Aēsop, Biotherm, Valentino, Prada, Shu Uemura, IT Cosmetics, Mugler, Ralph Lauren, Urban Decay, Azzaro, Maison Margiela, Viktor&Rolf, Takami, etc.) »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'kinder-bueno'), (select id from entities where slug = 'ferrero'), 'https://www.kinder.com/fr/fr/kinder-bueno', 'Page produit du site officiel de la marque Kinder en France (marque de Ferrero ; pied de page « © Ferrero 2026 ») : « Kinder Bueno - Kinder France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'kinder-country'), (select id from entities where slug = 'ferrero'), 'https://www.kinder.com/fr/fr/kinder-country', 'Page produit du site officiel de la marque Kinder en France (marque de Ferrero ; pied de page « © Ferrero 2026 ») : « Kinder Country - Kinder France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'kinder-delice'), (select id from entities where slug = 'ferrero'), 'https://www.kinder.com/fr/fr/kinder-delice', 'Page produit du site officiel de la marque Kinder en France (marque de Ferrero ; pied de page « © Ferrero 2026 ») : « Kinder Delice - Kinder France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'kinder-joy'), (select id from entities where slug = 'ferrero'), 'https://www.kinder.com/fr/fr/kinder-joy', 'Page produit du site officiel de la marque Kinder en France (marque de Ferrero ; pied de page « © Ferrero 2026 ») : « Kinder Joy - Kinder France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'kinder-maxi'), (select id from entities where slug = 'ferrero'), 'https://www.kinder.com/fr/fr/kinder-maxi', 'Page produit du site officiel de la marque Kinder en France (marque de Ferrero ; pied de page « © Ferrero 2026 ») : « Kinder Maxi - Kinder France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'kinder-pingui'), (select id from entities where slug = 'ferrero'), 'https://www.kinder.com/fr/fr/kinder-pingui', 'Page produit du site officiel de la marque Kinder en France (marque de Ferrero ; pied de page « © Ferrero 2026 ») : « Kinder Pingui - Kinder France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'kinder-schoko-bons'), (select id from entities where slug = 'ferrero'), 'https://www.kinder.com/fr/fr/kinder-schoko-bons', 'Page produit du site officiel de la marque Kinder en France (marque de Ferrero ; pied de page « © Ferrero 2026 ») : « Kinder Schoko-Bons - Kinder France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'kinder-surprise'), (select id from entities where slug = 'ferrero'), 'https://www.kinder.com/fr/fr/kinder-surprise', 'Page produit du site officiel de la marque Kinder en France (marque de Ferrero ; pied de page « © Ferrero 2026 ») : « Kinder Surprise - Kinder France »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'kinder'), (select id from entities where slug = 'ferrero'), 'https://www.ferrero.com/int/en/our-brands', 'Page des marques du site officiel du groupe Ferrero (en anglais) : « The Ferrero Group brings joy to people around the world with much-loved treats and snacks, including Nutella ® , Kinder ® , Tic Tac ® and Ferrero Rocher ® »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'king-c-gillette'), (select id from entities where slug = 'procter-gamble'), 'https://fr.pg.com/marques-et-produits/', 'Page « Marques » du site officiel de Procter & Gamble France (« Les marques de P&G sont reconnues pour l’excellence de leurs produits ») : « King C Gillette Consulter le site Soin et entretien de la barbe »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'kiri'), (select id from entities where slug = 'groupe-bel'), 'https://www.groupe-bel.com/wp-content/uploads/2026/07/Bel-Rapport-financier-semestriel-2026_version-francaise.pdf', 'Rapport financier semestriel 2026 du groupe Bel : « reconnues à l’international compr end La Vache qui rit®, Kiri ®, Babybel®, Boursin®, Pom’Potes® et GoGo squeeZ®, ainsi qu’une vingtaine d’autres marques locales »', '2026-10-13', 'auto:verify_ownership'),
@@ -3496,6 +3522,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'officine-universelle-buly'), (select id from entities where slug = 'lvmh'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0195/CA8A1E35A6C70FC2DE6B35F0939523887728C2FE2C11DFAC7F9B5F7675629928.zip', 'Document d''enregistrement universel 2025 de LVMH déposé à l''AMF (D.26-0195), note des comptes consolidés sur les marques et enseignes du groupe : « ● Parfums et Cosmétiques : Parfums Christian Dior, Guerlain, Parfums Givenchy, Make Up For Ever, Benefit Cosmetics, Fresh, Acqua di Parma, Fenty, Ole Henriksen, Maison Francis Kurkdjian et Officine Universelle Buly 1803 »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'ogx'), (select id from entities where slug = 'kenvue'), 'https://www.kenvue.com/our-brands', 'Page des marques du site officiel de Kenvue (en anglais) : « Band-Aid Brand Wound care Dr Ci:Labo Face care, body care, sun care OGX Body care, hair care »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'oikos'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « soutenu par les marques fonctionnelles Bio ( Activia ) pour la santé intestinale et Oikos pour les gammes hyper protéinées »', '2026-03-04', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'okay-essuie-tout'), (select id from entities where slug = 'essity'), 'https://www.okay.eu/fr/', 'Site officiel de la marque Okay en France (pied de page « © 2026 Essity Hygiene and Health AB ») : « Essuie-tout et conseils ménage pour la maison - Okay »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'olay'), (select id from entities where slug = 'procter-gamble'), 'https://us.pg.com/brands/', 'Page des marques du site officiel de Procter & Gamble (en anglais) : « Olay Visit Site Face & Skin Care »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'old-el-paso'), (select id from entities where slug = 'general-mills'), 'https://www.sec.gov/Archives/edgar/data/40704/000162828026046466/gis-20260531.htm', 'Rapport annuel 10-K 2026 de General Mills déposé à la SEC (autorité boursière américaine) : « Some of the more important trademarks used in our global operations (set forth in italics in this report) include Annie ’ s, Betty Crocker, Bisquick, Blue Buffalo, Bugles, Cascadian Farm, Cheerios, Chex, Cinnamon Toast Crunch, Cocoa Puffs, Cookie Crisp, Dunkaroos, Edgard & Cooper, Fiber One, Fruit by the Foot, Fruit Gushers, Fruit Roll-Ups, Gardetto ’ s, Gold Medal, Golden Grahams, Häagen-Dazs, Kitano, Kix, Lärabar, Latina, Lucky Charms, Nature Valley, Nudges, Oatmeal Crisp, Old El Paso, Pillsbury »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'old-spice'), (select id from entities where slug = 'procter-gamble'), 'https://us.pg.com/brands/', 'Page des marques du site officiel de Procter & Gamble (en anglais) : « Hair Care Aussie Visit Site Hair Care Head & Shoulders Visit Site Hair Care Herbal Essences Visit Site Hair Care My Black Is Beautiful Visit site Hair care Old Spice Visit Site Hair & Skin Care Pantene Visit Site Hair Care »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
