@@ -319,6 +319,22 @@ test("complémentaire déclaré non matériel : affiché avec son motif, hors no
   assert.equal(sans.dimensions[0].indicators.length, 1);   // sans motif : pas de ligne
 });
 
+test("pilier fait seulement de données déclarées non matérielles : affiché pour information, sans effet", () => {
+  const ev1 = [ev({ indicator_code: "ENV_A", normalized_value: 0.6, confidence: 0.9 })];
+  const pw = [{ dimension_code: "ENV", weight: 1 }, { dimension_code: "LAB", weight: 1 }];
+  const sans = computeScore(baseInput({ evidence: ev1, profileWeights: pw, applicableIndicators: [ind("ENV_A", "ENV")] }));
+  const avec = computeScore(baseInput({
+    evidence: ev1, profileWeights: pw,
+    applicableIndicators: [ind("ENV_A", "ENV"), ind("LAB_C", "LAB", { complementary: true, exemption: "Déclarée non matérielle." })],
+  }));
+  assert.equal(avec.score, sans.score);
+  assert.equal(avec.confidence, sans.confidence);
+  const lab = avec.dimensions.find((d) => d.dimension_code === "LAB")!;
+  assert.equal(lab.informational, true);
+  assert.equal(lab.rated, false);
+  assert.equal(lab.indicators[0].not_counted, true);
+});
+
 test("pilier réduit à son plafond documenté : une donnée complémentaire ne baisse pas sa fiabilité", () => {
   const gates = [{ dimension_code: "ENV", gate_indicator_code: "ENV_G", default_ceiling: 1 }];
   const inds = [ind("ENV_G", "ENV", { kind: "categorical" }), ind("ENV_C", "ENV", { complementary: true })];

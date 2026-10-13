@@ -377,10 +377,15 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
         {d.rated ? (
           <div className={`grade sm grade-${d.grade}`}>{d.grade}</div>
         ) : (
-          <div className="grade sm grade-none" title="Pilier non noté : aucune preuve ni publication obligatoire.">—</div>
+          <div className="grade sm grade-none" title={d.informational
+            ? "Pour information : données déclarées non matérielles par l'entreprise."
+            : "Pilier non noté : aucune preuve ni publication obligatoire."}>—</div>
         )}
         <div className="pillar-name">
           {d.name}
+          {d.informational ? (
+            <small>pour information · hors note et hors fiabilité</small>
+          ) : (
           <small>
             fiabilité {pct(d.confidence)} · {d.applicable_indicators === 0 && d.indicators.some((i) => i.is_gate)
               ? (d.indicators.some((i) => i.is_gate && i.covered) ? "niveau d'exploitation documenté" : "niveau d'exploitation présumé")
@@ -393,6 +398,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
               exclus. Note et fiabilité restent deux mesures distinctes.
             </Tip>
           </small>
+          )}
         </div>
         <span className="chev" aria-hidden="true">›</span>
       </summary>
@@ -407,8 +413,9 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
         </div>
       ) : (
         <p className="muted small" style={{ margin: "2px 0 6px" }}>
-          Non noté : aucune preuve, et aucune publication obligatoire pour cette entité sur ce pilier.
-          Il n'entre pas dans la note globale, mais baisse la fiabilité.
+          {d.informational
+            ? "Pour information : l'entreprise déclare ces données non matérielles dans son rapport réglementé. Le pilier n'entre ni dans la note ni dans la fiabilité."
+            : "Non noté : aucune preuve, et aucune publication obligatoire pour cette entité sur ce pilier. Il n'entre pas dans la note globale, mais baisse la fiabilité."}
         </p>
       )}
 

@@ -202,6 +202,9 @@ export interface DimensionResult {
   ceiling?: number;
   /** true si le plafond a effectivement rabaissé la note (ex: exploitation animale). */
   capped_by_gate?: boolean;
+  /** Pilier affiché pour information seulement (données déclarées non matérielles) :
+   *  hors note et hors fiabilité. */
+  informational?: boolean;
   indicators: IndicatorResult[];
 }
 export interface GroupResult {
@@ -568,7 +571,18 @@ export function computeScore(input: ScoreInput): ScoreResult {
 
     // Rien de connaissable dans le pilier (aucun indicateur du socle, pas de
     // gate) : il n'existe pas pour l'entité — ni note, ni fiabilité (v0.6.0).
-    if (scored.length === 0 && !gateApplies) continue;
+    if (scored.length === 0 && !gateApplies) {
+      // Pilier réduit à des données déclarées non matérielles : affiché pour information
+      // (le lecteur voit le motif), sans note ni fiabilité (v0.7.3).
+      if (indicators.some((r) => r.not_counted)) {
+        dimResults.push({
+          dimension_code: dimCode, name: dimName.get(dimCode) ?? dimCode, score: 0, confidence: 0,
+          grade: toGrade(0), rated: false, informational: true, applicable_indicators: 0,
+          covered_indicators: 0, indicators,
+        });
+      }
+      continue;
+    }
     // Noté s'il y a une base : une preuve, un manquant obligatoire, ou un gate
     // (documenté, il fixe la note du pilier ; inconnu, son plafond par défaut).
     const rated = scoreWeight > 0 || gateApplies;
