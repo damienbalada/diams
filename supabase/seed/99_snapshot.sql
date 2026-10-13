@@ -18,7 +18,7 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 210
+--   entities                 217
 --   evidence                 1320
 --   political_groups         18
 --   civic_votes              4
@@ -29,6 +29,7 @@
 --   indicator_sectors        31
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
+--   entity_ownership_sources 7
 -- =============================================================================
 
 begin;
@@ -408,12 +409,14 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('aws', 'Amazon Web Services', 'Amazon Web Services', '2549000I2PRQGGIGCA75', null, 'US', (select id from sectors where code = 'tech_electronics'), true, false),
   ('axa', 'AXA S.A.', 'AXA', null, null, 'FR', (select id from sectors where code = 'banking_finance'), false, false),
   ('babybel', 'Mini Babybel', 'Babybel', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('badoit', 'Badoit', 'Badoit', null, null, 'FR', (select id from sectors where code = 'beverages'), true, false),
   ('balenciaga', 'Balenciaga SA', 'Balenciaga', null, '775668122', 'FR', (select id from sectors where code = 'fashion_leather'), true, false),
   ('banque-populaire', 'Réseau des Banques Populaires', 'Banque Populaire', null, null, 'FR', (select id from sectors where code = 'banking_finance'), true, false),
   ('barilla', 'Barilla G. e R. Fratelli', 'Barilla', '529900HWBYCO8M2UN457', null, 'IT', (select id from sectors where code = 'fmcg_group'), false, false),
   ('beiersdorf', 'Beiersdorf AG', 'Beiersdorf', null, null, 'DE', (select id from sectors where code = 'personal_care'), false, false),
   ('ben-jerrys', 'Ben & Jerry''s', 'Ben & Jerry''s', null, null, 'US', (select id from sectors where code = 'food'), true, false),
   ('bentley', 'Bentley', 'Bentley', null, null, 'GB', (select id from sectors where code = 'automotive'), true, false),
+  ('bledina', 'Blédina', 'Blédina', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('bmw', 'Bayerische Motoren Werke AG', 'BMW', null, null, 'DE', (select id from sectors where code = 'automotive'), false, false),
   ('bnp-paribas', 'BNP Paribas S.A.', 'BNP Paribas', 'R0MUWSFPU8MPRO8K5P83', '662042449', 'FR', (select id from sectors where code = 'banking_finance'), false, false),
   ('bonduelle', 'Bonduelle SA', 'Bonduelle', null, '445450174', 'FR', (select id from sectors where code = 'food'), false, false),
@@ -441,7 +444,9 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('credit-mutuel-alliance-federale', 'Caisse Fédérale de Crédit Mutuel', 'Crédit Mutuel Alliance Fédérale', '969500LFTDNMONT2EP08', '588505354', 'FR', (select id from sectors where code = 'banking_finance'), false, false),
   ('credit-mutuel-arkea', 'Crédit Mutuel Arkéa', 'Crédit Mutuel Arkéa', '96950041VJ1QP0B69503', '775577018', 'FR', (select id from sectors where code = 'banking_finance'), false, false),
   ('dacia', 'Dacia', 'Dacia', '254900KC1993KD457P30', null, 'RO', (select id from sectors where code = 'automotive'), true, false),
+  ('danette', 'Danette', 'Danette', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('danone', 'Danone S.A.', 'Danone', '969500KMUQ2B6CBAF162', '552032534', 'FR', (select id from sectors where code = 'fmcg_group'), false, false),
+  ('danonino', 'Danonino', 'Danonino', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('decathlon', 'Decathlon S.A.', 'Decathlon', null, '306138900', 'FR', (select id from sectors where code = 'fashion_leather'), false, false),
   ('dior', 'Christian Dior Couture', 'Dior', '96950005T49LGF6G2042', '612035832', 'FR', (select id from sectors where code = 'fashion_leather'), true, false),
   ('dove', 'Dove', 'Dove', null, null, 'GB', (select id from sectors where code = 'personal_care'), true, false),
@@ -475,6 +480,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('hennessy', 'Hennessy', 'Hennessy', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('hermes', 'Hermès International SCA', 'Hermès', null, null, 'FR', (select id from sectors where code = 'luxury_group'), false, false),
   ('hermes-maison', 'Hermès Sellier SAS', 'Hermès', null, null, 'FR', (select id from sectors where code = 'fashion_leather'), true, false),
+  ('hipro', 'HiPRO', 'HiPRO', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('hm-group', 'H & M Hennes & Mauritz AB', 'H&M Group', '529900O5RR7R39FRDM42', null, 'SE', (select id from sectors where code = 'fashion_leather'), false, false),
   ('ikea', 'Ingka Group (IKEA)', 'IKEA', null, null, 'NL', (select id from sectors where code = 'retail_distribution'), false, false),
   ('inditex', 'Industria de Diseño Textil, S.A.', 'Inditex', '549300TTCXZOGZM2EY83', null, 'ES', (select id from sectors where code = 'fashion_leather'), false, false),
@@ -538,6 +544,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('nivea', 'Nivea', 'Nivea', null, null, 'DE', (select id from sectors where code = 'personal_care'), true, false),
   ('nutella', 'Nutella', 'Nutella', null, null, 'IT', (select id from sectors where code = 'food'), true, false),
   ('oculus', 'Meta Quest (Oculus)', 'Meta Quest (Oculus)', null, null, 'US', (select id from sectors where code = 'tech_electronics'), true, false),
+  ('oikos', 'Oikos', 'Oikos', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('opel', 'Opel', 'Opel', null, null, 'DE', (select id from sectors where code = 'automotive'), true, false),
   ('oreo', 'Oreo', 'Oreo', null, null, 'US', (select id from sectors where code = 'food'), true, false),
   ('palmolive', 'Palmolive', 'Palmolive', null, null, 'US', (select id from sectors where code = 'personal_care'), true, false),
@@ -597,6 +604,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('waze', 'Waze', 'Waze', null, null, 'US', (select id from sectors where code = 'tech_electronics'), true, false),
   ('whatsapp', 'WhatsApp', 'WhatsApp', '984500DBD07752F00118', null, 'US', (select id from sectors where code = 'tech_electronics'), true, false),
   ('xbox', 'Xbox', 'Xbox', null, null, 'US', (select id from sectors where code = 'tech_electronics'), true, false),
+  ('yopro', 'YoPro', 'YoPro', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('youtube', 'YouTube', 'YouTube', null, null, 'US', (select id from sectors where code = 'tech_electronics'), true, false),
   ('yum-brands', 'Yum! Brands, Inc.', 'Yum! Brands', '549300JE8XHZZ7OHN517', null, 'US', (select id from sectors where code = 'restaurant'), false, false),
   ('zara', 'Zara España, S.A.', 'Zara', null, null, 'ES', (select id from sectors where code = 'fashion_leather'), true, false)
@@ -626,10 +634,12 @@ from (values
   ('audible', 'amazon', null::numeric),
   ('aws', 'amazon', null::numeric),
   ('babybel', 'groupe-bel', 100::numeric),
+  ('badoit', 'danone', 100::numeric),
   ('balenciaga', 'kering', 100::numeric),
   ('banque-populaire', 'bpce', null::numeric),
   ('ben-jerrys', 'magnum-ice-cream-company', 100::numeric),
   ('bentley', 'volkswagen', null::numeric),
+  ('bledina', 'danone', 100::numeric),
   ('bottega-veneta', 'kering', 100::numeric),
   ('boucheron', 'kering', 100::numeric),
   ('boursobank', 'societe-generale', null::numeric),
@@ -646,6 +656,8 @@ from (values
   ('colgate', 'colgate-palmolive', 100::numeric),
   ('credit-cooperatif', 'bpce', null::numeric),
   ('dacia', 'renault', null::numeric),
+  ('danette', 'danone', 100::numeric),
+  ('danonino', 'danone', 100::numeric),
   ('dior', 'lvmh', 100::numeric),
   ('dove', 'unilever', 100::numeric),
   ('ds-automobiles', 'stellantis', null::numeric),
@@ -670,6 +682,7 @@ from (values
   ('hello-bank', 'bnp-paribas', null::numeric),
   ('hennessy', 'lvmh', null::numeric),
   ('hermes-maison', 'hermes', 100::numeric),
+  ('hipro', 'danone', 100::numeric),
   ('innocent', 'coca-cola', 90::numeric),
   ('instagram', 'meta', null::numeric),
   ('iwc', 'richemont', null::numeric),
@@ -712,6 +725,7 @@ from (values
   ('nivea', 'beiersdorf', 100::numeric),
   ('nutella', 'ferrero', 100::numeric),
   ('oculus', 'meta', null::numeric),
+  ('oikos', 'danone', 100::numeric),
   ('opel', 'stellantis', null::numeric),
   ('oreo', 'mondelez', 100::numeric),
   ('palmolive', 'colgate-palmolive', 100::numeric),
@@ -752,6 +766,7 @@ from (values
   ('waze', 'google', null::numeric),
   ('whatsapp', 'meta', null::numeric),
   ('xbox', 'microsoft', null::numeric),
+  ('yopro', 'danone', 100::numeric),
   ('youtube', 'google', null::numeric),
   ('zara', 'inditex', 100::numeric)
 ) as v(slug, parent_slug, pct)
@@ -922,6 +937,20 @@ on conflict (entity_id, indicator_id) do update set
   reason = excluded.reason,
   source_url = excluded.source_url,
   excerpt = excluded.excerpt;
+
+-- Appartenance marque → groupe : preuves citées
+insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, observed_on, reviewer) values
+  ((select id from entities where slug = 'badoit'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « Il est également passé des bouteilles colorées aux bouteilles transparentes pour ses marques Badoit et Lanjaron »', '2026-03-04', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'bledina'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « des marques régionales et locales fortes dans toutes les catégories (par exemple, Danette dans les Produits Laitiers, Zywiec Zdroj dans les Eaux en Pologne, Blédina dans l’alimentation infantile en France) »', '2026-03-04', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'danette'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « des marques mondiales comme Danone , Activia , Danonino et Danette »', '2026-03-04', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'danonino'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « des marques mondiales comme Danone , Activia , Danonino et Danette »', '2026-03-04', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'hipro'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « comme celles utilisées pour les boissons HiPRO au Royaume-Uni et en France »', '2026-03-04', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'oikos'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « soutenu par les marques fonctionnelles Bio ( Activia ) pour la santé intestinale et Oikos pour les gammes hyper protéinées »', '2026-03-04', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'yopro'), (select id from entities where slug = 'danone'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0063/89708FA20E711C6B82CFEDF5FF402C4B8E7375F3418569A7831FA88A50CB0872.zip', 'Document d''enregistrement universel 2025 de Danone déposé à l''AMF (D.26-0063) : « une riche plateforme de marques mondiales telles qu’ Aptamil , Actimel , Activia , Danone , YoPro , Neocate, Nutricia et evian »', '2026-03-04', 'auto:verify_ownership')
+on conflict (entity_id, owner_id, source_url) do update set
+  excerpt = excluded.excerpt,
+  observed_on = excluded.observed_on,
+  reviewer = excluded.reviewer;
 
 -- Preuves (evidence) — clé : entité + indicateur + source + date
 insert into evidence (entity_id, indicator_id, source_id, observed_on, value_type, value_numeric, value_boolean, value_text, normalized_value, nature, confidence, reviewer, review_status, contested, source_url, excerpt) values

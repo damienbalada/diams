@@ -90,7 +90,7 @@ async function build() {
     "dimension_gates", "sources", "source_tier_config", "evidence_nature_config", "scoring_params",
     "value_profiles", "profile_weights", "entities", "evidence", "political_groups",
     "civic_votes", "civic_positions", "disclosure_regimes", "indicator_regimes", "entity_regimes",
-    "indicator_sectors", "sector_dimension_weights", "obligation_exemptions",
+    "indicator_sectors", "sector_dimension_weights", "obligation_exemptions", "entity_ownership_sources",
   ]) T[t] = await fetchAll(t);
 
   const code = (rows, field = "code") => new Map(rows.map((r) => [r.id, r[field]]));
@@ -220,6 +220,13 @@ async function build() {
     [...T.obligation_exemptions].sort(by((r) => `${ent.get(r.entity_id)}|${ind.get(r.indicator_id)}`)).map((r) => [
       ref("entities", "slug", ent.get(r.entity_id)), ref("indicators", "code", ind.get(r.indicator_id)),
       lit(r.reason), lit(r.source_url), lit(r.excerpt),
+    ])));
+
+  section("Appartenance marque → groupe : preuves citées", upsert("entity_ownership_sources",
+    ["entity_id", "owner_id", "source_url", "excerpt", "observed_on", "reviewer"], ["entity_id", "owner_id", "source_url"],
+    [...T.entity_ownership_sources].sort(by((r) => `${ent.get(r.entity_id)}|${ent.get(r.owner_id)}|${r.source_url}`)).map((r) => [
+      ref("entities", "slug", ent.get(r.entity_id)), ref("entities", "slug", ent.get(r.owner_id)),
+      lit(r.source_url), lit(r.excerpt), lit(r.observed_on), lit(r.reviewer),
     ])));
 
   section("Preuves (evidence) — clé : entité + indicateur + source + date", upsert("evidence",

@@ -59,11 +59,11 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v39"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v40"], { revalidate: 600 });
 
 async function computeAllScores(): Promise<EntityScore[]> {
   const entities = await listEntities();
-  const scored = await mapWithConcurrency(entities, 6, async (e: any) => {
+  const scored = await mapWithConcurrency(entities, 16, async (e: any) => {
     try {
       const payload = await getScorePayload(e.slug);
       if (!payload) return null;
@@ -224,6 +224,31 @@ export async function getCivicData(): Promise<{ groups: CivicGroup[]; votes: Civ
  * Remonte la chaîne de propriété jusqu'au groupe racine (le vrai bénéficiaire
  * économique). Renvoie null si l'entité est elle-même la racine.
  */
+export interface OwnershipProof {
+  owner: string;
+  source_url: string;
+  excerpt: string;
+  observed_on: string;
+  reviewer: string;
+}
+
+/** Preuves d'appartenance de l'entité à son groupe (citations du propriétaire). */
+export async function getOwnershipProofs(slug: string): Promise<OwnershipProof[]> {
+  const supabase = getSupabase();
+  const { data: ent } = await supabase.from("entities").select("id").eq("slug", slug).maybeSingle();
+  if (!ent) return [];
+  const { data, error } = await supabase
+    .from("entity_ownership_sources")
+    .select("source_url, excerpt, observed_on, reviewer, owner:owner_id(display_name, legal_name)")
+    .eq("entity_id", (ent as any).id)
+    .order("observed_on", { ascending: false });
+  if (error || !data) return [];
+  return (data as any[]).map((r) => ({
+    owner: r.owner?.display_name ?? r.owner?.legal_name ?? "",
+    source_url: r.source_url, excerpt: r.excerpt, observed_on: r.observed_on, reviewer: r.reviewer,
+  }));
+}
+
 export async function getOwnerGroup(slug: string): Promise<{ slug: string; name: string } | null> {
   const idx = await loadEntityIndex();
   if (!idx) return null;
@@ -257,23 +282,21 @@ export async function getAlternatives(
   const candidates = pickComparable(idx.rows, self);
   if (candidates.length === 0) return [];
 
-  const scored = await mapWithConcurrency(candidates, 6, async (e) => {
-    try {
-      const payload = await getScorePayload(e.slug);
-      if (!payload) return null;
-      const r = computeScore(payload);
-      return {
-        slug: e.slug,
-        name: entityName(e),
-        grade: r.grade,
-        score: r.score,
-        confidence: r.confidence,
-        publishable: r.publishable,
-        root: idx.rootOf(e.slug)?.slug ?? null,
-      } as ScoredCandidate;
-    } catch {
-      return null;
-    }
+  // Notes lues dans le calcul mis en cache (toutes les entités) : une fiche ne
+  // recalcule pas chaque concurrent de son secteur (indispensable à des milliers de marques).
+  const all = new Map((await getAllScores()).map((s) => [s.slug, s]));
+  const scored = candidates.map((e) => {
+    const r = all.get(e.slug);
+    if (!r) return null;
+    return {
+      slug: e.slug,
+      name: entityName(e),
+      grade: r.grade,
+      score: r.score,
+      confidence: r.confidence,
+      publishable: r.publishable,
+      root: idx.rootOf(e.slug)?.slug ?? null,
+    } as ScoredCandidate;
   });
 
   const selfRoot = idx.rootOf(slug)?.slug ?? null;

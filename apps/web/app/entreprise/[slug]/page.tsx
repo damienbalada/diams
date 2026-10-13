@@ -1,4 +1,4 @@
-import { getScorePayload, getOwnerGroup, getAlternatives, type Alternative } from "@/lib/data";
+import { getScorePayload, getOwnerGroup, getAlternatives, getOwnershipProofs, type Alternative, type OwnershipProof } from "@/lib/data";
 import { computeScore } from "@/lib/scoring";
 import { CompanyScore } from "@/components/CompanyScore";
 
@@ -55,7 +55,14 @@ export default async function CompanyPage({
       // ignoré
     }
 
-    return <CompanyScore payload={payload} group={group} alternatives={alternatives} />;
+    let ownership: OwnershipProof[] = [];
+    try {
+      ownership = await getOwnershipProofs(slug);
+    } catch {
+      // ignoré : bloc d'information
+    }
+
+    return <CompanyScore payload={payload} group={group} alternatives={alternatives} ownership={ownership} />;
   } catch (e) {
     return (
       <main>

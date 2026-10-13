@@ -1,5 +1,5 @@
 import { computeScore, type DimensionResult, type ScoreResult } from "@/lib/scoring";
-import type { Alternative, ScorePayload } from "@/lib/data";
+import type { Alternative, OwnershipProof, ScorePayload } from "@/lib/data";
 import { CorrectionForm } from "@/components/CorrectionForm";
 import { Tip } from "@/components/Tip";
 import { summarize, type Flag } from "@/lib/flags";
@@ -47,10 +47,12 @@ export function CompanyScore({
   payload,
   group = null,
   alternatives = [],
+  ownership = [],
 }: {
   payload: ScorePayload;
   group?: { slug: string; name: string; result: ScoreResult } | null;
   alternatives?: Alternative[];
+  ownership?: OwnershipProof[];
 }) {
   // Pondération fixe : profil renvoyé par la base (défaut « Équilibré »).
   const result = computeScore(payload);
@@ -103,6 +105,18 @@ export function CompanyScore({
             <div className="muted small">
               {chain.length > 1 ? chain.join("  →  ") : "Groupe"}
             </div>
+            {ownership.length > 0 && (
+              <details className="small" style={{ marginTop: 2 }}>
+                <summary className="muted">Pourquoi ce groupe ? la preuve d'appartenance</summary>
+                {ownership.map((o, k) => (
+                  <p key={k} className="excerpt small" style={{ margin: "4px 0" }}>
+                    {o.excerpt}{" "}
+                    <a href={o.source_url} target="_blank" rel="noreferrer">source ↗</a>
+                    <span className="muted"> · {frDate(o.observed_on) ?? o.observed_on}</span>
+                  </p>
+                ))}
+              </details>
+            )}
             {result.last_observed && (
               <div className="muted small" style={{ marginTop: 2 }}>
                 Dernière mise à jour · {frDate(result.last_observed)}
