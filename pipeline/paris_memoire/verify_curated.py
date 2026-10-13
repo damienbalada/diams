@@ -381,6 +381,11 @@ def _parts(term: str) -> list[int]:
     return [int(x) for x in re.findall(r"\d+", term)]
 
 
+_CHAIR_INDEP = re.compile(r"\bChair(?:man|woman|person)?\b(?: of the Board)? (?:was|is) (?:considered |deemed |determined )?"
+                          r"(?:to be )?independent\b"
+                          r"|\bprésident(?:e)?\b(?: du conseil)? (?:est|était) (?:considérée? comme |qualifiée? d.)?indépendant", re.I)
+
+
 def _cited(n: int, quote: str) -> bool:
     words = [w for w, i in _NUM_WORDS.items() if i == n]
     flat = re.sub(r"(?<=\d)[ \u00a0\u202f](?=\d{3}(?!\d))", "", quote)
@@ -397,7 +402,12 @@ def check_ratio(row, quote: str) -> tuple[bool, list[str], bool]:
     num, parts = _parts(a_s), _parts(b_s)
     a, b = sum(num), sum(parts)
     stated = float(v_s.replace(",", "."))
-    both = all(_cited(x, quote) for x in num + parts)
+    # Au numérateur d'une somme, le président déclaré indépendant compte pour 1
+    # (« the Chair was considered to be independent on appointment »).
+    chair = (row.indicator_code == "GOV_BOARD_INDEP" and len(num) > 1 and num.count(1) == 1
+             and _CHAIR_INDEP.search(quote) is not None)
+    both = all(_cited(x, quote) or (chair and x == 1 and i == num.index(1))
+               for i, x in enumerate(num)) and all(_cited(x, quote) for x in parts)
     calc_ok = 0 < a <= b and abs(round(100 * a / b, 1) - stated) < 1e-9
     value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
     return both and calc_ok and value_ok, [

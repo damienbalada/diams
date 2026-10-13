@@ -528,3 +528,16 @@ def test_exception_composee_executifs_et_representant():
     assert check_esef_quote(trois, rep).status == "ÉCART"   # « trois » n'est pas cité
     deux_un = row("tmicc", 66.7, f"Rapport : « {q} » ; calcul : (9 − (1 + 1 + 1)) / 9 = 66,7 %", ind="GOV_BOARD_INDEP", src="ESEF")
     assert check_esef_quote(deux_un, rep).status != "OK"
+
+
+def test_president_independant_compte_pour_un():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("As at 31 December 2025, the Unilever Board comprised ten Directors: the Chair, two Executive Directors and "
+           "seven independent Non-Executive Directors. The Chair was considered to be independent on appointment.")
+    q = ("As at 31 December 2025, the Unilever Board comprised ten Directors: the Chair, two Executive Directors and "
+         "seven independent Non-Executive Directors » ; « The Chair was considered to be independent on appointment")
+    ok = row("unilever", 80.0, f"Rapport : « {q} » ; calcul : (7 + 1) / 10 = 80,0 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(ok, rep).status == "OK"
+    q2 = "As at 31 December 2025, the Unilever Board comprised ten Directors: the Chair, two Executive Directors and seven independent Non-Executive Directors"
+    sans = row("unilever", 80.0, f"Rapport : « {q2} » ; calcul : (7 + 1) / 10 = 80,0 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(sans, rep).status == "ÉCART"   # indépendance du président non citée
