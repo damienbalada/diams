@@ -77,6 +77,22 @@ complémentaire** absent, ne baisse pas la fiabilité (voir « Labels et
 certifications » et « Socle d'indicateurs », section 3) — sauf, pour le second,
 si la loi impose de le publier.
 
+**Ce qui compte comme « publié »** *(v0.7.3)*. La loi demande un chiffre pour
+le groupe. Un chiffre publié pour l'essentiel du groupe est retenu, périmètre
+écrit sur la fiche (LVMH : ratio de rémunération sur 99 % des salariés en CDI) ;
+des chiffres seulement par pays, par zone ou par sous-périmètre choisi ne le
+remplacent pas (BNP Paribas et L'Oréal : ratio par pays ou par zone ;
+TotalEnergies : ratios sur la France seule ; BPCE : écart salarial séparé pour
+Natixis ; L'Oréal : écart salarial hors conseillères de beauté, la population
+la moins payée et à 90 % féminine). Une donnée **déclarée non matérielle** par
+l'entreprise dans son état de durabilité audité n'est pas imposée : elle n'est
+pas comptée 0, et la fiche l'indique, citation à l'appui (LVMH : écart salarial
+non corrigé). Une donnée simplement « non publiée » ou « non chiffrée » reste
+comptée 0 (Société Générale, intensité carbone ; Hermès, écart salarial).
+Enfin, « non trouvée » doit vouloir dire « non publiée » : Crédit Mutuel Alliance
+Fédérale avait 7 données comptées 0 parce que son rapport n'avait pas été lu ;
+elles sont désormais relevées.
+
 **Pourquoi.** Ne pas publier ce que la loi impose est un choix, pas une excuse :
 l'opacité est punie. Mais ne pas publier ce que rien n'impose n'en est pas un —
 une coopérative, une PME ou une marque n'ont pas d'obligation CSRD. Pénaliser leur
@@ -684,7 +700,12 @@ calcul (tables de config) doit être datée et justifiée ici.
   aux programmes, plan de vigilance de Decathlon introuvable). Rapport de l'ONU
   A/HRC/59/23 : citations exactes pour Google, Amazon, Microsoft, BNP Paribas
   (affichées hors note). Liste des fournisseurs : non comptée dans la mode,
-  où l'indice de transparence l'évalue déjà.
+  où l'indice de transparence l'évalue déjà. Données obligatoires comptées 0 :
+  24 cas revus un par un, 11 corrigés (Crédit Mutuel Alliance Fédérale, Arkéa,
+  La Banque Postale, LVMH), 13 confirmés avec leur motif ; exemption pour une
+  donnée déclarée non matérielle. Plan de vigilance : obligation rattachée à six
+  banques et plans relevés (BNP Paribas, Société Générale, Crédit Agricole, BPCE,
+  Crédit Mutuel, Arkéa) ; La Banque Postale relève du plan de La Poste.
 - **0.7.2 (13/10/2026)** — Sanctions : l'indicateur ne retient plus que des
   décisions officielles (Commission européenne, autorités de protection des
   données), notées par la gravité de l'amende ; les anciennes lignes, sourcées

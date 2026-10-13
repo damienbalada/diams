@@ -90,7 +90,7 @@ async function build() {
     "dimension_gates", "sources", "source_tier_config", "evidence_nature_config", "scoring_params",
     "value_profiles", "profile_weights", "entities", "evidence", "political_groups",
     "civic_votes", "civic_positions", "disclosure_regimes", "indicator_regimes", "entity_regimes",
-    "indicator_sectors", "sector_dimension_weights",
+    "indicator_sectors", "sector_dimension_weights", "obligation_exemptions",
   ]) T[t] = await fetchAll(t);
 
   const code = (rows, field = "code") => new Map(rows.map((r) => [r.id, r[field]]));
@@ -213,6 +213,13 @@ async function build() {
     [...T.entity_regimes].sort(by((r) => `${ent.get(r.entity_id)}|${regime.get(r.regime_id)}`)).map((r) => [
       ref("entities", "slug", ent.get(r.entity_id)), ref("disclosure_regimes", "code", regime.get(r.regime_id)),
       lit(r.basis), lit(r.source_url), lit(r.observed_on), lit(r.reviewer),
+    ])));
+
+  section("Obligations levées : donnée déclarée non matérielle (faits cités, v0.7.3)", upsert("obligation_exemptions",
+    ["entity_id", "indicator_id", "reason", "source_url", "excerpt"], ["entity_id", "indicator_id"],
+    [...T.obligation_exemptions].sort(by((r) => `${ent.get(r.entity_id)}|${ind.get(r.indicator_id)}`)).map((r) => [
+      ref("entities", "slug", ent.get(r.entity_id)), ref("indicators", "code", ind.get(r.indicator_id)),
+      lit(r.reason), lit(r.source_url), lit(r.excerpt),
     ])));
 
   section("Preuves (evidence) — clé : entité + indicateur + source + date", upsert("evidence",

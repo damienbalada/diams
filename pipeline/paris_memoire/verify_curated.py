@@ -175,7 +175,7 @@ ESEF_KEYWORDS = {
     "GOV_BOARD_GENDER": [r"femmes|administratrices|f[ée]minisation|women|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions d.euros|net revenue"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
@@ -360,7 +360,8 @@ RATIO_RE = re.compile(r"calcul : (\d+) / (\d+) = ([\d,]+) %")
 
 def _cited(n: int, quote: str) -> bool:
     words = [w for w, i in _NUM_WORDS.items() if i == n]
-    return re.search(rf"(?<![\d,.]){n}(?!\d)(?![.,]\d)", quote) is not None or any(
+    flat = re.sub(r"(?<=\d)[ \u00a0\u202f](?=\d{3}(?!\d))", "", quote)
+    return any(re.search(rf"(?<![\d,.]){n}(?!\d)(?![.,]\d)", x) for x in (quote, flat)) or any(
         re.search(rf"\b{re.escape(w)}\b", quote, re.I) for w in words)
 
 
@@ -414,6 +415,26 @@ def check_trend_yoy(row, quote: str) -> tuple[bool, list[str], bool]:
         f"{y0} → {y1} = {n} an(s), une variation par année {'✓' if years_ok else '✗'}",
         f"rythme recalculé {rate:.2f} % = déclaré {stated} % {'✓' if calc_ok else '✗'}",
         f"valeur et note conformes {'✓' if value_ok and norm_ok else '✗'}",
+    ], True
+
+
+# Unité publiée différente de celle de l'indicateur : la conversion est écrite dans
+# l'extrait et recalculée. « conversion : 0,00039 t/€ × 1 000 000 = 390 t/M€ ».
+UNIT_RE = re.compile(r"conversion : ([\d,]+) t/€ × 1 000 000 = ([\d ,]+) t/M€")
+
+
+def check_unit(row, quote: str) -> tuple[bool, list[str], bool]:
+    m = UNIT_RE.search(row.excerpt or "")
+    if not m:
+        return True, [], False
+    a_s, c_s = m.groups()
+    a, c = float(a_s.replace(",", ".")), float(c_s.replace(" ", "").replace(",", "."))
+    present = re.search(rf"(?<![\d,.]){re.escape(a_s)}(?!\d)", quote) is not None
+    calc_ok = abs(a * 1e6 - c) <= 0.5
+    value_ok = row.value_numeric is not None and abs(row.value_numeric - c) < 1e-9
+    return present and calc_ok and value_ok, [
+        f"valeur publiée {a_s} t/€ présente dans la citation {'✓' if present else '✗'}",
+        f"conversion {a_s} × 1 000 000 = {a * 1e6:g} t/M€ = valeur {'✓' if calc_ok and value_ok else '✗'}",
     ], True
 
 
@@ -575,6 +596,8 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         tr_ok, tr_details, tr_active = check_except(row, quote)
     if not tr_active:
         tr_ok, tr_details, tr_active = check_ratio(row, quote)
+    if not tr_active:
+        tr_ok, tr_details, tr_active = check_unit(row, quote)
     ok &= tr_ok
     details += tr_details
     if row.indicator_code == "GOV_SANCTIONS":

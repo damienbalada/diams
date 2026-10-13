@@ -506,6 +506,8 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                 </span>
                 {i.mandatory ? (
                   <span className="badge warn">obligatoire · manquant</span>
+                ) : i.exemption ? (
+                  <span className="badge">déclarée non matérielle</span>
                 ) : (
                   <span className="badge">donnée manquante</span>
                 )}
@@ -516,6 +518,10 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                     Publication obligatoire ({(i.mandatory_regimes ?? []).join(", ")}). Aucune preuve versée
                     dans DIAMS à ce jour : comptée 0 dans la note tant qu'elle manque — que l'entreprise n'ait
                     pas publié, ou que la collecte reste à faire. Ne pas publier ce que la loi impose n'est pas récompensé.
+                  </>
+                ) : i.exemption ? (
+                  <>
+                    {i.exemption} Elle n'entre pas dans la note, mais baisse la fiabilité.
                   </>
                 ) : (
                   <>

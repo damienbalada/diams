@@ -92,7 +92,8 @@ def rows_for(slug: str, r: eu.Registrant, export_date: str) -> list[EvidenceRow]
     if r.cost_mid is not None:
         period = f"exercice {r.year_start[:4]}" if r.year_start else "dernier exercice clos"
         span = fr_money(r.cost_min) if r.cost_min == r.cost_max else f"{fr_money(r.cost_min)} à {fr_money(r.cost_max)}"
-        fte = f", {str(r.fte).rstrip('0').rstrip('.').replace('.', ',')} équivalents temps plein" if r.fte else ""
+        # Le registre publie des flottants simple précision (8.899999618530273) : arrondi au centième.
+        fte = f", {f'{round(r.fte, 2):g}'.replace('.', ',')} équivalents temps plein" if r.fte else ""
         rows.append(EvidenceRow(
             entity_slug=slug, indicator_code="GEO_LOBBYING_SPEND", source_code="EU_TRANSPARENCY",
             nature="result", observed_on=export_date, value_type="numeric", value_numeric=r.cost_mid,

@@ -431,3 +431,17 @@ def test_plastique_vierge_variations_annuelles_composees():
             ind="PLA_REDUCTION", src="COMPANY_REPORT")
     y.normalized_value = None
     assert check_esef_quote(y, rep).status == "ÉCART"   # trois ans pour deux variations
+
+
+def test_conversion_d_unite_et_nombres_a_espaces():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("Intensité des GES par produit net 2025 2024 Émissions totales de GES (fondées sur le marché) par produit net (en teqCO2/EUR) 0,00039 0,00039 -1 % "
+           "Résultat avant impôt 6 052 5 325 +13,6 % Impôt sur les bénéfices -1 834 -1 201")
+    q1 = "Intensité des GES par produit net 2025 2024 Émissions totales de GES (fondées sur le marché) par produit net (en teqCO2/EUR) 0,00039 0,00039"
+    x = row("cm", 390.0, f"Rapport : « {q1} » ; conversion : 0,00039 t/€ × 1 000 000 = 390 t/M€", ind="ENV_GHG_INTENSITY", src="AMF_BDIF")
+    assert check_esef_quote(x, rep).status == "OK"
+    x.value_numeric = 39.0
+    assert check_esef_quote(x, rep).status == "ÉCART"
+    q2 = "Résultat avant impôt 6 052 5 325 +13,6 % Impôt sur les bénéfices -1 834 -1 201"
+    y = row("cm", 30.3, f"Rapport : « {q2} » ; calcul : 1834 / 6052 = 30,3 %", ind="TAX_EFFECTIVE_RATE", src="AMF_BDIF")
+    assert check_esef_quote(y, rep).status == "OK"

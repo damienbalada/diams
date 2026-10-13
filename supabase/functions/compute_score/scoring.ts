@@ -81,6 +81,9 @@ export interface Indicator {
    *  que dans la fiabilité (se conformer ne rapporte pas de points) ; volontaire,
    *  il compte comme les autres (v0.6.0). */
   disclosure?: boolean;
+  /** Donnée déclarée non matérielle par l'entreprise dans son rapport réglementé :
+   *  pas d'obligation, donc pas de 0 (v0.7.3). Motif affiché sur la fiche. */
+  exemption?: string | null;
 }
 export interface Evidence {
   indicator_code: string;
@@ -179,6 +182,8 @@ export interface IndicatorResult {
   /** Indicateur de contexte (direction `contextual`, ex. budget de lobbying) :
    *  affiché, compté dans la fiabilité, jamais dans la note (v0.6.0). */
   informative?: boolean;
+  /** Obligation levée : donnée déclarée non matérielle par l'entreprise (motif). */
+  exemption?: string;
 }
 export interface DimensionResult {
   dimension_code: string;
@@ -502,6 +507,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
         r.mandatory = true;
         r.mandatory_regimes = ind.mandatory_regimes;
       }
+      if (ind.exemption) r.exemption = ind.exemption;
       indicators.push(r);
       if (ind.code === gateCode) continue; // exclu de la moyenne et des compteurs
       if (r.display_only) continue;        // affiché mais hors calcul (controverse non corroborée)

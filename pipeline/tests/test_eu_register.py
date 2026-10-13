@@ -45,3 +45,11 @@ def test_rows_and_matching():
     assert transp.normalized_value == 1.0 and spend.normalized_value is None
     assert spend.value_numeric == 3249999.5
     assert "3 000 000 € à 3 499 999 €" in spend.excerpt and "4,25 équivalents temps plein" in spend.excerpt
+
+
+def test_equivalents_temps_plein_arrondis():
+    import dataclasses
+    _d, regs = eu.parse_export(XML)
+    r = dataclasses.replace(regs[0], fte=8.899999618530273)
+    _t, spend = rows_for("totalenergies", r, "2026-10-10")
+    assert "8,9 équivalents temps plein" in spend.excerpt
