@@ -609,3 +609,53 @@ def test_conseil_sans_independant_et_une_seule_femme():
     deux = row("mousquetaires", 16.7, "Rapport : « Pas de parité au Conseil : une seule femme était administratrice en "
                "2025 ( sur 12 membres) » ; calcul : 2 / 12 = 16,7 %", ind="GOV_BOARD_GENDER", src="COMPANY_REPORT")
     assert check_esef_quote(deux, rep).status == "ÉCART"
+
+
+def test_independance_exception_nommee_a_part():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("The Board has selected the following eight nominees for election to the Board. As a result of these "
+           "reviews, the Board affirmatively determined that all of the Company’s current non-management directors "
+           "are, and, during their service on the Board in 2025, were “independent” of the Company and its management "
+           "within the meaning of the applicable Nasdaq rules. Mr. Peterson is not considered an independent director "
+           "nominee because of his employment as President and CEO of the Company.")
+    q = ("The Board has selected the following eight nominees for election to the Board » ; « the Board affirmatively "
+         "determined that all of the Company’s current non-management directors are, and, during their service on the "
+         "Board in 2025, were “independent” of the Company and its management within the meaning of the applicable "
+         "Nasdaq rules » ; « Mr. Peterson is not considered an independent director nominee")
+    ok = row("newell", 87.5, f"Circulaire : « {q} » ; calcul : (8 − 1) / 8 = 87,5 %", ind="GOV_BOARD_INDEP", src="SEC_FILING")
+    v = check_esef_quote(ok, rep)
+    assert v.status == "OK", v.details
+    # Sans la phrase « tous les autres sont indépendants », l'exception seule ne suffit pas.
+    seul = row("newell", 87.5, "Circulaire : « The Board has selected the following eight nominees for election to the "
+               "Board » ; « Mr. Peterson is not considered an independent director nominee » ; calcul : (8 − 1) / 8 = 87,5 %",
+               ind="GOV_BOARD_INDEP", src="SEC_FILING")
+    assert check_esef_quote(seul, rep).status == "ÉCART"
+
+
+def test_montants_groupes_en_colonnes_voisines():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("RÉSULTAT AVANT IMPÔTS 430 809 336 503 Impôts sur les sociétés 19.2 ( 104 665 ) ( 90 161 ) "
+           "RÉSULTAT CONSOLIDÉ 326 144 246 342")
+    q = "RÉSULTAT AVANT IMPÔTS 430 809 336 503 Impôts sur les sociétés 19.2 ( 104 665 ) ( 90 161 )"
+    ok = row("ldc", 24.3, f"Rapport : « {q} » ; calcul : 104665 / 430809 = 24,3 %", ind="TAX_EFFECTIVE_RATE", src="AMF")
+    v = check_esef_quote(ok, rep)
+    assert v.status == "OK", v.details
+    # 809 336 n'est pas un montant de la citation lu au bon endroit : le numérateur 104665
+    # rapporté à 336503 (colonne 2024-2025) donne une autre part.
+    faux = row("ldc", 24.3, f"Rapport : « {q} » ; calcul : 104665 / 336503 = 24,3 %", ind="TAX_EFFECTIVE_RATE", src="AMF")
+    assert check_esef_quote(faux, rep).status == "ÉCART"
+    # Le milieu d'un groupe (« 809 336 ») n'est pas un montant cité.
+    milieu = row("ldc", 12.9, f"Rapport : « {q} » ; calcul : 104665 / 809336 = 12,9 %", ind="TAX_EFFECTIVE_RATE", src="AMF")
+    assert check_esef_quote(milieu, rep).status == "ÉCART"
+
+
+def test_mixite_tableau_sexe_feminin():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("21.d Sexe Pourcentage Féminin 0 % Masculin 100 % TOTAL 100 % Le Conseil d’administration compte un "
+           "administrateur indépendant parmi les six administrateurs qui le composent.")
+    q = "21.d Sexe Pourcentage Féminin 0 % Masculin 100 % TOTAL 100 % Le Conseil d’administration compte un administrateur"
+    ok = row("auchan", 0, f"Rapport : « {q} »", ind="GOV_BOARD_GENDER", src="ANNUAL_REPORT")
+    v = check_esef_quote(ok, rep)
+    assert v.status == "OK", v.details
+    faux = row("auchan", 20, f"Rapport : « {q} »", ind="GOV_BOARD_GENDER", src="ANNUAL_REPORT")
+    assert check_esef_quote(faux, rep).status == "ÉCART"

@@ -172,7 +172,7 @@ ESEF_KEYWORDS = {
     "LAB_GENDER_PAYGAP": [r"[ée]cart|gap", r"r[ée]mun[ée]ration|salari|pay", r"femmes?|hommes?|genres?|gender|women"],
     # « ratio de rémunération annuelle totale » : intitulé ESRS S1-16, défini par rapport à la médiane.
     "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian|r[ée]mun[ée]ration annuelle totale|annual total remuneration|total remuneration ratio"],
-    "GOV_BOARD_GENDER": [r"femmes?|administratrices?|f[ée]minisation|wom[ae]n|female", r"conseil|board|director"],
+    "GOV_BOARD_GENDER": [r"femmes?|administratrices?|f[ée]minisation|f[ée]minin|wom[ae]n|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
     "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b"],
@@ -345,6 +345,12 @@ def check_trend_pct(row, quote: str) -> tuple[bool, list[str], bool]:
 # l'administrateur nommé après « except for »).
 EXCEPT_RE = re.compile(r"calcul : \((\d+) − (\d+|\(\d+ \+ \d+\))\) / (\d+) = ([\d,]+) %")
 _EXCEPT_PHRASE = re.compile(r"with the exception of|\bexcept\b|other than|\bsauf\b|à l'exception", re.I)
+# Exception nommée à part : « all of the Company’s current non-management directors are …
+# “independent” » puis « Mr. Peterson is not considered an independent director » ; les
+# deux phrases sont exigées ensemble (l'une seule ne dit pas qui est indépendant).
+_NOT_INDEP = re.compile(r"\bis not (?:considered|deemed|determined to be) (?:to be )?(?:an )?independent\b", re.I)
+_ALL_INDEP_STMT = re.compile(r"\ball (?:of )?(?:the |our )?(?:company.s )?(?:current )?(?:other )?(?:non-management |non-employee )?"
+                             r"directors\b[^.;]{0,120}?\b(?:are|were)\b[^.;]{0,40}?independent", re.I)
 
 
 def check_except(row, quote: str) -> tuple[bool, list[str], bool]:
@@ -357,7 +363,8 @@ def check_except(row, quote: str) -> tuple[bool, list[str], bool]:
     words = [w for w, i in _NUM_WORDS.items() if i == n]
     size_cited = re.search(rf"\b{n}\b", quote) is not None or any(
         re.search(rf"\b{re.escape(w)}\b", quote, re.I) for w in words)
-    exception = _EXCEPT_PHRASE.search(quote) is not None
+    exception = _EXCEPT_PHRASE.search(quote) is not None or (
+        _NOT_INDEP.search(quote) is not None and _ALL_INDEP_STMT.search(quote) is not None)
     # Chaque partie de plus d'une personne doit être citée ; la personne nommée après
     # « sauf » compte pour 1 (une seule partie de 1 au plus).
     parts_ok = len(parts) == 1 or (sum(1 for x in parts if x == 1) <= 1
@@ -404,7 +411,11 @@ def _cited(n: int, quote: str) -> bool:
     words = [w for w, i in _NUM_WORDS.items() if i == n]
     flat = re.sub(r"(?<=\d)[ \u00a0\u202f](?=\d{3}(?!\d))", "", quote)
     flat_en = re.sub(r"(?<=\d),(?=\d{3}(?!\d))", "", quote)   # notation anglaise : 802,505
-    return any(re.search(rf"(?<![\d,.]){n}(?!\d)(?![.,]\d)", x) for x in (quote, flat, flat_en)) or any(
+    # Montant écrit avec des espaces de milliers, suivi d'une autre colonne (« 430 809 336 503 » :
+    # la fusion des espaces en ferait un seul nombre) : on cherche aussi la forme groupée.
+    grouped = r"[   ]".join(re.findall(r"\d{1,3}(?=(?:\d{3})*$)", str(n))) if n >= 1000 else None
+    return any(re.search(rf"(?<![\d,.]){n}(?!\d)(?![.,]\d)", x) for x in (quote, flat, flat_en)) or (
+        grouped is not None and re.search(rf"(?<![\d,.])(?<!\d )(?<!\d )(?<!\d ){grouped}(?!\d)(?![.,]\d)", quote) is not None) or any(
         re.search(rf"\b{re.escape(w)}\b", quote, re.I) for w in words)
 
 
