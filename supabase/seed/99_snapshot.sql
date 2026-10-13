@@ -18,7 +18,7 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 1095
+--   entities                 1101
 --   evidence                 1876
 --   political_groups         18
 --   civic_votes              4
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 874
+--   entity_ownership_sources 879
 -- =============================================================================
 
 begin;
@@ -451,6 +451,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('arla-marque', 'Arla', 'Arla (produits laitiers)', null, null, 'DK', (select id from sectors where code = 'food'), true, false),
   ('armand-de-brignac', 'Armand de Brignac', 'Armand de Brignac', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('armor-all', 'Armor All', 'Armor All', null, null, 'US', (select id from sectors where code = 'home_care'), true, false),
+  ('artegusto', 'Artegusto', 'Artegusto', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('auchan', 'ELO', 'Auchan', '969500ASEC557H5A4F22', '476180625', 'FR', (select id from sectors where code = 'retail_distribution'), false, false),
   ('auchan-marque', 'Auchan', 'Auchan (marque de distributeur)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('audi', 'Audi', 'Audi', null, null, 'DE', (select id from sectors where code = 'automotive'), true, false),
@@ -745,6 +746,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('essity', 'Essity Aktiebolag (publ)', 'Essity', '549300G8E6YUVJ1DA153', null, 'SE', (select id from sectors where code = 'personal_care'), false, false),
   ('etorki', 'Etorki', 'Etorki', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('eucerin', 'Eucerin', 'Eucerin', null, null, 'DE', (select id from sectors where code = 'personal_care'), true, false),
+  ('euralis', 'Euralis Coop', 'Euralis', '213800RUV6IMHG4CNE89', '775637861', 'FR', (select id from sectors where code = 'food'), false, false),
   ('even-lait', 'Even', 'Even (lait)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('evian', 'Evian', 'Evian', '213800WEP69ITQTIO365', '797080850', 'FR', (select id from sectors where code = 'beverages'), true, false),
   ('extra-chewing-gum', 'Extra', 'Extra', null, null, 'US', (select id from sectors where code = 'food'), true, false),
@@ -1036,6 +1038,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('maille', 'Maille', 'Maille', null, null, 'GB', (select id from sectors where code = 'food'), true, false),
   ('maison-du-cafe', 'Maison du Café', 'Maison du Café', null, null, 'US', (select id from sectors where code = 'beverages'), true, false),
   ('maison-francis-kurkdjian', 'Maison Francis Kurkdjian', 'Maison Francis Kurkdjian', null, null, 'FR', (select id from sectors where code = 'beauty_fragrance'), true, false),
+  ('maison-montfort', 'Maison Montfort', 'Maison Montfort', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('maitre-coq', 'Maître CoQ', 'Maître CoQ', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('maitre-jacques', 'Maître Jacques', 'Maître Jacques', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('make-up-for-ever', 'Make Up For Ever', 'Make Up For Ever', null, null, 'FR', (select id from sectors where code = 'beauty_fragrance'), true, false),
@@ -1285,6 +1288,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('rondele', 'Rondelé', 'Rondelé', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('roquefort-papillon', 'Papillon', 'Papillon (roquefort)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('roquefort-societe', 'Société', 'Roquefort Société', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('rougie', 'Rougié', 'Rougié', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('rowenta', 'Rowenta', 'Rowenta', null, null, 'FR', (select id from sectors where code = 'tech_electronics'), true, false),
   ('royal-canin', 'Royal Canin', 'Royal Canin', '9695008986TM8FXRR733', '700200983', 'FR', (select id from sectors where code = 'pet_care'), true, false),
   ('royal-salute', 'Royal Salute', 'Royal Salute', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
@@ -1371,6 +1375,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('st-moret', 'St Môret', 'St Môret', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('st-remy', 'St-Rémy', 'St-Rémy', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('st-yorre', 'St-Yorre', 'St-Yorre', null, null, 'FR', (select id from sectors where code = 'beverages'), true, false),
+  ('stalaven', 'Stalaven', 'Stalaven', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('stanley-black-decker', 'Stanley Black & Decker, Inc.', 'Stanley Black & Decker', '549300DJ09SMTO561131', null, 'US', (select id from sectors where code = 'household_durables'), false, false),
   ('stanley-outillage', 'Stanley', 'Stanley (outillage)', null, null, 'US', (select id from sectors where code = 'household_durables'), true, false),
   ('starbucks', 'Starbucks Corporation', 'Starbucks', 'OQSJ1DU9TAOC51A47K68', null, 'US', (select id from sectors where code = 'restaurant'), false, false),
@@ -1405,6 +1410,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('terre-ditalia', 'Terre d''Italia', 'Terre d''Italia', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('tesla', 'Tesla, Inc.', 'Tesla', '54930043XZGB27CTOV49', null, 'US', (select id from sectors where code = 'automotive'), false, false),
   ('tetra', 'Tetra', 'Tetra (aquariophilie)', null, null, 'US', (select id from sectors where code = 'pet_care'), true, false),
+  ('teyssier', 'Teyssier', 'Teyssier (salaisons)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('thai-union', 'Thai Union Group Public Company Limited', 'Thai Union', '25490047VDGNFMEYZW95', null, 'TH', (select id from sectors where code = 'food'), false, false),
   ('the-botanist', 'The Botanist', 'The Botanist', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('the-glendronach', 'The Glendronach', 'The Glendronach', null, null, 'US', (select id from sectors where code = 'wines_spirits'), true, false),
@@ -1546,6 +1552,7 @@ from (values
   ('arla-marque', 'arla', 100::numeric),
   ('armand-de-brignac', 'lvmh', 100::numeric),
   ('armor-all', 'energizer', 100::numeric),
+  ('artegusto', 'euralis', 100::numeric),
   ('auchan-marque', 'auchan', 100::numeric),
   ('audi', 'volkswagen', null::numeric),
   ('audible', 'amazon', null::numeric),
@@ -2016,6 +2023,7 @@ from (values
   ('maille', 'unilever', 100::numeric),
   ('maison-du-cafe', 'keurig-dr-pepper', 100::numeric),
   ('maison-francis-kurkdjian', 'lvmh', 100::numeric),
+  ('maison-montfort', 'euralis', 100::numeric),
   ('maitre-coq', 'ldc', 100::numeric),
   ('maitre-jacques', 'agrial', 100::numeric),
   ('make-up-for-ever', 'lvmh', 100::numeric),
@@ -2219,6 +2227,7 @@ from (values
   ('rondele', 'lactalis', 100::numeric),
   ('roquefort-papillon', 'savencia', 100::numeric),
   ('roquefort-societe', 'lactalis', 100::numeric),
+  ('rougie', 'euralis', 100::numeric),
   ('rowenta', 'seb', 100::numeric),
   ('royal-canin', 'mars', 100::numeric),
   ('royal-salute', 'pernod-ricard', 100::numeric),
@@ -2284,6 +2293,7 @@ from (values
   ('st-moret', 'savencia', 100::numeric),
   ('st-remy', 'remy-cointreau', 100::numeric),
   ('st-yorre', 'neptune-distribution', 100::numeric),
+  ('stalaven', 'euralis', 100::numeric),
   ('stanley-outillage', 'stanley-black-decker', 100::numeric),
   ('starwax', 'brunel', 100::numeric),
   ('stella-artois', 'ab-inbev', 100::numeric),
@@ -2311,6 +2321,7 @@ from (values
   ('tena', 'essity', 100::numeric),
   ('terre-ditalia', 'carrefour', 100::numeric),
   ('tetra', 'spectrum-brands', 100::numeric),
+  ('teyssier', 'euralis', 100::numeric),
   ('the-botanist', 'remy-cointreau', 100::numeric),
   ('the-glendronach', 'brown-forman', 100::numeric),
   ('the-glenlivet', 'pernod-ricard', 100::numeric),
@@ -2604,6 +2615,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'arla-marque'), (select id from entities where slug = 'arla'), 'https://filings.xbrl.org/529900IJ6T4P1O10R377/2025-12-31/ESEF/DK/0/Arla-2025-12-31-en/reports/Arla-2025-12-31-en.xhtml', 'Rapport annuel 2025 d''Arla Foods (format électronique officiel ESEF, en anglais) : « The Arla ® brand spans multiple categories such as milk, yoghurt and cheese, supported by various sub-brands »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'armand-de-brignac'), (select id from entities where slug = 'lvmh'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0195/CA8A1E35A6C70FC2DE6B35F0939523887728C2FE2C11DFAC7F9B5F7675629928.zip', 'Document d''enregistrement universel 2025 de LVMH déposé à l''AMF (D.26-0195), note des comptes consolidés sur les marques et enseignes du groupe : « Les marques et enseignes comptabilisées sont celles acquises par le Groupe. Elles comprennent principalement au 31 décembre 2025 : ● Vins et Spiritueux : Veuve Clicquot, Krug, Château d’Yquem, Belvedere, Glenmorangie, Bodega Numanthia, Château d’Esclans, Armand de Brignac, Joseph Phelps et Château Minuty »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'armor-all'), (select id from entities where slug = 'energizer'), 'https://www.sec.gov/Archives/edgar/data/1632790/000163279025000091/enr-20250930.htm', 'Rapport annuel 10-K 2025 (exercice clos le 30/09/2025) de Energizer déposé à la SEC (autorité boursière américaine) : « protect interior and exterior automobile surfaces under the brand names Armor All® »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'artegusto'), (select id from entities where slug = 'euralis'), 'https://www.euralis.fr/', 'Site officiel du groupe coopératif Euralis (menu « Nos marques ») : « Nos marques Lidea Maison Montfort Rougié Stalaven Qualité Traiteur Teyssier La Table des Producteurs Point Vert / Magasin Vert Terranimo Artegusto »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'auchan-marque'), (select id from entities where slug = 'auchan'), 'https://www.auchan.fr/marques-auchan/ep-marques-auchan', 'Page Nos marques du site officiel d''Auchan : « Nos marques Auchan, le choix, le bon. Auchan s''engage à comprendre les modes de vie quotidiens pour créer des marques expertes »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'audi'), (select id from entities where slug = 'volkswagen'), 'https://annualreport2025.volkswagen-group.com/_assets/downloads/entire-vw-ar25.pdf', 'Rapport annuel 2025 du groupe Volkswagen (rapport légal, en anglais) : « Passenger Cars, Škoda, SEAT/CUPRA and Volkswagen Commercial Vehicles brands. The Progressive brand group comprises the Audi, Lamborghini, Bentley and Ducati brands. The Sport Luxury brand group consists of the Porsche brand. The company »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'aussie'), (select id from entities where slug = 'procter-gamble'), 'https://us.pg.com/brands/', 'Page des marques du site officiel de Procter & Gamble (en anglais) : « Hair Care Aussie Visit Site Hair Care Head & Shoulders Visit Site Hair Care Herbal Essences Visit Site Hair Care My Black Is Beautiful Visit site Hair care Old Spice Visit Site Hair & Skin Care Pantene Visit Site Hair Care »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
@@ -3069,6 +3081,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'maille'), (select id from entities where slug = 'unilever'), 'https://filings.xbrl.org/549300MKFYEKVRWML317/2026-02-12/ESEF/NL/0/ul-2025-12-31-1-en/reports/ul-2025-12-31-1-en.xhtml', 'Rapport annuel 2025 de Unilever (format électronique officiel ESEF) : « France – ZI de la Norge – Chevigny Saint-Sauveur, 21800 Quetigny Amora Maille Societe Industrielle S.A.S. (99.99) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'maison-du-cafe'), (select id from entities where slug = 'keurig-dr-pepper'), 'https://www.maisonducafe.com/mentions-legales/', 'Mentions légales du site officiel de la marque Maison du Café (éditeur : Jacobs Douwe Egberts FR, société de JDE Peet''s, groupe qui appartient à Keurig Dr Pepper depuis le 01/04/2026) : « Mentions légales | Maison du Café SKIP TO MAIN CONTENT CAFÉS MACHINES À CAFÉ Back MACHINES À CAFÉ Dosettes & capsules Machine à grain Machines espresso Cafetière italienne Cafetière filtre Cafetière à dépression Cafetière à piston Moulins à café PROMOTIONS MARQUES DE CAFÉ INSPIRATIONS MENTIONS LÉGALES JACOBS DOUWE EGBERTS FR SAS »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'maison-francis-kurkdjian'), (select id from entities where slug = 'lvmh'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0195/CA8A1E35A6C70FC2DE6B35F0939523887728C2FE2C11DFAC7F9B5F7675629928.zip', 'Document d''enregistrement universel 2025 de LVMH déposé à l''AMF (D.26-0195), note des comptes consolidés sur les marques et enseignes du groupe : « ● Parfums et Cosmétiques : Parfums Christian Dior, Guerlain, Parfums Givenchy, Make Up For Ever, Benefit Cosmetics, Fresh, Acqua di Parma, Fenty, Ole Henriksen, Maison Francis Kurkdjian et Officine Universelle Buly 1803 »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'maison-montfort'), (select id from entities where slug = 'euralis'), 'https://www.euralis.fr/', 'Site officiel du groupe coopératif Euralis (menu « Nos marques ») : « Nos marques Lidea Maison Montfort Rougié Stalaven Qualité Traiteur Teyssier La Table des Producteurs Point Vert / Magasin Vert Terranimo Artegusto »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'maitre-coq'), (select id from entities where slug = 'ldc'), 'https://fr.ftp.opendatasoft.com/datadila/INFOFI/139/2026/06/FC139635314_20260630.zip', 'Rapport annuel 2025-2026 de LDC déposé à l''AMF (format électronique officiel ESEF) : « Depuis 2020, les équipes Marketing des marques Marie, Le Gaulois, Maître CoQ et Loué, ont décliné la stratégie extra- financière du Groupe »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'maitre-jacques'), (select id from entities where slug = 'agrial'), 'https://www.agrial.com/nos-marques-agrial-cooperative-agricole-et-agroalimentaire/', 'Page Nos marques du site officiel d''Agrial (carrousel « Quelques produits issus de nos filières ») : « Maître Jacques Rôti de porc façon Orloff »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'make-up-for-ever'), (select id from entities where slug = 'lvmh'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0195/CA8A1E35A6C70FC2DE6B35F0939523887728C2FE2C11DFAC7F9B5F7675629928.zip', 'Document d''enregistrement universel 2025 de LVMH déposé à l''AMF (D.26-0195), note des comptes consolidés sur les marques et enseignes du groupe : « ● Parfums et Cosmétiques : Parfums Christian Dior, Guerlain, Parfums Givenchy, Make Up For Ever, Benefit Cosmetics, Fresh, Acqua di Parma, Fenty, Ole Henriksen, Maison Francis Kurkdjian et Officine Universelle Buly 1803 »', '2026-10-13', 'auto:verify_ownership'),
@@ -3270,6 +3283,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'rondele'), (select id from entities where slug = 'lactalis'), 'https://www.rondele.fr/', 'Mentions légales du site officiel de la marque Rondelé : « Cette politique sur les Cookies décrit la façon dont les cookies sont utilisés par la société LACTALIS FROMAGES sur le site www.rondele.fr »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'roquefort-papillon'), (select id from entities where slug = 'savencia'), 'https://www.quiveutdufromage.com/', 'Page d''accueil du portail Qui veut du fromage, édité par Savencia Produits Laitiers France selon ses mentions légales (https://www.quiveutdufromage.com/nf/legals) : « DES MARQUES À DÉVORER Apérivrais Brebiou Bresse Bleu British Heritage Caprice Des Dieux Carré Frais Chaumes Chavroux Coeur De Lion Epoisses Berthaut Etorki Fauquet Fol Epi Giovanni Ferrari Ford Farm Gris du Périgord Holland Master Islos Le Coq Le Rustique Papillon »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'roquefort-societe'), (select id from entities where slug = 'lactalis'), 'https://www.lactalis.fr/fr/notre-histoire', 'Page Notre histoire du site officiel du groupe Lactalis : « Bridel et Société des caves de roquefort rejoingnent le groupe au cours de la décénnie 90 »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'rougie'), (select id from entities where slug = 'euralis'), 'https://www.euralis.fr/', 'Site officiel du groupe coopératif Euralis (menu « Nos marques ») : « Nos marques Lidea Maison Montfort Rougié Stalaven Qualité Traiteur Teyssier La Table des Producteurs Point Vert / Magasin Vert Terranimo Artegusto »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'rowenta'), (select id from entities where slug = 'seb'), 'https://fr.ftp.opendatasoft.com/datadila/INFOFI/256/8888/01/FC256621206_20260326.zip', 'Document d''enregistrement universel 2025 du Groupe SEB déposé à l''AMF (format électronique officiel ESEF) : « 80 % des ventes Grand Public sont réalisées avec seulement 5 marques - Tefal, Supor, Rowenta, WMF et Moulinex »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'royal-canin'), (select id from entities where slug = 'mars'), 'https://www.mars.com/our-brands', 'Page des marques du site officiel de Mars (en anglais) : « We produce some of the world’s best-loved brands including ROYAL CANIN ® , PEDIGREE ®, WHISKAS ® , CESAR ® , DOVE ® , EXTRA ® , M&M’S ® , SNICKERS ® and BEN’S ORIGINAL™ »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'royal-salute'), (select id from entities where slug = 'pernod-ricard'), 'https://filings.xbrl.org/52990097YFPX9J0H5D87/2025-06-30/ESEF/FR/0/pernod-2025-06-30-1-fr/reports/pernod-2025-06-30-1-fr.xhtml', 'Document d''enregistrement universel 2024-2025 de Pernod Ricard (format électronique officiel ESEF) : « Grâce à l’acquisition de marques emblématiques avec le rachat de Seagram en 2001 (Chivas Regal, Martell, Royal Salute & The Glenlivet), d’Allied Domecq en 2005 (Ballantine’s, Perrier‑Jouët, Beefeater, Malibu) et de Vin & Sprit en 2008 (Absolut), Pernod Ricard devient le numéro deux mondial du secteur »', '2026-10-13', 'auto:verify_ownership'),
@@ -3335,6 +3349,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'st-moret'), (select id from entities where slug = 'savencia'), 'https://fr.ftp.opendatasoft.com/datadila/INFOFI/MKW/8888/01/FCMKW137861_20260424.zip', 'Rapport financier annuel 2025 de Savencia déposé à l''AMF (format électronique officiel ESEF) : « Les marques St Môret, Chavroux, Saint-Agur et Elle&Vire apposent sur leurs emballages le logo TGTG »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'st-remy'), (select id from entities where slug = 'remy-cointreau'), 'https://filings.xbrl.org/5493004V6A3Z027YT216/2026-03-31/ESEF/FR/0/remycointreau-2026-03-31-1-fr/reports/remycointreau-2026-03-31-1-fr.xhtml', 'Document d''enregistrement universel 2025-2026 de Rémy Cointreau (format électronique officiel ESEF) : « Les marques ainsi regroupées sont : Cointreau, Metaxa, St-Rémy, Mount Gay, Ponche Kuba, Bruichladdich, The Botanist, Westland, Le Domaine des Hautes Glaces, Belle de Brillet et Telmont »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'st-yorre'), (select id from entities where slug = 'neptune-distribution'), 'https://www.st-yorre.com/informations-legales/', 'Mentions légales du site officiel de la marque St-Yorre : « st-yorre.com ». SNC-Neptune Distribution ne peut en aucun cas être tenu pour responsable de la mise à disposition des sites qui font l’objet d’un lien hypertexte à partir du site « www »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'stalaven'), (select id from entities where slug = 'euralis'), 'https://www.euralis.fr/', 'Site officiel du groupe coopératif Euralis (menu « Nos marques ») : « Nos marques Lidea Maison Montfort Rougié Stalaven Qualité Traiteur Teyssier La Table des Producteurs Point Vert / Magasin Vert Terranimo Artegusto »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'stanley-outillage'), (select id from entities where slug = 'stanley-black-decker'), 'https://www.sec.gov/Archives/edgar/data/93556/000009355626000009/swk-20260103.htm', 'Rapport annuel 10-K 2025 de Stanley Black & Decker déposé à la SEC (autorité boursière américaine) : « In the Tools & Outdoor segment, significant trademarks include DEWALT®, CRAFTSMAN®, STANLEY®, BLACK+DECKER® »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'starwax'), (select id from entities where slug = 'brunel'), 'https://www.starwax.fr/pages/mentions-legales', 'Mentions légales du site officiel de la marque Starwax : « -10% sur toute la gamme Starwax The Fabulous 0 Votre panier est vide Explorer nos produits Effacer Fermer ✨ Nos Packs malins à -15 % Les indispensables Maison engagée Promotions Les maxi formats Conseils & Astuces Mentions légales Éditeur du site Le directeur de la publication est : Brunel Dénomination sociale : Brunel Forme juridique : S.A.S. Capital social : 591 600 € Siège social : Zone industrielle de la Pilaterie – 16, rue Harald Stammbach – 59290 Wasquehal – Fr »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'stella-artois'), (select id from entities where slug = 'ab-inbev'), 'https://filings.xbrl.org/5493008H3828EMEXB082/2025-12-31/ESEF/BE/0/5493008H3828EMEXB082-2025-12-31-1-en/reports/5493008H3828EMEXB082-2025-12-31-1-en.xhtml', 'Rapport annuel 2025 d''AB InBev (format électronique officiel ESEF) : « performance in 2025 was driven by our megabrands, led by Coro na, which delive red mid -single digit volume g rowth, and Stella Artois. We successfully completed the integration of San Miguel into o ur UK portfolio, becoming the leading brewer in »', '2026-10-13', 'auto:verify_ownership'),
@@ -3362,6 +3377,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'tena'), (select id from entities where slug = 'essity'), 'https://filings.xbrl.org/549300G8E6YUVJ1DA153/2024-12-31/ESEF/SE/0/essi-2024-12-31-0-sv/reports/essi-2024-12-31-0-sv.xhtml', 'Rapport annuel 2024 d''Essity (format électronique officiel ESEF, en suédois) : « global marknadsledare med varumärkena Tork och TENA »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'terre-ditalia'), (select id from entities where slug = 'carrefour'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0143/7A3CB233AA8727B6F5EE7B409F80D8CBC4ECFCF43ACB2FA1B88354B4090AB39A.zip', 'Document d''enregistrement universel 2025 de Carrefour déposé à l''AMF (D.26-0143) : « Carrefour a pour objectif de renforcer la présence de ses marques propres locales (Reflets de France et Terre d’Italia, etc.) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'tetra'), (select id from entities where slug = 'spectrum-brands'), 'https://www.sec.gov/Archives/edgar/data/109177/000010917725000043/spb-20250930.htm', 'Rapport annuel 10-K 2025 (exercice clos le 30/09/2025) de Spectrum Brands déposé à la SEC (autorité boursière américaine) : « most Tetra® aquatics nutrition and care products manufactured in our Melle, Germany facility »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'teyssier'), (select id from entities where slug = 'euralis'), 'https://www.euralis.fr/', 'Site officiel du groupe coopératif Euralis (menu « Nos marques ») : « Nos marques Lidea Maison Montfort Rougié Stalaven Qualité Traiteur Teyssier La Table des Producteurs Point Vert / Magasin Vert Terranimo Artegusto »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'the-botanist'), (select id from entities where slug = 'remy-cointreau'), 'https://filings.xbrl.org/5493004V6A3Z027YT216/2026-03-31/ESEF/FR/0/remycointreau-2026-03-31-1-fr/reports/remycointreau-2026-03-31-1-fr.xhtml', 'Document d''enregistrement universel 2025-2026 de Rémy Cointreau (format électronique officiel ESEF) : « Les marques ainsi regroupées sont : Cointreau, Metaxa, St-Rémy, Mount Gay, Ponche Kuba, Bruichladdich, The Botanist, Westland, Le Domaine des Hautes Glaces, Belle de Brillet et Telmont »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'the-glendronach'), (select id from entities where slug = 'brown-forman'), 'https://www.sec.gov/Archives/edgar/data/14693/000001469326000024/bfb-20260430.htm', 'Rapport annuel 10-K 2026 (exercice clos le 30/04/2026) de Brown-Forman déposé à la SEC (autorité boursière américaine) : « Principal Brands Jack Daniel’s Tennessee Whiskey el Jimador New Mix RTD Jack Daniel’s RTD 1 el Jimador Tequilas 4 Jack Daniel’s Tennessee Honey Herradura Tequilas 5 Gentleman Jack Rare Tennessee Whiskey Old Forester Kentucky Straight Bourbon Whisky Jack Daniel’s Tennessee Apple Old Forester Whiskey Row Series Jack Daniel’s Tennessee Blackberry Old Forester Single Barrel Straight Bourbon Whisky Jack Daniel’s Tennessee Fire Diplomático Rums 5 Jack Daniel’s Single Barrel Collection 2 Gin Mare 5 Jack Daniel’s Bonded Series 3 Chambord Liqueur Jack Daniel’s Sinatra Select The Glendronach Single Malt Scotch Whiskies »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'the-glenlivet'), (select id from entities where slug = 'pernod-ricard'), 'https://filings.xbrl.org/52990097YFPX9J0H5D87/2025-06-30/ESEF/FR/0/pernod-2025-06-30-1-fr/reports/pernod-2025-06-30-1-fr.xhtml', 'Document d''enregistrement universel 2024-2025 de Pernod Ricard (format électronique officiel ESEF) : « Grâce à l’acquisition de marques emblématiques avec le rachat de Seagram en 2001 (Chivas Regal, Martell, Royal Salute & The Glenlivet), d’Allied Domecq en 2005 (Ballantine’s, Perrier‑Jouët, Beefeater, Malibu) et de Vin & Sprit en 2008 (Absolut), Pernod Ricard devient le numéro deux mondial du secteur »', '2026-10-13', 'auto:verify_ownership'),
