@@ -65,29 +65,75 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v102"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v103"], { revalidate: 600 });
+
+type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
+
+async function scoreCore(slug: string): Promise<ScoreCore | null> {
+  // Une nouvelle tentative en cas d'échec passager (délai, saturation) : une
+  // entité ne doit pas disparaître du classement pour une erreur réseau.
+  const payload = await getScorePayload(slug).catch(() => getScorePayload(slug));
+  if (!payload) return null;
+  const r = computeScore(payload);
+  const chain = payload.ownership_chain ?? [];
+  return {
+    group: chain.length > 1 ? chain[chain.length - 1] : null,
+    grade: r.grade,
+    score: r.score,
+    confidence: r.confidence,
+    publishable: r.publishable,
+    last_observed: r.last_observed,
+  };
+}
+
+/** Entités qui ont des preuves, régimes ou dispenses propres (null si indisponible). */
+async function listEntitiesWithOwnData(): Promise<Set<string> | null> {
+  const supabase = getSupabase();
+  try {
+    const ids = await selectAll<string>((from, to) =>
+      supabase.rpc("entities_with_own_scoring_data").range(from, to) as any,
+    );
+    return new Set(ids.map((x: any) => (typeof x === "string" ? x : x?.entities_with_own_scoring_data ?? String(x))));
+  } catch {
+    return null;
+  }
+}
 
 async function computeAllScores(): Promise<EntityScore[]> {
-  const entities = await listEntities();
+  const [entities, own] = await Promise.all([listEntities(), listEntitiesWithOwnData()]);
+  const byId = new Map<string, any>(entities.map((e: any) => [e.id, e]));
+  const rootOf = (e: any) => {
+    let cur = e;
+    for (let i = 0; i < 20 && cur.parent_id && byId.has(cur.parent_id); i++) cur = byId.get(cur.parent_id);
+    return cur;
+  };
+  // Une marque sans donnée propre est notée uniquement à partir de son groupe racine
+  // (compute_score_input) : même racine, même secteur, même pays et même indicateur
+  // « sans exploitation animale » donnent exactement la même note, calculée une fois.
+  const memo = new Map<string, Promise<ScoreCore | null>>();
+  const keyOf = (e: any): string | null => {
+    if (!own) return null;
+    const root = rootOf(e);
+    if (root.id === e.id || own.has(e.id)) return null;
+    return [root.id, e.sector_id ?? "", e.country ?? "", e.animal_free ? 1 : 0].join("|");
+  };
   const scored = await mapWithConcurrency(entities, 24, async (e: any) => {
     try {
-      // Une nouvelle tentative en cas d'échec passager (délai, saturation) : une
-      // entité ne doit pas disparaître du classement pour une erreur réseau.
-      const payload = await getScorePayload(e.slug).catch(() => getScorePayload(e.slug));
-      if (!payload) return null;
-      const r = computeScore(payload);
-      const chain = payload.ownership_chain ?? [];
+      const k = keyOf(e);
+      let core: ScoreCore | null;
+      if (k) {
+        if (!memo.has(k)) memo.set(k, scoreCore(e.slug).catch(() => null));
+        core = await memo.get(k)!;
+      } else {
+        core = await scoreCore(e.slug);
+      }
+      if (!core) return null;
       return {
         slug: e.slug,
         name: e.display_name ?? e.legal_name,
         is_brand: e.is_brand,
-        group: chain.length > 1 ? chain[chain.length - 1] : null,
-        grade: r.grade,
-        score: r.score,
-        confidence: r.confidence,
-        publishable: r.publishable,
-        last_observed: r.last_observed,
         sector_id: e.sector_id ?? null,
+        ...core,
       } as EntityScore;
     } catch {
       return null;
@@ -139,7 +185,7 @@ export async function listEntities() {
   return selectAll((from, to) =>
     supabase
       .from("entities")
-      .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id")
+      .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id, country, animal_free")
       .order("is_brand")
       .order("display_name")
       .order("id")
