@@ -1,0 +1,3 @@
+entity_slug,indicator_code,source_code,nature,observed_on,value_type,value_numeric,value_boolean,value_text,normalized_value,confidence,source_url,excerpt,review_note
+orangina-schweppes-france,GEO_LOBBYING_TRANSP,HATVP,result,2026-10-13,boolean,,true,,1,0.9,https://www.hatvp.fr/fiche-organisation/?organisation=404907941,ORANGINA SCHWEPPES FRANCE inscrit au répertoire des représentants d'intérêts depuis le 31/03/2022 ; dépenses déclarées pour 2025 : 50 000 à 75 000 €.,
+weleda,GEO_LOBBYING_TRANSP,HATVP,result,2026-10-13,boolean,,true,,1,0.9,https://www.hatvp.fr/fiche-organisation/?organisation=945850246,WELEDA inscrit au répertoire des représentants d'intérêts depuis le 07/06/2021.,
