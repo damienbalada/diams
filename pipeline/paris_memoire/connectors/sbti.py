@@ -106,6 +106,9 @@ ALIASES = {
     "schwarz-gruppe": "Schwarz Gruppe (Lidl, Kaufland, Schwarz Produktion, PreZero, Schwarz Digits)",
     "shein": "ROADGET BUSINESS PTE. LTD. (owner of the SHEIN brand)",
     "delonghi": "De' Longhi Group",
+    "lego": "The LEGO Group",
+    # Ecotone (Bjorg, Clipper, Alter Eco…) : seule entrée « ECOTONE », située en France.
+    "ecotone-france": "ECOTONE",
 }
 
 
