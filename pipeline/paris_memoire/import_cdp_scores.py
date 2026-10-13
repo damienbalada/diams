@@ -51,6 +51,9 @@ ALIASES = {
     # Carlsberg A/S répond au CDP par sa filiale opérationnelle à 100 %, qui porte
     # l'ensemble des brasseries du groupe.
     "carlsberg": "Carlsberg Breweries A/S",
+    # Noms trop courts ou différents de la raison sociale (vérifiés : sociétés mères).
+    "hp-inc": "HP Inc",
+    "lego": "The LEGO Group",
 }
 # Rapprochement ambigu (entité CDP incertaine) : on s'abstient.
 SKIP = {
