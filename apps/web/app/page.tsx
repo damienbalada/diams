@@ -4,6 +4,8 @@ import { EntitySearch } from "@/components/EntitySearch";
 import type { SearchableEntity } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
+// Calcul de toutes les notes (plusieurs centaines d'entités) : jusqu'à 60 s au premier appel.
+export const maxDuration = 60;
 
 const pct = (x: number) => `${Math.round(x * 100)} %`;
 
@@ -11,6 +13,7 @@ export default async function HomePage() {
   let entities: Awaited<ReturnType<typeof listEntities>> = [];
   let grades = new Map<string, string>();
   let ranked: SectorRanking[] = [];
+  let sectorName = new Map<string, string>();
   let stats: { evidence: number; sources: number } | null = null;
   let error: string | null = null;
   try {
@@ -19,6 +22,7 @@ export default async function HomePage() {
     ]);
     entities = ents;
     stats = st;
+    sectorName = new Map(sectors.map((x) => [x.id, x.name]));
     ranked = rankBySector(scores, sectors).ranked;
     // Pas de lettre sous le seuil de fiabilité (Règle 5) : une note mal
     // documentée ne doit pas se lire comme un verdict.
@@ -50,6 +54,14 @@ export default async function HomePage() {
 
   const rated = entities.filter((e: any) => grades.has(e.slug)).sort(byName);
   const pending = entities.filter((e: any) => !grades.has(e.slug)).sort(byName);
+  // Plusieurs centaines de marques : la liste complète est rangée par secteur,
+  // chaque secteur repliable (la recherche reste le moyen le plus rapide).
+  const bySector = new Map<string, any[]>();
+  for (const e of rated) {
+    const k = sectorName.get((e as any).sector_id) ?? "Autres";
+    bySector.set(k, [...(bySector.get(k) ?? []), e]);
+  }
+  const sectorsSorted = [...bySector.entries()].sort((a, b) => a[0].localeCompare(b[0], "fr"));
 
   const Row = (e: any) => {
     const g = grades.get(e.slug);
@@ -165,7 +177,14 @@ export default async function HomePage() {
           {rated.length > 0 && (
             <>
               <h3 className="list-title">Notées <span className="muted">{rated.length}</span></h3>
-              <div className="ent-list">{rated.map(Row)}</div>
+              {sectorsSorted.map(([sector, list]) => (
+                <details className="pending" key={sector}>
+                  <summary>
+                    <span>{sector} <span className="muted">{list.length}</span></span>
+                  </summary>
+                  <div className="ent-list">{list.map(Row)}</div>
+                </details>
+              ))}
             </>
           )}
           {pending.length > 0 && (

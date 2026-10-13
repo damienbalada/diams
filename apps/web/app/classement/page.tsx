@@ -2,6 +2,8 @@ import { getAllScores, listSectors, type EntityScore } from "@/lib/data";
 import { rankBySector, sectorAnchor, type SectorInfo } from "@/lib/ranking";
 
 export const dynamic = "force-dynamic";
+// Calcul de toutes les notes (plusieurs centaines d'entités) : jusqu'à 60 s au premier appel.
+export const maxDuration = 60;
 export const metadata = { title: "Classement par secteur" };
 
 const gradeColor: Record<string, string> = {

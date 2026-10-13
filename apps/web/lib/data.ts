@@ -45,11 +45,17 @@ export interface EntityScore {
 }
 
 async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {
-  const out: R[] = [];
-  for (let i = 0; i < items.length; i += limit) {
-    const batch = items.slice(i, i + limit);
-    out.push(...(await Promise.all(batch.map(fn))));
+  // File de travail : chaque emplacement reprend une entité dès qu'il se libère
+  // (un lot n'attend plus la plus lente de ses entités).
+  const out = new Array<R>(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]);
+    }
   }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
   return out;
 }
 
@@ -63,9 +69,11 @@ export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v42"],
 
 async function computeAllScores(): Promise<EntityScore[]> {
   const entities = await listEntities();
-  const scored = await mapWithConcurrency(entities, 16, async (e: any) => {
+  const scored = await mapWithConcurrency(entities, 24, async (e: any) => {
     try {
-      const payload = await getScorePayload(e.slug);
+      // Une nouvelle tentative en cas d'échec passager (délai, saturation) : une
+      // entité ne doit pas disparaître du classement pour une erreur réseau.
+      const payload = await getScorePayload(e.slug).catch(() => getScorePayload(e.slug));
       if (!payload) return null;
       const r = computeScore(payload);
       const chain = payload.ownership_chain ?? [];

@@ -3,6 +3,8 @@ import { computeScore } from "@/lib/scoring";
 import { CompanyScore } from "@/components/CompanyScore";
 
 export const dynamic = "force-dynamic";
+// Calcul de toutes les notes (plusieurs centaines d'entités) : jusqu'à 60 s au premier appel.
+export const maxDuration = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
