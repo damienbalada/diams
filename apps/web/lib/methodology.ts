@@ -387,6 +387,32 @@ Magnum et Ben & Jerry's relèvent de **The Magnum Ice Cream Company**, séparée
 d'Unilever le 06/12/2025. Une opération annoncée mais non réalisée ne change
 rien (Kenvue, dont le rachat par Kimberly-Clark n'était pas conclu au 13/10/2026).
 
+**Appartenance prouvée.** Une marque n'est rattachée à un groupe que sur une
+citation, retrouvée mot pour mot, d'un document officiel du propriétaire : rapport
+annuel légal (document d'enregistrement universel, rapport 10-K ou 20-F, rapport
+au format ESEF), registre public (nom commercial déclaré au répertoire SIRENE), ou,
+à défaut, page « nos marques » ou rapport volontaire du groupe. La fiche de chaque
+marque affiche cette preuve (« Pourquoi ce groupe ? »). Le contrôle est
+automatique : la citation doit figurer dans le document et nommer la marque ; une
+marque déjà rattachée à un autre groupe n'est jamais déplacée sans décision
+motivée. Une source légale est validée d'office ; une page web ou un rapport
+volontaire l'est par délégation de l'éditeur, sous la même condition de citation
+exacte. Deux cas particuliers :
+
+- **Licences.** Une marque exploitée sous licence n'est pas rattachée au
+  licencié : Coty fabrique les parfums Hugo Boss ou Gucci, Puig ceux de Christian
+  Louboutin, Interparfums ceux de Montblanc, mais ces marques appartiennent à
+  d'autres. Seules les marques que le groupe déclare détenir en propre sont
+  rattachées.
+- **Homonymes.** Deux marques de même nom chez deux propriétaires sont
+  distinguées à l'affichage : Lotus (papier, Essity) et Lotus (biscuits, Lotus
+  Bakeries) ; Lustucru (riz, Ebro Foods). Le contrôle porte toujours sur le nom
+  tel qu'il est écrit dans la source.
+
+Les enseignes de distribution (Intermarché, Monoprix, Carrefour Market…) et les
+marques propres des distributeurs (Reflets de France, Simpl…) sont rattachées
+de la même façon à leur groupe.
+
 ---
 
 ## 3. Du fait au score (pipeline de calcul)
@@ -674,6 +700,8 @@ pas du nombre de marques. Trois garde-fous invariants :
 | Connecteur | Pilier | Indicateur(s) | Source | Niveau |
 |---|---|---|---|---|
 | GLEIF / SIRENE | — | résolution d'entités (LEI/SIREN) | GLEIF, INSEE | — |
+| Information réglementée | — | rapports financiers annuels et documents d'enregistrement universels des sociétés cotées en France (paquets ESEF) | info-financiere.gouv.fr (DILA), base BDIF de l'AMF, filings.xbrl.org | groupe |
+| Annuaire des entreprises | — | SIREN et noms commerciaux déclarés (preuve d'appartenance d'une marque) | recherche-entreprises.api.gouv.fr (données INSEE) | groupe |
 | OpenFoodFacts / Wikidata | — | univers de marques + chaînes de détention | OFF, Wikidata | — |
 | HATVP | GEO | lobbying (France) | HATVP | groupe |
 | Yale | GEO | position Russie | Yale CELI | groupe |
@@ -720,6 +748,17 @@ Document vivant (v\`0.7.4\`, octobre 2026). Toute modification des paramètres d
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **13/10/2026 (couverture des marques)** — Sans changement de calcul. Chaque
+  rattachement marque → groupe porte désormais sa preuve citée (« Appartenance
+  prouvée », Règle 8) ; les 131 marques rattachées avant cette règle l'ont reçue.
+  Ajout de 32 groupes présents en grande surface (dont Carlsberg, Diageo, Reckitt,
+  Rémy Cointreau, Campari, Essity, Savencia, LDC, SEB, BIC, Arla, Puig, Coty,
+  E.Leclerc, Système U, Les Mousquetaires, Auchan, Casino, Sodiaal, Avril, Tereos)
+  et de plus de 450 marques, chacune vérifiée mot pour mot. Les groupes non cotés
+  publient peu : leur note reste souvent « en attente » faute de preuves, et c'est
+  affiché comme tel. Vérification automatique étendue : sommes et différences dans
+  un calcul de part (conseil hors représentants des salariés), intensité carbone
+  « par million d'euros de chiffre d'affaires » en anglais.
 - **0.7.4 (13/10/2026)** — Décisions de l'éditeur. Sanctions : chaque décision
   officielle de moins de 5 ans retire 15, 8 ou 3 points à la note globale selon
   l'amende (cumul plafonné à 25), en plus de l'indicateur de gouvernance. Les
