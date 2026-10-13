@@ -748,6 +748,31 @@ Document vivant (v\`0.7.4\`, octobre 2026). Toute modification des paramètres d
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **13/10/2026 (couverture des marques, liste officielle du Nutri-Score)** — Sans
+  changement de calcul. Nouvelle source d'appartenance : la liste publiée par Santé
+  publique France, « Entreprises et marques utilisant le Nutri-Score en France »
+  (version de janvier 2026, 1 538 entreprises). Chaque entreprise y déclare elle-même
+  les marques sous lesquelles elle vend ses produits en France ; la ligne
+  « entreprise → marques » est citée mot pour mot et revérifiée par l'importeur dans
+  le PDF officiel. Cette source sert surtout pour les marques de distributeur, que les
+  enseignes ne listent nulle part ailleurs : Lidl (Milbona, Crownfield, Alesto,
+  Freshona…), Aldi (Les Doris, Golden Bridge, Mr Frites…), Intermarché (Paquito,
+  Saint Eloi, Top Budget…), Carrefour (Carrefour Classic, Extra, Original…), Système U
+  (U, U Saveurs, U Bio…), Leclerc (Nos régions ont du talent). Elle sert aussi pour
+  des fabricants : Nestlé (Buitoni, Contrex, Thomy, Galak), Danone (Gervais,
+  Taillefine), Nutrition & Santé (Gerblé, Céréal), Tipiak, Francine, Père Dodu, Prince
+  de Bretagne, Fruit d'Or et Planta Fin (Upfield, aujourd'hui Flora Food Group). Deux
+  précautions : (1) une déclaration désigne l'entreprise qui vend sous la marque, pas
+  toujours son propriétaire ; les licences et coentreprises connues restent donc
+  écartées (céréales de Cereal Partners, Paysan Breton surgelé chez Gelagri, Lustucru
+  partagée entre plusieurs sociétés, Panzani chez William Saurin), de même que les
+  importateurs et distributeurs de marques étrangères (Weetabix chez Pietercil) ;
+  (2) une déclaration faite par une filiale n'est rattachée au groupe que si
+  l'appartenance de la filiale est déjà prouvée par ailleurs (Materne et Mont Blanc
+  chez Bel, Candia chez Sodiaal, Findus chez Nomad Foods) ; sinon la filiale devient
+  elle-même le propriétaire affiché. **Homonyme signalé** : « Bear Fruits » (soins
+  capillaires de P&G) n'a rien à voir avec « Bear » (en-cas aux fruits de Lotus
+  Bakeries).
 - **13/10/2026 (couverture des marques, pages de marques des groupes)** — Sans
   changement de calcul. Environ 145 marques de plus (lots 34 à 42), surtout à partir
   des fiches de marque publiées par les groupes eux-mêmes : Henkel (Le Chat, Mir,
