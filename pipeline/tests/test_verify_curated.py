@@ -514,3 +514,17 @@ def test_conseil_entierement_independant():
     moins = row("nestle", 90, "Rapport : « The Chair and all members of the Board of Directors are independent »",
                 ind="GOV_BOARD_INDEP", src="ANNUAL_REPORT")
     assert check_esef_quote(moins, rep).status == "ÉCART"
+
+
+def test_exception_composee_executifs_et_representant():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("As at 31 December 2025, the Board comprised nine Directors: the Board Chair, two Executive Directors and six "
+           "Non-Executive Directors (NEDs). The majority (88%) of the NEDs were independent, except for Reginaldo Ecclissato.")
+    q = ("As at 31 December 2025, the Board comprised nine Directors: the Board Chair, two Executive Directors and six "
+         "Non-Executive Directors (NEDs) » ; « The majority (88%) of the NEDs were independent, except for Reginaldo Ecclissato")
+    ok = row("tmicc", 66.7, f"Rapport : « {q} » ; calcul : (9 − (2 + 1)) / 9 = 66,7 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(ok, rep).status == "OK"
+    trois = row("tmicc", 55.6, f"Rapport : « {q} » ; calcul : (9 − (3 + 1)) / 9 = 55,6 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(trois, rep).status == "ÉCART"   # « trois » n'est pas cité
+    deux_un = row("tmicc", 66.7, f"Rapport : « {q} » ; calcul : (9 − (1 + 1 + 1)) / 9 = 66,7 %", ind="GOV_BOARD_INDEP", src="ESEF")
+    assert check_esef_quote(deux_un, rep).status != "OK"

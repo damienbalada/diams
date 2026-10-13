@@ -334,7 +334,9 @@ def check_trend_pct(row, quote: str) -> tuple[bool, list[str], bool]:
 # Conseil « tous indépendants sauf le PDG » : la part est calculée depuis l'effectif cité.
 # « … calcul : (12 − 1) / 12 = 91,7 % » ; la citation donne l'effectif (« twelve directors »)
 # et l'exception (« with the exception of our CEO »).
-EXCEPT_RE = re.compile(r"calcul : \((\d+) − (\d+)\) / (\d+) = ([\d,]+) %")
+# Exception composée : « calcul : (9 − (2 + 1)) / 9 = 66,7 % » (deux exécutifs cités, plus
+# l'administrateur nommé après « except for »).
+EXCEPT_RE = re.compile(r"calcul : \((\d+) − (\d+|\(\d+ \+ \d+\))\) / (\d+) = ([\d,]+) %")
 _EXCEPT_PHRASE = re.compile(r"with the exception of|\bexcept\b|other than|\bsauf\b|à l'exception", re.I)
 
 
@@ -343,18 +345,25 @@ def check_except(row, quote: str) -> tuple[bool, list[str], bool]:
     if not m:
         return True, [], False
     n_s, k_s, n2_s, v_s = m.groups()
-    n, k = int(n_s), int(k_s)
+    n, parts = int(n_s), [int(x) for x in re.findall(r"\d+", k_s)]
+    k = sum(parts)
     words = [w for w, i in _NUM_WORDS.items() if i == n]
     size_cited = re.search(rf"\b{n}\b", quote) is not None or any(
         re.search(rf"\b{re.escape(w)}\b", quote, re.I) for w in words)
     exception = _EXCEPT_PHRASE.search(quote) is not None
+    # Chaque partie de plus d'une personne doit être citée ; la personne nommée après
+    # « sauf » compte pour 1 (une seule partie de 1 au plus).
+    parts_ok = len(parts) == 1 or (sum(1 for x in parts if x == 1) <= 1
+                                   and all(_cited(x, quote) for x in parts if x > 1))
     stated = float(v_s.replace(",", "."))
-    calc_ok = n_s == n2_s and 0 < k <= 2 and abs(round(100 * (n - k) / n, 1) - stated) < 1e-9
+    calc_ok = (n_s == n2_s and 0 < k <= (3 if len(parts) > 1 else 2) and parts_ok
+               and abs(round(100 * (n - k) / n, 1) - stated) < 1e-9)
     value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
     ok = size_cited and exception and calc_ok and value_ok
     return ok, [
         f"effectif {n} cité {'✓' if size_cited else '✗'}",
-        f"exception citée (« sauf … ») {'✓' if exception else '✗'}",
+        f"exception citée (« sauf … ») {'✓' if exception else '✗'}"
+        + (f", parties {' + '.join(map(str, parts))} citées {'✓' if parts_ok else '✗'}" if len(parts) > 1 else ""),
         f"part recalculée ({n} − {k}) / {n} = {round(100 * (n - k) / n, 1)} % = valeur {'✓' if calc_ok and value_ok else '✗'}",
     ], True
 

@@ -366,6 +366,13 @@ vers sa fiche et sa note — parce que c'est lui qui reçoit l'argent. Une marqu
 nettement mieux notée que son groupe porte une alerte : votre achat bénéficie
 tout de même au groupe.
 
+**Propriétaire à jour.** Un rachat ou une scission achevés changent le groupe
+dont une marque relève, à la date de réalisation et sur la foi d'une source
+officielle : Kellogg's (Kellanova) relève de **Mars** depuis le 11/12/2025 ;
+Magnum et Ben & Jerry's relèvent de **The Magnum Ice Cream Company**, séparée
+d'Unilever le 06/12/2025. Une opération annoncée mais non réalisée ne change
+rien (Kenvue, dont le rachat par Kimberly-Clark n'était pas conclu au 13/10/2026).
+
 ---
 
 ## 3. Du fait au score (pipeline de calcul)
