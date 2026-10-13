@@ -752,7 +752,7 @@ calcul (tables de config) doit être datée et justifiée ici.
   Ajout de 32 groupes présents en grande surface (dont Carlsberg, Diageo, Reckitt,
   Rémy Cointreau, Campari, Essity, Savencia, LDC, SEB, BIC, Arla, Puig, Coty,
   E.Leclerc, Système U, Les Mousquetaires, Auchan, Casino, Sodiaal, Avril, Tereos)
-  et de plus de 450 marques, chacune vérifiée mot pour mot. Les groupes non cotés
+  et de 349 marques, chacune vérifiée mot pour mot. Les groupes non cotés
   publient peu : leur note reste souvent « en attente » faute de preuves, et c'est
   affiché comme tel. Vérification automatique étendue : sommes et différences dans
   un calcul de part (conseil hors représentants des salariés), intensité carbone
