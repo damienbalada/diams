@@ -234,6 +234,12 @@ _NUM = r"\d{1,2}|" + "|".join(sorted(_NUM_WORDS, key=len, reverse=True))
 _COUNT = re.compile(rf"\b({_NUM})\b(?:\s+\w+){{0,3}}?\s+(?:of|sur)\s+(?:our\s+|the\s+|its\s+)?({_NUM})\b", re.I)
 
 
+# Conseil entièrement indépendant, déclaré comme tel (valeur 100 %).
+_ALL_INDEP = re.compile(r"\ball (?:the )?(?:other )?(?:members of the board(?: of directors)?|board members|directors|members)\b"
+                        r"[^.;]{0,40}?\bare independent\b|l.ensemble (?:de ses|des) membres (?:du conseil[^.;]{0,30})?est ind[ée]pendant",
+                        re.I)
+
+
 _SLASH = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2})\b")
 
 
@@ -355,7 +361,15 @@ def check_except(row, quote: str) -> tuple[bool, list[str], bool]:
 
 # Part calculée depuis deux effectifs cités dans des phrases distinctes :
 # « the 10 incumbent directors » … « include four women » → « calcul : 4 / 10 = 40 % ».
-RATIO_RE = re.compile(r"calcul : (\d+) / (\d+) = ([\d,]+) %")
+# Effectif publié en deux parties (« two executive directors and 13 non-executive
+# directors ») : « calcul : 13 / (2 + 13) = 86,7 % », chaque partie citée ; de même
+# au numérateur (« calcul : (6 + 3) / 12 = 75 % »).
+_TERM = r"(\d+|\(\d+ \+ \d+\))"
+RATIO_RE = re.compile(rf"calcul : {_TERM} / {_TERM} = ([\d,]+) %")
+
+
+def _parts(term: str) -> list[int]:
+    return [int(x) for x in re.findall(r"\d+", term)]
 
 
 def _cited(n: int, quote: str) -> bool:
@@ -371,13 +385,14 @@ def check_ratio(row, quote: str) -> tuple[bool, list[str], bool]:
     if not m:
         return True, [], False
     a_s, b_s, v_s = m.groups()
-    a, b = int(a_s), int(b_s)
+    num, parts = _parts(a_s), _parts(b_s)
+    a, b = sum(num), sum(parts)
     stated = float(v_s.replace(",", "."))
-    both = _cited(a, quote) and _cited(b, quote)
+    both = all(_cited(x, quote) for x in num + parts)
     calc_ok = 0 < a <= b and abs(round(100 * a / b, 1) - stated) < 1e-9
     value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
     return both and calc_ok and value_ok, [
-        f"effectifs {a} et {b} cités {'✓' if both else '✗'}",
+        f"effectifs {' + '.join(map(str, num))} et {' + '.join(map(str, parts))} cités {'✓' if both else '✗'}",
         f"part recalculée {a} / {b} = {round(100 * a / b, 1) if b else '—'} % = valeur {'✓' if calc_ok and value_ok else '✗'}",
     ], True
 
@@ -575,8 +590,15 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         return Verdict("NON VÉRIFIABLE", ["pas de citation « … » dans l'extrait"])
     canon_report = _canon(report_text)
     found = all(q in canon_report for q in quotes)
+    # PDF dont l'extraction coupe les mots (« ar e women ») : même suite de caractères,
+    # espaces de mise en page ignorés. La citation affichée reste lisible.
+    spaced = False
+    if not found:
+        bare = re.sub(r"\s", "", canon_report)
+        found = spaced = all(re.sub(r"\s", "", q) in bare for q in quotes)
     label = "citation retrouvée" if len(quotes) == 1 else f"{len(quotes)} citations retrouvées"
-    details = [f"{label} mot pour mot dans le rapport {'✓' if found else '✗'}"]
+    details = [f"{label} mot pour mot dans le rapport"
+               f"{' (espaces de mise en page ignorés)' if spaced else ''} {'✓' if found else '✗'}"]
     quote = " … ".join(quotes)
     ok = found
     for kw in ([] if ignore_keywords else ESEF_KEYWORDS.get(row.indicator_code, [])):
@@ -630,9 +652,12 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         col = not hit and any(re.search(rf"(?:^|\s){pt}(?=\s|$)", quote) for pt in pats)
         cnt = (not hit and not col and row.indicator_code in ("GOV_BOARD_INDEP", "GOV_BOARD_GENDER")
                and _count_ratio_matches(row.value_numeric, quote))
-        ok &= hit or col or cnt
+        # « The Chair and all members of the Board of Directors are independent » : 100 %.
+        tous = (not hit and not col and not cnt and row.indicator_code == "GOV_BOARD_INDEP"
+                and row.value_numeric == 100 and _ALL_INDEP.search(quote) is not None)
+        ok &= hit or col or cnt or tous
         details.append(f"valeur {target} présente dans la citation "
-                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✗'}")
+                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✓ (tous les membres déclarés indépendants)' if tous else '✗'}")
     elif row.value_boolean is not None:
         details.append("indicateur oui/non : la présence de la citation suffit")
     # Note normalisée imposée par le barème de l'indicateur : recalculée.

@@ -460,3 +460,57 @@ def test_taux_d_impot_recalcule_depuis_des_montants_a_l_anglaise():
     absent = row("fast-retailing", 27.0, f"Résultats annuels : « {q} » ; calcul : 218364 / 808000 = 27,0 %",
                  ind="TAX_EFFECTIVE_RATE", src="ANNUAL_REPORT")
     assert check_esef_quote(absent, rep).status == "ÉCART"   # 808 000 n'est pas cité
+
+
+def test_citation_propre_retrouvee_malgre_les_mots_coupes_du_pdf():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "Currently, five out of 15 Board members ar e women (same ratio as last re porting year)."
+    ok = row("ab-inbev", 33.3, "Rapport : « Currently, five out of 15 Board members are women » ; calcul : 5 / 15 = 33,3 %",
+             ind="GOV_BOARD_GENDER", src="ESEF")
+    v = check_esef_quote(ok, rep)
+    assert v.status == "OK" and "espaces de mise en page ignorés" in v.details[0]
+    autre = row("ab-inbev", 33.3, "Rapport : « Currently, five out of 15 Board members are men » ; calcul : 5 / 15 = 33,3 %",
+                ind="GOV_BOARD_GENDER", src="ESEF")
+    assert check_esef_quote(autre, rep).status == "ÉCART"
+
+
+def test_effectif_publie_en_deux_parties():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("the Board, which is composed of two executive directors and 13 non-executive directors with diverse "
+           "backgrounds. The non-executive directors are, without exception, indisputably independent in character and judgment.")
+    q = ("which is composed of two executive directors and 13 non-executive directors » ; « The non-executive directors "
+         "are, without exception, indisputably independent in character and judgment")
+    ok = row("richemont", 86.7, f"Rapport : « {q} » ; calcul : 13 / (2 + 13) = 86,7 %", ind="GOV_BOARD_INDEP", src="ANNUAL_REPORT")
+    assert check_esef_quote(ok, rep).status == "OK"
+    faux = row("richemont", 81.3, f"Rapport : « {q} » ; calcul : 13 / (3 + 13) = 81,3 %", ind="GOV_BOARD_INDEP", src="ANNUAL_REPORT")
+    assert check_esef_quote(faux, rep).status == "ÉCART"   # « 3 » n'est pas cité
+
+
+def test_numerateur_en_deux_parties():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("Our Supervisory Board comprises twelve members. In 2025 six members were employee representatives. "
+           "the Supervisory Board considers it to be adequate if at least three of its shareholder members are independent")
+    q = ("Our Supervisory Board comprises twelve members » ; « six members were employee representatives » ; "
+         "« at least three of its shareholder members are independent")
+    ok = row("beiersdorf", 75.0, f"Rapport : « {q} » ; calcul : (6 + 3) / 12 = 75,0 %", ind="GOV_BOARD_INDEP", src="ANNUAL_REPORT")
+    assert check_esef_quote(ok, rep).status == "OK"
+    faux = row("beiersdorf", 83.3, f"Rapport : « {q} » ; calcul : (6 + 4) / 12 = 83,3 %", ind="GOV_BOARD_INDEP", src="ANNUAL_REPORT")
+    assert check_esef_quote(faux, rep).status == "ÉCART"
+
+
+def test_conseil_entierement_independant():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = ("The Chair and all members of the Board of Directors are independent, were not previously members of the "
+           "Nestlé management. Le Conseil de Surveillance a constaté que l’ensemble de ses membres est indépendant "
+           "(hors membre représentant les salariés). All members of the Board are non-executive.")
+    en = row("nestle", 100, "Rapport : « The Chair and all members of the Board of Directors are independent »",
+             ind="GOV_BOARD_INDEP", src="ANNUAL_REPORT")
+    assert check_esef_quote(en, rep).status == "OK"
+    fr = row("bonduelle", 100, "Rapport : « Le Conseil de Surveillance a constaté que l’ensemble de ses membres est indépendant »",
+             ind="GOV_BOARD_INDEP", src="AMF_BDIF")
+    assert check_esef_quote(fr, rep).status == "OK"
+    non = row("nestle", 100, "Rapport : « All members of the Board are non-executive »", ind="GOV_BOARD_INDEP", src="ANNUAL_REPORT")
+    assert check_esef_quote(non, rep).status == "ÉCART"
+    moins = row("nestle", 90, "Rapport : « The Chair and all members of the Board of Directors are independent »",
+                ind="GOV_BOARD_INDEP", src="ANNUAL_REPORT")
+    assert check_esef_quote(moins, rep).status == "ÉCART"
