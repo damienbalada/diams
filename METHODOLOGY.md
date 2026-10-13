@@ -746,6 +746,22 @@ Document vivant (v`0.7.4`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **13/10/2026 (couverture des marques, mentions de marque déposée)** — Sans
+  changement de calcul. Nouvelle source d'appartenance, en plus des mentions
+  légales : la mention de marque déposée ou de droits d'auteur du site officiel
+  de la marque (« Ebly est une marque déposée de Mars, Inc. », « trademarks of
+  Bacardi & Company Limited », « © Groupe Melitta »), citée mot pour mot et
+  revérifiée par l'importeur. 23 propriétaires et 42 marques de plus (Albal,
+  Handy Bag, Brita, HiPP, Rainett, Scholl, Mustela, Giovanni Rana, Capri-Sun,
+  Quézac, Mousline, Lipton, Éléphant, Bacardí, Eristoff, Rio Mare, WC Net…).
+  Écartées faute de propriétaire certain : les mentions sans nom de société
+  (« Martini… are trademarks »), les sites étrangers d'une marque dont le
+  propriétaire diffère en France (Biafine, Smarties, Bugles), les marques sous
+  licence (La Laitière), Varta (procédure d'insolvabilité et vente en cours).
+  **Correction** : la cession d'Essential Home (Air Wick, Calgon, Cillit Bang,
+  Woolite) par Reckitt à Advent International est achevée le 31/12/2025 ; Reckitt
+  n'en garde que 30 %. Air Wick était rattachée à Reckitt par une citation tirée
+  de cette même section du rapport : elle est désormais rattachée à Essential Home.
 - **13/10/2026 (couverture des marques, troisième série)** — Sans changement de
   calcul. 38 groupes et 112 marques de plus : 5 groupes cotés aux États-Unis
   (Findus de Nomad Foods, jeans Wrangler et Lee, WD-40, Batiste, Russell Hobbs),
