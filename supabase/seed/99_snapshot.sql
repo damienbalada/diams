@@ -18,8 +18,8 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 2117
---   evidence                 2089
+--   entities                 2120
+--   evidence                 2091
 --   political_groups         18
 --   civic_votes              4
 --   civic_positions          35
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 1602
+--   entity_ownership_sources 1603
 -- =============================================================================
 
 begin;
@@ -689,6 +689,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('burger-king', 'Burger King', 'Burger King', null, null, 'US', (select id from sectors where code = 'restaurant'), true, false),
   ('burn', 'Burn', 'Burn (boisson énergisante)', null, null, 'US', (select id from sectors where code = 'beverages'), true, false),
   ('byredo', 'Byredo', 'Byredo', null, null, 'ES', (select id from sectors where code = 'beauty_fragrance'), true, false),
+  ('c-est-qui-le-patron', 'C’est qui le Patron', 'C''est qui le Patron ?!', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('cadum', 'Cadum', 'Cadum', null, null, 'FR', (select id from sectors where code = 'personal_care'), true, false),
   ('cafes-malongo', 'Compagnie Méditerranéenne des Cafés', 'Compagnie Méditerranéenne des Cafés (Malongo)', '969500YNKNT6RWAK0K09', '955802061', 'FR', (select id from sectors where code = 'beverages'), false, false),
   ('cafes-meo', 'Cafés Méo', 'Cafés Méo', '969500GMR9XYH09HIQ20', '459501219', 'FR', (select id from sectors where code = 'beverages'), false, false),
@@ -1852,6 +1853,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('o-taste', 'O''TASTE', 'O''Taste (Orcun Distribution)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('o9', 'Ô9', 'Ô9 (La Compagnie des Pyrenees)', null, null, 'FR', (select id from sectors where code = 'beverages'), true, false),
   ('oasis-boisson', 'Oasis', 'Oasis (boissons)', null, null, 'FR', (select id from sectors where code = 'beverages'), true, false),
+  ('oatly', 'Oatly Group AB', 'Oatly', '894500CEIOQNBAH10Z10', null, 'SE', (select id from sectors where code = 'beverages'), false, false),
   ('oceanic', 'Océanic', 'Océanic (Cornic-Novamer)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('oculus', 'Meta Quest (Oculus)', 'Meta Quest (Oculus)', null, null, 'US', (select id from sectors where code = 'tech_electronics'), true, false),
   ('odyssee-intermarche', 'ODYSSEE', 'Odyssée (Intermarché)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
@@ -2223,6 +2225,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('so-bio-etic', 'SO BiO étic', 'SO BiO étic', null, null, 'FR', (select id from sectors where code = 'personal_care'), true, false),
   ('sobieski', 'Sobieski', 'Sobieski', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('soboriz-industrie', 'SOBORIZ INDUSTRIE', 'Soboriz Industrie', null, '380035519', 'FR', (select id from sectors where code = 'food'), false, false),
+  ('societe-des-consommateurs', 'La Société des Consommateurs', 'La Société des Consommateurs (coopérative)', null, '828852871', 'FR', (select id from sectors where code = 'food'), false, false),
   ('societe-des-eaux-du-col-saint-georges', 'SOCIETE DES EAUX DU COL SAINT-GEORGES', 'Societe des Eaux du Col Saint-Georges', null, '304892300', 'FR', (select id from sectors where code = 'beverages'), false, false),
   ('societe-generale', 'Société Générale S.A.', 'Société Générale', 'O2RNE8IBXP4R0TD8PU41', '552120222', 'FR', (select id from sectors where code = 'banking_finance'), false, false),
   ('societe-nouvelle-terr-loire', 'SOCIETE NOUVELLE TERR''LOIRE', 'Société Nouvelle Terr''Loire', null, '514436252', 'FR', (select id from sectors where code = 'food'), false, false),
@@ -2745,6 +2748,7 @@ from (values
   ('burger-king', 'rbi', 100::numeric),
   ('burn', 'monster-beverage', 100::numeric),
   ('byredo', 'puig', 100::numeric),
+  ('c-est-qui-le-patron', 'societe-des-consommateurs', 100::numeric),
   ('cadum', 'loreal', 100::numeric),
   ('caisse-epargne', 'bpce', null::numeric),
   ('cajoline', 'unilever', 100::numeric),
@@ -4531,6 +4535,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'burger-king'), (select id from entities where slug = 'rbi'), 'https://www.sec.gov/Archives/edgar/data/1618756/000119312526171760/d22888ddef14a.htm', 'Circulaire de procuration 2026 de Restaurant Brands International déposée à la SEC : « 2025. RBI owns four of the world’s most prominent and iconic quick service restaurant brands – TIM HORTONS ® , BURGER KING ® , POPEYES ® and FIREHOUSE SUBS ® . These independently operated brands have been serving their respective guests »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'burn'), (select id from entities where slug = 'monster-beverage'), 'https://www.sec.gov/Archives/edgar/data/865752/000110465926020831/mnst-20251231x10k.htm', 'Rapport annuel 10-K 2025 de Monster Beverage déposé à la SEC (autorité boursière américaine) : « drink beverages, primarily under the following brand names: ● ​ ​ ​ ​Monster Energy® ● ​ ​ ​ ​Monster Energy Ultra® ● ​ ​ ​ ​Rehab Monster® ● ​ ​ ​ ​Monster Energy®Nitro ● ​ ​ ​ ​Java Monster® ● ​ ​ ​ ​Punch Monster® ● ​ ​ ​ ​Juice Monster® ● ​ ​ ​ ​Reign Total Body Fuel® ● ​ ​ ​ ​Reign Storm® ● ​ ​ ​ ​Bang Energy® ● ​ ​ ​ ​NOS® ● ​ ​ ​ ​Full Throttle® ​ ​ ​ ● ​ ​ ​ ​Burn® »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'byredo'), (select id from entities where slug = 'puig'), 'https://filings.xbrl.org/549300OVHNSX30L1AQ94/2024-12-31/ESEF/ES/0/549300OVHNSX30L1AQ94-20241231-es/reports/549300OVHNSX30L1AQ94-20241231-es.xhtml', 'Rapport annuel 2024 de Puig (format électronique officiel ESEF, en espagnol) : « El portfolio de marcas de Puig que operan en la categoría de negocio de Fragancias y moda incluye a Carolina Herrera, Jean Paul Gaultier, Nina Ricci, Rabanne, Byredo, Christian Louboutin, Dries Van Noten, L''Artisan Parfumeur, Penhaligon''s, Adolfo Domínguez y Banderas »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'c-est-qui-le-patron'), (select id from entities where slug = 'societe-des-consommateurs'), 'https://agir.cestquilepatron.com/p/mentions-legales', 'Mentions légales du site officiel de la marque C''est qui le Patron ?! : « Mentions légales et conditions générales d’utilisation · C’est qui le Patron ?! Mobilisons-nous : comment soutenir les producteurs français d''oignons et d''échalotes ? 🧅 Démarche Produits Points de vente Participer Actualités Me connecter / adhérer Mentions légales et conditions générales d’utilisation Mentions légales Editeur LA SOCIÉTÉ DES CONSOMMATEURS SCIC »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'cadum'), (select id from entities where slug = 'loreal'), 'https://www.loreal.com/fr-fr/france/', 'Page « L''Oréal France » du site officiel du groupe L''Oréal (en anglais) : « +50 brands, including French heritage brands such as Mixa, Dop, Cadum »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'caisse-epargne'), (select id from entities where slug = 'bpce'), 'https://filings.xbrl.org/9695005MSX1OYEMGDF46/2025-12-31/ESEF/FR/0/9695005MSX1OYEMGDF46-2025-12-31-1-FR/reports/9695005MSX1OYEMGDF46-2025-12-31-1-FR.xhtml', 'Rapport financier annuel 2025 du groupe BPCE (format électronique officiel ESEF) : « d''argent. Elle dispose en outre d’un compte TikTok pédagogique qui rassemble déjà plus de 60 000 abonnés, plaçant la Caisse d''Epargne parmi les comptes bancaires les plus suivis sur ce réseau. Du côté des entreprises, une campagne ciblée de 4 mois »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'cajoline'), (select id from entities where slug = 'unilever'), 'https://www.unilever.digital/fr/cajoline/l''univers-cajoline.html', 'Site officiel français de la marque Cajoline (domaine unilever.digital d''Unilever, vers lequel renvoie l''adresse de la marque ; pied de page « © Unilever 2026 ») : « DÉCOUVREZ CAJOLINE LES BÉNÉFICES DE CAJOLINE PARFUM* ET FRAÎCHEUR LONGUE DURÉE PROTÈGE LES COULEURS PRÉSERVE LES FIBRES *parfum de synthèse © Unilever 2026 »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
@@ -7447,6 +7452,8 @@ insert into evidence (entity_id, indicator_id, source_id, observed_on, value_typ
   ((select id from entities where slug = 'noo-corp'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2023-03-01', 'numeric', 91, null, null, 0.91, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2022 : 91/100 (SAS NOO CORP)'),
   ((select id from entities where slug = 'nueva-pescanova-france'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 92, null, null, 0.92, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 92/100 (NUEVA PESCANOVA FRANCE)'),
   ((select id from entities where slug = 'nxtfood'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 82, null, null, 0.82, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 82/100 (NXTFOOD)'),
+  ((select id from entities where slug = 'oatly'), (select id from indicators where code = 'ENV_CDP_CLIMATE'), (select id from sources where code = 'CDP'), '2025-12-31', 'ordinal', null, null, 'F', 0, 'result', 0.85, 'auto:import_cdp_scores', 'approved', false, 'https://www.cdp.net/en/data/scores', 'CDP, notes publiques 2025 (liste complète, page « Scores and A Lists ») : « Oatly Group AB » (Sweden), climat — « Did not disclose » : sollicitée par CDP, l''entreprise n''a pas répondu (note F selon la méthode CDP).'),
+  ((select id from entities where slug = 'oatly'), (select id from indicators where code = 'WAT_CDP'), (select id from sources where code = 'CDP'), '2025-12-31', 'ordinal', null, null, 'F', 0, 'result', 0.85, 'auto:import_cdp_scores', 'approved', false, 'https://www.cdp.net/en/data/scores', 'CDP, notes publiques 2025 (liste complète, page « Scores and A Lists ») : « Oatly Group AB » (Sweden), sécurité de l''eau — « Did not disclose » : sollicitée par CDP, l''entreprise n''a pas répondu (note F selon la méthode CDP).'),
   ((select id from entities where slug = 'olga'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 84, null, null, 0.84, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 84/100 (OLGA)'),
   ((select id from entities where slug = 'orangina-schweppes-france'), (select id from indicators where code = 'GEO_LOBBYING_TRANSP'), (select id from sources where code = 'HATVP'), '2026-10-13', 'boolean', null, true, null, 1, 'result', 0.9, 'auto:verify_curated', 'approved', false, 'https://www.hatvp.fr/fiche-organisation/?organisation=404907941', 'ORANGINA SCHWEPPES FRANCE inscrit au répertoire des représentants d''intérêts depuis le 31/03/2022 ; dépenses déclarées pour 2025 : 50 000 à 75 000 €.'),
   ((select id from entities where slug = 'orangina-schweppes-france'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 91, null, null, 0.91, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 91/100 (ORANGINA SCHWEPPES FRANCE)'),
