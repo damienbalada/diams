@@ -18,7 +18,7 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 1394
+--   entities                 1395
 --   evidence                 1915
 --   political_groups         18
 --   civic_votes              4
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 1128
+--   entity_ownership_sources 1129
 -- =============================================================================
 
 begin;
@@ -1005,6 +1005,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('jaeger-lecoultre', 'Manufacture Jaeger-LeCoultre SA', 'Jaeger-LeCoultre', null, null, 'CH', (select id from sectors where code = 'watches_jewelry'), true, false),
   ('jameson', 'Jameson', 'Jameson', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('jardin-bio-etic', 'Jardin BiO étic', 'Jardin BiO étic', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('jb-whisky', 'J & B', 'J&B (whisky)', null, null, 'GB', (select id from sectors where code = 'wines_spirits'), true, false),
   ('jean-caby', 'Jean Caby', 'Jean Caby', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('jean-henaff', 'Jean Hénaff SA', 'Groupe Jean Hénaff', null, '375580594', 'FR', (select id from sectors where code = 'food'), false, false),
   ('jean-paul-gaultier', 'Jean Paul Gaultier', 'Jean Paul Gaultier', null, null, 'ES', (select id from sectors where code = 'beauty_fragrance'), true, false),
@@ -2283,6 +2284,7 @@ from (values
   ('jaeger-lecoultre', 'richemont', 100::numeric),
   ('jameson', 'pernod-ricard', 100::numeric),
   ('jardin-bio-etic', 'lea-nature', 100::numeric),
+  ('jb-whisky', 'diageo', 100::numeric),
   ('jean-caby', 'cooperl', 100::numeric),
   ('jean-paul-gaultier', 'puig', 100::numeric),
   ('jean-roze', 'mousquetaires', 100::numeric),
@@ -3592,6 +3594,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'jaeger-lecoultre'), (select id from entities where slug = 'richemont'), 'https://www.richemont.com/media/ud3bety3/richemont-fy26-annual-report.pdf', 'Rapport annuel 2026 de Richemont (exercice clos le 31/03/2026, en anglais) : « The Group’s luxury goods interests encompass some of the most prestigious names in the industry, including Cartier, Van Cleef & Arpels, Piaget, Vacheron Constantin, Jaeger-LeCoultre, IWC Schaffhausen and Montblanc »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'jameson'), (select id from entities where slug = 'pernod-ricard'), 'https://filings.xbrl.org/52990097YFPX9J0H5D87/2025-06-30/ESEF/FR/0/pernod-2025-06-30-1-fr/reports/pernod-2025-06-30-1-fr.xhtml', 'Document d''enregistrement universel 2024-2025 de Pernod Ricard (format électronique officiel ESEF) : « Croissance à deux chiffres pour les marques internationales stratégiques, notamment Jameson »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'jardin-bio-etic'), (select id from entities where slug = 'lea-nature'), 'https://www.leanature.com/fr_fr/mentions-legales', 'Page des mentions légales du site officiel du groupe Léa Nature (menu « Par marques ») : « Par marques Retour Par marques Beauté & Hygiène Eau Thermale Jonzac SO BiO étic Boho Green Beauty Natessance Floressance Dentavie I Love Bio by Léa Nature Bioregena Alimentation Jardin BiO étic Karéléa »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'jb-whisky'), (select id from entities where slug = 'diageo'), 'https://filings.xbrl.org/213800ZVIELEA55JMJ32/2026-06-30/ESEF/GB/0/213800ZVIELEA55JMJ32-2026-06-30/reports/213800ZVIELEA55JMJ32-2026-06-30-T01.html', 'Rapport annuel 2026 de Diageo (format ESEF, en anglais), liste des filiales : la société J & B Scotland Limited : « Diageo Capital plc (1) Diageo Scotland Limited J & B Scotland Limited (2) »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'jean-caby'), (select id from entities where slug = 'cooperl'), 'https://www.jeancaby.com/mentions-legales/', 'Mentions légales du site officiel de la marque Jean Caby : « fr Conditions d’accès et d’utilisation La société COOPERL ARC ATLANTIQUE est titulaire du nom de domaine jeancaby.com . Ce site, de langue française, est un site d’information qui s’adresse aussi bien aux clients de Jean CABY, qu’aux non clients, dénommés ci-après « internautes » »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'jean-paul-gaultier'), (select id from entities where slug = 'puig'), 'https://filings.xbrl.org/549300OVHNSX30L1AQ94/2024-12-31/ESEF/ES/0/549300OVHNSX30L1AQ94-20241231-es/reports/549300OVHNSX30L1AQ94-20241231-es.xhtml', 'Rapport annuel 2024 de Puig (format électronique officiel ESEF, en espagnol) : « El portfolio de marcas de Puig que operan en la categoría de negocio de Fragancias y moda incluye a Carolina Herrera, Jean Paul Gaultier, Nina Ricci, Rabanne, Byredo, Christian Louboutin, Dries Van Noten, L''Artisan Parfumeur, Penhaligon''s, Adolfo Domínguez y Banderas »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'jean-roze'), (select id from entities where slug = 'mousquetaires'), 'https://www.mousquetaires.com/nos-filiales/agromousquetaires/', 'Page Agromousquetaires (unités de production des marques de distributeur) du site officiel du Groupement Les Mousquetaires : « Produits laitiers avec Pâturages, céréales et gâteaux avec Chabrior et Filet Bleu, produits carnés avec Jean Rozé et Monique Ranou, produits de la mer avec Capitaine Cook, et bien d’autres marques : nos unités de production fabriquent les MDD du Groupement Mousquetaires »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
