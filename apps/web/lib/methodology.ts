@@ -627,8 +627,11 @@ Voir \`supabase/seed/99_snapshot.sql\` (section « Sources ») pour le registre 
 **Rapports volontaires des entreprises (niveau 3).** Hors de l'Union, aucun
 rapport de durabilité n'est imposé : les émissions d'Apple, Microsoft, Shein ou
 PepsiCo ne figurent que dans leurs rapports volontaires (source
-\`COMPANY_REPORT\`). Ce sont des déclarations de l'entreprise, à confiance
-plafonnée. L'éditeur a délégué leur validation (11/10/2026), à une condition :
+\`COMPANY_REPORT\`) ; une société non cotée comme Lactalis publie aussi son plan de
+vigilance dans un rapport volontaire. Ce sont des déclarations de l'entreprise, à
+confiance plafonnée. Seul un rapport légal (rapport annuel, document
+d'enregistrement universel, déclaration non financière imposée par la loi du pays)
+est classé « rapport annuel légal ». L'éditeur a délégué leur validation (11/10/2026), à une condition :
 la citation est retrouvée **mot pour mot** dans le document, et les calculs sont
 refaits par la vérification automatique. Ces preuves portent l'étiquette de
 relecture \`delegue-editeur:verifie-mot-pour-mot\`.
