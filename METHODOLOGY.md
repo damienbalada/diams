@@ -746,6 +746,18 @@ Document vivant (v`0.7.4`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **13/10/2026 (couverture des marques, troisième série)** — Sans changement de
+  calcul. 38 groupes et 112 marques de plus : 5 groupes cotés aux États-Unis
+  (Findus de Nomad Foods, jeans Wrangler et Lee, WD-40, Batiste, Russell Hobbs),
+  les marques françaises de Mars et de Mondelez (Bounty, Twix, Mikado, Pépito,
+  Petit Écolier…) et 33 fabricants français identifiés par les mentions légales
+  de leurs marques (Carambar & Co, Cofigeo, Panzani, Herta, St Michel, Haribo,
+  Campofrío, d'aucy, Hénaff, Carte Noire, Malongo, Charal, Delpeyrat, Vileda,
+  Saint Louis, Gavottes…). Les marques cédées sont écartées d'après les rapports
+  des groupes (Timotei, Clan Campbell, Cinzano, participation dans Herta), de
+  même que les homonymes (le site jacquet.fr appartient à une entreprise du
+  bâtiment). Technique : au-delà de 1 000 entités, le site et le pipeline lisent
+  désormais la base page par page (l'API plafonne chaque réponse à 1 000 lignes).
 - **13/10/2026 (couverture des marques, suite)** — Sans changement de calcul.
   70 groupes et 232 marques de plus, chacune rattachée par une preuve citée
   vérifiée mot pour mot : 17 groupes cotés (jouets Mattel et Hasbro, piles
