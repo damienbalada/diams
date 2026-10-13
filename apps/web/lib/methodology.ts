@@ -772,7 +772,13 @@ calcul (tables de config) doit être datée et justifiée ici.
   chez Bel, Candia chez Sodiaal, Findus chez Nomad Foods) ; sinon la filiale devient
   elle-même le propriétaire affiché. **Homonyme signalé** : « Bear Fruits » (soins
   capillaires de P&G) n'a rien à voir avec « Bear » (en-cas aux fruits de Lotus
-  Bakeries).
+  Bakeries). **Série des PME (lot 59, 148 marques, 126 sociétés)** : une société de la
+  liste n'est retenue que si son nom correspond exactement à une seule société active
+  de l'annuaire officiel des entreprises, qui emploie au moins 10 salariés ; sont
+  écartés les entrepreneurs individuels, les organismes publics et associatifs, les
+  importateurs, la restauration et les magasins, les noms génériques (« sans marque »,
+  « Les Surgelés ») et les descriptions de produit ; chaque ligne a été relue (Mr
+  Freeze, probablement sous licence, et une quinzaine d'autres lignes écartées).
 - **13/10/2026 (couverture des marques, pages de marques des groupes)** — Sans
   changement de calcul. Environ 145 marques de plus (lots 34 à 42), surtout à partir
   des fiches de marque publiées par les groupes eux-mêmes : Henkel (Le Chat, Mir,
