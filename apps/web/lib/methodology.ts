@@ -748,6 +748,24 @@ Document vivant (v\`0.7.4\`, octobre 2026). Toute modification des paramètres d
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **13/10/2026 (couverture des marques, pages de marques des groupes)** — Sans
+  changement de calcul. Environ 145 marques de plus (lots 34 à 42), surtout à partir
+  des fiches de marque publiées par les groupes eux-mêmes : Henkel (Le Chat, Mir,
+  X-Tra, Somat, Pril, Vernel, Fa, Schauma…), P&G France (Dash, Lenor, Mr Propre…),
+  Unilever France (Persil, Omo, Skip, Cajoline, Sun), Garnier (Ambre Solaire, Ultra
+  Doux…), Pernod Ricard, Diageo, Purina, Kinder, Yoplait, Lindt ; des rapports
+  annuels (AB InBev, Heineken, Casino, Maison Pommery & Associés, 10-K de Spectrum,
+  Newell, Energizer, Edgewell, Church & Dwight) ; et des mentions légales (Intersnack
+  France, Thiriet, Lanson, Nicolas Feuillatte, Mouton Cadet…). Quand l'éditeur d'un
+  site est une filiale, le lien avec le groupe est lu dans le registre GLEIF (société
+  mère directe ou ultime) : Bardinet → COFEPP, Sofibel → Church & Dwight, L.I.D. →
+  Lanson-BCC, Société des Caves → Groupe Lactalis. **Corrections** : Suchard est
+  exploitée en France par Carambar & Co (Mondelez la détient hors de France) ; les
+  Laboratoires Juva Santé appartiennent au Groupe Urgo. **Écartées** : Persil chez
+  Henkel (en France, la marque est à Unilever), Iams et Eukanuba chez Mars (en Europe,
+  elles sont à Spectrum Brands), les coentreprises (Clearblue, Havana Club, Mamie
+  Nova), les marques cédées (Heidsieck & Co Monopole) et Terry's (distribuée par
+  Carambar & Co, propriété incertaine).
 - **13/10/2026 (couverture des marques, mentions de marque déposée)** — Sans
   changement de calcul. Nouvelle source d'appartenance, en plus des mentions
   légales : la mention de marque déposée ou de droits d'auteur du site officiel
