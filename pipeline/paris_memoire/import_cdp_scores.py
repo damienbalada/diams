@@ -31,6 +31,8 @@ from .normalize.names import normalize_name
 # Slug DIAMS -> nom exact dans la liste CDP (vérifié à la main : société mère).
 ALIASES = {
     "procter-gamble": "Procter & Gamble Company",
+    "edgewell": "Edgewell Personal Care",
+    "laurent-perrier": "Laurent-Perrier Group",
     "hm-group": "H&M Hennes & Mauritz AB",
     "samsung": "Samsung Electronics",
     "bpce": "Groupe BPCE",

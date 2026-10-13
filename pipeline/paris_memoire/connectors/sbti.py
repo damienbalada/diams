@@ -105,6 +105,7 @@ ALIASES = {
     "axa": "AXA Group",
     "schwarz-gruppe": "Schwarz Gruppe (Lidl, Kaufland, Schwarz Produktion, PreZero, Schwarz Digits)",
     "shein": "ROADGET BUSINESS PTE. LTD. (owner of the SHEIN brand)",
+    "delonghi": "De' Longhi Group",
 }
 
 

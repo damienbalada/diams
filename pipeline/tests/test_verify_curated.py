@@ -447,6 +447,29 @@ def test_conversion_d_unite_et_nombres_a_espaces():
     assert check_esef_quote(y, rep).status == "OK"
 
 
+def test_conversion_depuis_des_kilogrammes_par_euro_en_anglais():
+    from paris_memoire.verify_curated import check_esef_quote
+    rep = "GHG intensity (Location-based approach) (kgCO₂-e/EUR) 0.24 0.25 GHG intensity (Market-based approach) (kgCO₂-e/EUR) 0.23 0.24"
+    q = "GHG intensity (Market-based approach) (kgCO₂-e/EUR) 0.23 0.24"
+    x = row("philips", 230.0, f"Rapport : « {q} » ; conversion : 0,23 kg/€ × 1 000 = 230 t/M€ (intensité par million d'euros de chiffre d'affaires)",
+            ind="ENV_GHG_INTENSITY", src="ESEF")
+    assert check_esef_quote(x, rep).status == "OK"
+    x.value_numeric = 23.0
+    assert check_esef_quote(x, rep).status == "ÉCART"
+    y = row("philips", 230.0, f"Rapport : « {q} » ; conversion : 0,25 kg/€ × 1 000 = 250 t/M€", ind="ENV_GHG_INTENSITY", src="ESEF")
+    y.value_numeric = 250.0
+    assert check_esef_quote(y, rep).status == "ÉCART"     # 0,25 n'est pas dans la citation
+
+
+def test_colonnes_de_ratios_non_fusionnees_en_milliers():
+    from paris_memoire.verify_curated import check_esef_quote
+    q = "CEO pay ratio Year Methodology used Lower quartile Median Upper quartile 2025 Option B 137:1 126:1 104:1"
+    x = row("abf", 126.0, f"Rapport : « {q} »", ind="LAB_CEO_PAY_RATIO", src="ESEF")
+    assert check_esef_quote(x, q).status == "OK"
+    x.value_numeric = 1126.0
+    assert check_esef_quote(x, q).status == "ÉCART"
+
+
 def test_taux_d_impot_recalcule_depuis_des_montants_a_l_anglaise():
     from paris_memoire.verify_curated import check_esef_quote
     rep = "Profit before income taxes 650,574 802,505 Income tax expense (191,421) (218,364) Profit for the year 459,153 584,141"

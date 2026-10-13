@@ -175,7 +175,7 @@ ESEF_KEYWORDS = {
     "GOV_BOARD_GENDER": [r"femmes|administratrices|f[ée]minisation|women|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
@@ -461,22 +461,26 @@ def check_trend_yoy(row, quote: str) -> tuple[bool, list[str], bool]:
 
 
 # Unité publiée différente de celle de l'indicateur : la conversion est écrite dans
-# l'extrait et recalculée. « conversion : 0,00039 t/€ × 1 000 000 = 390 t/M€ ».
-UNIT_RE = re.compile(r"conversion : ([\d,]+) t/€ × 1 000 000 = ([\d ,]+) t/M€")
+# l'extrait et recalculée. « conversion : 0,00039 t/€ × 1 000 000 = 390 t/M€ », ou
+# depuis des kilogrammes par euro : « conversion : 0,23 kg/€ × 1 000 = 230 t/M€ ».
+UNIT_RE = re.compile(r"conversion : ([\d,]+) (t/€ × 1 000 000|kg/€ × 1 000) = ([\d ,]+) t/M€")
 
 
 def check_unit(row, quote: str) -> tuple[bool, list[str], bool]:
     m = UNIT_RE.search(row.excerpt or "")
     if not m:
         return True, [], False
-    a_s, c_s = m.groups()
+    a_s, unit, c_s = m.groups()
+    factor, unit_s = (1e6, "t/€") if unit.startswith("t/") else (1e3, "kg/€")
     a, c = float(a_s.replace(",", ".")), float(c_s.replace(" ", "").replace(",", "."))
-    present = re.search(rf"(?<![\d,.]){re.escape(a_s)}(?!\d)", quote) is not None
-    calc_ok = abs(a * 1e6 - c) <= 0.5
+    # Le rapport peut être en anglais (0.23) quand l'extrait écrit 0,23.
+    present = any(re.search(rf"(?<![\d,.]){re.escape(f)}(?!\d)", quote) is not None
+                  for f in {a_s, a_s.replace(",", ".")})
+    calc_ok = abs(a * factor - c) <= 0.5
     value_ok = row.value_numeric is not None and abs(row.value_numeric - c) < 1e-9
     return present and calc_ok and value_ok, [
-        f"valeur publiée {a_s} t/€ présente dans la citation {'✓' if present else '✗'}",
-        f"conversion {a_s} × 1 000 000 = {a * 1e6:g} t/M€ = valeur {'✓' if calc_ok and value_ok else '✗'}",
+        f"valeur publiée {a_s} {unit_s} présente dans la citation {'✓' if present else '✗'}",
+        f"conversion {a_s} × {'1 000 000' if factor == 1e6 else '1 000'} = {a * factor:g} t/M€ = valeur {'✓' if calc_ok and value_ok else '✗'}",
     ], True
 
 
@@ -654,7 +658,9 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         ok &= sc_ok
         details += sc_details
     if row.value_numeric is not None and not ignore_keywords and not tr_active:
-        flat = re.sub(r"(?<=\d)\s(?=\d{3}(?!\d))", "", quote)  # espaces de milliers seulement
+        # Espaces de milliers seulement ; pas après un rapport « 137:1 » (colonnes de
+        # ratios : « 137:1 126:1 » ne contient pas le nombre 1126).
+        flat = re.sub(r"(?<=\d)(?<!:\d)\s(?=\d{3}(?!\d))", "", quote)
         target = fx_source if fx_source is not None else row.value_numeric
         variants = _value_variants(target)
         # Écart « en faveur des femmes » : publié en valeur absolue, compté négatif ;
