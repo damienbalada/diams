@@ -32,7 +32,7 @@ TICKERS: dict[str, str] = {
     "amazon": "AMZN", "tesla": "TSLA", "nike": "NKE",
     "coca-cola": "KO", "pepsico": "PEP", "procter-gamble": "PG", "mondelez": "MDLZ", "kraft-heinz": "KHC",
     "colgate-palmolive": "CL", "kenvue": "KVUE",
-    "general-mills": "GIS", "mccormick": "MKC", "kimberly-clark": "KMB", "coty": "COTY",
+    "general-mills": "GIS", "mccormick": "MKC", "kimberly-clark": "KMB", "coty": "COTY", "keurig-dr-pepper": "KDP",
     "mcdonalds": "MCD", "starbucks": "SBUX", "yum-brands": "YUM", "rbi": "QSR",
     # Émetteurs étrangers (rapport annuel 20-F en IFRS)
     "unilever": "UL", "toyota": "TM", "sony": "SONY", "stellantis": "STLA",
