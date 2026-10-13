@@ -18,8 +18,8 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 1387
---   evidence                 1914
+--   entities                 1392
+--   evidence                 1915
 --   political_groups         18
 --   civic_votes              4
 --   civic_positions          35
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 1123
+--   entity_ownership_sources 1126
 -- =============================================================================
 
 begin;
@@ -801,6 +801,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('edelweiss', 'Edelweiss', 'Edelweiss', null, null, 'NL', (select id from sectors where code = 'wines_spirits'), true, false),
   ('edgard-cooper', 'Edgard & Cooper', 'Edgard & Cooper', null, null, 'US', (select id from sectors where code = 'pet_care'), true, false),
   ('edgewell', 'Edgewell Personal Care Company', 'Edgewell', '549300CY8QZDL4Z3RU59', null, 'US', (select id from sectors where code = 'personal_care'), false, false),
+  ('ekibio', 'Ekibio', 'Ekibio', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('el-jimador', 'el Jimador', 'el Jimador', null, null, 'US', (select id from sectors where code = 'wines_spirits'), true, false),
   ('electrolux', 'Aktiebolaget Electrolux', 'Electrolux', '549300Y3HHZB1ZGFPJ93', null, 'SE', (select id from sectors where code = 'household_durables'), false, false),
   ('electrolux-marque', 'Electrolux', 'Electrolux', null, null, 'SE', (select id from sectors where code = 'household_durables'), true, false),
@@ -865,6 +866,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('florette', 'Florette', 'Florette', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('fol-epi', 'Fol Epi', 'Fol Épi', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('fortuneo', 'Arkéa Direct Bank', 'Fortuneo', '969500EYUH381IUM2589', '384288890', 'FR', (select id from sectors where code = 'banking_finance'), true, false),
+  ('france-snacking-aperitif', 'France Snacking Apéritif', 'France Snacking Apéritif (Menguy''s)', null, '333821692', 'FR', (select id from sectors where code = 'food'), false, false),
   ('frangelico', 'Frangelico', 'Frangelico', null, null, 'IT', (select id from sectors where code = 'wines_spirits'), true, false),
   ('franprix', 'Franprix', 'Franprix', null, null, 'FR', (select id from sectors where code = 'retail_distribution'), true, false),
   ('franprix-bio', 'Franprix Bio', 'Franprix Bio', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
@@ -1069,6 +1071,8 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('l-arbre-vert', 'L''Arbre Vert', 'L''Arbre Vert', null, null, 'FR', (select id from sectors where code = 'home_care'), true, false),
   ('l-or', 'L''OR', 'L''Or (café)', null, null, 'US', (select id from sectors where code = 'beverages'), true, false),
   ('la-banque-postale', 'La Banque Postale', 'La Banque Postale', '96950066U5XAAIRCPA78', '421100645', 'FR', (select id from sectors where code = 'banking_finance'), false, false),
+  ('la-boulangere', 'La Boulangère', 'La Boulangère', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('la-boulangere-et-co', 'La Boulangère & Co', 'La Boulangère & Co', null, '429081565', 'FR', (select id from sectors where code = 'food'), false, false),
   ('la-chouffe', 'Chouffe', 'La Chouffe', null, null, 'BE', (select id from sectors where code = 'wines_spirits'), true, false),
   ('la-croix-javel', 'La Croix', 'La Croix (eau de Javel)', null, null, 'US', (select id from sectors where code = 'home_care'), true, false),
   ('la-fermiere', 'Société La Fermière', 'La Fermière (société)', null, '055811996', 'FR', (select id from sectors where code = 'food'), false, false),
@@ -1224,6 +1228,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('mega-construction', 'MEGA', 'MEGA (jeux de construction)', null, null, 'US', (select id from sectors where code = 'toys_games'), true, false),
   ('melitta', 'Melitta Group Management GmbH & Co. KG', 'Groupe Melitta', '5299006ELY38N3VPXQ92', null, 'DE', (select id from sectors where code = 'home_care'), false, false),
   ('men-perfect', 'Men Perfect', 'Men Perfect', null, null, 'DE', (select id from sectors where code = 'personal_care'), true, false),
+  ('menguys', 'Menguy''s', 'Menguy''s', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('mentos', 'Mentos', 'Mentos', null, null, 'NL', (select id from sectors where code = 'food'), true, false),
   ('meo', 'Méo', 'Méo', null, null, 'FR', (select id from sectors where code = 'beverages'), true, false),
   ('mercedes-benz', 'Mercedes-Benz Group AG', 'Mercedes-Benz', '529900R27DL06UVNT076', null, 'DE', (select id from sectors where code = 'automotive'), false, false),
@@ -2114,6 +2119,7 @@ from (values
   ('ecusson', 'agrial', 100::numeric),
   ('edelweiss', 'heineken', 100::numeric),
   ('edgard-cooper', 'general-mills', 100::numeric),
+  ('ekibio', 'lea-nature', 100::numeric),
   ('el-jimador', 'brown-forman', 100::numeric),
   ('electrolux-marque', 'electrolux', 100::numeric),
   ('elephant', 'lipton-teas-and-infusions', 100::numeric),
@@ -2332,6 +2338,7 @@ from (values
   ('kwak', 'ab-inbev', 100::numeric),
   ('l-arbre-vert', 'sodalis-france', 100::numeric),
   ('l-or', 'keurig-dr-pepper', 100::numeric),
+  ('la-boulangere', 'la-boulangere-et-co', 100::numeric),
   ('la-chouffe', 'duvel-moortgat', 100::numeric),
   ('la-croix-javel', 'colgate-palmolive', 100::numeric),
   ('la-fermiere-marque', 'la-fermiere', 100::numeric),
@@ -2459,6 +2466,7 @@ from (values
   ('mccain-frites', 'mccain', 100::numeric),
   ('mega-construction', 'mattel', 100::numeric),
   ('men-perfect', 'henkel', 100::numeric),
+  ('menguys', 'france-snacking-aperitif', 100::numeric),
   ('mentos', 'perfetti-van-melle', 100::numeric),
   ('meo', 'cafes-meo', 100::numeric),
   ('merci-storck', 'storck', 100::numeric),
@@ -3420,6 +3428,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'ecusson'), (select id from entities where slug = 'agrial'), 'https://www.agrial.com/nos-marques-agrial-cooperative-agricole-et-agroalimentaire/', 'Page Nos marques du site officiel d''Agrial (carrousel « Quelques produits issus de nos filières ») : « Écusson Cidre Rosé »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'edelweiss'), (select id from entities where slug = 'heineken'), 'https://www.theheinekencompany.com/our-brands', 'Page des marques du site officiel de Heineken (en anglais) : « Heineken Silver A brand with a rich history Amstel Enjoy Life’s simple pleasures Moretti Discover Tiger Original Tiger Unleashing wild experiments Desperados Born and raised in the Alps Edelweiss »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'edgard-cooper'), (select id from entities where slug = 'general-mills'), 'https://www.sec.gov/Archives/edgar/data/40704/000162828026046466/gis-20260531.htm', 'Rapport annuel 10-K 2026 de General Mills déposé à la SEC (autorité boursière américaine) : « Some of the more important trademarks used in our global operations (set forth in italics in this report) include Annie ’ s, Betty Crocker, Bisquick, Blue Buffalo, Bugles, Cascadian Farm, Cheerios, Chex, Cinnamon Toast Crunch, Cocoa Puffs, Cookie Crisp, Dunkaroos, Edgard & Cooper, Fiber One »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'ekibio'), (select id from entities where slug = 'lea-nature'), 'https://www.ekibio.fr/mentions-legales', 'Mentions légales du site officiel de la marque Ekibio (éditeur : Ekibio SAS, présidée par Compagnie Léa Nature selon l''annuaire officiel des entreprises) : « L’éditeur du site est une personne morale. EKIBIO ZA La Boissonnette 07340 PEAUGRES »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'el-jimador'), (select id from entities where slug = 'brown-forman'), 'https://www.sec.gov/Archives/edgar/data/14693/000001469326000024/bfb-20260430.htm', 'Rapport annuel 10-K 2026 (exercice clos le 30/04/2026) de Brown-Forman déposé à la SEC (autorité boursière américaine) : « Principal Brands Jack Daniel’s Tennessee Whiskey el Jimador New Mix RTD »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'electrolux-marque'), (select id from entities where slug = 'electrolux'), 'https://www.electroluxgroup.com/', 'Site officiel du groupe Electrolux (page d''accueil) : « Under our group of leading appliance brands, including Electrolux, AEG and Frigidaire »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'elephant'), (select id from entities where slug = 'lipton-teas-and-infusions'), 'https://www.liptonteas.com/fr/nos-marques/portfolio/elephant', 'Page « Nos marques » consacrée à Éléphant du site officiel de LIPTON Teas and Infusions : « ‘la société des Thés de l’Eléphant’. En 1987, une nouvelle ère commence, marquée par le lancement des infusions auxquelles la marque dédie son savoir-faire depuis 2003. Nous contacter Fournisseurs Professionels Journalistes Suivez-nous sur Politique de confidentialité Gestion des cookies Protection des données personnelles © LIPTON Teas and Infusions »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
@@ -3635,6 +3644,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'kwak'), (select id from entities where slug = 'ab-inbev'), 'https://filings.xbrl.org/5493008H3828EMEXB082/2025-12-31/ESEF/BE/0/5493008H3828EMEXB082-2025-12-31-1-en/reports/5493008H3828EMEXB082-2025-12-31-1-en.xhtml', 'Rapport annuel 2025 d''AB InBev (format ESEF, en anglais), liste des marques déposées du groupe : « Kona, Kwak, Labatt, Lakeport, La Virgen, Leffe 0.0, Leon, Löwenbräu, Mackeson »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'l-arbre-vert'), (select id from entities where slug = 'sodalis-france'), 'https://www.arbrevert.fr/', 'Site officiel de la marque L''Arbre Vert (pied de page) : « L''Arbre Vert Notre histoire Nos engagements Notre démarche L''Arbre Vert x Yuka Vos avis Blog & Conseils Presse Nous rejoindre Espace Professionnels A Brand of Sodalis Group »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'l-or'), (select id from entities where slug = 'keurig-dr-pepper'), 'https://www.sec.gov/Archives/edgar/data/1418135/000141813526000051/kdp-20260630.htm', 'Rapport trimestriel 10-Q au 30/06/2026 de Keurig Dr Pepper déposé à la SEC (autorité boursière américaine) ; JDE Peet''s appartient à Keurig Dr Pepper depuis le 01/04/2026 : « 2. JDE Peet''s Acquisition OVERVIEW AND TOTAL CONSIDERATION EXCHANGED JDE Peet''s is a global coffee and tea company, serving more than 100 markets, with a portfolio of leading brands including Jacobs, L''OR, and Peet''s, alongside a collection of local icons »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'la-boulangere'), (select id from entities where slug = 'la-boulangere-et-co'), 'https://www.laboulangere.com/mentionslegales/', 'Mentions légales du site officiel de la marque La Boulangère : « La Boulangère Mentions légales Le site web Le site https://www.laboulangere.com est édité par la société LA BOULANGÈRE & CO »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'la-chouffe'), (select id from entities where slug = 'duvel-moortgat'), 'https://www.duvelmoortgat.be/', 'Site officiel du brasseur Duvel Moortgat (en anglais) : « With 13 breweries and over 20 iconic brands, including Duvel, Vedett, Chouffe, Liefmans, and 805, we craft exceptional beers »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'la-croix-javel'), (select id from entities where slug = 'colgate-palmolive'), 'https://www.colgatepalmolive.fr/brands', 'Page « Nos marques » du site officiel de Colgate-Palmolive France : « Assurez-vous un intérieur propre et sain grâce à notre gamme variée de produits d''entretien ménager. Nous proposons des solutions de nettoyage efficaces pour tous vos besoins, de la lessive à la cuisine en passant par la salle de bains, afin que votre maison ne soit pas seulement propre, mais aussi pleine de vie. Ajax La Croix Palmolive Dish Soap Tahiti Soupline »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'la-fermiere-marque'), (select id from entities where slug = 'la-fermiere'), 'https://www.lafermiere.com/mentions-legales/', 'Mentions légales du site officiel de la marque La Fermière : « dont est propriétaire et éditeur la société LA FERMIERE, société anonyme à conseil d’administration au capital social de 193 958,39 € ayant son siège social 375, Avenue de Passe-Temps, ZA Napollon, 13400 Aubagne (France) imm »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
@@ -3761,6 +3771,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'mccain-frites'), (select id from entities where slug = 'mccain'), 'https://www.mccain.fr/', 'Site officiel de McCain France (filiale de McCain Foods) : « McCain France, votre référence en produits surgelés »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'mega-construction'), (select id from entities where slug = 'mattel'), 'https://www.sec.gov/Archives/edgar/data/63276/000162828026010716/mat-20251231.htm', 'Rapport annuel 10-K 2025 de Mattel déposé à la SEC (autorité boursière américaine) : « Games, and Other —including brands such as Masters of the Universe , Mattel Brick Shop , MEGA , UNO »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'men-perfect'), (select id from entities where slug = 'henkel'), 'https://www.henkel.com/our-businesses/men-perfect-136778', 'Fiche de la marque Men Perfect sur le site officiel du groupe Henkel (rubrique « Our Businesses », en anglais) : « Men Perfect - Hair Care Products - Henkel »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'menguys'), (select id from entities where slug = 'france-snacking-aperitif'), 'https://www.menguys.fr/informations-legales/', 'Informations légales du site officiel de la marque Menguy''s : « 1. Présentation de la société. Menguy’ s, société anonyme à conseil d’administration au capital de 57 120 €uros, inscrite au registre du commerce et des sociétés de Toulouse sous le numéro 333 821 692, sise 13-15 rue Jean Monnet Saint Parc D’Activités du Casse II, BP 14246, 31240 L’Union – France , est le propriétaire du site www.menguys.fr »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'mentos'), (select id from entities where slug = 'perfetti-van-melle'), 'https://www.perfettivanmelle.com/our-brands/overview/', 'Page Our brands du site officiel de Perfetti Van Melle (en anglais) : « Global brands Mentos Its product concepts, packaging and flavours make this our most innovative, unconventional brand. Mentos brand profile Chupa Chups The original lollipop comes in more than 100 flavours »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'meo'), (select id from entities where slug = 'cafes-meo'), 'https://www.meo.fr/mentions-legales/', 'Mentions légales du site officiel des Cafés Méo : « 1. Éditeur Cafés Méo Service internet 112 quai de l’ouest 59000 Lille Tel : 03.20.22.05.00 Fax : 03.20.92.50.03 SAS au capital de 325 449 € N° SIRET : 459 501 219 00214 »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'merci-storck'), (select id from entities where slug = 'storck'), 'https://www.storck.com/en/brands/', 'Page « Our Brands » du site officiel du confiseur Storck (en anglais) : « Brands Toffifee Latest news Products merci News Products nimm2 News Products Knoppers News Products Werther''s Original Latest news Products RIESEN Products Mamba »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
@@ -5282,6 +5293,7 @@ insert into evidence (entity_id, indicator_id, source_id, observed_on, value_typ
   ((select id from entities where slug = 'la-banque-postale'), (select id from indicators where code = 'TAX_CBCR_PUBLISHED'), (select id from sources where code = 'ESEF'), '2026-04-07', 'boolean', null, true, null, 1, 'result', 0.95, 'auto:import_esef', 'approved', false, 'https://filings.xbrl.org/96950066U5XAAIRCPA78/2025-12-31/ESEF/FR/0/96950066U5XAAIRCPA78-2025-12-31-1-FR/reports/ixbrlviewer.html', 'Rapport financier annuel 2025 (ESEF) : « 4.9.9 Informations relatives aux implantations et activités au 31 décembre 2025 L’article L. 511-45 du Code monétaire et financier impose aux établissements de crédit de publier des informations relatives à l’exercice clos le 31 décembre 2025 sur leurs implantations et leurs activités incluses dans leur périmètre de consolidation, dans chaque État ou territoire. »'),
   ((select id from entities where slug = 'la-banque-postale'), (select id from indicators where code = 'TAX_EFFECTIVE_RATE'), (select id from sources where code = 'ESEF'), '2026-04-07', 'numeric', 32.8, null, null, null, 'result', 0.95, 'auto:import_esef', 'approved', false, 'https://filings.xbrl.org/96950066U5XAAIRCPA78/2025-12-31/ESEF/FR/0/96950066U5XAAIRCPA78-2025-12-31-1-FR/reports/ixbrlviewer.html', 'Rapport financier annuel 2025 (ESEF, faits IFRS balisés) : résultat avant impôt 2 739 M€, impôt sur les bénéfices 898 M€ → taux effectif 32,8 %. Contrôle : résultat net 1 841 M€ = avant impôt − impôt.'),
   ((select id from entities where slug = 'la-banque-postale'), (select id from indicators where code = 'WAT_CDP'), (select id from sources where code = 'CDP'), '2025-12-31', 'ordinal', null, null, 'F', 0, 'result', 0.85, 'auto:import_cdp_scores', 'approved', false, 'https://www.cdp.net/en/data/scores', 'CDP, notes publiques 2025 (liste complète, page « Scores and A Lists ») : « La Banque Postale » (France), sécurité de l''eau — « Did not disclose » : sollicitée par CDP, l''entreprise n''a pas répondu (note F selon la méthode CDP).'),
+  ((select id from entities where slug = 'la-boulangere-et-co'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 99, null, null, 0.99, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 99/100 (LA BOULANGERE & CO)'),
   ((select id from entities where slug = 'la-fermiere'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2025-03-01', 'numeric', 98, null, null, 0.98, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2024 : 98/100 (SOCIETE LA FERMIERE)'),
   ((select id from entities where slug = 'la-nef'), (select id from indicators where code = 'INV_FOSSIL_FINANCING'), (select id from sources where code = 'ESG_REPORT'), '2026-03-10', 'numeric', 0, null, null, null, 'result', 0.7, 'revue-manuelle', 'approved', false, 'https://www.lanef.com/wp-content/uploads/2026/03/Rapport-annuel-2025_La-Nef.pdf', 'Rapport annuel 2025 de La Nef (déclaration de l''établissement ; liste complète des financements publiée dans le même rapport) : « nous pouvons assurer avec certitude que les secteurs suivants sont exclus depuis notre création. Armement Déforestation Énergies fossiles Fast fashion Jeux d’argent Nucléaire Partis politiques Pesticides Pornographie Tabac »'),
   ((select id from entities where slug = 'la-nef'), (select id from indicators where code = 'INV_RESPONSIBLE_POLICY'), (select id from sources where code = 'ESG_REPORT'), '2026-03-10', 'category', null, null, 'policy', 0.5, 'policy', 0.7, 'revue-manuelle', 'approved', false, 'https://www.lanef.com/wp-content/uploads/2026/03/Rapport-annuel-2025_La-Nef.pdf', 'Rapport annuel 2025 de La Nef — politique d''exclusion sectorielle : « nous pouvons assurer avec certitude que les secteurs suivants sont exclus depuis notre création. Armement Déforestation Énergies fossiles Fast fashion Jeux d’argent Nucléaire Partis politiques Pesticides Pornographie Tabac »'),
