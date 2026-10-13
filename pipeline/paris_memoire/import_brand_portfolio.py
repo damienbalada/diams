@@ -39,7 +39,9 @@ REVIEWER_LEGAL = "auto:verify_ownership"
 
 
 def _fold(s: str) -> str:
-    s = unicodedata.normalize("NFKD", s.replace("’", "'"))
+    # Les signes de marque déposée ne font pas partie du nom (« BEN’S ORIGINAL™ »).
+    s = re.sub(r"[™®©]", " ", s.replace("’", "'"))
+    s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c))
     return re.sub(r"\s+", " ", s).strip().lower()
 

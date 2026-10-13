@@ -38,3 +38,8 @@ def test_ecart_si_la_marque_n_est_pas_dans_la_citation_ou_le_document():
     assert res[0][1] == "ÉCART"
     res = check_rows([_row()], ents, {"food": "s"}, lambda u: "… Milka, LU …")
     assert res[0][1] == "OK"
+
+
+def test_signes_de_marque_deposee_ignores():
+    assert name_in_quote("Ben's Original", "brands like Ben’s Original™, Dolmio ®")
+    assert name_in_quote("Dolmio", "brands like Ben’s Original™, Dolmio®")
