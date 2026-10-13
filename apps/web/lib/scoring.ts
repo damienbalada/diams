@@ -184,6 +184,8 @@ export interface IndicatorResult {
   informative?: boolean;
   /** Obligation levée : donnée déclarée non matérielle par l'entreprise (motif). */
   exemption?: string;
+  /** Affiché pour information (motif d'exemption) mais hors note et hors fiabilité. */
+  not_counted?: boolean;
 }
 export interface DimensionResult {
   dimension_code: string;
@@ -475,9 +477,12 @@ export function computeScore(input: ScoreInput): ScoreResult {
   for (const dimCode of dimsWithIndicators) {
     // Un label ou un indicateur complémentaire absent n'existe pas pour l'entité :
     // ni note, ni fiabilité, ni ligne — sauf si la loi impose de le publier.
+    // Déclaré non matériel par l'entreprise, il reste affiché avec son motif (le
+    // lecteur voit pourquoi il n'est pas compté 0), mais hors calcul (v0.7.3).
+    const optionalAbsent = (i: Indicator) =>
+      (i.presence_only || i.complementary) && !i.mandatory && !resByCode.get(i.code)?.covered;
     const inds = input.applicableIndicators.filter(
-      (i) => i.dimension_code === dimCode
-        && !((i.presence_only || i.complementary) && !i.mandatory && !resByCode.get(i.code)?.covered),
+      (i) => i.dimension_code === dimCode && !(optionalAbsent(i) && !i.exemption),
     );
     const gate = gateByDim.get(dimCode);
     const gateCode = gate?.gate_indicator_code;
@@ -485,7 +490,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
     // Le gate ne pèse PAS dans la moyenne (il sert de plafond), et une
     // controverse non corroborée « display_only » est affichée mais hors calcul.
     const scored = inds.filter(
-      (i) => i.code !== gateCode && !resByCode.get(i.code)?.display_only,
+      (i) => i.code !== gateCode && !resByCode.get(i.code)?.display_only && !optionalAbsent(i),
     );
 
     let scoreNum = 0;
@@ -511,6 +516,10 @@ export function computeScore(input: ScoreInput): ScoreResult {
       indicators.push(r);
       if (ind.code === gateCode) continue; // exclu de la moyenne et des compteurs
       if (r.display_only) continue;        // affiché mais hors calcul (controverse non corroborée)
+      if (optionalAbsent(ind)) {           // non matériel déclaré : motif affiché, hors calcul
+        r.not_counted = true;
+        continue;
+      }
       confWeight += ind.weight;
       let conf: number;
       if (r.covered && ind.disclosure && ind.mandatory && (r.value ?? 0) >= 0.999) {

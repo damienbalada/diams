@@ -521,7 +521,10 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                   </>
                 ) : i.exemption ? (
                   <>
-                    {i.exemption} Elle n'entre pas dans la note, mais baisse la fiabilité.
+                    {i.exemption}{" "}
+                    {i.not_counted
+                      ? "Donnée complémentaire : elle n'entre ni dans la note ni dans la fiabilité."
+                      : "Elle n'entre pas dans la note, mais baisse la fiabilité."}
                   </>
                 ) : (
                   <>
