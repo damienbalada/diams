@@ -54,6 +54,10 @@ ALIASES = {
     # Noms trop courts ou différents de la raison sociale (vérifiés : sociétés mères).
     "hp-inc": "HP Inc",
     "lego": "The LEGO Group",
+    # Sociétés mères dont le nom diffère de la raison sociale suivie (vérifiées).
+    "dr-oetker": "Dr. August Oetker KG",
+    "ecotone-france": "Ecotone",
+    "picard": "PICARD GROUPE SAS",
 }
 # Rapprochement ambigu (entité CDP incertaine) : on s'abstient.
 SKIP = {

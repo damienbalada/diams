@@ -54,6 +54,21 @@ ALIASES = {
     # Groupe Ingka (magasins IKEA), suivi sous ce nom ; « Inter Ikea Systems BV » est le
     # franchiseur, un autre groupe.
     "ikea": "Ingka Services A.B.",
+    # Entités européennes désignées des groupes (vérifiées le 13/10/2026).
+    "bacardi": "Bacardi-Martini BV",
+    "hasbro": "Hasbro International Holdings BV",
+    "carlsberg": "Carlsberg Breweries A/S",
+    "reckitt": "Reckitt Benckiser ENA B.V.",
+    "brown-forman": "Brown-Forman Netherlands BV",
+    "asahi": "Asahi CE&Europe Services s.r.o",
+    "delonghi": "De'Longhi Appliances s.r.l.",
+    "energizer": "Energizer",
+    "campofrio-france": "Campofrio Food Group SAU (Sigma Europe)",
+    "nomad-foods": "Nomad Foods Europe Limited",
+    "mccormick": "McCormick & Company INC",
+    "duracell": "Duracell International Operations Sàrl",
+    "canon": "Canon Europe Ltd.",
+    "capri-sun-group": "Capri Sun",
 }
 # Groupes inscrits sous plusieurs entités distinctes ou entité incertaine : on s'abstient.
 SKIP = {"sony", "credit-mutuel-arkea", "credit-mutuel-alliance-federale"}

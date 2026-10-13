@@ -109,6 +109,11 @@ ALIASES = {
     "lego": "The LEGO Group",
     # Ecotone (Bjorg, Clipper, Alter Eco…) : seule entrée « ECOTONE », située en France.
     "ecotone-france": "ECOTONE",
+    "alsace-lait": "Alsace Lait",
+    "laiterie-de-saint-denis-de-l-hotel": "LSDH LAITERIE DE SAINT-DENIS DE L'HOTEL",
+    "expanscience": "Expanscience",
+    # Nutrition & Santé, filiale opérationnelle dont Nardobel est la société mère directe (GLEIF).
+    "nardobel": "Nutrition&Santé",
 }
 
 
