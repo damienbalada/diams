@@ -770,8 +770,19 @@ def document_text(url: str, client: httpx.Client) -> str:
 
         import pypdf
         logging.getLogger("pypdf").setLevel(logging.ERROR)
-        return "\n".join(p.extract_text() or "" for p in pypdf.PdfReader(io.BytesIO(r.content)).pages)
+        return "\n".join(_page_text(p) for p in pypdf.PdfReader(io.BytesIO(r.content)).pages)
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", r.text, flags=re.S)))
+
+
+def _page_text(page) -> str:
+    """Texte d'une page PDF ; une page dont un flux dépasse la limite de décompression de
+    pypdf (image pleine page d'un rapport illustré) est ignorée plutôt que de faire échouer
+    la lecture de tout le document : on ne cherche que des citations textuelles."""
+    import pypdf
+    try:
+        return page.extract_text() or ""
+    except pypdf.errors.LimitReachedError:
+        return ""
 
 
 #: Étiquette de relecture des preuves de tier 3 approuvées par délégation de

@@ -69,6 +69,12 @@ ALIASES = {
     "duracell": "Duracell International Operations Sàrl",
     "canon": "Canon Europe Ltd.",
     "capri-sun-group": "Capri Sun",
+    # Vérifiées le 14/10/2026 : le Groupement lui-même (site mousquetaires.com) ; la branche
+    # spiritueux qui porte toutes les marques de Suntory Holdings suivies ; la filiale
+    # européenne de Suntory Beverage & Food (Orangina, Schweppes, Oasis).
+    "mousquetaires": "Groupement Les Mousquetaires",
+    "suntory-holdings": "Suntory Global Spirits",
+    "suntory-beverage-food": "Suntory Beverage & Food Europe",
 }
 # Groupes inscrits sous plusieurs entités distinctes ou entité incertaine : on s'abstient.
 SKIP = {"sony", "credit-mutuel-arkea", "credit-mutuel-alliance-federale"}

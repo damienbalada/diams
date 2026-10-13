@@ -114,6 +114,9 @@ ALIASES = {
     "expanscience": "Expanscience",
     # Nutrition & Santé, filiale opérationnelle dont Nardobel est la société mère directe (GLEIF).
     "nardobel": "Nutrition&Santé",
+    # Auchan Retail, filiale de commerce de détail d'ELO (plus de 98 % de l'activité du
+    # groupe, plan de vigilance 2025 d'ELO) ; vérifié le 14/10/2026.
+    "auchan": "Auchan Retail",
 }
 
 
