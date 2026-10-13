@@ -18,7 +18,7 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 1392
+--   entities                 1394
 --   evidence                 1915
 --   political_groups         18
 --   civic_votes              4
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 1126
+--   entity_ownership_sources 1128
 -- =============================================================================
 
 begin;
@@ -457,6 +457,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('apivita', 'Apivita', 'Apivita', null, null, 'ES', (select id from sectors where code = 'personal_care'), true, false),
   ('apple', 'Apple Inc.', 'Apple', 'HWUPKR0MPOU8FGXBT394', null, 'US', (select id from sectors where code = 'tech_electronics'), false, false),
   ('appleton-estate', 'Appleton Estate', 'Appleton Estate', null, null, 'IT', (select id from sectors where code = 'wines_spirits'), true, false),
+  ('ardbeg', 'Ardbeg', 'Ardbeg', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('ariel', 'Ariel', 'Ariel', null, null, 'DE', (select id from sectors where code = 'personal_care'), true, false),
   ('ariete', 'Ariete', 'Ariete', null, null, 'IT', (select id from sectors where code = 'household_durables'), true, false),
   ('arla', 'Arla Foods amba', 'Arla Foods', '529900IJ6T4P1O10R377', null, 'DK', (select id from sectors where code = 'food'), false, false),
@@ -647,6 +648,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('chambord', 'Chambord', 'Chambord', null, null, 'US', (select id from sectors where code = 'wines_spirits'), true, false),
   ('champagne-canard-duchene', 'Champagne Canard-Duchêne', 'Champagne Canard-Duchêne (société)', '969500DWG8SE6IDVIC48', '335680245', 'FR', (select id from sectors where code = 'wines_spirits'), false, false),
   ('champagne-laurent-perrier', 'Laurent-Perrier', 'Laurent-Perrier (champagne)', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
+  ('champagne-mercier', 'Mercier', 'Champagne Mercier', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('champagne-salon', 'Salon', 'Champagne Salon', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('champagne-taittinger', 'Taittinger', 'Taittinger (champagne)', null, null, 'FR', (select id from sectors where code = 'wines_spirits'), true, false),
   ('champomy', 'Champomy', 'Champomy', null, null, 'FR', (select id from sectors where code = 'beverages'), true, false),
@@ -1846,6 +1848,7 @@ from (values
   ('aperol', 'campari', 100::numeric),
   ('apivita', 'puig', 100::numeric),
   ('appleton-estate', 'campari', 100::numeric),
+  ('ardbeg', 'lvmh', 100::numeric),
   ('ariel', 'procter-gamble', 100::numeric),
   ('ariete', 'delonghi', 100::numeric),
   ('arla-marque', 'arla', 100::numeric),
@@ -1998,6 +2001,7 @@ from (values
   ('chabrior', 'mousquetaires', 100::numeric),
   ('chambord', 'brown-forman', 100::numeric),
   ('champagne-laurent-perrier', 'laurent-perrier', 100::numeric),
+  ('champagne-mercier', 'lvmh', 100::numeric),
   ('champagne-salon', 'laurent-perrier', 100::numeric),
   ('champagne-taittinger', 'taittinger', 100::numeric),
   ('champomy', 'orangina-schweppes-france', 100::numeric),
@@ -3156,6 +3160,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'aperol'), (select id from entities where slug = 'campari'), 'https://filings.xbrl.org/213800ED5AN2J56N6Z02/2025-12-31/ESEF/NL/0/davidecamparimilano-2025-12-31-0-en/reports/davidecamparimilano-2025-12-31-0-en.xhtml', 'Rapport annuel 2025 de Campari Group (format électronique officiel ESEF, en anglais) : « The classification of brands within Campari Group’s portfolio strategy is as follows: Champion Aperol Aperol is the flagship brand »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'apivita'), (select id from entities where slug = 'puig'), 'https://filings.xbrl.org/549300OVHNSX30L1AQ94/2024-12-31/ESEF/ES/0/549300OVHNSX30L1AQ94-20241231-es/reports/549300OVHNSX30L1AQ94-20241231-es.xhtml', 'Rapport annuel 2024 de Puig (format électronique officiel ESEF, en espagnol) : « Las marcas de Puig que operan en este segmento incluyen Uriage, Apivita, Dr.Barbara Sturm, Kama Ayurveda, Loto del Sur y Charlotte Tilbury »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'appleton-estate'), (select id from entities where slug = 'campari'), 'https://filings.xbrl.org/213800ED5AN2J56N6Z02/2025-12-31/ESEF/NL/0/davidecamparimilano-2025-12-31-0-en/reports/davidecamparimilano-2025-12-31-0-en.xhtml', 'Rapport annuel 2025 de Campari Group (format électronique officiel ESEF, en anglais) : « Generators Brands underpinning scale in key markets: Appleton Estate, Wray&Nephew, Grand Marnier, American Honey, Picon, Cynar, Mondoro, Skyy, Magnum, Dreher and Riccadonna »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'ardbeg'), (select id from entities where slug = 'lvmh'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0195/CA8A1E35A6C70FC2DE6B35F0939523887728C2FE2C11DFAC7F9B5F7675629928.zip', 'Document d''enregistrement universel 2025 de LVMH, déposé auprès de l''AMF (activité Vins et Spiritueux) : « L’ Ardbeg House est ouvert sur l’île d’Islay, un écrin magnifique pour s’imprégner de l’atmosphère unique de la marque. »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'ariel'), (select id from entities where slug = 'procter-gamble'), 'https://www.sec.gov/Archives/edgar/data/80424/000008042426000103/pg-20260630.htm', 'Rapport annuel 10-K 2026 de Procter & Gamble déposé à la SEC (autorité boursière américaine) : « global market leader with over 35% market share in the markets in which we compete, primarily behind our Tide, Ariel and Downy brands. Our global home care market share is more than 30% across the categories in which we compete »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'ariete'), (select id from entities where slug = 'delonghi'), 'https://www.delonghigroup.com/en/brand', 'Page Brand Portfolio du site officiel du groupe De''Longhi : « Brand Portfolio De'' Longhi Kenwood Braun NutriBullet Ariete »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'arla-marque'), (select id from entities where slug = 'arla'), 'https://filings.xbrl.org/529900IJ6T4P1O10R377/2025-12-31/ESEF/DK/0/Arla-2025-12-31-en/reports/Arla-2025-12-31-en.xhtml', 'Rapport annuel 2025 d''Arla Foods (format électronique officiel ESEF, en anglais) : « The Arla ® brand spans multiple categories such as milk, yoghurt and cheese, supported by various sub-brands »', '2026-10-13', 'auto:verify_ownership'),
@@ -3308,6 +3313,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'chabrior'), (select id from entities where slug = 'mousquetaires'), 'https://www.mousquetaires.com/nos-filiales/agromousquetaires/', 'Page Agromousquetaires (unités de production des marques de distributeur) du site officiel du Groupement Les Mousquetaires : « Produits laitiers avec Pâturages, céréales et gâteaux avec Chabrior et Filet Bleu, produits carnés avec Jean Rozé et Monique Ranou, produits de la mer avec Capitaine Cook, et bien d’autres marques : nos unités de production fabriquent les MDD du Groupement Mousquetaires »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'chambord'), (select id from entities where slug = 'brown-forman'), 'https://www.sec.gov/Archives/edgar/data/14693/000001469326000024/bfb-20260430.htm', 'Rapport annuel 10-K 2026 (exercice clos le 30/04/2026) de Brown-Forman déposé à la SEC (autorité boursière américaine) : « Principal Brands Jack Daniel’s Tennessee Whiskey el Jimador New Mix RTD Jack Daniel’s RTD 1 el Jimador Tequilas 4 Jack Daniel’s Tennessee Honey Herradura Tequilas 5 Gentleman Jack Rare Tennessee Whiskey Old Forester Kentucky Straight Bourbon Whisky Jack Daniel’s Tennessee Apple Old Forester Whiskey Row Series Jack Daniel’s Tennessee Blackberry Old Forester Single Barrel Straight Bourbon Whisky Jack Daniel’s Tennessee Fire Diplomático Rums 5 Jack Daniel’s Single Barrel Collection 2 Gin Mare 5 Jack Daniel’s Bonded Series 3 Chambord Liqueur »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'champagne-laurent-perrier'), (select id from entities where slug = 'laurent-perrier'), 'https://filings.xbrl.org/96950036OIHAEGNGJ871/2026-03-31/ESEF/FR/0/96950036OIHAEGNGJ871-2026-03-31-1-fr/reports/96950036OIHAEGNGJ871-2026-03-31-1-fr.xhtml', 'Document d''enregistrement universel 2025-2026 de Laurent-Perrier (format ESEF) : « Le Groupe vend ses produits principalement sous les marques, Laurent-Perrier, Salon, Delamotte et Champagne de Castellane »', '2026-10-13', 'auto:verify_ownership'),
+  ((select id from entities where slug = 'champagne-mercier'), (select id from entities where slug = 'lvmh'), 'https://bdif.amf-france.org/back/api/v1/documents/2026/D.26-0195/CA8A1E35A6C70FC2DE6B35F0939523887728C2FE2C11DFAC7F9B5F7675629928.zip', 'Document d''enregistrement universel 2025 de LVMH, déposé auprès de l''AMF (frise des Maisons du groupe par date de création) : « 1852 Le Bon Marché 1854 Louis Vuitton 1858 Mercier 1860 TAG Heuer »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'champagne-salon'), (select id from entities where slug = 'laurent-perrier'), 'https://filings.xbrl.org/96950036OIHAEGNGJ871/2026-03-31/ESEF/FR/0/96950036OIHAEGNGJ871-2026-03-31-1-fr/reports/96950036OIHAEGNGJ871-2026-03-31-1-fr.xhtml', 'Document d''enregistrement universel 2025-2026 de Laurent-Perrier (format ESEF) : « Le Groupe vend ses produits principalement sous les marques, Laurent-Perrier, Salon, Delamotte et Champagne de Castellane »', '2026-10-13', 'auto:verify_ownership'),
   ((select id from entities where slug = 'champagne-taittinger'), (select id from entities where slug = 'taittinger'), 'https://www.taittinger.com/legal-notice', 'Mentions légales du site officiel de la marque Taittinger : « (ci-après le « Site ») est la propriété de la société Taittinger CCVC. Taittinger CCVC 9, place Saint-Nicaise – CS 10011 – 51722 Reims Cedex – France N° TVA : FR 59 490 341 062 N° SIRET : 490 341 062 00035 Tél »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'champomy'), (select id from entities where slug = 'orangina-schweppes-france'), 'https://suntorybeverageandfood-europe.com/fr-FR/france/', 'Page d''accueil du site officiel de Suntory Beverage & Food France (rubrique « Nos marques ») ; site édité par Orangina Schweppes France selon ses mentions légales : « Nos marques Nos marques de boissons rafraîchissantes sont incontournables en France: Orangina, Schweppes, Pulco, Oasis, Celsius, MayTea et Champomy. »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
