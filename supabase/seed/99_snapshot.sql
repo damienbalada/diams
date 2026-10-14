@@ -18,8 +18,8 @@
 --   scoring_params           11
 --   value_profiles           4
 --   profile_weights          40
---   entities                 3097
---   evidence                 2398
+--   entities                 3099
+--   evidence                 2399
 --   political_groups         18
 --   civic_votes              4
 --   civic_positions          35
@@ -29,7 +29,7 @@
 --   indicator_sectors        33
 --   sector_dimension_weights 5
 --   obligation_exemptions    3
---   entity_ownership_sources 2146
+--   entity_ownership_sources 2147
 -- =============================================================================
 
 begin;
@@ -719,6 +719,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('biscuiterie-de-l-abbaye', 'BISCUITERIE DE L''ABBAYE SA', 'Biscuiterie de l''Abbaye', null, '376450029', 'FR', (select id from sectors where code = 'food'), false, false),
   ('biscuiterie-husson', 'BISCUITERIE HUSSON', 'Biscuiterie Husson', null, '352426282', 'FR', (select id from sectors where code = 'food'), false, false),
   ('biscuiterie-husson-marque', 'Biscuiterie Husson', 'Biscuiterie Husson', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('biscuiterie-la-mere-poulard', 'BISCUITERIE LA MERE POULARD', 'Biscuiterie La Mère Poulard', null, '423919299', 'FR', (select id from sectors where code = 'food'), false, false),
   ('biscuiterie-louvat', 'BISCUITERIE LOUVAT', 'Biscuiterie Louvat', null, '323374918', 'FR', (select id from sectors where code = 'food'), false, false),
   ('biscuiterie-louvat-marque', 'Biscuiterie Louvat', 'Biscuiterie Louvat', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('biscuiterie-ouro', 'BISCUITERIE OURO', 'Biscuiterie Ouro', null, '891184590', 'FR', (select id from sectors where code = 'food'), false, false),
@@ -1974,6 +1975,7 @@ insert into entities (slug, legal_name, display_name, lei, siren, country, secto
   ('la-marmite-de-lanig-marque', 'La Marmite de Lanig', 'La Marmite de Lanig', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('la-melba', 'EURL LA MELBA', 'La Melba', null, '529033656', 'FR', (select id from sectors where code = 'food'), false, false),
   ('la-melba-marque', 'LA MELBA', 'La Melba', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
+  ('la-mere-poulard', 'La Mère Poulard', 'La Mère Poulard (biscuits)', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
   ('la-minoterie-de-colagne', 'LA MINOTERIE DE COLAGNE', 'La Minoterie de Colagne', null, '353523418', 'FR', (select id from sectors where code = 'food'), false, false),
   ('la-montlouisienne', 'LA MONTLOUISIENNE', 'La Montlouisienne', null, '340241421', 'FR', (select id from sectors where code = 'food'), false, false),
   ('la-montlouisienne-marque', 'LA MONTLOUISIENNE', 'La Montlouisienne', null, null, 'FR', (select id from sectors where code = 'food'), true, false),
@@ -4570,6 +4572,7 @@ from (values
   ('la-maison-des-miels-marque', 'la-maison-des-miels', 100::numeric),
   ('la-marmite-de-lanig-marque', 'la-marmite-de-lanig', 100::numeric),
   ('la-melba-marque', 'la-melba', 100::numeric),
+  ('la-mere-poulard', 'biscuiterie-la-mere-poulard', 100::numeric),
   ('la-montlouisienne-marque', 'la-montlouisienne', 100::numeric),
   ('la-mordue', 'agrial', 100::numeric),
   ('la-perruche', 'tereos', 100::numeric),
@@ -6896,6 +6899,7 @@ insert into entity_ownership_sources (entity_id, owner_id, source_url, excerpt, 
   ((select id from entities where slug = 'la-maison-des-miels-marque'), (select id from entities where slug = 'la-maison-des-miels'), 'https://www.santepubliquefrance.fr/sites/default/files/rdd/document/Entreprises-et-marques-engagees-en-faveur-de-nutri-score-France-20260224.pdf', 'Liste officielle de Santé publique France « Entreprises et marques utilisant le Nutri-Score en France » (janvier 2026, déclarations des entreprises) : marques déclarées par la société la maison des miels : « la maison des miels LA MAISON DES MIELS »', '2026-10-14', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'la-marmite-de-lanig-marque'), (select id from entities where slug = 'la-marmite-de-lanig'), 'https://www.santepubliquefrance.fr/sites/default/files/rdd/document/Entreprises-et-marques-engagees-en-faveur-de-nutri-score-France-20260224.pdf', 'Liste officielle de Santé publique France « Entreprises et marques utilisant le Nutri-Score en France » (janvier 2026, déclarations des entreprises) : marques déclarées par la société La Marmite de Lanig : « La Marmite de Lanig La Marmite de Lanig »', '2026-10-14', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'la-melba-marque'), (select id from entities where slug = 'la-melba'), 'https://www.santepubliquefrance.fr/sites/default/files/rdd/document/Entreprises-et-marques-engagees-en-faveur-de-nutri-score-France-20260224.pdf', 'Liste officielle de Santé publique France « Entreprises et marques utilisant le Nutri-Score en France » (janvier 2026, déclarations des entreprises) : marques déclarées par la société EURL La Melba : « EURL La Melba LA MELBA »', '2026-10-14', 'delegue-editeur:verifie-mot-pour-mot'),
+  ((select id from entities where slug = 'la-mere-poulard'), (select id from entities where slug = 'biscuiterie-la-mere-poulard'), 'https://www.biscuiterie-mere-poulard.com/mentions-legales', 'Mentions légales du site officiel des biscuits La Mère Poulard, mises à jour le 1er septembre 2026 (éditeur : Biscuiterie La Mère Poulard, SIREN 423919299 vérifié dans l''annuaire officiel des entreprises) : « Le présent site internet est édité par : BISCUITERIE LA MÈRE POULARD Société par actions simplifiée à associé unique (SASU) »', '2026-10-14', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'la-montlouisienne-marque'), (select id from entities where slug = 'la-montlouisienne'), 'https://www.santepubliquefrance.fr/sites/default/files/rdd/document/Entreprises-et-marques-engagees-en-faveur-de-nutri-score-France-20260224.pdf', 'Liste officielle de Santé publique France « Entreprises et marques utilisant le Nutri-Score en France » (janvier 2026, déclarations des entreprises) : marques déclarées par la société LA MONTLOUISIENNE : « LA MONTLOUISIENNE LA MONTLOUISIENNE »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'la-mordue'), (select id from entities where slug = 'agrial'), 'https://www.agrial.com/nos-marques-agrial-cooperative-agricole-et-agroalimentaire/', 'Page Nos marques du site officiel d''Agrial (carrousel « Quelques produits issus de nos filières ») : « La Mordue La Mordue Original »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
   ((select id from entities where slug = 'la-perruche'), (select id from entities where slug = 'tereos'), 'https://www.tereos.com/fr/nos-marques/', 'Page Nos marques du site officiel de Tereos : « Guarani commercialise également la marque française La Perruche »', '2026-10-13', 'delegue-editeur:verifie-mot-pour-mot'),
@@ -8272,6 +8276,7 @@ insert into evidence (entity_id, indicator_id, source_id, observed_on, value_typ
   ((select id from entities where slug = 'biocoop'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 93, null, null, 0.93, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 93/100 (BIOCOOP)'),
   ((select id from entities where slug = 'biofournil'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 99, null, null, 0.99, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 99/100 (BIOFOURNIL)'),
   ((select id from entities where slug = 'biscuiterie-de-l-abbaye'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 98, null, null, 0.98, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 98/100 (BISCUITERIE DE L''ABBAYE SA)'),
+  ((select id from entities where slug = 'biscuiterie-la-mere-poulard'), (select id from indicators where code = 'LAB_EGAPRO_INDEX'), (select id from sources where code = 'EGAPRO'), '2026-03-01', 'numeric', 90, null, null, 0.9, 'result', 0.95, 'auto:pipeline', 'approved', false, 'https://egapro.travail.gouv.fr/index-egapro/recherche', 'Index Égapro 2025 : 90/100 (BISCUITERIE LA MERE POULARD)'),
   ((select id from entities where slug = 'blue-skies-holdings-limited'), (select id from indicators where code = 'ENV_SBTI_VALIDATED'), (select id from sources where code = 'SBTI'), '2026-10-14', 'category', null, null, 'Targets set', 1, 'commitment', 0.85, 'auto:import_sbti', 'approved', false, 'https://sciencebasedtargets.org/companies-taking-action', 'SBTi, export « Companies taking action » (consulté le 14/10/2026) : « Blue Skies Holdings Ltd » — objectif de court terme validé (1,5 °C) (objectif validé par la SBTi : un engagement sur l''avenir, pas un résultat).'),
   ((select id from entities where slug = 'bmw'), (select id from indicators where code = 'ENV_CDP_CLIMATE'), (select id from sources where code = 'CDP'), '2023-01-01', 'ordinal', null, null, 'A', 1, 'result', 0.85, 'remplace:import_cdp_scores', 'rejected', false, 'https://www.bmwgroup.com/content/dam/grpw/websites/bmwgroup_com/ir/downloads/en/2024/bericht/BMW_Group_CDP_Climate_Change_Questionnaire_2023.pdf', 'CDP Climat 2023 : note A (99/100, sector leader) — 8e annee consecutive.'),
   ((select id from entities where slug = 'bmw'), (select id from indicators where code = 'ENV_CDP_CLIMATE'), (select id from sources where code = 'CDP'), '2025-12-31', 'ordinal', null, null, 'A', 1, 'result', 0.85, 'auto:import_cdp_scores', 'approved', false, 'https://www.cdp.net/en/data/scores', 'CDP, notes publiques 2025 (liste complète, page « Scores and A Lists ») : « BMW AG » (Germany), climat — note A.'),

@@ -746,6 +746,57 @@ Document vivant (v`0.7.4`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **14/10/2026 (marques alimentaires vendues en France, lots 82 à 95)** — Sans changement
+  de calcul. Environ 470 marques ajoutées : la base compte 2 145 marques, dont 968
+  publiables. Les nouvelles marques appartiennent surtout à de petites sociétés sans
+  données publiques suffisantes : elles sont référencées et rattachées à leur
+  propriétaire, mais pas encore notées.
+  - **Liste Nutri-Score de Santé publique France** (déclarations des entreprises,
+    janvier 2026) :
+    - filtre de taille levé (lot 82) ;
+    - sociétés étrangères identifiées par leur LEI dans le registre GLEIF, formes
+      juridiques ignorées (lots 83 et 87) ;
+    - noms proches (lot 84), enseignes (lot 86), déclarants ciblés un à un (lot 88) ;
+    - correspondances uniques dans l'annuaire officiel des entreprises, écartées jusqu'ici
+      par le filtre d'activité puis relues à la main (lot 91) ;
+    - recherche approchée, retenue seulement si le candidat est unique, l'activité
+      alimentaire et la forme juridique concordante (lot 92).
+  - **Mentions légales des sites officiels de marques** (lots 85, 89, 90, 93 à 95) :
+    - l'éditeur est identifié par le SIREN cité sur la page, vérifié dans l'annuaire
+      officiel ;
+    - la citation retenue nomme la marque et la société.
+  - **Pages officielles de groupes** :
+    - page « Nos marques » d'Intersnack France ;
+    - pages « Nos entreprises » de Sucralliance ;
+    - communiqué réglementé de LDC du 28/05/2025 : acquisition de 100 % du groupe Pierre
+      Martinet.
+  - **Liens de groupe lus dans GLEIF** (relations de consolidation au statut « ACTIVE ») :
+    - Labeyrie Fine Foods France → Labeyrie Fine Foods ;
+    - Société des Caves (Lanquetot) → Lactalis, fiche LEI non renouvelée depuis 2020 ;
+    - Loeuf (Matines) → LDC, par la mère ultime ;
+    - Jacquart → Alliance Champagne.
+  - **Doublons supprimés** : Paysan Breton, Malo, St Michel, Valfleuri, Sains et Saufs,
+    Pastilles Vichy. Règle adoptée : relire la liste de la base juste avant chaque lot et
+    comparer les noms sous un même propriétaire.
+
+  **Écartés** :
+  - l'hébergeur ou l'agence web relevé à la place de l'éditeur ;
+  - les homonymes : Janneau (menuiseries), Popote (Compass Group), Krill (réseau de vente
+    aux professionnels), « DUC SAS » (restaurant, sans lien avec les volailles Duc) ;
+  - les domaines en vente ou détournés (gringoire.com, kritsen.fr) ;
+  - les pages construites en JavaScript, illisibles par le vérificateur (Port Salut,
+    Le Gall) ;
+  - les sites fermés par un contrôle d'âge (Spirit France) ;
+  - les éditeurs personnes physiques (Neisson) ;
+  - les pages qui ne nomment pas la marque près de la société (La Baleine, Jardin Bio,
+    La Mauny, Trois Rivières) ;
+  - les lignes Nutri-Score génériques (« sans marque », « marque générique »), les slogans,
+    la restauration, les associations et collectivités ;
+  - Bordeau Chesnel, dont la cession par Savencia n'est qu'en négociation.
+
+  **Limite assumée** : une liste « de toutes les marques alimentaires vendues en France »
+  n'existe dans aucune source officielle. DIAMS n'ajoute une marque que si son
+  propriétaire est prouvé.
 - **14/10/2026 (notation des groupes très présents en rayon)** — Sans changement de
   calcul. Rappel de la Règle 8 : une marque ne reprend de son groupe racine que les
   indicateurs « de groupe » ; un groupe publiable n'a donc pas toujours des marques
