@@ -36,6 +36,9 @@ ALIASES = {
     "dior": "Christian Dior",
     "louis-vuitton": "Louis Vuitton Malletier SA (LVMH)",
     "decathlon": "Decathlon Group",
+    # Relecture du 15/10/2026 : noms juridiques de l'indice, non reconnus jusque-là.
+    "helly-hansen": "Helly Hansen AS",
+    "jockey": "Jockey International Inc",
 }
 GENERIC = {"group", "groupe", "holding", "holdings", "international", "company", "corporation"}
 

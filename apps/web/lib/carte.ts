@@ -197,6 +197,9 @@ export function resumeGroupe(marques: MarqueAnimale[]) {
 const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/CDP/, "liste publique CDP"], [/SBTi/, "export SBTi"], [/Leave Russia/, "base Leave Russia (KSE)"],
   [/registre de transparence/, "registre européen"], [/HATVP/, "répertoire de la HATVP"],
+  [/transparence de la mode/, "indice de transparence de la mode"], [/KnowTheChain/, "KnowTheChain"],
+  [/BBFAW/, "classement BBFAW"], [/Fur Free/, "liste Fur Free Retailer"], [/Fashion Checker/, "Fashion Checker"],
+  [/Finansol/, "liste Finansol"],
 ];
 
 /** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */

@@ -3,6 +3,19 @@ import type { OwnershipProof } from "@/lib/data";
 import { CorrectionForm } from "@/components/CorrectionForm";
 
 const ICONE: Record<string, string> = { ANI: "🐄", ENV: "🌍", PLA: "🧴", WAT: "💧", LAB: "👥", SUP: "🔗", GOV: "🏛️", TAX: "💶", GEO: "🗺️", INV: "🏦" };
+function Chevron() {
+  return (
+    <span className="ci-chev" aria-hidden="true">
+      <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    </span>
+  );
+}
+
+/** Teinte propre à chaque pilier (repère visuel seulement : elle ne dit rien du résultat). */
+const TEINTE: Record<string, string> = {
+  ANI: "#b4532a", ENV: "#1f8a4c", PLA: "#0e7a8a", WAT: "#2563c9", LAB: "#7a3fd0",
+  SUP: "#a86a12", GOV: "#4b5a70", TAX: "#11796d", GEO: "#b8325a", INV: "#4a43c4",
+};
 const SOLIDITE: Record<Solidite, string> = {
   officielle: "Source officielle (loi, régulateur)",
   reconnue: "Organisme reconnu",
@@ -179,13 +192,15 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
   const m = p.faits.filter((f) => f.niveau === "marque");
   const pr = p.faits.filter((f) => f.niveau === "produit");
   return (
-    <details className="ci-row">
+    <details className="ci-row" style={{ "--pil": TEINTE[p.code] ?? "#6c3bff" } as React.CSSProperties}>
       <summary>
         <span className="ci-p">
-          {exploitee || presumee ? "⚠️" : ICONE[p.code]} {p.nom}
+          <span className="ci-ico" aria-hidden="true">{exploitee || presumee ? "⚠️" : ICONE[p.code]}</span>
+          {p.nom}
         </span>
         <span className="ci-cnt">
           {p.documentes}/{p.total}
+          <Chevron />
         </span>
         <span className={`ci-v ci-${etatCle}`}>
           {exploitee && "⚠️ "}
@@ -266,8 +281,8 @@ export function CarteIdentite({
         ))}
         <details className="ci-row">
           <summary>
-            <span className="ci-p">📜 Toutes les sources</span>
-            <span className="ci-cnt">{carte.chronologie.length}</span>
+            <span className="ci-p"><span className="ci-ico" aria-hidden="true">📜</span>Toutes les sources</span>
+            <span className="ci-cnt">{carte.chronologie.length}<Chevron /></span>
             <span className="ci-v">Chronologie complète</span>
           </summary>
           <div className="ci-body">

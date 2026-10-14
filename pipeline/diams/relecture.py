@@ -465,6 +465,29 @@ ABSENCE_SOURCES = {
     "KSE_LEAVE_RUSSIA": (("GEO_RUSSIA_EXIT",), "absente de la base « Leave Russia » du KSE Institute"),
     "EU_TRANSPARENCY": (("GEO_LOBBYING_TRANSP",), "aucune inscription au registre de transparence de l'UE"),
     "HATVP": (("GEO_LOBBYING_TRANSP",), "aucune inscription à son nom au répertoire des représentants d'intérêts (HATVP)"),
+    # Listes complètes ajoutées le 15/10/2026 (trois niveaux : on cherche aussi chaque marque quand
+    # la liste nomme des marques).
+    "FTI": (("SUP_FTI_SCORE",), "absente de l'indice de transparence de la mode 2023 (Fashion Transparency Index, 250 marques)"),
+    "KNOWTHECHAIN": (("SUP_KNOWTHECHAIN",), "absente des comparaisons KnowTheChain (alimentation et boissons, habillement, technologies)"),
+    "BBFAW": (("ANI_BBFAW_TIER",), "absente du classement BBFAW (liste complète des entreprises évaluées)"),
+    "FUR_FREE": (("ANI_FUR_FREE",), "absente de la liste des membres Fur Free Retailer (Fur Free Alliance)"),
+    "CCC": (("SUP_LIVING_WAGE",), "absente du Fashion Checker (Clean Clothes Campaign)"),
+    "FINANSOL": (("INV_SOLIDARITY_LABEL",), "aucun produit labellisé à son nom dans la liste officielle Finansol"),
+}
+# Listes qui nomment aussi des marques : l'absence est consignée pour les marques, pas seulement
+# pour les groupes.
+ABSENCE_MARQUES = {"FTI", "FUR_FREE", "CCC"}
+# Contrôle du 15/10/2026 (noms bruts de chaque liste comparés aux entités non rapprochées) : la
+# liste nomme une société LIÉE (filiale, homonyme d'un autre pays du même réseau) sans qu'on puisse
+# attribuer la donnée. Ni preuve ni « absente » : on ne consigne rien.
+ABSENCE_EXCLUSIONS = {
+    "BBFAW": {"amazon": "« Amazon/Whole Foods Market » : Whole Foods, filiale, est évaluée",
+              "aldi-france": "ALDI Nord et ALDI Sud sont évalués, pas Aldi France"},
+    "FUR_FREE": {"aldi-france": "« ALDI », « ALDI NORD », « ALDI SUED » membres, sans précision pour la France"},
+    "KNOWTHECHAIN": {"suntory-holdings": "« Suntory Beverage & Food Limited », filiale cotée, est évaluée",
+                     "orangina-schweppes-france": "« Suntory Beverage & Food Limited », sa maison mère, est évaluée"},
+    "FINANSOL": {"axa": "« Axa IM », société de gestion distincte, distribue des produits labellisés",
+                 "credit-mutuel-arkea": "« Crédit Mutuel AM », autre entité du Crédit Mutuel"},
 }
 
 
@@ -476,6 +499,7 @@ def cmd_absences(c: httpx.Client, b: Base, args) -> dict:
     have = {(e["entity_id"], e["indicator_id"]) for e in b.ev}
     wave_of = {r: w for w, rs in b.waves().items() for r in rs}
     roots = [e for e in b.ents if not e.get("parent_id") and not e["is_brand"]]
+    brands = [e for e in b.ents if e["is_brand"]]
     reviews, report = [], {}
     wanted = set(args.sources.split(",")) if args.sources else set(ABSENCE_SOURCES)
     for code, (inds, phrase) in ABSENCE_SOURCES.items():
@@ -488,7 +512,20 @@ def cmd_absences(c: httpx.Client, b: Base, args) -> dict:
             continue
         found = {r.entity_slug for r in rows}
         n = 0
-        for e in roots:
+        # Une marque dont un propriétaire (groupe, enseigne) figure dans la liste n'est pas dite
+        # « absente » : la liste a évalué son propriétaire (l'indice de la mode note « Hermes
+        # International », pas la marque ; Fur Free Retailer nomme Monoprix, pas Monoprix Bio).
+        def ancetres(ent):
+            out, cur = set(), ent
+            for _ in range(20):
+                if not cur.get("parent_id") or cur["parent_id"] not in b.by_id:
+                    return out
+                cur = b.by_id[cur["parent_id"]]
+                out.add(cur["slug"])
+            return out
+        exclus = ABSENCE_EXCLUSIONS.get(code, {})
+        cibles = roots + ([m for m in brands if not (ancetres(m) & found)] if code in ABSENCE_MARQUES else [])
+        for e in [x for x in cibles if x["slug"] not in exclus]:
             if code == "HATVP" and not e.get("siren"):
                 continue  # répertoire français : rapprochement par SIREN
             if e["slug"] in found:
