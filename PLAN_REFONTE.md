@@ -80,10 +80,15 @@ R2 à R6. Présentation à la presse après R6 et les vagues 1 à 3 au minimum.
 - [x] Vague 1 — citations 186/186 ; 13 obligations lues dans les rapports : 4 absences déclarées
   par l'entreprise (Hermès, Carrefour, Société Générale) ou constatées (BPCE, BNP Paribas), 7
   « autre forme » (sous-périmètre, par zone ou pays, écart ajusté), H&M trouvé (en attente)
-- [~] Vagues 2 à 5 — citations : 217/217, 40/41, 146/148, 52/53 (2 pages de la CNIL en erreur 503,
-  à reprendre) ; aucune obligation sans preuve hors Égapro. Reste : absences non obligatoires
-  (« cherché, non trouvé ») consignées source par source.
-- [ ] Vague 6
+- [x] Vagues 2 à 5 — citations : 217/217, 40/41, 146/148, 52/53 (2 pages de la CNIL en erreur 503,
+  à reprendre) ; aucune obligation sans preuve hors Égapro ; 4 787 absences « cherché, non
+  trouvé » consignées (CDP, SBTi, KSE, registre UE, HATVP).
+- [~] Vague 6 — marques
+  - Appartenances : 2 129 / 2 147 confirmées mot pour mot ; 17 sites bloquants (Nestlé, Unilever…),
+    Thiriet hors ligne ; Kellanova et ses 10 marques rattachées à Mars (acquisition conclue).
+  - Exploitation animale : lot 97 (38 marques par leur site officiel), 35 par le code APE.
+  - Reste : 714 marques alimentaires rattachées par la seule liste Nutri-Score (544 sociétés,
+    dont 477 à une seule marque) sans site officiel connu ; Open Food Facts indisponible (503).
 - [ ] R2 — moteur
 - [ ] R3 — fiches
 - [ ] R4 — pages
