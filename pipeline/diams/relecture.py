@@ -38,10 +38,13 @@ BLOCKING = {403, 429, 503}
 # Preuves curées (citation relue à l'entrée) : relues mot pour mot. Les autres viennent d'un
 # connecteur et se relisent par lui.
 CURATED_REVIEWERS = {"auto:verify_curated", "delegue-editeur:verifie-mot-pour-mot", "revue-manuelle"}
+# Décisions de l'éditeur (« decision-editeur:AAAA-MM-JJ ») : preuves curées, elles aussi.
+CURATED_PREFIXES = ("decision-editeur:", "delegue-editeur:", "revue-")
 
 
 def curated(ev: dict) -> bool:
-    return (ev.get("reviewer") or "") in CURATED_REVIEWERS
+    r = ev.get("reviewer") or ""
+    return r in CURATED_REVIEWERS or r.startswith(CURATED_PREFIXES)
 
 
 # --- Chargement -----------------------------------------------------------------------------
@@ -367,6 +370,143 @@ def cmd_connecteurs(c: httpx.Client, b: Base, args) -> dict:
     return {"reviews": reviews, "report": report}
 
 
+# --- Vague 6 : preuves d'appartenance marque → groupe ---------------------------------------
+
+# Sites qui refusent les lectures automatiques (constaté lors des sessions précédentes) : on ne
+# les sollicite pas, la preuve est notée « source_inaccessible ».
+BLOCKED_HOSTS = {"www.nestle.com", "nestle.com", "www.unilever.com", "unilever.com", "www.suntory.com",
+                 "www.pepsico.fr", "www.barilla.com"}
+
+
+def cmd_proprietes(c: httpx.Client, b: Base, args) -> dict:
+    from .verify_curated import _canon, document_text
+    from .connectors.esef import report_text
+    params = {"select": "id,entity_id,owner_id,source_url,excerpt"}
+    if args.reprise:
+        params["check_result"] = "in.(ecart,source_inaccessible)"
+    rows = supabase_client.get_all(c, "entity_ownership_sources", params)
+    if args.only:
+        keep = {b.by_slug[s]["id"] for s in args.only if s in b.by_slug}
+        rows = [r for r in rows if r["entity_id"] in keep or r["owner_id"] in keep]
+    texts: dict[str, str | None] = {}
+    blocked = set(BLOCKED_HOSTS)
+    results: dict[str, list] = defaultdict(list)
+    print(f"{len(rows)} preuves d'appartenance ({len({r['source_url'] for r in rows})} documents)")
+    for n, r in enumerate(sorted(rows, key=lambda r: r["source_url"] or ""), 1):
+        url = r["source_url"] or ""
+        host = urlparse(url).netloc
+        # Comme à l'import (import_brand_portfolio) : la citation probante est la DERNIÈRE « … »
+        # de l'extrait, celle qui nomme la marque ; les guillemets précédents désignent un titre
+        # de page ou citent une autre page (mentions légales).
+        quotes = [_canon(q) for q in re.findall(r"«\s?(.+?)\s?»", r["excerpt"] or "")][-1:]
+        if not quotes:
+            results["non_verifiable"].append((r["id"], "pas de citation « … »"))
+            continue
+        if url not in texts:
+            if host in blocked:
+                texts[url] = None
+            else:
+                try:
+                    texts[url] = _canon(report_text(url, c) if "filings.xbrl.org" in url else document_text(url, c))
+                except httpx.HTTPStatusError as err:
+                    texts[url] = None
+                    if err.response.status_code in BLOCKING:
+                        blocked.add(host)
+                        print(f"  {host} répond {err.response.status_code} : site mis de côté")
+                except (httpx.HTTPError, ValueError, OSError) as err:
+                    texts[url] = None
+                    print(f"  source illisible ({type(err).__name__}) : {url[:100]}")
+        t = texts[url]
+        if t is None:
+            results["source_inaccessible"].append((r["id"], f"source inaccessible ({host})"))
+            continue
+        ok = all(q in t for q in quotes) or all(re.sub(r"\s", "", q) in re.sub(r"\s", "", t) for q in quotes)
+        if ok:
+            results["confirmee"].append((r["id"], "citation retrouvée mot pour mot"))
+        else:
+            missing = [q for q in quotes if q not in t]
+            results["ecart"].append((r["id"], "citation introuvable : « " + missing[0][:200] + " »"))
+            print(f"  [ÉCART] {b.by_id[r['entity_id']]['slug']} → {b.by_id[r['owner_id']]['slug']} : {url[:90]}")
+        if n % 200 == 0:
+            print(f"  … {n}/{len(rows)}")
+    print("Bilan : " + ", ".join(f"{k} {len(v)}" for k, v in sorted(results.items())))
+    if args.apply:
+        h = {**supabase_client._headers(), "Prefer": "return=minimal"}
+        today = dt.date.today().isoformat()
+        for outcome, items in results.items():
+            by_detail = defaultdict(list)
+            for i, d in items:
+                by_detail[d].append(i)
+            for d, ids in by_detail.items():
+                for k in range(0, len(ids), 150):
+                    resp = c.patch(f"{config.SUPABASE_URL}/rest/v1/entity_ownership_sources",
+                                   params={"id": f"in.({','.join(ids[k:k + 150])})"}, headers=h,
+                                   json={"checked_on": today, "check_result": outcome, "check_detail": d})
+                    resp.raise_for_status()
+        print("Résultats notés sur les preuves d'appartenance.")
+    return {"reviews": [], "report": {k: [(i, d) for i, d in v] for k, v in results.items() if k != "confirmee"}}
+
+
+# --- Absences : cherché dans la liste complète, non trouvé ---------------------------------
+
+def produce_hatvp(c, b, args):
+    from .connectors import hatvp
+    from .import_hatvp import build_rows
+    if not args.hatvp_file:
+        raise RuntimeError("répertoire HATVP non fourni (--hatvp-file)")
+    orgs = hatvp.load_registry_file(args.hatvp_file)
+    roots = [e for e in b.ents if not e.get("parent_id") and not e["is_brand"]]
+    return f"fichier {args.hatvp_file}", build_rows(roots, orgs, dt.date.today().isoformat())
+
+
+ABSENCE_SOURCES = {
+    "CDP": (("ENV_CDP_CLIMATE", "WAT_CDP"), "absente de la liste publique complète des notes CDP 2025"),
+    "SBTI": (("ENV_SBTI_VALIDATED",), "absente de l'export complet SBTi « Companies taking action » (08/10/2026)"),
+    "KSE_LEAVE_RUSSIA": (("GEO_RUSSIA_EXIT",), "absente de la base « Leave Russia » du KSE Institute"),
+    "EU_TRANSPARENCY": (("GEO_LOBBYING_TRANSP",), "aucune inscription au registre de transparence de l'UE"),
+    "HATVP": (("GEO_LOBBYING_TRANSP",), "aucune inscription à son nom au répertoire des représentants d'intérêts (HATVP)"),
+}
+
+
+def cmd_absences(c: httpx.Client, b: Base, args) -> dict:
+    """Pour chaque groupe racine sans preuve sur un indicateur, consigne « non_trouvee » pour chaque
+    source dont la liste complète a été relue sans y trouver le groupe. C'est ce qui permet d'écrire
+    sur la fiche « aucune information : absent de … (date) » plutôt qu'un simple vide."""
+    producers = {**PRODUCERS, "HATVP": produce_hatvp}
+    have = {(e["entity_id"], e["indicator_id"]) for e in b.ev}
+    wave_of = {r: w for w, rs in b.waves().items() for r in rs}
+    roots = [e for e in b.ents if not e.get("parent_id") and not e["is_brand"]]
+    reviews, report = [], {}
+    wanted = set(args.sources.split(",")) if args.sources else set(ABSENCE_SOURCES)
+    for code, (inds, phrase) in ABSENCE_SOURCES.items():
+        if code not in wanted:
+            continue
+        try:
+            label, rows = producers[code](c, b, args)
+        except (httpx.HTTPError, RuntimeError, OSError) as err:
+            print(f"✗ {code} : source indisponible ({err})")
+            continue
+        found = {r.entity_slug for r in rows}
+        n = 0
+        for e in roots:
+            if code == "HATVP" and not e.get("siren"):
+                continue  # répertoire français : rapprochement par SIREN
+            if e["slug"] in found:
+                continue
+            for ind in inds:
+                iid = b.ind_id[ind]
+                if (e["id"], iid) in have:
+                    continue
+                reviews.append({"entity_id": e["id"], "indicator_id": iid, "evidence_id": None,
+                                "outcome": "non_trouvee", "detail": f"Cherché, non trouvé : {phrase} ({label}, relu le "
+                                f"{dt.date.today().strftime('%d/%m/%Y')}).", "source_url": None,
+                                "reviewer": REVIEWER, "wave": wave_of.get(e["id"])})
+                n += 1
+        report[code] = {"source": label, "trouves": len(found), "non_trouves": n}
+        print(f"✔ {code} ({label}) : {len(found)} groupes présents, {n} absences consignées")
+    return {"reviews": reviews, "report": report}
+
+
 # --- Preuves documentaires : citations mot pour mot -----------------------------------------
 
 def cmd_citations(c: httpx.Client, b: Base, args) -> dict:
@@ -495,23 +635,26 @@ def cmd_manques(c: httpx.Client, b: Base, args) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Relecture complète des preuves (journal indicator_reviews).")
-    ap.add_argument("commande", choices=["connecteurs", "citations", "manques"])
+    ap.add_argument("commande", choices=["connecteurs", "citations", "manques", "absences", "proprietes"])
     ap.add_argument("--vague", type=int)
     ap.add_argument("--only", help="groupes racines, séparés par des virgules")
     ap.add_argument("--apply", action="store_true", help="consigne le résultat dans le journal")
     ap.add_argument("--rapport", help="fichier JSON du détail")
     ap.add_argument("--ani-cache", help="cache des avis Sirene (import_ani_ape)")
+    ap.add_argument("--hatvp-file", help="répertoire HATVP (open data AGORA, JSON)")
+    ap.add_argument("--reprise", action="store_true", help="proprietes : ne relire que les écarts et sources inaccessibles")
     ap.add_argument("--sources", help="connecteurs à relire (EGAPRO,CDP,EU_TRANSPARENCY,KSE_LEAVE_RUSSIA,SBTI)")
     for k in ("eu", "kse", "cdp", "sbti", "egapro"):
         ap.add_argument(f"--{k}-file")
     args = ap.parse_args()
     args.only = [s.strip() for s in args.only.split(",")] if args.only else None
-    if args.commande != "connecteurs" and not (args.vague or args.only):
+    if args.commande not in ("connecteurs", "absences", "proprietes") and not (args.vague or args.only):
         raise SystemExit("--vague ou --only requis")
     config.require_supabase()
     with httpx.Client(timeout=300, follow_redirects=True) as c:
         b = Base(c)
-        res = {"connecteurs": cmd_connecteurs, "citations": cmd_citations, "manques": cmd_manques}[args.commande](c, b, args)
+        res = {"connecteurs": cmd_connecteurs, "citations": cmd_citations, "manques": cmd_manques,
+               "absences": cmd_absences, "proprietes": cmd_proprietes}[args.commande](c, b, args)
         if args.rapport:
             with open(args.rapport, "w", encoding="utf-8") as fh:
                 json.dump(res["report"], fh, ensure_ascii=False, indent=1, default=str)

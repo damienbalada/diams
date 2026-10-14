@@ -224,10 +224,12 @@ async function build() {
     ])));
 
   section("Appartenance marque → groupe : preuves citées", upsert("entity_ownership_sources",
-    ["entity_id", "owner_id", "source_url", "excerpt", "observed_on", "reviewer"], ["entity_id", "owner_id", "source_url"],
+    ["entity_id", "owner_id", "source_url", "excerpt", "observed_on", "reviewer", "checked_on", "check_result", "check_detail"],
+    ["entity_id", "owner_id", "source_url"],
     [...T.entity_ownership_sources].sort(by((r) => `${ent.get(r.entity_id)}|${ent.get(r.owner_id)}|${r.source_url}`)).map((r) => [
       ref("entities", "slug", ent.get(r.entity_id)), ref("entities", "slug", ent.get(r.owner_id)),
       lit(r.source_url), lit(r.excerpt), lit(r.observed_on), lit(r.reviewer),
+      lit(r.checked_on), lit(r.check_result), lit(r.check_detail),
     ])));
 
   section("Preuves (evidence) — clé : entité + indicateur + source + date", upsert("evidence",

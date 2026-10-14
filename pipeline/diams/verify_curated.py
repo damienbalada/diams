@@ -196,6 +196,9 @@ ESEF_KEYWORDS = {
                          r"|foie gras|canards?\b|jambons?\b|charcuterie|saucisses?\b|saucissons?\b|rillettes"
                          r"|poissons?\b|saumons?\b|\bthons?\b|sardines?\b|maquereaux?\b|anchois|crustac|mollusques"
                          r"|hu[îi]tres|caviar|[ée]levage|aquaculture|p[êe]che en (?:mer|eau douce)"
+                         # « produits carnés » (viande) et « produits de la mer » (poissons, coquillages),
+                         # ajoutés le 15/10/2026 pendant la relecture des marques (vague 6).
+                         r"|produits carn[ée]s|produits de la mer"
                          r"|d.origine animale|of animal origin|animal[- ]derived|tests? sur (les )?animaux|animal testing"
                          r"|tested on animals"],
     "ANI_FUR_FREE": [r"fourrure|fur\b"],

@@ -777,6 +777,28 @@ Document vivant (v\`0.7.5\`, octobre 2026). Toute modification des paramètres d
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **15/10/2026 (relecture complète, PLAN_REFONTE.md)** — Sans changement de calcul, hors
+  rattachement d'obligations. Chaque preuve a été relue contre sa source, et chaque passage est
+  consigné dans un journal public (\`indicator_reviews\`) :
+  - preuves des connecteurs relues sur leurs sources téléchargées à nouveau : Égapro 268/268,
+    CDP 242/242, KSE 122/122, registre de l'UE (2 montants mis à jour, Kellanova sorti), SBTi
+    (export du 08/10 : objectifs validés pour Ecotone et Pilot, engagement retiré pour Alsace
+    Lait), classements (FTI, KnowTheChain, Fashion Checker, BBFAW, Finansol, sans fourrure,
+    B Corp) tous confirmés, codes APE 81/81 confirmés par l'annuaire officiel ;
+  - citations curées relues mot pour mot : 651 confirmées, aucun écart ;
+  - obligations des 20 groupes soumis à la CSRD lues dans leurs rapports : absences déclarées
+    par l'entreprise (Hermès, Carrefour, Société Générale), constatées (BPCE, BNP Paribas), ou
+    publication sous une autre forme (sous-périmètre, par zone ou pays, écart ajusté) ;
+  - obligation Égapro rattachée à 296 sociétés (fichier officiel des déclarations croisé avec la
+    tranche d'effectif de l'annuaire) au lieu de 33 ; 35 sociétés tenues de publier n'ont pas
+    d'index 2025 ; les index d'UES sont attribués aux sociétés membres ;
+  - absences recherchées dans les listes complètes (CDP, SBTi, KSE, registre de l'UE, HATVP) :
+    4 787 « cherché, non trouvé » datés ;
+  - appartenances marque → groupe relues : 2 129 confirmées mot pour mot ; Kellanova (Kellogg's,
+    Pringles…) rattachée à Mars (acquisition conclue le 11/12/2025, 8-K et communiqué de Mars) ;
+  - exploitation animale : 38 marques de plus documentées par leur site officiel (lot 97), 35
+    par le code APE ; vocabulaire du vérificateur complété par « produits carnés » et « produits
+    de la mer ».
 - **0.7.5 (14/10/2026)** — Décision de l'éditeur (option A) : une marque reprend
   l'index Égapro de **son propriétaire direct** (Règle 8). Avant, l'index restait
   attaché à la société déclarante et aucune marque n'en héritait. Effet mesuré par
