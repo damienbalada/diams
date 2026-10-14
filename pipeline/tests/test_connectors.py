@@ -1,5 +1,5 @@
-from paris_memoire.connectors.gleif import parse_lei_record
-from paris_memoire.connectors.sirene import parse_result
+from diams.connectors.gleif import parse_lei_record
+from diams.connectors.sirene import parse_result
 
 
 def test_parse_lei_record():

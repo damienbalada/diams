@@ -4,7 +4,7 @@ Ce qui est publié SANS revue humaine est une décision sensible : ces tests
 verrouillent la règle pour qu'un changement accidentel ne puisse pas ouvrir la
 publication automatique à la presse ou au contributif.
 """
-from paris_memoire.load import AUTO_PUBLISH_TIERS, review_status_for
+from diams.load import AUTO_PUBLISH_TIERS, review_status_for
 
 
 def test_tiers_autorite_publies_automatiquement():

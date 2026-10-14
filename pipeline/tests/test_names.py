@@ -1,4 +1,4 @@
-from paris_memoire.normalize.names import best_match, is_strong_match, normalize_name
+from diams.normalize.names import best_match, is_strong_match, normalize_name
 
 
 def test_normalize_strips_accents_suffixes_punct():

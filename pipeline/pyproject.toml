@@ -1,5 +1,5 @@
 [project]
-name = "paris-memoire-pipeline"
+name = "diams-pipeline"
 version = "0.1.0"
 description = "Pipeline de collecte (DIAMS) — résolution d'entités GLEIF/SIRENE + connecteurs par pilier."
 requires-python = ">=3.10"
@@ -18,7 +18,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["paris_memoire", "paris_memoire.connectors", "paris_memoire.normalize"]
+packages = ["diams", "diams.connectors", "diams.normalize"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

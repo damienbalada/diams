@@ -1,6 +1,6 @@
 """Connecteur SEC : identité par le nom déposé, taux effectif balisé et contrôlé."""
-from paris_memoire.connectors.sec import effective_tax_rate, effective_tax_rate_ifrs, norm
-from paris_memoire.import_sec import same_company
+from diams.connectors.sec import effective_tax_rate, effective_tax_rate_ifrs, norm
+from diams.import_sec import same_company
 
 
 def fact(val, end, start, form="10-K", filed="2026-02-01", accn="0000-26-1"):

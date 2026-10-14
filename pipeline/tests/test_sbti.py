@@ -2,8 +2,8 @@ import textwrap
 
 import pytest
 
-from paris_memoire.connectors.sbti import SbtiRow, match_company, parse_csv
-from paris_memoire.import_sbti import build_rows
+from diams.connectors.sbti import SbtiRow, match_company, parse_csv
+from diams.import_sbti import build_rows
 
 
 def _write_csv(tmp_path, content: str):

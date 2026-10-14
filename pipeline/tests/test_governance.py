@@ -1,5 +1,5 @@
-from paris_memoire.connectors import governance as gov
-from paris_memoire.import_governance import build_rows
+from diams.connectors import governance as gov
+from diams.import_governance import build_rows
 
 
 def test_parse_share_formats():

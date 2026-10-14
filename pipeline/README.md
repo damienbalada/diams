@@ -26,9 +26,9 @@ pytest
 ```bash
 cp .env.example .env        # renseigner SUPABASE_SERVICE_ROLE_KEY (secrète)
 
-python -m paris_memoire.enrich_entities            # DRY-RUN : montre ce qui serait écrit
-python -m paris_memoire.enrich_entities --apply     # écrit réellement en base
-python -m paris_memoire.enrich_entities --limit 5   # limiter
+python -m diams.enrich_entities            # DRY-RUN : montre ce qui serait écrit
+python -m diams.enrich_entities --apply     # écrit réellement en base
+python -m diams.enrich_entities --limit 5   # limiter
 ```
 
 ### Garde-fous
@@ -51,6 +51,6 @@ les commandes exactes sont dans **[`CONNECTORS.md`](./CONNECTORS.md)**. Exemple 
 
 ```bash
 # SBTi (objectifs climat) — export « Companies taking action » :
-python -m paris_memoire.import_sbti --file sbti.csv            # dry-run
-python -m paris_memoire.import_sbti --file sbti.csv --apply    # écrit (pending)
+python -m diams.import_sbti --file sbti.csv            # dry-run
+python -m diams.import_sbti --file sbti.csv --apply    # écrit (pending)
 ```

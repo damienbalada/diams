@@ -1,5 +1,5 @@
 """Connecteur B Corp : lecture de fiche, découverte par nom, import des seules paires vérifiées."""
-from paris_memoire.connectors.bcorp import VERIFIED, candidates, norm_name, parse_page
+from diams.connectors.bcorp import VERIFIED, candidates, norm_name, parse_page
 
 PAGE = """<html><head><title>BoursoBank - Certified B Corporation - B Lab</title></head><body>
 <p>Certified Since</p><p>February 2023</p><p>Industry</p><p>Deposit bank</p><p>Sector</p><p>Service</p>

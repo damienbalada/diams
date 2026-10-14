@@ -1,4 +1,4 @@
-from paris_memoire.import_ani_ape import ape_is_animal, build_rows, parse_avis
+from diams.import_ani_ape import ape_is_animal, build_rows, parse_avis
 
 AVIS = ("Identifiant SIREN 783 423 270 Dénomination UNION LAITIERE VITTELLOISE Catégorie juridique 6317 - "
         "Société coopérative agricole Activité Principale Exercée (APE) 10.51C - Fabrication de fromage "

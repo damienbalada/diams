@@ -1,10 +1,10 @@
-﻿from paris_memoire.connectors.egapro import (
+﻿from diams.connectors.egapro import (
     EgaproRecord,
     latest_by_siren,
     parse_csv,
     parse_records,
 )
-from paris_memoire.import_egapro import build_rows
+from diams.import_egapro import build_rows
 
 PAYLOAD = {
     "results": [

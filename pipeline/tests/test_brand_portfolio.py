@@ -1,4 +1,4 @@
-from paris_memoire.import_brand_portfolio import check_rows, name_in_quote, quote_in_document
+from diams.import_brand_portfolio import check_rows, name_in_quote, quote_in_document
 
 
 def test_nom_de_marque_en_mot_entier_casse_et_accents_ignores():

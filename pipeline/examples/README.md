@@ -7,7 +7,7 @@ But : le jour où le réseau est débloqué, l'ingestion se résume à remplacer
 l'exemple par le vrai export, puis :
 
 ```bash
-python -m paris_memoire.import_<connecteur> --file examples/<fichier>.csv   # dry-run
+python -m diams.import_<connecteur> --file examples/<fichier>.csv   # dry-run
 ```
 
 Le format de chaque fichier est décrit dans [`../CONNECTORS.md`](../CONNECTORS.md).

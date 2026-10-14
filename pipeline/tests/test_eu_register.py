@@ -1,6 +1,6 @@
-from paris_memoire.connectors import eu_register as eu
-from paris_memoire.import_eu_register import match, rows_for
-from paris_memoire.normalize.names import normalize_name
+from diams.connectors import eu_register as eu
+from diams.import_eu_register import match, rows_for
+from diams.normalize.names import normalize_name
 
 XML = b"""<?xml version='1.1' encoding='UTF-8'?>
 <ListOfIRPublicDetail xmlns="http://intragate.ec.europa.eu/transparencyregister/odp">

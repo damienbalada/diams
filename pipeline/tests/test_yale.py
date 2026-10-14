@@ -2,8 +2,8 @@ import textwrap
 
 import pytest
 
-from paris_memoire.connectors.yale_russia import YaleRow, match_company, parse_csv
-from paris_memoire.import_yale import build_rows
+from diams.connectors.yale_russia import YaleRow, match_company, parse_csv
+from diams.import_yale import build_rows
 
 
 def _write_csv(tmp_path, content: str):

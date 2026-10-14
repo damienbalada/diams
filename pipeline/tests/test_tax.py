@@ -1,5 +1,5 @@
-from paris_memoire.connectors import tax
-from paris_memoire.import_tax import build_rows
+from diams.connectors import tax
+from diams.import_tax import build_rows
 
 
 def test_parse_bool():

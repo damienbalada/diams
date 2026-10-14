@@ -1,5 +1,5 @@
-from paris_memoire.connectors import bbfaw
-from paris_memoire.import_bbfaw import build_row, match_group
+from diams.connectors import bbfaw
+from diams.import_bbfaw import build_row, match_group
 
 
 class FakePage:

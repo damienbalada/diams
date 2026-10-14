@@ -1,6 +1,6 @@
 """Connecteur Finansol : lecture de la liste FAIR et rattachement strict."""
-from paris_memoire.connectors.finansol import Product, by_entity, parse_page
-from paris_memoire.import_finansol import build_rows
+from diams.connectors.finansol import Product, by_entity, parse_page
+from diams.import_finansol import build_rows
 
 PAGE = """
 <li  class="entity-list-item products-item"><div class="item-card">

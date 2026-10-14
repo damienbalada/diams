@@ -1,5 +1,5 @@
-from paris_memoire.connectors import benchmarks as bm
-from paris_memoire.import_benchmarks import build_rows
+from diams.connectors import benchmarks as bm
+from diams.import_benchmarks import build_rows
 
 
 def test_norm_bbfaw_tier():

@@ -1,6 +1,6 @@
 """Test du résolveur (connecteurs mockés — aucun appel réseau)."""
-from paris_memoire import enrich_entities
-from paris_memoire.connectors import gleif, sirene
+from diams import enrich_entities
+from diams.connectors import gleif, sirene
 
 
 def test_resolve_entity_fills_lei_and_siren(monkeypatch):

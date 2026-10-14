@@ -1,10 +1,10 @@
-from paris_memoire.connectors.hatvp import (
+from diams.connectors.hatvp import (
     HatvpOrg,
     _extract_amount_mid,
     match_org,
     parse_registry,
 )
-from paris_memoire.import_hatvp import build_rows
+from diams.import_hatvp import build_rows
 
 FIXTURE = {
     "publications": [

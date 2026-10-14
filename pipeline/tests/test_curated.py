@@ -1,10 +1,10 @@
 """Import de preuves curées : contrôle strict et revue humaine obligatoire."""
 import pytest
 
-from paris_memoire.attach_regimes import egapro_links
-from paris_memoire.connectors.egapro import EgaproRecord
-from paris_memoire.import_curated import parse_row
-from paris_memoire.load import review_status_for
+from diams.attach_regimes import egapro_links
+from diams.connectors.egapro import EgaproRecord
+from diams.import_curated import parse_row
+from diams.load import review_status_for
 
 ROW = {
     "entity_slug": "bnp-paribas", "indicator_code": "TAX_CBCR_PUBLISHED", "source_code": "CBCR",

@@ -90,7 +90,7 @@ humain, ou sans piste d'audit.
 
 ## Implications techniques — ✅ implémenté
 
-`pipeline/paris_memoire/load.py` **dérive `review_status` du tier de la source**
+`pipeline/diams/load.py` **dérive `review_status` du tier de la source**
 à l'ingestion (`review_status_for()`), conformément à la règle ci-dessus :
 
 - tier 1-2 → insertion directe en `approved`, reviewer préfixé **`auto:<connecteur>`** ;

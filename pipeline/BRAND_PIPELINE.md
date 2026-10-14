@@ -66,7 +66,7 @@ api.gleif.org
 # 1. récupérer le dump (une fois le domaine autorisé)
 curl -o off.jsonl.gz https://static.openfoodfacts.org/data/openfoodfacts-products.jsonl.gz
 # 2. ingérer -> staging + file de revue
-python -m paris_memoire.import_brands off.jsonl.gz
+python -m diams.import_brands off.jsonl.gz
 # 3. réviser/approuver dans /admin, puis les marques héritent des groupes
 ```
 

@@ -1,9 +1,9 @@
-from paris_memoire.connectors import cdp_scores as cs
-from paris_memoire.connectors import kse_russia as kse
-from paris_memoire.import_cdp_scores import match as cdp_match
-from paris_memoire.import_cdp_scores import rows_for
-from paris_memoire.import_kse import build_row, fr_date, match_group
-from paris_memoire.normalize.names import normalize_name
+from diams.connectors import cdp_scores as cs
+from diams.connectors import kse_russia as kse
+from diams.import_cdp_scores import match as cdp_match
+from diams.import_cdp_scores import rows_for
+from diams.import_kse import build_row, fr_date, match_group
+from diams.normalize.names import normalize_name
 
 CARD = (
     '<div class="card {cls}"><div class="cstatus"><div class="label status {cls} ">'

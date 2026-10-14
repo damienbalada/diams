@@ -1,5 +1,5 @@
 """Connecteur BDIF : DEU de l'exercice, émetteur exact."""
-from paris_memoire.connectors import bdif
+from diams.connectors import bdif
 
 
 class _Resp:

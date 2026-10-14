@@ -1,5 +1,5 @@
-from paris_memoire.connectors import cdp
-from paris_memoire.import_cdp import build_rows
+from diams.connectors import cdp
+from diams.import_cdp import build_rows
 
 
 def test_parse_grade():

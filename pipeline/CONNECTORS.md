@@ -22,7 +22,7 @@
 | GOV | `import_governance --file gov.csv` | `women_share`, `independent_share` | `GOV_BOARD_*` |
 | INV | `import_investments --file inv.csv` | `responsible_policy`, `fossil_financing`, … | `INV_*` |
 
-(Toutes les commandes : `python -m paris_memoire.<commande>` ; ajouter `--apply` pour écrire.)
+(Toutes les commandes : `python -m diams.<commande>` ; ajouter `--apply` pour écrire.)
 Détail de chaque connecteur ci-dessous. Un CSV d'exemple par connecteur (en-têtes
 réels, données fictives) est fourni dans [`examples/`](./examples/).
 
@@ -58,7 +58,7 @@ Colonne `source_url` facultative partout (sinon URL par défaut du connecteur).
 - Barème canonique : `A=1.00, A-=0.88, B=0.75, B-=0.63, C=0.50, C-=0.38, D=0.25, D-=0.13, F=0.00`
 - Niveau : groupe · Source : `CDP` (écrit un ou deux indicateurs selon les colonnes présentes)
 ```bash
-python -m paris_memoire.import_cdp --file cdp.csv [--apply]
+python -m diams.import_cdp --file cdp.csv [--apply]
 ```
 
 ### SBTi — objectifs climat validés → `ENV_SBTI_VALIDATED`
@@ -66,7 +66,7 @@ python -m paris_memoire.import_cdp --file cdp.csv [--apply]
 - `Targets Set` +1.5°C → 1.0 (résultat) ; `Committed` → promesse (plafonnée par le moteur) ; `Removed` → 0.0
 - Niveau : groupe · Source : `SBTI`
 ```bash
-python -m paris_memoire.import_sbti --file sbti.csv [--apply]
+python -m diams.import_sbti --file sbti.csv [--apply]
 ```
 
 ---
@@ -82,7 +82,7 @@ python -m paris_memoire.import_sbti --file sbti.csv [--apply]
 - Barème rang → sévérité : `#1=0.90, #2=0.80, #3=0.75, top10=0.60, top50=0.45, au-delà=0.35`
 - Niveau : groupe ou marque · Source : `BFFP`
 ```bash
-python -m paris_memoire.import_bffp --file bffp.csv [--apply]
+python -m diams.import_bffp --file bffp.csv [--apply]
 ```
 
 ---
@@ -99,8 +99,8 @@ python -m paris_memoire.import_bffp --file bffp.csv [--apply]
 - Normalisation : note / 100 · Niveau : entité portant le SIREN (groupe)
 - Source : `EGAPRO` (réglementaire, Ministère du Travail)
 ```bash
-python -m paris_memoire.import_egapro [--apply]                 # API ODS live
-python -m paris_memoire.import_egapro --file egapro.csv [--apply]  # hors-ligne
+python -m diams.import_egapro [--apply]                 # API ODS live
+python -m diams.import_egapro --file egapro.csv [--apply]  # hors-ligne
 ```
 
 ---
@@ -112,7 +112,7 @@ python -m paris_memoire.import_egapro --file egapro.csv [--apply]  # hors-ligne
 - Mixité : parité (50 %) = 1.0, proportionnel en dessous, plafonné · Indépendance : part directe
 - Niveau : groupe · Source : `CSRD_ESRS`
 ```bash
-python -m paris_memoire.import_governance --file gov.csv [--apply]
+python -m diams.import_governance --file gov.csv [--apply]
 ```
 
 ---
@@ -124,7 +124,7 @@ python -m paris_memoire.import_governance --file gov.csv [--apply]
 - CbCR normalisé ici (oui→1.0 / non→0.0) ; **taux effectif** (négatif autorisé) et **paradis fiscaux** en valeur brute (percentile par le moteur)
 - Niveau : groupe · Sources : `CBCR`, `AMF`, `TAX_JUSTICE`
 ```bash
-python -m paris_memoire.import_tax --file tax.csv [--apply]
+python -m diams.import_tax --file tax.csv [--apply]
 ```
 
 ---
@@ -142,7 +142,7 @@ Un seul CLI, sélection par `--benchmark` :
 - CSV : nom (`company`/`name`/`brand`) + colonne valeur ci-dessus
 - Niveau : groupe **ou marque** (l'evidence se rattache à l'entité nommée)
 ```bash
-python -m paris_memoire.import_benchmarks --benchmark bbfaw --file bbfaw.csv [--apply]
+python -m diams.import_benchmarks --benchmark bbfaw --file bbfaw.csv [--apply]
 ```
 
 ### `import_ktc` — KnowTheChain, données publiées → `SUP_KNOWTHECHAIN` (publication auto)
@@ -155,7 +155,7 @@ python -m paris_memoire.import_benchmarks --benchmark bbfaw --file bbfaw.csv [--
 - Retire les lignes `curation-v1` de l'indicateur (`remplace:import_ktc`) ; une
   ligne existante à la même date est remplacée par la donnée publiée.
 ```bash
-python -m paris_memoire.import_ktc [--apply]
+python -m diams.import_ktc [--apply]
 ```
 
 ### `import_kse` — KSE Institute « Leave Russia » → `GEO_RUSSIA_EXIT` (publication auto)
@@ -201,7 +201,7 @@ python -m paris_memoire.import_ktc [--apply]
 - Liste complète (149 entreprises en 2025) : indicateur complémentaire.
   Retire les lignes `curation-v1` (`remplace:import_bbfaw`).
 ```bash
-python -m paris_memoire.import_bbfaw [--pdf rapport.pdf] [--apply]
+python -m diams.import_bbfaw [--pdf rapport.pdf] [--apply]
 ```
 
 ---
@@ -216,7 +216,7 @@ python -m paris_memoire.import_bbfaw [--pdf rapport.pdf] [--apply]
   et participations en valeur brute** (percentile inversé `lower_better` par le moteur).
 - Niveau : groupe · Sources : `UN_PRI` (politique / finance durable), `RECLAIM_FINANCE` (fossile / participations)
 ```bash
-python -m paris_memoire.import_investments --file inv.csv [--apply]
+python -m diams.import_investments --file inv.csv [--apply]
 ```
 
 ---
@@ -247,7 +247,7 @@ python -m paris_memoire.import_investments --file inv.csv [--apply]
   référence absente de la base bloque tout l'import.
 - Reviewer `ai:<modèle>` obligatoire → statut `pending`, validation dans `/admin/revue`.
 ```bash
-python -m paris_memoire.import_curated --file curated/banques_2026-10_lot1.csv [--apply]
+python -m diams.import_curated --file curated/banques_2026-10_lot1.csv [--apply]
 ```
 
 ### `import_esef` — rapports financiers annuels balisés (ESEF) → publication auto
@@ -265,7 +265,7 @@ python -m paris_memoire.import_curated --file curated/banques_2026-10_lot1.csv [
 - Montants libellés dans la devise balisée (iso4217), jamais supposée ; exercice
   clos en fin de mois ; version déposée dans le pays de l'entité en priorité.
 ```bash
-python -m paris_memoire.import_esef [--only slug1,slug2] [--apply]
+python -m diams.import_esef [--only slug1,slug2] [--apply]
 ```
 
 ### `esrs_candidates` — aide à la lecture des états de durabilité (aucune écriture)
@@ -276,7 +276,7 @@ python -m paris_memoire.import_esef [--only slug1,slug2] [--apply]
 - Le compilateur écrit la citation dans `curated/groupes_*.csv` ; `verify_curated`
   la retrouve mot pour mot. Les cas écartés vont dans `curated/groupes_*_notes.md`.
 ```bash
-python -m paris_memoire.esrs_candidates --slug loreal --only GOV_BOARD_GENDER,ENV_GHG_INTENSITY
+python -m diams.esrs_candidates --slug loreal --only GOV_BOARD_GENDER,ENV_GHG_INTENSITY
 ```
 
 ### `verify_curated` — vérification déterministe contre la source primaire
@@ -321,7 +321,7 @@ python -m paris_memoire.esrs_candidates --slug loreal --only GOV_BOARD_GENDER,EN
   `JUGEMENT` (attribution : la source vise un périmètre plus large que l'entité),
   `NON VÉRIFIABLE`. Seuls les `OK` encore en attente sont approuvés.
 ```bash
-python -m paris_memoire.verify_curated --file curated/banques_2026-10_lot1.csv --bocc-pdf tables.pdf [--apply]
+python -m diams.verify_curated --file curated/banques_2026-10_lot1.csv --bocc-pdf tables.pdf [--apply]
 ```
 
 ### `import_finansol` — label Finansol → `INV_SOLIDARITY_LABEL`
@@ -331,7 +331,7 @@ python -m paris_memoire.verify_curated --file curated/banques_2026-10_lot1.csv -
   filiales et fédérations régionales exclues : le label ne remonte pas au groupe.
 - Positifs seulement : une banque absente de la liste n'a pas de preuve (pas de 0).
 ```bash
-python -m paris_memoire.import_finansol [--apply]
+python -m diams.import_finansol [--apply]
 ```
 
 ### `import_bcorp` — certification B Corp → `GOV_BCORP`
@@ -341,8 +341,8 @@ python -m paris_memoire.import_finansol [--apply]
 - `--discover [--only slug]` liste les candidats de l'annuaire **sans rien
   écrire** : un humain confirme, puis ajoute la paire à `VERIFIED`.
 ```bash
-python -m paris_memoire.import_bcorp --discover --only la-nef
-python -m paris_memoire.import_bcorp [--apply]
+python -m diams.import_bcorp --discover --only la-nef
+python -m diams.import_bcorp [--apply]
 ```
 
 ### `import_ohchr` — base ONU des entreprises liées aux colonies → `GEO_CONFLICT_TIES`
@@ -350,7 +350,7 @@ python -m paris_memoire.import_bcorp [--apply]
 - Rattachement par nom **exact** normalisé ; une présence = controverse sourcée.
 - A/HRC/63/20 (sept. 2025) : 190 lignes lues sur 214, **aucune entité DIAMS listée**.
 ```bash
-python -m paris_memoire.import_ohchr --file A_HRC_63_20.pdf --symbol A/HRC/63/20 --date 2025-09-26 [--apply]
+python -m diams.import_ohchr --file A_HRC_63_20.pdf --symbol A/HRC/63/20 --date 2025-09-26 [--apply]
 ```
 
 ### `import_sec` — sociétés cotées aux États-Unis (SEC EDGAR) → publication auto
@@ -368,7 +368,7 @@ python -m paris_memoire.import_ohchr --file A_HRC_63_20.pdf --symbol A/HRC/63/20
   lus pour `curated/` et vérifiés par `verify_curated`.
 - User-Agent identifiant le projet, sans donnée personnelle.
 ```bash
-python -m paris_memoire.import_sec [--only apple,meta] [--apply]
+python -m diams.import_sec [--only apple,meta] [--apply]
 ```
 
 ### `connectors/bdif` — documents d'enregistrement universels déposés à l'AMF
@@ -384,8 +384,8 @@ python -m paris_memoire.import_sec [--only apple,meta] [--apply]
 - `--file curated/regimes_*.csv` : rattachements curés (`entity_slug, regime_code,
   basis, source_url, observed_on`), reviewer `ai:<modèle>`.
 ```bash
-python -m paris_memoire.attach_regimes --egapro egapro.csv [--apply]
-python -m paris_memoire.attach_regimes --file curated/regimes_banques_2026-10.csv [--apply]
+python -m diams.attach_regimes --egapro egapro.csv [--apply]
+python -m diams.attach_regimes --file curated/regimes_banques_2026-10.csv [--apply]
 ```
 
 > Identifiants : un SIREN ou un LEI n'est retenu que s'il est **confirmé par le

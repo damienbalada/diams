@@ -1,6 +1,6 @@
 """Vérification déterministe des preuves curées (BOCC, HATVP)."""
-from paris_memoire.load import EvidenceRow
-from paris_memoire.verify_curated import check_hatvp, parse_bocc_text, verify_bocc
+from diams.load import EvidenceRow
+from diams.verify_curated import check_hatvp, parse_bocc_text, verify_bocc
 
 BOCC_TEXT = """
 Financing to Upstream Oil & Gas Expansion
@@ -88,7 +88,7 @@ def esef_row(ind, value, quote):
 
 
 def test_esef_citation_verbatim_valeur_et_indicateur():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     q = "L'écart de rémunération entre les femmes et les hommes au sein de Crédit Agricole S.A. est de 31,68 % en 2025"
     assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", 31.68, q), REPORT).status == "OK"
     q2 = "Intensité de GES - basée sur le marché 2 773,87 tonnes éqCO₂/M€"
@@ -100,7 +100,7 @@ def test_esef_citation_verbatim_valeur_et_indicateur():
 
 
 def test_signe_moins_typographique():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "The ↗ Gender Pay Gap was –9.9% (2024:–10.1%)."
     q = "The ↗ Gender Pay Gap was –9.9%"
     assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -9.9, q), rep).status == "OK"
@@ -111,7 +111,7 @@ def test_signe_moins_typographique():
 
 
 def test_ecart_en_faveur_des_femmes_compte_negatif():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "In 2025 , the total gender pay gap at HEINEKEN was 30.1% ( 2024 : 28.4%) in favour of women. The"
     q = "In 2025 , the total gender pay gap at HEINEKEN was 30.1% ( 2024 : 28.4%) in favour of women"
     assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", -30.1, q), rep).status == "OK"
@@ -129,7 +129,7 @@ def test_ecart_en_faveur_des_femmes_compte_negatif():
 
 
 def test_pourcentage_tire_des_effectifs_cites():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Key elements of our Board independence include: • 11 of 12 director nominees are independent • All"
     q = "11 of 12 director nominees are independent"
     assert check_esef_quote(esef_row("GOV_BOARD_INDEP", 91.7, q), rep).status == "OK"
@@ -140,7 +140,7 @@ def test_pourcentage_tire_des_effectifs_cites():
 
 
 def test_nombres_en_notation_anglaise():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     report = "For 2025, the ratio of the annual total compensation of our CEO to the median employee was 1,980 to 1."
     q = "the ratio of the annual total compensation of our CEO to the median employee was 1,980 to 1"
     assert check_esef_quote(esef_row("LAB_CEO_PAY_RATIO", 1980, q), report).status == "OK"
@@ -149,7 +149,7 @@ def test_nombres_en_notation_anglaise():
 
 
 def test_plusieurs_citations_toutes_verifiees():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     report = "3.2 Plan de vigilance 3.2.7 Dispositif de suivi des mesures. Ailleurs : une cartographie des risques achats."
     ok = esef_row("SUP_VIGILANCE_PLAN", None, "3.2 Plan de vigilance 3.2.7 Dispositif de suivi des mesures » et « une cartographie des risques achats")
     assert check_esef_quote(ok, report).status == "OK"
@@ -158,7 +158,7 @@ def test_plusieurs_citations_toutes_verifiees():
 
 
 def test_esef_colonnes_voisines_de_trois_chiffres():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     report = "Intensité des GES par chiffre d’affaires net tCO 2 e/M€ 345 352 2 Suite"
     q = "Intensité des GES par chiffre d’affaires net tCO 2 e/M€ 345 352"
     assert check_esef_quote(esef_row("ENV_GHG_INTENSITY", 352, q), report).status == "OK"
@@ -166,7 +166,7 @@ def test_esef_colonnes_voisines_de_trois_chiffres():
 
 
 def test_esef_ecart_si_citation_absente_valeur_differente_ou_hors_sujet():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     q = "L'écart de rémunération entre les femmes et les hommes au sein de Crédit Agricole S.A. est de 31,68 % en 2025"
     assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", 31.7, q), REPORT).status == "ÉCART"
     assert check_esef_quote(esef_row("LAB_GENDER_PAYGAP", 31.68, q.replace("31,68", "30,68")), REPORT).status == "ÉCART"
@@ -179,7 +179,7 @@ def test_hatvp_fiche_vide_est_un_ecart():
 
 
 def test_seul_un_ok_de_tier_1_2_sans_note_est_approuvable():
-    from paris_memoire.verify_curated import Verdict, finalize
+    from diams.verify_curated import Verdict, finalize
     ok = Verdict("OK", [])
     assert finalize(ok, "", "regulatory").status == "OK"
     assert finalize(ok, "", "audited_ngo").status == "OK"
@@ -190,7 +190,7 @@ def test_seul_un_ok_de_tier_1_2_sans_note_est_approuvable():
 
 
 def test_conversion_de_devise_au_taux_bce():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("GHG intensity per net revenue 1 (tonnes CO2e/SEK m) 2025 2024 2023 2019 Comparison … "
            "Total GHG emissions (market–based) per net revenue 30 33 32 44 –10.1 –31.7 1. Net revenue")
     q = ("GHG intensity per net revenue 1 (tonnes CO2e/SEK m) 2025 2024 2023 2019 » ; « "
@@ -208,7 +208,7 @@ def test_conversion_de_devise_au_taux_bce():
 
 
 def test_rythme_annuel_des_emissions_recalcule():
-    from paris_memoire.verify_curated import check_esef_quote, trend_score
+    from diams.verify_curated import check_esef_quote, trend_score
     rep = ("Total GHG emissions (market–based) (tCO 2e) 6,855,000 7,831,000 7,548,000 10,227,000 –12.5 –33 "
            "1. For Scope 3 emissions")
     q = "Total GHG emissions (market–based) (tCO 2e) 6,855,000 7,831,000 7,548,000 10,227,000"
@@ -227,7 +227,7 @@ def test_rythme_annuel_des_emissions_recalcule():
 
 
 def test_rythme_avec_totaux_decimaux():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Émissions totales de GES Location-Based 265,1 145,2 157,2 Émissions totales de GES Market-Based"
     q = "Émissions totales de GES Location-Based 265,1 145,2 157,2"
     calc = " ; rythme annuel moyen (2017 → 2025, 8 ans) : (145,2 / 265,1)^(1/8) − 1 = −7,25 %"
@@ -237,7 +237,7 @@ def test_rythme_avec_totaux_decimaux():
 
 
 def test_rythme_avec_espaces_de_milliers():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Émissions totales de GES (scope 2 market-based) 622 429 747 810 658 455 - 11,9 %"
     q = "Émissions totales de GES (scope 2 market-based) 622 429 747 810 658 455"
     calc = " ; rythme annuel moyen (2018 → 2025, 7 ans) : (658455 / 622429)^(1/7) − 1 = 0,81 %"
@@ -247,7 +247,7 @@ def test_rythme_avec_espaces_de_milliers():
 
 
 def test_delegation_tier3_seulement_si_verifie():
-    from paris_memoire.verify_curated import Verdict, finalize
+    from diams.verify_curated import Verdict, finalize
     ok = Verdict("OK", ["citation retrouvée ✓"])
     assert finalize(ok, "", "press").status == "JUGEMENT"                      # sans délégation : humain
     assert finalize(ok, "", "press", delegated=True).status == "OK-DÉLÉGUÉ"    # délégation : approuvable
@@ -258,7 +258,7 @@ def test_delegation_tier3_seulement_si_verifie():
 
 
 def test_baisse_sur_un_an_refusee_hausse_acceptee():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Total GHG emissions (market-based) million tonnes 1,142 1,166 and 887.4 828.5"
     def r(q, calc, value, norm):
         x = row("x", value, f"Rapport : « {q} »{calc}", ind="ENV_GHG_TREND", src="ESEF")
@@ -273,7 +273,7 @@ def test_baisse_sur_un_an_refusee_hausse_acceptee():
 
 
 def test_effectifs_en_notation_barre():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Director Nominee Highlights Board Composition 4 /10 women 6 /10 men 3 /10 members"
     q = "Director Nominee Highlights Board Composition 4 /10 women 6 /10 men"
     assert check_esef_quote(esef_row("GOV_BOARD_GENDER", 40.0, q), rep).status == "OK"
@@ -282,7 +282,7 @@ def test_effectifs_en_notation_barre():
 
 
 def test_rythme_depuis_une_variation_publiee():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Reach net zero across our value chain by 2040 2025 progress and results 19% CO 2 reduction vs. 2022 baseline in Scope 1, 2 and 3 emissions"
     q = "2025 progress and results 19% CO 2 reduction vs. 2022 baseline in Scope 1, 2 and 3 emissions"
     calc = " ; rythme annuel moyen (2022 → 2025, 3 ans) : (1 − 19 %)^(1/3) − 1 = −6,78 %"
@@ -295,7 +295,7 @@ def test_rythme_depuis_une_variation_publiee():
 
 
 def test_sanction_gravite_relue_dans_la_citation():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("The Commission has fined 15 major car manufacturers. The breakdown of the fines imposed on each party is as "
            "follows: Stellantis 50% €74 934 000 BMW €24 587 000. The European Commission has fined Google €2.95 billion "
            "for breaching EU antitrust rules. Mercedes-Benz was not fined, as it revealed the cartel")
@@ -316,7 +316,7 @@ def test_sanction_gravite_relue_dans_la_citation():
 
 
 def test_sanction_montant_en_francais():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("Le 1 er septembre 2025, la CNIL a sanctionné la société INFINITE STYLES SERVICES CO. LIMITED, filiale "
            "irlandaise du groupe SHEIN, d'une amende de 150 millions d'euros pour avoir déposé des cookies. "
            "la CNIL a sanctionné la société SAMARITAINE SAS d'une amende de 100 000 euros")
@@ -333,7 +333,7 @@ def test_sanction_montant_en_francais():
 
 
 def test_sanction_tableau_en_euros():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("l'Autorité de la concurrence inflige une sanction de 187,5 millions d'euros à TotalEnergies Marketing "
            "France, à deux sociétés du groupe Rubis et à EG Retail. Entreprises Montants des sanctions (en euros) "
            "TEMF 115 820 000 Rubis 64 670 000")
@@ -347,7 +347,7 @@ def test_sanction_tableau_en_euros():
 
 
 def test_sanction_virgule_decimale_devant_billion():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Italian Competition Authority: Amazon fined over € 1,128 billion for abusing its dominant position"
     x = row("amazon", None, f"AGCM : « {rep} »", ind="GOV_SANCTIONS", src="IT_COMPETITION")
     x.value_numeric, x.value_text, x.normalized_value, x.nature = None, "amende de 1,13 Md€ (abus)", 0.9, "controversy"
@@ -355,7 +355,7 @@ def test_sanction_virgule_decimale_devant_billion():
 
 
 def test_montants_en_euros_toutes_ecritures():
-    from paris_memoire.verify_curated import euro_amounts
+    from diams.verify_curated import euro_amounts
     def has(q, v):
         return any(abs(x - v) < 0.5 for x in euro_amounts(q))
     assert has("fined Apple over €1.8 billion", 1.8e9)
@@ -372,7 +372,7 @@ def test_montants_en_euros_toutes_ecritures():
 
 
 def test_independance_tous_sauf_le_pdg():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("To elect the twelve directors nominated by our board of directors. All of our director nominees are "
            "independent, with the exception of our CEO.")
     q = "To elect the twelve directors nominated by our board of directors » ; « All of our director nominees are independent, with the exception of our CEO"
@@ -385,7 +385,7 @@ def test_independance_tous_sauf_le_pdg():
 
 
 def test_mixite_depuis_deux_effectifs_cites():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("The Board nominated each of the 10 incumbent directors listed here. The Director nominees vary in age "
            "from 59 to 70, include four women, and collectively bring a range of professional and life experiences")
     q = "The Board nominated each of the 10 incumbent directors listed here » ; « The Director nominees vary in age from 59 to 70, include four women"
@@ -396,7 +396,7 @@ def test_mixite_depuis_deux_effectifs_cites():
 
 
 def test_note_normalisee_de_la_mixite_controlee():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Notre conseil compte 40 % de femmes administratrices."
     x = row("x", 40.0, "Rapport : « Notre conseil compte 40 % de femmes administratrices »", ind="GOV_BOARD_GENDER", src="ESEF")
     x.normalized_value = 0.8
@@ -406,7 +406,7 @@ def test_note_normalisee_de_la_mixite_controlee():
 
 
 def test_plastique_vierge_rythme_classe_entre_pairs():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("Entre 2019 et 2025 , il a ainsi réduit de 10.1 % son utilisation d’emballages en plastique et de 17 .7 % "
            "son utilisation de plastique vierge issu de ressources fossiles.")
     q = "Entre 2019 et 2025 , il a ainsi réduit de 10.1 % son utilisation d’emballages en plastique et de 17 .7 % son utilisation de plastique vierge issu de ressources fossiles"
@@ -419,7 +419,7 @@ def test_plastique_vierge_rythme_classe_entre_pairs():
 
 
 def test_plastique_vierge_variations_annuelles_composees():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("Target metrics 2030 Target 2025 2024 2023 Comments Achieve an average of 2% year-over-year reduction in "
            "our absolute tonnage of virgin plastics through 2030 2% YOY 6%1 5%1 Goal refined in 2025")
     q = "Achieve an average of 2% year-over-year reduction in our absolute tonnage of virgin plastics through 2030 2% YOY 6%1 5%1"
@@ -434,7 +434,7 @@ def test_plastique_vierge_variations_annuelles_composees():
 
 
 def test_conversion_d_unite_et_nombres_a_espaces():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("Intensité des GES par produit net 2025 2024 Émissions totales de GES (fondées sur le marché) par produit net (en teqCO2/EUR) 0,00039 0,00039 -1 % "
            "Résultat avant impôt 6 052 5 325 +13,6 % Impôt sur les bénéfices -1 834 -1 201")
     q1 = "Intensité des GES par produit net 2025 2024 Émissions totales de GES (fondées sur le marché) par produit net (en teqCO2/EUR) 0,00039 0,00039"
@@ -448,7 +448,7 @@ def test_conversion_d_unite_et_nombres_a_espaces():
 
 
 def test_conversion_depuis_des_kilogrammes_par_euro_en_anglais():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "GHG intensity (Location-based approach) (kgCO₂-e/EUR) 0.24 0.25 GHG intensity (Market-based approach) (kgCO₂-e/EUR) 0.23 0.24"
     q = "GHG intensity (Market-based approach) (kgCO₂-e/EUR) 0.23 0.24"
     x = row("philips", 230.0, f"Rapport : « {q} » ; conversion : 0,23 kg/€ × 1 000 = 230 t/M€ (intensité par million d'euros de chiffre d'affaires)",
@@ -462,7 +462,7 @@ def test_conversion_depuis_des_kilogrammes_par_euro_en_anglais():
 
 
 def test_colonnes_de_ratios_non_fusionnees_en_milliers():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     q = "CEO pay ratio Year Methodology used Lower quartile Median Upper quartile 2025 Option B 137:1 126:1 104:1"
     x = row("abf", 126.0, f"Rapport : « {q} »", ind="LAB_CEO_PAY_RATIO", src="ESEF")
     assert check_esef_quote(x, q).status == "OK"
@@ -471,7 +471,7 @@ def test_colonnes_de_ratios_non_fusionnees_en_milliers():
 
 
 def test_taux_d_impot_recalcule_depuis_des_montants_a_l_anglaise():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Profit before income taxes 650,574 802,505 Income tax expense (191,421) (218,364) Profit for the year 459,153 584,141"
     q = "Profit before income taxes 650,574 802,505 Income tax expense (191,421) (218,364)"
     ok = row("fast-retailing", 27.2, f"Résultats annuels : « {q} » ; calcul : 218364 / 802505 = 27,2 %",
@@ -486,7 +486,7 @@ def test_taux_d_impot_recalcule_depuis_des_montants_a_l_anglaise():
 
 
 def test_citation_propre_retrouvee_malgre_les_mots_coupes_du_pdf():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Currently, five out of 15 Board members ar e women (same ratio as last re porting year)."
     ok = row("ab-inbev", 33.3, "Rapport : « Currently, five out of 15 Board members are women » ; calcul : 5 / 15 = 33,3 %",
              ind="GOV_BOARD_GENDER", src="ESEF")
@@ -498,7 +498,7 @@ def test_citation_propre_retrouvee_malgre_les_mots_coupes_du_pdf():
 
 
 def test_effectif_publie_en_deux_parties():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("the Board, which is composed of two executive directors and 13 non-executive directors with diverse "
            "backgrounds. The non-executive directors are, without exception, indisputably independent in character and judgment.")
     q = ("which is composed of two executive directors and 13 non-executive directors » ; « The non-executive directors "
@@ -510,7 +510,7 @@ def test_effectif_publie_en_deux_parties():
 
 
 def test_numerateur_en_deux_parties():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("Our Supervisory Board comprises twelve members. In 2025 six members were employee representatives. "
            "the Supervisory Board considers it to be adequate if at least three of its shareholder members are independent")
     q = ("Our Supervisory Board comprises twelve members » ; « six members were employee representatives » ; "
@@ -522,7 +522,7 @@ def test_numerateur_en_deux_parties():
 
 
 def test_conseil_entierement_independant():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("The Chair and all members of the Board of Directors are independent, were not previously members of the "
            "Nestlé management. Le Conseil de Surveillance a constaté que l’ensemble de ses membres est indépendant "
            "(hors membre représentant les salariés). All members of the Board are non-executive.")
@@ -540,7 +540,7 @@ def test_conseil_entierement_independant():
 
 
 def test_exception_composee_executifs_et_representant():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("As at 31 December 2025, the Board comprised nine Directors: the Board Chair, two Executive Directors and six "
            "Non-Executive Directors (NEDs). The majority (88%) of the NEDs were independent, except for Reginaldo Ecclissato.")
     q = ("As at 31 December 2025, the Board comprised nine Directors: the Board Chair, two Executive Directors and six "
@@ -554,7 +554,7 @@ def test_exception_composee_executifs_et_representant():
 
 
 def test_president_independant_compte_pour_un():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("As at 31 December 2025, the Unilever Board comprised ten Directors: the Chair, two Executive Directors and "
            "seven independent Non-Executive Directors. The Chair was considered to be independent on appointment.")
     q = ("As at 31 December 2025, the Unilever Board comprised ten Directors: the Chair, two Executive Directors and "
@@ -567,7 +567,7 @@ def test_president_independant_compte_pour_un():
 
 
 def test_effectif_publie_en_trois_parties():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "The Board has 1 executive director, 6 non-executive directors and 3 independent directors."
     q = "The Board has 1 executive director, 6 non-executive directors and 3 independent directors"
     ok = row("lotus", 30.0, f"Rapport : « {q} » ; calcul : 3 / (1 + 6 + 3) = 30,0 %", ind="GOV_BOARD_INDEP", src="ESEF")
@@ -577,7 +577,7 @@ def test_effectif_publie_en_trois_parties():
 
 
 def test_denominateur_hors_representants_des_salaries():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = "Le Conseil de Surveillance est composé de 17 membres dont 4 membres sont indépendants et 2 sont des représentants des salariés."
     q = "Le Conseil de Surveillance est composé de 17 membres dont 4 membres sont indépendants et 2 sont des représentants des salariés"
     ok = row("ldc", 26.7, f"Rapport : « {q} » ; calcul : 4 / (17 − 2) = 26,7 %", ind="GOV_BOARD_INDEP", src="ESEF")
@@ -587,7 +587,7 @@ def test_denominateur_hors_representants_des_salaries():
 
 
 def test_conseil_sans_independant_et_une_seule_femme():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("Pas de parité au Conseil : une seule femme était administratrice en 2025 ( sur 12 membres). "
            "Absence d’administrateurs indépendants : les membres du Conseil sont uniquement des adhérents. "
            "Des administrateurs indépendants siègent au comité d'audit.")
@@ -612,7 +612,7 @@ def test_conseil_sans_independant_et_une_seule_femme():
 
 
 def test_independance_exception_nommee_a_part():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("The Board has selected the following eight nominees for election to the Board. As a result of these "
            "reviews, the Board affirmatively determined that all of the Company’s current non-management directors "
            "are, and, during their service on the Board in 2025, were “independent” of the Company and its management "
@@ -633,7 +633,7 @@ def test_independance_exception_nommee_a_part():
 
 
 def test_montants_groupes_en_colonnes_voisines():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("RÉSULTAT AVANT IMPÔTS 430 809 336 503 Impôts sur les sociétés 19.2 ( 104 665 ) ( 90 161 ) "
            "RÉSULTAT CONSOLIDÉ 326 144 246 342")
     q = "RÉSULTAT AVANT IMPÔTS 430 809 336 503 Impôts sur les sociétés 19.2 ( 104 665 ) ( 90 161 )"
@@ -650,7 +650,7 @@ def test_montants_groupes_en_colonnes_voisines():
 
 
 def test_mixite_tableau_sexe_feminin():
-    from paris_memoire.verify_curated import check_esef_quote
+    from diams.verify_curated import check_esef_quote
     rep = ("21.d Sexe Pourcentage Féminin 0 % Masculin 100 % TOTAL 100 % Le Conseil d’administration compte un "
            "administrateur indépendant parmi les six administrateurs qui le composent.")
     q = "21.d Sexe Pourcentage Féminin 0 % Masculin 100 % TOTAL 100 % Le Conseil d’administration compte un administrateur"
@@ -663,7 +663,7 @@ def test_mixite_tableau_sexe_feminin():
 
 def test_mots_cles_exploitation_animale_alimentation():
     import re
-    from paris_memoire.verify_curated import ESEF_KEYWORDS
+    from diams.verify_curated import ESEF_KEYWORDS
     pat = re.compile(ESEF_KEYWORDS["ANI_EXPLOITATION"][0], re.I)
     for ok in ["Fabrication de fromage", "galettes pur beurre", "Charcuterie", "Transformation et conservation de poisson",
                "foie gras de canard", "Élevage de volailles", "Aquaculture en mer", "Pêche en mer", "crème fraîche"]:

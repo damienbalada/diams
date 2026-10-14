@@ -6,7 +6,7 @@ Les données sont fictives (ExempleCorp / DemoGroup) : aucun fait réel.
 """
 from pathlib import Path
 
-from paris_memoire.connectors import (
+from diams.connectors import (
     benchmarks,
     bffp,
     cdp,

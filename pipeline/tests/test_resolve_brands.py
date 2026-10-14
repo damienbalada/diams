@@ -1,5 +1,5 @@
-from paris_memoire.resolve_brands import resolve
-from paris_memoire.connectors.openfoodfacts import map_sector, brands_from_products
+from diams.resolve_brands import resolve
+from diams.connectors.openfoodfacts import map_sector, brands_from_products
 
 ENTITIES = [
     {"slug": "danone", "name": "Danone", "is_brand": False, "aliases": []},

@@ -1,5 +1,5 @@
-from paris_memoire.connectors import bffp
-from paris_memoire.import_bffp import build_rows
+from diams.connectors import bffp
+from diams.import_bffp import build_rows
 
 
 def test_severity_from_rank_is_monotone_decreasing():

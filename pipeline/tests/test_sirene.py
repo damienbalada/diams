@@ -1,6 +1,6 @@
 ﻿import httpx
 
-from paris_memoire.connectors.sirene import parse_result, search_siren
+from diams.connectors.sirene import parse_result, search_siren
 
 
 def test_parse_result_prefers_nom_complet():

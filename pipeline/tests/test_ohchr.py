@@ -1,5 +1,5 @@
 """Base du HCDH : lecture de l'annexe et correspondance exacte des noms."""
-from paris_memoire.import_ohchr import match, parse_annex
+from diams.import_ohchr import match, parse_annex
 
 ANNEX = """Annex I Business enterprises involved in listed activities
 No. Business enterprise Listed activity Home State

@@ -14,7 +14,7 @@ l'utilisateur : **présenter le site à des journalistes**. Chaque chiffre publi
 sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité avant couverture.
 
 - Dépôt : `C:\Users\damie\Downloads\claude\awareness-score` — distant GitHub
-  `damienbalada/paris-memoire`, branche de travail **et** principale :
+  `damienbalada/diams`, branche de travail **et** principale :
   `claude/ethical-scoring-engine-gdm5xl`.
 - Site : Next.js dans `apps/web`, hébergé sur Vercel (projet « diams »,
   `prj_UzSxj7BQA4cDXeFxUWo9JdJ3CeTs`, équipe `team_ISaAGM5v39wnVYVLKDsTlr9J`). Chaque
@@ -22,7 +22,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
 - Base : Supabase, projet `wvqbvmjsqihqzmygrkwq` (outil MCP Supabase : `execute_sql`,
   `apply_migration`).
 - Moteur de calcul : `supabase/functions/compute_score/scoring.ts` (même moteur côté site).
-- Chaîne de données : `pipeline/` (Python, paquet `paris_memoire`).
+- Chaîne de données : `pipeline/` (Python, paquet `diams`).
 - Méthodologie publique : `METHODOLOGY.md` (régénérer `apps/web/lib/methodology.ts` avec
   `node scripts/gen-methodology.mjs` après toute modification).
 
@@ -43,7 +43,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
     usage **localhost seulement**).
     Lecture sans affichage : `PW=$(grep -E "^SITE_PASSWORD=" .env.local | cut -d= -f2- | tr -d '"\r')` puis `unset PW`.
   - `pipeline/.env` : `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (lus par
-    `paris_memoire/config.py`).
+    `diams/config.py`).
   - La clé publique (anon) de Supabase figure dans le script d'audit
     `audit_brands.mts` (outils de la session, § 8) : elle est publique par conception.
 - Interdits : créer un compte, saisir un mot de passe ou une clé d'API (les clés Vercel
@@ -87,7 +87,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
 - Shell : Bash (Git Bash) et PowerShell disponibles. **`rtk` n'est pas installé** dans le
   Bash : utiliser `git` directement (malgré le CLAUDE.md global).
 - Python : `pipeline/.venv/Scripts/python.exe` ; lancer les modules depuis `pipeline/` :
-  `python -m paris_memoire.<module>`. Scripts du brouillon : avec `-I`.
+  `python -m diams.<module>`. Scripts du brouillon : avec `-I`.
 - Certificats (interception TLS par Cloudflare WARP / Avast) :
   - `export SSL_CERT_FILE="<brouillon>/ca-bundle.pem" PYTHONIOENCODING=utf-8`
   - Node : `NODE_EXTRA_CA_CERTS="<brouillon>/ca-bundle.pem"`
@@ -134,15 +134,15 @@ Depuis `pipeline/`, avec les variables du § 3 :
 
 | Besoin | Commande |
 |---|---|
-| Importer des marques | `python -m paris_memoire.import_brand_portfolio --file curated/marques_X.csv` (contrôle) puis `--apply` |
-| Importer des preuves curées | `python -m paris_memoire.import_curated --file curated/groupes_X.csv` puis `--apply` (statut pending) |
-| Vérifier / approuver | `python -m paris_memoire.verify_curated --file curated/groupes_X.csv --apply [--delegue]` |
-| Egapro | `python -m paris_memoire.import_egapro --file egapro.csv --apply` |
-| SBTi | `python -m paris_memoire.import_sbti --file sbti.csv --apply` |
-| Exploitation animale (APE) | `python -m paris_memoire.import_ani_ape --cache <brouillon>/ani_ape_cache.json --apply` |
-| B Corp | `python -m paris_memoire.import_bcorp --discover --only slug1,slug2` puis déclarer la paire dans `connectors/bcorp.py` (`VERIFIED`) et `--apply` |
-| Registre européen | `python -m paris_memoire.import_eu_register --file <brouillon>/eu_register.xml [--apply]` |
-| Notes CDP | `python -m paris_memoire.import_cdp_scores --file <brouillon>/cdp_page.html [--apply]` |
+| Importer des marques | `python -m diams.import_brand_portfolio --file curated/marques_X.csv` (contrôle) puis `--apply` |
+| Importer des preuves curées | `python -m diams.import_curated --file curated/groupes_X.csv` puis `--apply` (statut pending) |
+| Vérifier / approuver | `python -m diams.verify_curated --file curated/groupes_X.csv --apply [--delegue]` |
+| Egapro | `python -m diams.import_egapro --file egapro.csv --apply` |
+| SBTi | `python -m diams.import_sbti --file sbti.csv --apply` |
+| Exploitation animale (APE) | `python -m diams.import_ani_ape --cache <brouillon>/ani_ape_cache.json --apply` |
+| B Corp | `python -m diams.import_bcorp --discover --only slug1,slug2` puis déclarer la paire dans `connectors/bcorp.py` (`VERIFIED`) et `--apply` |
+| Registre européen | `python -m diams.import_eu_register --file <brouillon>/eu_register.xml [--apply]` |
+| Notes CDP | `python -m diams.import_cdp_scores --file <brouillon>/cdp_page.html [--apply]` |
 | HATVP | open data `hatvp.fr/agora/opendata/agora_repertoire_opendata.json` (copie : `<brouillon>/hatvp_open/agora.json`) ; construire les lignes avec `<brouillon>/build_hatvp.py sortie.csv slug=SIREN …` puis `import_curated` + `verify_curated --apply` |
 
 Format du CSV de marques :

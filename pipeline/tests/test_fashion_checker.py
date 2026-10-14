@@ -1,4 +1,4 @@
-from paris_memoire.import_fashion_checker import ALIASES, SCALE, build_row, parse_answers
+from diams.import_fashion_checker import ALIASES, SCALE, build_row, parse_answers
 
 PAYLOAD = {"items": [
     {"company": "H&M", "year": 2026, "value": "E"},

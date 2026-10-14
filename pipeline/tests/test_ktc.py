@@ -1,5 +1,5 @@
-from paris_memoire.connectors import benchmarks as bm
-from paris_memoire.import_ktc import build_row, match_group
+from diams.connectors import benchmarks as bm
+from diams.import_ktc import build_row, match_group
 
 HTML = (
     '<script>var _Flourish_data = {"data":['

@@ -1,5 +1,5 @@
-from paris_memoire.connectors import investments as inv
-from paris_memoire.import_investments import build_rows
+from diams.connectors import investments as inv
+from diams.import_investments import build_rows
 
 
 def test_parse_status_policy():
