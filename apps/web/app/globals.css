@@ -292,3 +292,58 @@ details.pending[open] > summary::after { content: "masquer"; }
 /* Classement : mêmes colonnes d'un secteur à l'autre. */
 .rank-table { table-layout: fixed; }
 .rank-table td:nth-child(2) a { overflow-wrap: anywhere; }
+
+/* ---------------------------------------------------------------------------
+   Carte d'identité (refonte : plus de note, des faits sourcés et datés).
+   Pensée d'abord pour le téléphone ; une ligne par pilier, dépliable en
+   chronologie des sources. La couleur double toujours un texte. */
+.ci { max-width: 640px; margin: 0 auto; }
+.ci-card { background: var(--panel); border: 2px solid var(--text); border-radius: 22px; padding: 16px 16px 14px; margin: 12px 0 16px; }
+.ci-head { border-bottom: 2px solid var(--text); padding-bottom: 10px; margin-bottom: 2px; }
+.ci-k { font-size: 11px; letter-spacing: .1em; color: var(--muted); font-weight: 800; }
+.ci-head h1 { font-size: 30px; margin: 2px 0 4px; letter-spacing: -.01em; }
+.ci-own { font-size: 14px; }
+.ci-own a { text-decoration: underline; text-decoration-color: var(--border-strong); }
+.ci-row { border-bottom: 1px solid var(--border); }
+.ci-row > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 11px 2px; }
+.ci-row > summary::-webkit-details-marker { display: none; }
+.ci-row[open] { background: var(--panel-2); margin: 0 -16px; padding: 0 16px; }
+.ci-p { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 800; }
+.ci-cnt { font-size: 12px; color: var(--muted); text-align: right; }
+.ci-cnt::after { content: " ▾"; }
+.ci-row[open] .ci-cnt::after { content: " ▴"; }
+.ci-v { grid-column: 1 / -1; font-weight: 700; font-size: 15px; }
+.ci-body { padding: 0 0 12px; }
+.ci-small { font-size: 12.5px; }
+.ci-faint { color: var(--muted); }
+.ci-badge { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: var(--panel-3); color: var(--muted); margin-left: 6px; }
+.ci-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: 1px; }
+.ci-dot.ci-officielle, .ci-it-officielle::before { background: #138a5a; }
+.ci-dot.ci-reconnue, .ci-it-reconnue::before { background: #3f67c5; }
+.ci-dot.ci-declarative, .ci-it-declarative::before { background: #a7801f; }
+.ci-presume { color: #8a5a00; }
+.ci-obligatoire_absent { color: #b0261a; }
+.ci-autre_forme { color: #8a4a00; }
+.ci-aucune_info { color: var(--faint); font-weight: 600; }
+.ci-documente { color: var(--text); }
+.ci-tl { list-style: none; margin: 4px 0 8px 6px; padding: 0 0 0 16px; border-left: 2px solid var(--border-strong); }
+.ci-it { position: relative; padding: 6px 0 9px; }
+.ci-it::before { content: ""; position: absolute; left: -23px; top: 11px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--panel-2); }
+.ci-date { font-size: 11.5px; font-weight: 800; color: var(--muted); }
+.ci-fait { font-size: 14px; }
+.ci-src { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.ci-cit { font-size: 12.5px; margin-top: 4px; }
+.ci-cit > summary { cursor: pointer; color: var(--accent); }
+.ci-cit blockquote { margin: 6px 0; padding: 7px 10px; background: var(--panel); border-left: 3px solid var(--border-strong); border-radius: 6px; color: var(--text); }
+.ci-cit a { color: var(--accent); }
+.ci-sig { font-size: 13.5px; margin: 6px 0 0 6px; padding: 6px 10px; border-radius: 8px; background: var(--panel); }
+.ci-vides { font-size: 12.5px; color: var(--faint); margin: 8px 0 0 6px; }
+.ci-vides strong { color: var(--muted); }
+.ci-foot { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
+.ci-legend > summary { cursor: pointer; font-weight: 700; }
+.ci-legend li { margin-top: 6px; }
+.ci-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ci-chip { border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 11px; font-size: 13.5px; background: var(--panel); }
+.ci-chip:hover { border-color: var(--accent); }
+@media (max-width: 480px) { .ci-card { padding: 14px 12px; border-radius: 18px; } .ci-row[open] { margin: 0 -12px; padding: 0 12px; } .ci-head h1 { font-size: 26px; } }
+.ent-kind { width: 34px; height: 34px; display: grid; place-items: center; font-size: 18px; border-radius: 10px; background: var(--panel-2); }

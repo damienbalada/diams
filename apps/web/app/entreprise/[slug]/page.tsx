@@ -1,9 +1,8 @@
-import { getScorePayload, getOwnerGroup, getAlternatives, getOwnershipProofs, type Alternative, type OwnershipProof } from "@/lib/data";
-import { computeScore } from "@/lib/scoring";
-import { CompanyScore } from "@/components/CompanyScore";
+import { getScorePayload, getOwnerGroup, getOwnershipProofs, getJournal, getMemeRayon, getMarques, type OwnershipProof } from "@/lib/data";
+import { construireCarte } from "@/lib/carte";
+import { CarteIdentite } from "@/components/CarteIdentite";
 
 export const dynamic = "force-dynamic";
-// Calcul de toutes les notes (plusieurs centaines d'entités) : jusqu'à 60 s au premier appel.
 export const maxDuration = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -11,17 +10,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const payload = await getScorePayload(slug).catch(() => null);
   const name = payload?.entity?.name;
   return name
-    ? { title: name, description: `${name} : note éthique DIAMS, pilier par pilier, chaque point relié à sa source officielle.` }
+    ? { title: name, description: `${name} : carte d'identité DIAMS — les faits publiés, pilier par pilier, chacun relié à sa source et daté. Aucune note, que des faits.` }
     : { title: "Entité introuvable" };
 }
 
-export default async function CompanyPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function CompanyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-
   try {
     const payload = await getScorePayload(slug);
     if (!payload) {
@@ -32,39 +26,26 @@ export default async function CompanyPage({
         </main>
       );
     }
-
-    const result = computeScore(payload);
-
-    // Groupe propriétaire (le vrai bénéficiaire économique) : on calcule aussi
-    // sa note pour l'afficher en regard de celle de la marque.
-    let group: { slug: string; name: string; result: ReturnType<typeof computeScore> } | null = null;
-    try {
-      const owner = await getOwnerGroup(slug);
-      if (owner) {
-        const gp = await getScorePayload(owner.slug);
-        if (gp) group = { slug: owner.slug, name: owner.name, result: computeScore(gp) };
-      }
-    } catch {
-      // encart groupe optionnel : on ignore les erreurs
-    }
-
-    // Alternatives mieux notées du même secteur. Bloc optionnel : une erreur ici
-    // ne doit jamais empêcher l'affichage de la note.
-    let alternatives: Alternative[] = [];
-    try {
-      alternatives = await getAlternatives(slug, result.score);
-    } catch {
-      // ignoré
-    }
-
-    let ownership: OwnershipProof[] = [];
-    try {
-      ownership = await getOwnershipProofs(slug);
-    } catch {
-      // ignoré : bloc d'information
-    }
-
-    return <CompanyScore payload={payload} group={group} alternatives={alternatives} ownership={ownership} />;
+    // Blocs d'information : une erreur sur l'un d'eux ne doit jamais empêcher l'affichage de la carte.
+    const [journal, proprietaire, preuves, memeRayon, marques] = await Promise.all([
+      getJournal(slug).catch(() => []),
+      getOwnerGroup(slug).catch(() => null),
+      getOwnershipProofs(slug).catch(() => [] as OwnershipProof[]),
+      getMemeRayon(slug).catch(() => []),
+      getMarques(slug).catch(() => []),
+    ]);
+    const carte = construireCarte(payload as any, journal);
+    const estGroupe = (payload.ownership_chain ?? []).length <= 1 || marques.length > 0;
+    return (
+      <CarteIdentite
+        carte={carte}
+        estGroupe={estGroupe && !proprietaire}
+        proprietaire={proprietaire}
+        preuvesPropriete={preuves}
+        memeRayon={memeRayon}
+        marques={marques}
+      />
+    );
   } catch (e) {
     return (
       <main>

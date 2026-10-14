@@ -75,7 +75,9 @@ R2 à R6. Présentation à la presse après R6 et les vagues 1 à 3 au minimum.
     électroniques 34/35, dépôts américains 35/35.
   - Obligation Égapro (15/10) : croisement du fichier officiel des déclarations et de l'annuaire
     (tranche d'effectif) → 296 sociétés tenues de publier (`curated/regimes_egapro_2026-10-15.csv`,
-    au lieu de 33) ; 35 sans index 2025 consignées « absence_confirmee » (12 ont cessé de déclarer,
+    au lieu de 33). **Correction :** l'outil de rattachement ne lisait que les 1 000 premières
+    entités ; ces obligations n'ont réellement été écrites qu'après le correctif de pagination
+    (297 écrites le 15/10, Hermès compris) ; 35 sans index 2025 consignées « absence_confirmee » (12 ont cessé de déclarer,
     23 n'ont jamais déclaré) ; 18 index d'UES attribués aux sociétés membres (connecteur étendu).
 - [x] Vague 1 — citations 186/186 ; 13 obligations lues dans les rapports : 4 absences déclarées
   par l'entreprise (Hermès, Carrefour, Société Générale) ou constatées (BPCE, BNP Paribas), 7

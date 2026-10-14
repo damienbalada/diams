@@ -7,11 +7,7 @@ import { CorrectionForm } from "@/components/CorrectionForm";
 function Row({ e }: { e: SearchableEntity }) {
   return (
     <a className="ent-row" href={`/entreprise/${e.slug}`}>
-      {e.grade ? (
-        <span className={`grade sm grade-${e.grade}`}>{e.grade}</span>
-      ) : (
-        <span className="grade sm grade-none" title="Pas encore notée">—</span>
-      )}
+      <span className="ent-kind" aria-hidden="true">{e.is_brand ? "🏷️" : "🏢"}</span>
       <span className="ent-main">
         <span className="ent-name">{e.name}</span>
         {e.group && <small className="muted">{e.group}</small>}

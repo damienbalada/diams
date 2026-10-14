@@ -85,7 +85,9 @@ def upsert(links: list[RegimeLink]) -> int:
          "Content-Type": "application/json"}
     base = f"{config.SUPABASE_URL}/rest/v1"
     with httpx.Client(timeout=60) as c:
-        ents = {e["slug"]: e["id"] for e in c.get(f"{base}/entities", params={"select": "id,slug"}, headers=h).json()}
+        # Toutes les entités, page par page : l'API n'en renvoie que 1 000 par appel (avant le
+        # 15/10/2026, les rattachements au-delà échouaient en « références inconnues »).
+        ents = {e["slug"]: e["id"] for e in supabase_client.get_all(c, "entities", {"select": "id,slug"}, headers=h)}
         regs = {r["code"]: r["id"] for r in c.get(f"{base}/disclosure_regimes", params={"select": "id,code"}, headers=h).json()}
         unknown = sorted({l.entity_slug for l in links if l.entity_slug not in ents} | {l.regime_code for l in links if l.regime_code not in regs})
         if unknown:

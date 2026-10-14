@@ -1,0 +1,62 @@
+// Tests de la carte d'identité (logique pure).
+// Lancer : node --test --experimental-strip-types apps/web/lib/carte.test.ts
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { construireCarte, valeurCourte, type IndicateurEntree, type PreuveEntree } from "./carte.ts";
+
+const dims = [{ code: "ANI", name: "Bien-être animal" }, { code: "LAB", name: "Travail" }, { code: "ENV", name: "Environnement" }];
+const ind = (code: string, dim: string, extra: Partial<IndicateurEntree> = {}): IndicateurEntree =>
+  ({ code, name: code, dimension_code: dim, unit: null, ...extra });
+const preuve = (code: string, extra: Partial<PreuveEntree> = {}): PreuveEntree => ({
+  indicator_code: code, tier: "regulatory", value_numeric: null, observed_on: "2026-03-01", specificity: 0,
+  source_url: "https://exemple.fr", source_name: "Source", excerpt: "« … »", ...extra,
+});
+
+test("exploitation animale non documentée : présumée, jamais « aucune information »", () => {
+  const c = construireCarte({ entity: { slug: "m", name: "M" }, applicableIndicators: [ind("ANI_EXPLOITATION", "ANI")], evidence: [], dimensions: dims });
+  assert.equal(c.piliers[0].faits[0].etat, "presume");
+  assert.equal(c.piliers[0].cle?.code, "ANI_EXPLOITATION");
+});
+
+test("obligation sans lecture du rapport : pas de rouge ; après lecture : obligatoire absent", () => {
+  const p = { entity: { slug: "g", name: "G" }, dimensions: dims, evidence: [],
+    applicableIndicators: [ind("LAB_GENDER_PAYGAP", "LAB", { mandatory: true, mandatory_regimes: ["CSRD"] })] };
+  assert.equal(construireCarte(p).piliers[0].faits[0].etat, "aucune_info");
+  const lu = construireCarte(p, [{ indicator_code: "LAB_GENDER_PAYGAP", outcome: "absence_confirmee", detail: "lu", checked_on: "2026-10-15" }]);
+  assert.equal(lu.piliers[0].faits[0].etat, "obligatoire_absent");
+  assert.equal(lu.piliers[0].cle?.etat, "obligatoire_absent");
+  const autre = construireCarte(p, [{ indicator_code: "LAB_GENDER_PAYGAP", outcome: "autre_forme", detail: "par zone", checked_on: "2026-10-15" }]);
+  assert.equal(autre.piliers[0].faits[0].etat, "autre_forme");
+});
+
+test("la preuve propre à l'entité passe devant celle du groupe ; la valeur garde l'échelle de la source", () => {
+  const c = construireCarte({ entity: { slug: "m", name: "M" }, dimensions: dims, applicableIndicators: [ind("LAB_EGAPRO_INDEX", "LAB", { unit: "score/100" })],
+    evidence: [preuve("LAB_EGAPRO_INDEX", { value_numeric: "92.0", specificity: -1, inherited_from: "Groupe" }),
+               preuve("LAB_EGAPRO_INDEX", { value_numeric: 88, specificity: 0, observed_on: "2025-03-01" })] });
+  const f = c.piliers[0].faits[0];
+  assert.equal(f.valeur, "88/100");
+  assert.equal(f.preuve?.reprisDe, null);
+});
+
+test("aucune information : la recherche faite est rapportée", () => {
+  const c = construireCarte({ entity: { slug: "g", name: "G" }, dimensions: dims, evidence: [],
+    applicableIndicators: [ind("ENV_CDP_CLIMATE", "ENV")] },
+    [{ indicator_code: "ENV_CDP_CLIMATE", outcome: "non_trouvee", detail: "Cherché, non trouvé : absente de la liste publique complète des notes CDP 2025", checked_on: "2026-10-15" }]);
+  assert.match(c.piliers[0].faits[0].note ?? "", /liste publique CDP/);
+});
+
+test("solidité d'un pilier : d'après les seules sources utilisées", () => {
+  const c = construireCarte({ entity: { slug: "g", name: "G" }, dimensions: dims,
+    applicableIndicators: [ind("ENV_CDP_CLIMATE", "ENV"), ind("ENV_GHG_TREND", "ENV", { unit: "%/an" }), ind("ENV_X", "ENV")],
+    evidence: [preuve("ENV_CDP_CLIMATE", { tier: "audited_ngo", excerpt: "climat — note A." }), preuve("ENV_GHG_TREND", { value_numeric: -7.3 })] });
+  assert.equal(c.piliers[0].solidite, "reconnue");
+  assert.equal(c.piliers[0].documentes, 2);
+  assert.equal(c.piliers[0].total, 3);
+  assert.equal(c.piliers[0].cle?.code, "ENV_GHG_TREND");
+});
+
+test("valeurs courtes", () => {
+  assert.equal(valeurCourte("ANI_EXPLOITATION", null, preuve("x", { excerpt: "… — recours à l'exploitation animale (lait)." })), "Oui (lait)");
+  assert.equal(valeurCourte("LAB_GENDER_PAYGAP", "%", preuve("x", { value_numeric: -8 })), "8 % en faveur des femmes");
+  assert.equal(valeurCourte("ENV_GHG_TREND", "%/an", preuve("x", { value_numeric: -7.3 })), "−7,3 % par an");
+});

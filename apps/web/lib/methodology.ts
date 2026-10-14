@@ -3,15 +3,68 @@
 export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 
 > **DIAMS** — **D**ocumenté, **I**ndépendant, **A**uditable, **M**ulticritère,
-> **S**ourcé (en anglais : *Documented, Independent, Auditable, Multi-criteria
-> Scoring*). Score éthique multi-critères et **traçable** : chaque point de note
-> renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
-> c'est la condition de la confiance.
+> **S**ourcé. Depuis la version 0.8.0 (15/10/2026), **DIAMS ne note plus** : il
+> publie la **carte d'identité** de chaque marque et de chaque groupe, faite de faits
+> sourcés, datés et vérifiés mot pour mot, et dit ce qu'il ne sait pas. La méthode
+> est publique et versionnée : c'est la condition de la confiance.
 
-Version : \`0.7.5\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.8.0\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
+
+## 0. La carte d'identité (version 0.8.0, depuis le 15/10/2026)
+
+**Décision de l'éditeur.** La note globale, les lettres A à E, la fiabilité globale et le
+seuil de publication sont abandonnés. Toute note additionne des faits selon des choix de
+pondération qui restent des opinions ; DIAMS publie les faits eux-mêmes et laisse chacun se
+faire un avis. Toutes les marques sont publiées, avec leurs trous.
+
+**Ce que montre une fiche.** Une ligne par pilier, avec un fait clé et le nombre
+d'informations documentées (« 3/6 ») ; chaque ligne se déplie en **chronologie** des faits du
+pilier, chacun avec sa valeur dans l'échelle de sa source (« 92/100 », « note A », « sortie
+effective »), sa date, la solidité de sa source et la citation exacte. La dernière ligne
+rassemble toutes les sources de la fiche. En tête : le propriétaire, qui reçoit l'argent des
+achats, avec les preuves de l'appartenance.
+
+**Cinq états, et seulement cinq :**
+
+| État | Quand | Ce qu'affiche la fiche |
+|---|---|---|
+| Documenté | une preuve vérifiée existe | la valeur, la source, la date, la citation |
+| Présumé | exploitation animale non documentée dans un secteur où elle est la règle (Règle ANI) | « non documentée, présumée dans ce secteur » |
+| Obligatoire, non publié | la loi impose la donnée **et** la lecture du rapport officiel confirme son absence (journal de relecture) | l'obligation, le constat, la citation quand l'entreprise s'en explique |
+| Publié sous une autre forme | publiée, mais pas sous la forme que la loi exige (sous-périmètre, par zone ou par pays, écart ajusté…) | ce qui est publié, et en quoi cela diffère |
+| Aucune information | rien de publié, rien d'obligatoire | « aucune information » et, quand on a cherché dans une liste complète, où et quand |
+
+Une donnée obligatoire absente n'est jamais affichée comme telle sans lecture du rapport qui
+devrait la contenir.
+
+**Solidité des sources, pilier par pilier.** Elle ne dépend que des sources utilisées :
+**officielle** (loi, régulateur, registre public, rapport réglementé), **organisme reconnu**
+(questionnaire CDP, SBTi, classements d'ONG publiés), **déclarative** (site de l'entreprise,
+presse). Une donnée manquante ne la change pas : elle est affichée comme manquante.
+
+**Dates.** Chaque fait porte la date de l'événement quand elle est connue (décision,
+publication, validation), sinon la date de notre relevé, signalée comme telle.
+
+**Journal de relecture public.** Chaque passage sur un indicateur (preuve reconfirmée,
+corrigée, trouvée, absence confirmée, recherche sans résultat) est consigné, daté, avec sa
+source (table \`indicator_reviews\`).
+
+**Règles qui gardent un effet sur la fiche :** Règle 7 (un signalement n'est pas une preuve),
+Règle 8 (ce que la marque reprend de son groupe, et l'index Égapro de son propriétaire
+direct), Règle ANI (présomption d'exploitation animale), pertinence sectorielle et
+géographique, sanctions limitées aux décisions officielles, refus des chiffres présentés comme
+ceux du groupe quand ils ne couvrent qu'une partie. Les informations de presse sont affichées
+pour ce qu'elles sont, sans être converties en verdict ; l'inscription à un registre de
+lobbying est un fait (inscrit, montant déclaré), pas un mérite. Sortie de Russie : base du KSE
+Institute, à six niveaux (activité poursuivie, investissements gelés, activité réduite,
+suspendue, sortie annoncée, sortie effective).
+
+> **Historique.** Les sections 2 à 5 décrivent le calcul de la note utilisé de la version 0.1
+> à la version 0.7.5. Il ne s'applique plus ; ces sections restent publiées pour la
+> traçabilité des décisions passées.
 
 ## 1. Principes fondateurs
 
@@ -773,10 +826,18 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.7.5\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.8.0\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.0 (15/10/2026)** — Décision de l'éditeur : fin de la note globale. La fiche devient
+  une carte d'identité de faits sourcés (section 0) : cinq états par indicateur, solidité des
+  sources par pilier, chronologie des sources, journal de relecture public, toutes les marques
+  publiées. Le classement est retiré ; les « alternatives mieux notées » deviennent « autres
+  marques du même rayon », par ordre alphabétique. Correctifs de données relevés en route :
+  SIREN et LEI de Carrefour, Rémy Cointreau, Hermès et AXA (confirmés dans l'annuaire officiel et
+  GLEIF ; Hermès reçoit son index Égapro 2025, 99/100) ; l'outil de rattachement des obligations
+  ne lisait que les 1 000 premières entités : les 297 obligations Égapro sont désormais écrites.
 - **15/10/2026 (relecture complète, PLAN_REFONTE.md)** — Sans changement de calcul, hors
   rattachement d'obligations. Chaque preuve a été relue contre sa source, et chaque passage est
   consigné dans un journal public (\`indicator_reviews\`) :

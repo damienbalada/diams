@@ -1,0 +1,246 @@
+/**
+ * Carte d'identité d'une marque ou d'un groupe (refonte, PLAN_REFONTE.md) — logique pure.
+ *
+ * Plus de note : chaque indicateur est un FAIT sourcé, dans l'échelle de sa source, ou un
+ * état explicite quand on ne sait rien. Cinq états :
+ *   - documenté          : une preuve, avec sa source, sa date et la citation exacte ;
+ *   - présumé            : exploitation animale non documentée dans un secteur à enjeu ;
+ *   - obligatoire absent : la loi impose la donnée et la lecture du rapport a confirmé son
+ *                          absence (journal de relecture) — jamais sans cette lecture ;
+ *   - autre forme        : publiée, mais pas sous la forme que la loi exige (sous-périmètre,
+ *                          par zone, écart ajusté…) ;
+ *   - aucune information : rien de publié, rien d'obligatoire ; on dit où l'on a cherché.
+ * La « solidité » d'un pilier ne dépend que des sources utilisées.
+ */
+
+export type Etat = "documente" | "presume" | "obligatoire_absent" | "autre_forme" | "aucune_info";
+export type Solidite = "officielle" | "reconnue" | "declarative";
+
+export interface IndicateurEntree {
+  code: string;
+  name: string;
+  dimension_code: string;
+  unit: string | null;
+  direction?: string;
+  mandatory?: boolean;
+  mandatory_regimes?: string[];
+  exemption?: string | null;
+}
+export interface PreuveEntree {
+  indicator_code: string;
+  tier: string;
+  nature?: string;
+  value_numeric: number | string | null;
+  normalized_value?: number | string | null;
+  observed_on: string;
+  event_date?: string | null;
+  specificity: number;
+  source_code?: string;
+  source_url: string | null;
+  source_name?: string;
+  excerpt: string | null;
+  inherited_from?: string | null;
+  contested?: boolean;
+}
+export interface JournalEntree {
+  indicator_code: string;
+  outcome: string;
+  detail: string | null;
+  checked_on: string;
+  source_url?: string | null;
+}
+
+export interface Fait {
+  code: string;
+  nom: string;
+  pilier: string;
+  etat: Etat;
+  /** Valeur courte, dans l'échelle de la source (« 92/100 », « Note A », « Oui (lait) »). */
+  valeur: string;
+  contexte: boolean;
+  preuve?: {
+    source: string;
+    url: string | null;
+    solidite: Solidite;
+    /** Date de l'événement si connue, sinon date du relevé. */
+    date: string;
+    dateEvenement: boolean;
+    citation: string | null;
+    reprisDe: string | null;
+    conteste: boolean;
+  };
+  /** Obligation légale qui s'applique (régimes). */
+  obligation: string[];
+  /** Journal de relecture : ce qui a été lu ou cherché pour cet indicateur. */
+  note: string | null;
+}
+
+export interface Pilier {
+  code: string;
+  nom: string;
+  faits: Fait[];
+  cle: Fait | null;
+  documentes: number;
+  total: number;
+  solidite: Solidite | null;
+}
+
+export interface Carte {
+  slug: string;
+  nom: string;
+  chaine: string[];
+  piliers: Pilier[];
+  chronologie: Fait[];
+  documentes: number;
+  total: number;
+}
+
+export const ORDRE_PILIERS = ["ANI", "ENV", "PLA", "WAT", "LAB", "SUP", "GOV", "TAX", "GEO", "INV"];
+
+const SOLIDITE: Record<string, Solidite> = { regulatory: "officielle", audited_ngo: "reconnue", press: "declarative", crowd: "declarative" };
+const RANG: Record<Solidite, number> = { officielle: 1, reconnue: 2, declarative: 3 };
+
+const nf = (x: number, d = 1) => x.toLocaleString("fr-FR", { maximumFractionDigits: d });
+const m1 = (re: RegExp, s: string) => (s.match(re)?.[1] ?? "").trim() || null;
+const num = (v: number | string | null | undefined) => (v === null || v === undefined || v === "" ? null : Number(v));
+
+/** Valeur courte d'une preuve, dans l'échelle de sa source (aucune conversion en note). */
+export function valeurCourte(code: string, unit: string | null, p: PreuveEntree): string {
+  const x = p.excerpt ?? "";
+  const v = num(p.value_numeric);
+  switch (code) {
+    case "ANI_EXPLOITATION": return `Oui (${m1(/exploitation animale \(([^)]+)\)/, x) ?? m1(/APE\) [\d.]+[A-Z] - ([^»]+)»/, x)?.toLowerCase() ?? "documentée"})`;
+    case "ANI_ANIMAL_FREE": return "Non — 100 % végétale (prouvé)";
+    case "ANI_FUR_FREE": return "Membre du label « sans fourrure »";
+    case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 (1 = meilleur)`;
+    case "GEO_RUSSIA_EXIT": return m1(/— ([^;]+);/, x) ?? "Documenté";
+    case "GEO_LOBBYING_TRANSP": return /HATVP|répertoire/i.test(x + (p.source_name ?? "")) ? "Inscrit au répertoire de la HATVP" : "Inscrit au registre européen";
+    case "GEO_LOBBYING_SPEND": return m1(/déclarés[^:]*: ([^,]+(?:€[^,]*€)?)/, x) ?? (v === null ? "Déclaré" : `${nf(v, 0)} €`);
+    case "ENV_CDP_CLIMATE": case "WAT_CDP": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? "?"} (de A à D-, F = non-réponse)`;
+    case "ENV_SBTI_VALIDATED": return m1(/— (objectif[^(]+\([^)]*\))/, x) ?? m1(/— ([^(]+)\(/, x) ?? "Documenté";
+    case "SUP_LIVING_WAGE": return `Note ${m1(/note ([A-E])/, x) ?? "?"} (de A à E)`;
+    case "SUP_VIGILANCE_PLAN": return "Publié";
+    case "ENV_SCOPE3_DISCLOSED": return "Publiées";
+    case "TAX_CBCR_PUBLISHED": return "Publiée";
+    case "PLA_POLLUTER": return "Parmi les plus gros pollueurs plastique";
+    case "SUP_FTI_SCORE": return v === null ? "Évalué" : `${nf(v)} % des points de transparence`;
+    case "LAB_CEO_PAY_RATIO": return v === null ? "Publié" : `${nf(v, 0)} fois la rémunération médiane`;
+    case "LAB_GENDER_PAYGAP": return v === null ? "Publié" : v < 0 ? `${nf(-v)} % en faveur des femmes` : `${nf(v)} % en faveur des hommes`;
+    case "GOV_BCORP": return "Certifiée B Corp";
+    case "INV_SOLIDARITY_LABEL": return "Produits labellisés Finansol";
+  }
+  if (v === null) return "Documenté";
+  switch (unit) {
+    case "%": return `${nf(v)} %`;
+    case "score/100": return `${nf(v, 0)}/100`;
+    case "%/an": return `${v > 0 ? "+" : "−"}${nf(Math.abs(v), 2)} % par an`;
+    case "tCO2e/M€": return `${nf(v, 0)} t CO₂e par M€ de chiffre d'affaires`;
+  }
+  return `${nf(v)}${unit ? ` ${unit}` : ""}`;
+}
+
+/** Preuve retenue : la plus spécifique (propre à l'entité), puis la plus récente. */
+function meilleure(ps: PreuveEntree[]): PreuveEntree | null {
+  return [...ps].sort((a, b) => b.specificity - a.specificity || (b.event_date ?? b.observed_on).localeCompare(a.event_date ?? a.observed_on))[0] ?? null;
+}
+
+const SOURCES_CHERCHEES: [RegExp, string][] = [
+  [/CDP/, "liste publique CDP"], [/SBTi/, "export SBTi"], [/Leave Russia/, "base Leave Russia (KSE)"],
+  [/registre de transparence/, "registre européen"], [/HATVP/, "répertoire de la HATVP"],
+];
+
+/** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */
+export function construireCarte(
+  payload: { entity: { slug: string; name: string }; ownership_chain?: string[]; applicableIndicators: IndicateurEntree[]; evidence: PreuveEntree[]; dimensions: { code: string; name: string }[] },
+  journal: JournalEntree[] = [],
+): Carte {
+  const nomPilier = new Map(payload.dimensions.map((d) => [d.code, d.name]));
+  const parCode = new Map<string, PreuveEntree[]>();
+  for (const e of payload.evidence) {
+    if (!parCode.has(e.indicator_code)) parCode.set(e.indicator_code, []);
+    parCode.get(e.indicator_code)!.push(e);
+  }
+  const jparCode = new Map<string, JournalEntree[]>();
+  for (const j of journal) {
+    if (!jparCode.has(j.indicator_code)) jparCode.set(j.indicator_code, []);
+    jparCode.get(j.indicator_code)!.push(j);
+  }
+
+  const faits: Fait[] = payload.applicableIndicators.map((i) => {
+    const p = meilleure(parCode.get(i.code) ?? []);
+    const js = (jparCode.get(i.code) ?? []).sort((a, b) => b.checked_on.localeCompare(a.checked_on));
+    const obligation = i.mandatory ? (i.mandatory_regimes ?? []) : [];
+    const contexte = i.direction === "contextual";
+    if (p) {
+      return {
+        code: i.code, nom: i.name, pilier: i.dimension_code, etat: "documente", valeur: valeurCourte(i.code, i.unit, p), contexte, obligation, note: null,
+        preuve: {
+          source: p.source_name ?? p.source_code ?? "Source", url: p.source_url, solidite: SOLIDITE[p.tier] ?? "declarative",
+          date: p.event_date ?? p.observed_on, dateEvenement: !!p.event_date, citation: p.excerpt, reprisDe: p.inherited_from ?? null,
+          conteste: !!p.contested,
+        },
+      };
+    }
+    const lu = js.find((j) => j.outcome === "absence_confirmee" || j.outcome === "autre_forme");
+    if (lu?.outcome === "autre_forme") {
+      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "autre_forme", valeur: "Publié sous une autre forme", contexte, obligation, note: lu.detail };
+    }
+    if (lu && obligation.length) {
+      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "obligatoire_absent", valeur: "Obligatoire, non publié", contexte, obligation, note: lu.detail };
+    }
+    if (i.code === "ANI_EXPLOITATION") {
+      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "presume", valeur: "Non documentée, présumée dans ce secteur", contexte, obligation, note: null };
+    }
+    const cherche = [...new Set(js.filter((j) => j.outcome === "non_trouvee").map((j) => SOURCES_CHERCHEES.find(([re]) => re.test(j.detail ?? ""))?.[1]).filter(Boolean))];
+    const date = js.find((j) => j.outcome === "non_trouvee")?.checked_on;
+    return {
+      code: i.code, nom: i.name, pilier: i.dimension_code, etat: "aucune_info", valeur: "Aucune information", contexte,
+      obligation, note: cherche.length ? `Cherché sans résultat (${cherche.join(", ")}), le ${date?.split("-").reverse().join("/")}.` : null,
+    };
+  });
+
+  const piliers: Pilier[] = [];
+  for (const d of ORDRE_PILIERS) {
+    const fs = faits.filter((f) => f.pilier === d);
+    if (!fs.length) continue;
+    const doc = fs.filter((f) => f.etat === "documente");
+    const rangs = doc.map((f) => RANG[f.preuve!.solidite]);
+    const moy = rangs.length ? rangs.reduce((a, b) => a + b, 0) / rangs.length : null;
+    piliers.push({
+      code: d, nom: nomPilier.get(d) ?? d, faits: fs, cle: faitCle(d, fs), documentes: doc.length, total: fs.length,
+      solidite: moy === null ? null : moy <= 1.4 ? "officielle" : moy <= 2.2 ? "reconnue" : "declarative",
+    });
+  }
+  const chronologie = faits.filter((f) => f.etat === "documente").sort((a, b) => b.preuve!.date.localeCompare(a.preuve!.date));
+  return {
+    slug: payload.entity.slug, nom: payload.entity.name, chaine: payload.ownership_chain ?? [payload.entity.name], piliers,
+    chronologie, documentes: chronologie.length, total: faits.length,
+  };
+}
+
+const PRIORITE: Record<string, string[]> = {
+  ANI: ["ANI_EXPLOITATION", "ANI_ANIMAL_FREE", "ANI_BBFAW_TIER"],
+  ENV: ["ENV_GHG_TREND", "ENV_CDP_CLIMATE", "ENV_SBTI_VALIDATED"],
+  LAB: ["LAB_EGAPRO_INDEX", "LAB_GENDER_PAYGAP"],
+  SUP: ["SUP_VIGILANCE_PLAN", "SUP_LIVING_WAGE", "SUP_KNOWTHECHAIN"],
+  GOV: ["GOV_SANCTIONS", "GOV_BOARD_GENDER"],
+  TAX: ["TAX_EFFECTIVE_RATE"],
+  GEO: ["GEO_RUSSIA_EXIT", "GEO_CONFLICT_TIES", "GEO_LOBBYING_TRANSP"],
+};
+
+/** Fait clé d'un pilier : exploitation animale d'abord ; puis un manque obligatoire lu ; puis le
+ *  fait prioritaire documenté ; puis le mieux sourcé (hors donnée de contexte). */
+export function faitCle(pilier: string, fs: Fait[]): Fait | null {
+  if (pilier === "ANI") {
+    const a = fs.find((f) => f.code === "ANI_ANIMAL_FREE" && f.etat === "documente") ?? fs.find((f) => f.code === "ANI_EXPLOITATION");
+    if (a) return a;
+  }
+  const rouge = fs.find((f) => f.etat === "obligatoire_absent");
+  if (rouge) return rouge;
+  for (const c of PRIORITE[pilier] ?? []) {
+    const f = fs.find((x) => x.code === c && x.etat === "documente");
+    if (f) return f;
+  }
+  const doc = fs.filter((f) => f.etat === "documente" && !f.contexte).sort((a, b) => RANG[a.preuve!.solidite] - RANG[b.preuve!.solidite]);
+  return doc[0] ?? fs.find((f) => f.etat === "autre_forme") ?? null;
+}

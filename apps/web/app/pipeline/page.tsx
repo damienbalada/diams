@@ -58,10 +58,9 @@ export default function PipelinePage() {
           </table>
         </div>
         <p className="muted small" style={{ marginTop: 12 }}>
-          Les indicateurs quantitatifs (taux effectif, présence en paradis fiscaux)
-          sont chargés en <strong>valeur brute</strong> : c'est le moteur qui calcule
-          le percentile intra-secteur et applique la direction (« plus haut = mieux »
-          ou l'inverse). Normaliser à la main fausserait la comparaison sectorielle.
+          Chaque valeur est chargée et affichée <strong>dans l'échelle de sa source</strong>
+          (« 92/100 » pour Égapro, « note A » pour le CDP, un taux en pour cent) : aucune
+          conversion, aucune note, aucune addition.
         </p>
       </div>
 
@@ -75,7 +74,7 @@ export default function PipelinePage() {
           d'ITM Entreprises pour les marques des Mousquetaires). Ce qui relève du produit
           reste propre à la marque : matières et exploitation animales, transparence textile,
           labels (l'indice de transparence de la mode note directement Gucci). La fiche d'une
-          marque affiche toujours le groupe propriétaire et sa note, parce que c'est lui qui
+          marque affiche toujours le groupe propriétaire et un lien vers sa fiche, parce que c'est lui qui
           reçoit l'argent.
         </p>
       </div>

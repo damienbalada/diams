@@ -5,10 +5,10 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = {
   title: { default: "DIAMS — l'éthique des entreprises, preuves à l'appui", template: "%s · DIAMS" },
   description:
-    "Une note éthique par entreprise, fondée sur des preuves officielles datées et vérifiées mot pour mot : climat, travail, gouvernance, fiscalité, droits humains.",
+    "La carte d'identité des marques : des faits publiés, datés et vérifiés mot pour mot dans les sources officielles — climat, travail, gouvernance, fiscalité, droits humains, animaux. Aucune note.",
   openGraph: {
     title: "DIAMS — l'éthique des entreprises, preuves à l'appui",
-    description: "Chaque note renvoie à sa source officielle. Quand les données manquent, on le dit.",
+    description: "Chaque fait renvoie à sa source officielle. Quand les données manquent, on le dit.",
     locale: "fr_FR",
     type: "website",
   },
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <strong>DIAMS</strong>
             </a>
             <span className="row" style={{ gap: 14 }}>
-              <a className="muted small" href="/classement">Classement</a>
+              <a className="muted small" href="/#index">Index</a>
               <a className="muted small" href="/pipeline">Sources</a>
               <a className="muted small" href="/methodologie">Méthodologie</a>
             </span>

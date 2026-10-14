@@ -26,7 +26,7 @@ export function CorrectionForm({
         <div className="grade sm grade-none" aria-hidden="true">!</div>
         <div className="pillar-name">
           Signaler une erreur ou une donnée manquante
-          <small>Ouvre une revue humaine — la note ne change pas automatiquement</small>
+          <small>Ouvre une revue humaine — la fiche ne change pas automatiquement</small>
         </div>
         <span className="chev" aria-hidden="true">›</span>
       </summary>

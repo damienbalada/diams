@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { getSupabase } from "./supabase";
+import type { JournalEntree } from "./carte";
 import { computeScore, type ScoreInput } from "./scoring";
 import {
   pickComparable,
@@ -65,7 +66,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v142"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v143"], { revalidate: 600 });
 
 type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
 
@@ -388,4 +389,98 @@ export async function getAlternatives(
     selfRoot,
     limit,
   );
+}
+
+// --- Refonte : carte d'identité (PLAN_REFONTE.md) -----------------------------------------
+
+
+/** Identifiants de l'entité et de toute sa chaîne de propriétaires (jusqu'à la racine). */
+async function chainIds(slug: string): Promise<string[]> {
+  const idx = await loadEntityIndex();
+  if (!idx) return [];
+  const byId = new Map(idx.rows.map((e) => [e.id, e]));
+  const out: string[] = [];
+  let cur = idx.bySlug.get(slug) ?? null;
+  for (let i = 0; cur && i < 20; i++) {
+    out.push(cur.id);
+    cur = cur.parent_id ? byId.get(cur.parent_id) ?? null : null;
+  }
+  return out;
+}
+
+/**
+ * Journal de relecture utile à la fiche : obligations lues (absence confirmée, autre forme)
+ * et recherches sans résultat, pour l'entité et ses propriétaires (une marque reprend les
+ * indicateurs de son groupe et l'index Égapro de son propriétaire direct).
+ */
+export async function getJournal(slug: string): Promise<JournalEntree[]> {
+  const ids = await chainIds(slug);
+  if (!ids.length) return [];
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("indicator_reviews")
+    .select("outcome, detail, checked_on, source_url, indicator:indicator_id(code)")
+    .in("entity_id", ids)
+    .in("outcome", ["absence_confirmee", "autre_forme", "non_trouvee"])
+    .order("checked_on", { ascending: false })
+    .limit(500);
+  if (error || !data) return [];
+  return (data as any[]).map((r) => ({
+    indicator_code: r.indicator?.code ?? "", outcome: r.outcome, detail: r.detail, checked_on: r.checked_on, source_url: r.source_url,
+  }));
+}
+
+/**
+ * Autres marques du même rayon (même secteur, autre groupe propriétaire), sans ordre de
+ * mérite : rangées par ordre alphabétique. Le lecteur compare les fiches lui-même.
+ */
+export async function getMemeRayon(slug: string, limit = 8): Promise<{ slug: string; name: string; group: string | null }[]> {
+  const idx = await loadEntityIndex();
+  if (!idx) return [];
+  const self = idx.bySlug.get(slug);
+  if (!self) return [];
+  const selfRoot = idx.rootOf(slug)?.slug ?? null;
+  const others = pickComparable(idx.rows, self)
+    .filter((e) => e.slug !== slug && (idx.rootOf(e.slug)?.slug ?? null) !== selfRoot)
+    .map((e) => {
+      const root = idx.rootOf(e.slug);
+      return { slug: e.slug, name: entityName(e), group: root && root.slug !== e.slug ? entityName(root) : null };
+    });
+  // Choix stable mais varié d'une fiche à l'autre : on part d'un point dépendant du slug.
+  others.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  if (others.length <= limit) return others;
+  let h = 0;
+  for (const ch of slug) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const start = h % others.length;
+  return [...others.slice(start), ...others.slice(0, start)].slice(0, limit).sort((a, b) => a.name.localeCompare(b.name, "fr"));
+}
+
+/** Liste des marques et groupes pour l'index (sans note). */
+export async function listIndex(): Promise<{ slug: string; name: string; is_brand: boolean; group: string | null }[]> {
+  const idx = await loadEntityIndex();
+  if (!idx) return [];
+  return idx.rows
+    .map((e) => {
+      const root = idx.rootOf(e.slug);
+      return { slug: e.slug, name: entityName(e), is_brand: e.is_brand, group: root && root.slug !== e.slug ? entityName(root) : null };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
+}
+
+/** Marques détenues par l'entité, directement ou via ses filiales (fiche d'un groupe). */
+export async function getMarques(slug: string): Promise<{ slug: string; name: string }[]> {
+  const idx = await loadEntityIndex();
+  if (!idx) return [];
+  const self = idx.bySlug.get(slug);
+  if (!self) return [];
+  const byId = new Map(idx.rows.map((e) => [e.id, e]));
+  const sous = (e: EntityRow) => {
+    for (let cur: EntityRow | undefined = e, i = 0; cur?.parent_id && i < 20; i++) {
+      if (cur.parent_id === self.id) return true;
+      cur = byId.get(cur.parent_id);
+    }
+    return false;
+  };
+  return idx.rows.filter((e) => e.is_brand && sous(e)).map((e) => ({ slug: e.slug, name: entityName(e) }))
+    .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
 }
