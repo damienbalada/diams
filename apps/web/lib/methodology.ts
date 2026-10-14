@@ -8,7 +8,7 @@ export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 > renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
 > c'est la condition de la confiance.
 
-Version : \`0.7.4\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.7.5\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -368,12 +368,23 @@ groupe. Une preuve propre à la marque passe toujours devant.
 Restent propres à la marque les indicateurs qui relèvent du **produit** ou que la
 source mesure marque par marque : matières animales (fourrure, cuir, peaux
 exotiques, laine, duvet) et plafond d'exploitation animale, transparence textile
-(Fashion Transparency Index), matières (Textile Exchange), labels, et l'index
-Égapro (dû par chaque société employeuse). Une marque de mode qui n'utilise ni
+(Fashion Transparency Index), matières (Textile Exchange) et labels. Une marque de mode qui n'utilise ni
 cuir ni fourrure ne porte pas le plafond « exploitation animale » de son
 propriétaire, une marque 100 % végétale sort du pilier animal de son groupe, et
 la certification d'un groupe ne labellise pas ses marques. *(De v0.5.0 à v0.6.0, une marque n'héritait de rien :
 presque aucune n'atteignait le seuil de publication, faute de données propres.)*
+
+**Index Égapro : celui du propriétaire direct** *(v0.7.5, décision de l'éditeur du
+14/10/2026)*. L'index est dû par chaque société employeuse d'au moins 50 salariés :
+il ne relève pas du groupe, car l'index d'une holding ne couvre que ses propres
+salariés. Mais une marque est fabriquée et vendue par la société qui la détient
+directement : la marque reprend donc l'index, l'obligation de le publier et le
+pays de **son propriétaire direct**, et non ceux de la racine du groupe (drapeau
+\`indicators.owner_level\`). Exemples : les marques des Mousquetaires reprennent
+l'index d'ITM Entreprises, celles d'Orangina Schweppes l'index d'Orangina
+Schweppes France, et non celui de Suntory. La fiche nomme la société dont
+l'index est repris ; un index propre à la marque passe devant. Une société
+filiale (qui n'est pas une marque) reste notée sur son propre index.
 
 La fiche d'une marque affiche **toujours** son groupe propriétaire — avec un lien
 vers sa fiche et sa note — parce que c'est lui qui reçoit l'argent. Une marque
@@ -726,7 +737,7 @@ pas du nombre de marques. Trois garde-fous invariants :
 | SBTi | ENV | objectifs climat validés (anti-greenwashing) | SBTi | groupe |
 | CDP | ENV, WAT | notes climat & eau A..D- (barème canonique A=1.00 … D-=0.13, F=0) | CDP | groupe |
 | BFFP | PLA | classement pollueurs plastique — sévérité (gate) qui plafonne la note | Break Free From Plastic | groupe ou marque |
-| Égapro | LAB | index égalité F/H (/100), rapprochement par SIREN exact | Ministère du Travail | groupe |
+| Égapro | LAB | index égalité F/H (/100), rapprochement par SIREN exact | Ministère du Travail | société (repris par ses marques) |
 | Gouvernance | GOV | mixité (parité=1.0) + indépendance du conseil | déclarations CSRD/ESRS | groupe |
 | Fiscalité | TAX | CbCR (oui/non), taux effectif (%), nb d'entités en paradis fiscaux | CbCR, états financiers, Tax Justice Network | groupe |
 | Benchmarks | ANI, SUP | BBFAW (Tier 1→1.0 … 6→0.10), KnowTheChain (/100), FTI (%) | BBFAW, BHRRC, Fashion Revolution | groupe ou marque |
@@ -762,10 +773,22 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.7.4\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.7.5\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.7.5 (14/10/2026)** — Décision de l'éditeur (option A) : une marque reprend
+  l'index Égapro de **son propriétaire direct** (Règle 8). Avant, l'index restait
+  attaché à la société déclarante et aucune marque n'en héritait. Effet mesuré par
+  simulation avant application, marque par marque : 580 marques concernées,
+  **+83 marques publiables, aucune perdue, aucune note en baisse** (Mousquetaires 24,
+  Pierre Fabre 13, Avril 10, Sodiaal 7, Orangina Schweppes France 6, Ecotone 6,
+  Maison Pommery 6, Interparfums 3, Fleury Michon 2, Alsace Lait 2, Boiron,
+  Panzani, Maîtres Laitiers du Cotentin, Paul Hartmann 1 chacun). L'option B
+  (index de la racine du groupe) a été écartée : l'index d'une holding couvre
+  souvent ses seuls salariés. Contrôle fait : les index transmis sont ceux des
+  sociétés qui exploitent les marques (ITM Entreprises pour Les Mousquetaires, et
+  non la holding). Migration \`20261014950000_egapro_proprietaire_direct\`.
 - **14/10/2026 (recherche par pilier pour les marques alimentaires)** — Sans changement
   de calcul. Décision de l'éditeur : une fromagerie, ou une biscuiterie qui utilise du
   beurre, des œufs ou du lait, exploite des animaux ; l'exploitation se documente donc

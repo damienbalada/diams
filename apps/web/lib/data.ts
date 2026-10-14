@@ -65,7 +65,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v138"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v139"], { revalidate: 600 });
 
 type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
 
@@ -108,14 +108,15 @@ async function computeAllScores(): Promise<EntityScore[]> {
     return cur;
   };
   // Une marque sans donnée propre est notée uniquement à partir de son groupe racine
-  // (compute_score_input) : même racine, même secteur, même pays et même indicateur
-  // « sans exploitation animale » donnent exactement la même note, calculée une fois.
+  // et de son propriétaire direct (index Égapro, v0.7.5) — compute_score_input : même
+  // racine, même propriétaire, même secteur, même pays et même indicateur « sans
+  // exploitation animale » donnent exactement la même note, calculée une fois.
   const memo = new Map<string, Promise<ScoreCore | null>>();
   const keyOf = (e: any): string | null => {
     if (!own) return null;
     const root = rootOf(e);
     if (root.id === e.id || own.has(e.id)) return null;
-    return [root.id, e.sector_id ?? "", e.country ?? "", e.animal_free ? 1 : 0].join("|");
+    return [root.id, e.is_brand ? e.parent_id ?? "" : "", e.sector_id ?? "", e.country ?? "", e.animal_free ? 1 : 0].join("|");
   };
   const scored = await mapWithConcurrency(entities, 24, async (e: any) => {
     try {

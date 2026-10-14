@@ -70,7 +70,9 @@ export default function PipelinePage() {
         <p className="muted small">
           Gouvernance, fiscalité, climat, lobbying et salaires chez les fournisseurs sont
           publiés au niveau du <strong>groupe</strong> : une marque reprend ces données de
-          son groupe, signalées « donnée du groupe » sur sa fiche. Ce qui relève du produit
+          son groupe, signalées « donnée du groupe » sur sa fiche. L'index Égapro, dû par
+          chaque société employeuse, vient du propriétaire direct de la marque (celui
+          d'ITM Entreprises pour les marques des Mousquetaires). Ce qui relève du produit
           reste propre à la marque : matières et exploitation animales, transparence textile,
           labels (l'indice de transparence de la mode note directement Gucci). La fiche d'une
           marque affiche toujours le groupe propriétaire et sa note, parce que c'est lui qui
