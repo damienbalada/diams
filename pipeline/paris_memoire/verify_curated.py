@@ -190,6 +190,12 @@ ESEF_KEYWORDS = {
     "ANI_EXPLOITATION": [r"cuirs?|peaux?|fourrures?|crocodil|leather|skins?|fur\b|\blaine|\bwool|cachemire|cashmere"
                          r"|duvet|\bsoie\b|\bsilk\b|\blait|laiti|\bmilk|dairy|viande|\bmeat|\bbeef|b[œo]euf|\bporc\b|pork"
                          r"|poulet|chicken|volaille|poultry|[œo]eufs?\b|\beggs?\b|\bmiel\b|honey|g[ée]latine|gelatin"
+                         # Alimentation (règle de l'éditeur du 14/10/2026 : fromagerie, biscuits au
+                         # beurre ou aux œufs…). « beurre de cacahuète / karité / cacao » exclu.
+                         r"|fromages?\b|\bbeurre\b(?! de (?:cacahu|karit|cacao))|\bcr[èe]me fra[îi]che|yaourts?\b"
+                         r"|foie gras|canards?\b|jambons?\b|charcuterie|saucisses?\b|saucissons?\b|rillettes"
+                         r"|poissons?\b|saumons?\b|\bthons?\b|sardines?\b|maquereaux?\b|anchois|crustac|mollusques"
+                         r"|hu[îi]tres|caviar|[ée]levage|aquaculture|p[êe]che en (?:mer|eau douce)"
                          r"|d.origine animale|of animal origin|animal[- ]derived|tests? sur (les )?animaux|animal testing"
                          r"|tested on animals"],
     "ANI_FUR_FREE": [r"fourrure|fur\b"],

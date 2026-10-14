@@ -591,6 +591,24 @@ pas dans la base de la note, jusqu'à ce que l'exploitation soit documentée (ou
 exclue). Les plafonds qui valent 1 par défaut (lobbying, plastique) ne présument
 rien.
 
+**Documenter l'exploitation (décision de l'éditeur, 14/10/2026).** Une fromagerie
+exploite des animaux par définition ; une biscuiterie aussi, si ses produits
+contiennent du beurre, des œufs ou du lait. Deux preuves en découlent :
+- **activité officielle** : la société dont l'activité principale (code APE, lu mot pour
+  mot dans l'avis de situation Sirene de l'Insee) est d'élever ou de pêcher des
+  animaux, ou de transformer ou commercialiser viande, volaille, charcuterie, poisson,
+  lait, beurre ou fromage, a l'exploitation documentée, ainsi que ses marques directes
+  (sauf une marque `animal_free`). Codes exclus à dessein : glaces et sorbets (10.52Z),
+  commerce de gros mêlant produits laitiers et huiles (46.33Z), plats préparés
+  (10.85Z) ;
+- **présentation des produits par la marque** : un passage du site officiel qui nomme
+  la marque et un ingrédient ou produit animal (« pur beurre », « 98 % de lait »,
+  « saucisson », « foie gras »…), vérifié mot pour mot. Les recettes et les menus du
+  site ne comptent pas : seule compte la composition de ce que la marque vend.
+
+La note du pilier ne change pas (elle était déjà à 0 par présomption) ; sa fiabilité,
+elle, devient celle de la preuve, et le pilier entre dans la base de la note.
+
 **Cas d'une marque 100 % végétale (`animal_free`).** Une marque sans aucun
 intrant animal (ex : Alpro) n'exploite pas d'animaux : le postulat d'exploitation
 ne s'applique pas. Le pilier ANI n'est alors **pas plafonné** ; il est au
@@ -746,6 +764,20 @@ Document vivant (v`0.7.4`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **14/10/2026 (recherche par pilier pour les marques alimentaires)** — Sans changement
+  de calcul. Décision de l'éditeur : une fromagerie, ou une biscuiterie qui utilise du
+  beurre, des œufs ou du lait, exploite des animaux ; l'exploitation se documente donc
+  (Règle ANI, « Documenter l'exploitation »).
+  - Nouveau connecteur `import_ani_ape` : code APE lu dans l'avis de situation Sirene de
+    l'Insee (source réglementaire). Le quota de lecture de l'Insee est respecté : arrêt au
+    premier refus, reprise à l'exécution suivante grâce au cache.
+  - 92 marques documentées par la présentation de leurs produits sur leur site officiel,
+    passages relus puis vérifiés mot pour mot (Babybel, Kinder, Lustucru, St Michel,
+    Cochonou, Rougié, fromages de Savencia…).
+  - Mots-clés du vérificateur élargis à l'alimentation (fromage, beurre, charcuterie,
+    poisson, foie gras, élevage, pêche…), « beurre de cacahuète / karité / cacao » exclu.
+  - Autres piliers relancés sur les nouvelles sociétés : registre des représentants
+    d'intérêts (Biocoop, Eat4Good France), certification B Corp (Isigny Sainte-Mère).
 - **14/10/2026 (marques alimentaires vendues en France, lots 82 à 95)** — Sans changement
   de calcul. Environ 470 marques ajoutées : la base compte 2 145 marques, dont 968
   publiables. Les nouvelles marques appartiennent surtout à de petites sociétés sans

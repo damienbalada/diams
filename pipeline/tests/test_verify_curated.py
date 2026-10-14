@@ -659,3 +659,14 @@ def test_mixite_tableau_sexe_feminin():
     assert v.status == "OK", v.details
     faux = row("auchan", 20, f"Rapport : « {q} »", ind="GOV_BOARD_GENDER", src="ANNUAL_REPORT")
     assert check_esef_quote(faux, rep).status == "ÉCART"
+
+
+def test_mots_cles_exploitation_animale_alimentation():
+    import re
+    from paris_memoire.verify_curated import ESEF_KEYWORDS
+    pat = re.compile(ESEF_KEYWORDS["ANI_EXPLOITATION"][0], re.I)
+    for ok in ["Fabrication de fromage", "galettes pur beurre", "Charcuterie", "Transformation et conservation de poisson",
+               "foie gras de canard", "Élevage de volailles", "Aquaculture en mer", "Pêche en mer", "crème fraîche"]:
+        assert pat.search(ok), ok
+    for ko in ["beurre de cacahuète", "beurre de karité", "Fabrication de biscuits", "pâte à tartiner aux noisettes"]:
+        assert not pat.search(ko), ko

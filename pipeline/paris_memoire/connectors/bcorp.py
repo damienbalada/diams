@@ -30,6 +30,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (DIAMS, recherche documentaire)"}
 VERIFIED: dict[str, tuple[str, str]] = {
     "boursobank": ("boursorama", "boursobank"),        # BoursoBank, filiale de Société Générale
     "innocent": ("innocent-drinks", "innocentdrinks"),  # innocent Drinks, marque de Coca-Cola
+    "isigny-sainte-mere": ("isigny-sainte-mere", "isigny-ste-mere"),  # coopérative laitière normande
 }
 
 

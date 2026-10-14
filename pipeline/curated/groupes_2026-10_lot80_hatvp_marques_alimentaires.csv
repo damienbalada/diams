@@ -1,0 +1,3 @@
+entity_slug,indicator_code,source_code,nature,observed_on,value_type,value_numeric,value_boolean,value_text,normalized_value,confidence,source_url,excerpt,review_note
+biocoop,GEO_LOBBYING_TRANSP,HATVP,result,2026-10-14,boolean,,true,,1,0.9,https://www.hatvp.fr/fiche-organisation/?organisation=382891752,BIOCOOP inscrit au répertoire des représentants d'intérêts depuis le 15/03/2022 ; dépenses déclarées pour 2025 : 100 000 à 200 000 €.,
+eat4good-france,GEO_LOBBYING_TRANSP,HATVP,result,2026-10-14,boolean,,true,,1,0.9,https://www.hatvp.fr/fiche-organisation/?organisation=450246152,EAT4GOOD FRANCE inscrit au répertoire des représentants d'intérêts depuis le 13/04/2023.,
