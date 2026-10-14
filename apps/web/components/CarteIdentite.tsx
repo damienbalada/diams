@@ -15,8 +15,10 @@ const SOLIDITE_PILIER: Record<Solidite, string> = {
 };
 const dfr = (d: string) => d.split("-").reverse().join("/");
 
-function Pastille({ s }: { s: Solidite }) {
-  return <i className={`ci-dot ci-${s}`} aria-hidden="true" />;
+/** Solidité de la source, écrite en toutes lettres dans une étiquette à contour (pas une simple
+ *  couleur : décision de l'éditeur, 15/10/2026). */
+function Solidite({ s }: { s: Solidite }) {
+  return <span className={`ci-sol ci-sol-${s}`}>{SOLIDITE[s]}</span>;
 }
 
 /** Une entrée de chronologie : date, fait, source (pastille de solidité), citation à déplier. */
@@ -30,12 +32,12 @@ function Entree({ f, avecPilier, nomPilier }: { f: Fait; avecPilier?: boolean; n
         {avecPilier && nomPilier && <span className="ci-faint"> · {ICONE[f.pilier]} {nomPilier}</span>}
       </div>
       <div className="ci-fait">
-        {f.nom} : <strong>{f.valeur}</strong>
+        {f.nom} : {f.code === "ANI_EXPLOITATION" ? <strong className="ci-alerte">⚠️ {f.valeur}</strong> : <strong>{f.valeur}</strong>}
         {f.contexte && <span className="ci-badge" title="Donnée de contexte : ni bonne ni mauvaise en soi">contexte</span>}
         {p.conteste && <span className="ci-badge">contesté</span>}
       </div>
       <div className="ci-src">
-        <Pastille s={p.solidite} /> {SOLIDITE[p.solidite]} · {p.source}
+        <Solidite s={p.solidite} /> {p.source}
         {p.reprisDe && <span className="ci-badge">donnée de {p.reprisDe}</span>}
         {f.niveau === "produit" && <span className="ci-badge">niveau : produits</span>}
         {f.niveau === "marque" && <span className="ci-badge">niveau : marque</span>}
@@ -163,7 +165,11 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
   // Fiche d'un groupe : sans preuve propre au groupe, le pilier animal se lit d'après ses marques.
   const r = p.code === "ANI" && !estMarque && mg ? resumeGroupe(mg.marques.map(marqueAnimale)) : null;
   const niveauGroupe = !!r && (r.exploitation > 0 || r.vegetale > 0) && k?.etat !== "documente";
-  const etatCle = niveauGroupe ? "documente" : k ? k.etat : "aucune_info";
+  // Exploitation animale : signalée en rouge avec ⚠️, quel que soit le classement BBFAW (décision
+  // de l'éditeur, 15/10/2026) ; présumée : ⚠️ et couleur de la présomption.
+  const exploitee = p.code === "ANI" && ((niveauGroupe && r!.exploitation > 0) || (k?.code === "ANI_EXPLOITATION" && k.etat === "documente"));
+  const presumee = p.code === "ANI" && !exploitee && k?.code === "ANI_EXPLOITATION" && k.etat === "presume";
+  const etatCle = exploitee ? "alerte" : niveauGroupe ? "documente" : k ? k.etat : "aucune_info";
   const valeurCle = niveauGroupe
     ? r!.exploitation > 0
       ? `Oui, documentée chez ${r!.exploitation} marque${r!.exploitation > 1 ? "s" : ""} sur ${r!.total}`
@@ -176,12 +182,13 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
     <details className="ci-row">
       <summary>
         <span className="ci-p">
-          {ICONE[p.code]} {p.nom}
+          {exploitee || presumee ? "⚠️" : ICONE[p.code]} {p.nom}
         </span>
         <span className="ci-cnt">
           {p.documentes}/{p.total}
         </span>
         <span className={`ci-v ci-${etatCle}`}>
+          {exploitee && "⚠️ "}
           {valeurCle}
           {!niveauGroupe && k?.preuve?.reprisDe && <span className="ci-badge">{k.preuve.reprisDe}</span>}
         </span>
@@ -284,8 +291,9 @@ export function CarteIdentite({
       <details className="panel ci-legend">
         <summary>Comment lire cette fiche ?</summary>
         <ul className="small">
-          <li><Pastille s="officielle" /> {SOLIDITE.officielle} · <Pastille s="reconnue" /> {SOLIDITE.reconnue} · <Pastille s="declarative" /> {SOLIDITE.declarative}</li>
+          <li>Solidité de chaque source : <Solidite s="officielle" /> <Solidite s="reconnue" /> <Solidite s="declarative" /></li>
           <li>Chaque pilier se lit à trois niveaux : 🏢 le <strong>groupe</strong> (ce qu'il publie : climat, fiscalité, lobbying… ; la marque le reprend), 🏷️ la <strong>marque</strong> (ce qui est prouvé pour elle-même : un seul produit d'origine animale suffit ; « entièrement végétale » seulement si une page officielle le dit pour toute la marque), 🛒 les <strong>produits</strong> (ce qui ne vaut que pour certains produits, sans s'étendre à la marque).</li>
+          <li><span className="ci-alerte">⚠️ Exploitation animale</span> : signalée en rouge dès qu'un produit d'origine animale est documenté, même si l'entreprise est bien classée par ailleurs pour le bien-être animal (BBFAW, classement des politiques d'élevage).</li>
           <li><span className="ci-presume">Présumée</span> : exploitation animale non documentée dans un secteur où elle est la règle ; elle est présumée tant que la marque ne prouve pas le contraire.</li>
           <li><span className="ci-obligatoire_absent">Obligatoire, non publié</span> : la loi impose cette donnée et la lecture du rapport officiel confirme qu'elle n'y est pas.</li>
           <li><span className="ci-autre_forme">Publié sous une autre forme</span> : l'entreprise publie l'information, mais pas sous la forme que la loi exige (pour une partie du groupe seulement, par pays…).</li>
