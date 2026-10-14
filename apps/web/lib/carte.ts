@@ -25,6 +25,7 @@ export interface IndicateurEntree {
   mandatory?: boolean;
   mandatory_regimes?: string[];
   exemption?: string | null;
+  group_level?: boolean;
 }
 export interface PreuveEntree {
   indicator_code: string;
@@ -58,8 +59,9 @@ export interface Fait {
   /** Valeur courte, dans l'échelle de la source (« 92/100 », « Note A », « Oui (lait) »). */
   valeur: string;
   contexte: boolean;
-  /** Pilier animal : niveau auquel le fait est établi (la marque entière, ou certains produits). */
-  niveau?: "marque" | "produit";
+  /** Niveau auquel le fait est établi : le groupe (ou la société propriétaire), la marque, ou
+   *  certains produits (décision de l'éditeur, 15/10/2026, pour tout le site). */
+  niveau: Niveau;
   preuve?: {
     source: string;
     url: string | null;
@@ -147,15 +149,43 @@ function meilleure(ps: PreuveEntree[]): PreuveEntree | null {
   return [...ps].sort((a, b) => b.specificity - a.specificity || (b.event_date ?? b.observed_on).localeCompare(a.event_date ?? a.observed_on))[0] ?? null;
 }
 
-/** Pilier animal à trois niveaux (décision de l'éditeur, 15/10/2026) : le groupe (résumé de ses
- *  marques, calculé à part), la marque, les produits. */
-export const NIVEAU: Record<string, "marque" | "produit"> = {
-  ANI_EXPLOITATION: "marque", ANI_ANIMAL_FREE: "marque", ANI_OFFRE_VEGETALE: "produit",
-};
+/**
+ * Trois niveaux, pour tout le site (décision de l'éditeur, 15/10/2026) :
+ *   - groupe  : ce que publie le groupe (ou, pour Égapro, la société propriétaire directe) ;
+ *   - marque  : ce qui est prouvé pour la marque elle-même ;
+ *   - produit : ce qui ne vaut que pour certains produits (produits 100 % végétaux, épargne
+ *               labellisée) et ne s'étend pas à la marque entière.
+ * Un fait documenté est de niveau « marque » si sa preuve porte sur la marque elle-même, « groupe »
+ * s'il est repris du groupe. Sur la fiche d'un groupe, tout ce qui n'est pas « produit » est
+ * de niveau groupe.
+ */
+export type Niveau = "groupe" | "marque" | "produit";
+export const NIVEAU_PRODUIT = new Set(["ANI_OFFRE_VEGETALE", "INV_SOLIDARITY_LABEL"]);
+const NIVEAU_PROPRIETAIRE = new Set(["LAB_EGAPRO_INDEX"]);
+export function niveauDe(i: IndicateurEntree, p: PreuveEntree | null, estMarque: boolean): Niveau {
+  if (NIVEAU_PRODUIT.has(i.code)) return "produit";
+  if (!estMarque) return "groupe";
+  if (p) return p.inherited_from ? "groupe" : "marque";
+  return i.group_level || NIVEAU_PROPRIETAIRE.has(i.code) ? "groupe" : "marque";
+}
+
+/** Une marque du groupe et les indicateurs documentés pour elle-même (preuves approuvées). */
+export interface MarqueDuGroupe { slug: string; nom: string; codes: { code: string; pilier: string }[] }
 
 /** Résumé animal d'un groupe à partir de l'état de chacune de ses marques suivies. */
 export type EtatAnimalMarque = "exploitation" | "vegetale" | "non_documentee";
 export interface MarqueAnimale { slug: string; nom: string; etat: EtatAnimalMarque; offreVegetale: boolean }
+export function marqueAnimale(m: MarqueDuGroupe): MarqueAnimale {
+  const c = new Set(m.codes.map((x) => x.code));
+  return {
+    slug: m.slug, nom: m.nom, offreVegetale: c.has("ANI_OFFRE_VEGETALE"),
+    etat: c.has("ANI_ANIMAL_FREE") ? "vegetale" : c.has("ANI_EXPLOITATION") ? "exploitation" : "non_documentee",
+  };
+}
+/** Marques du groupe qui ont au moins une information propre documentée dans un pilier. */
+export function marquesDocumentees(marques: MarqueDuGroupe[], pilier: string): MarqueDuGroupe[] {
+  return marques.filter((m) => m.codes.some((c) => c.pilier === pilier));
+}
 export function resumeGroupe(marques: MarqueAnimale[]) {
   const n = (e: EtatAnimalMarque) => marques.filter((m) => m.etat === e).length;
   return {
@@ -173,7 +203,9 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
 export function construireCarte(
   payload: { entity: { slug: string; name: string }; ownership_chain?: string[]; applicableIndicators: IndicateurEntree[]; evidence: PreuveEntree[]; dimensions: { code: string; name: string }[] },
   journal: JournalEntree[] = [],
+  options: { estMarque?: boolean } = {},
 ): Carte {
+  const estMarque = options.estMarque ?? (payload.ownership_chain ?? []).length > 1;
   const nomPilier = new Map(payload.dimensions.map((d) => [d.code, d.name]));
   const parCode = new Map<string, PreuveEntree[]>();
   for (const e of payload.evidence) {
@@ -194,6 +226,7 @@ export function construireCarte(
     if (p) {
       return {
         code: i.code, nom: i.name, pilier: i.dimension_code, etat: "documente", valeur: valeurCourte(i.code, i.unit, p), contexte, obligation, note: null,
+        niveau: niveauDe(i, p, estMarque),
         preuve: {
           source: p.source_name ?? p.source_code ?? "Source", url: p.source_url, solidite: SOLIDITE[p.tier] ?? "declarative",
           date: p.event_date ?? p.observed_on, dateEvenement: !!p.event_date, citation: p.excerpt, reprisDe: p.inherited_from ?? null,
@@ -203,25 +236,22 @@ export function construireCarte(
     }
     const lu = js.find((j) => j.outcome === "absence_confirmee" || j.outcome === "autre_forme");
     if (lu?.outcome === "autre_forme") {
-      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "autre_forme", valeur: "Publié sous une autre forme", contexte, obligation, note: lu.detail };
+      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "autre_forme", valeur: "Publié sous une autre forme", contexte, obligation, note: lu.detail, niveau: niveauDe(i, null, estMarque) };
     }
     if (lu && obligation.length) {
-      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "obligatoire_absent", valeur: "Obligatoire, non publié", contexte, obligation, note: lu.detail };
+      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "obligatoire_absent", valeur: "Obligatoire, non publié", contexte, obligation, note: lu.detail, niveau: niveauDe(i, null, estMarque) };
     }
     if (i.code === "ANI_EXPLOITATION") {
-      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "presume", valeur: "Non documentée, présumée dans ce secteur", contexte, obligation, note: null };
+      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "presume", valeur: "Non documentée, présumée dans ce secteur", contexte, obligation, note: null, niveau: niveauDe(i, null, estMarque) };
     }
     const cherche = [...new Set(js.filter((j) => j.outcome === "non_trouvee").map((j) => SOURCES_CHERCHEES.find(([re]) => re.test(j.detail ?? ""))?.[1]).filter(Boolean))];
     const date = js.find((j) => j.outcome === "non_trouvee")?.checked_on;
     return {
-      code: i.code, nom: i.name, pilier: i.dimension_code, etat: "aucune_info", valeur: "Aucune information", contexte,
+      code: i.code, nom: i.name, pilier: i.dimension_code, etat: "aucune_info", valeur: "Aucune information", contexte, niveau: niveauDe(i, null, estMarque),
       obligation, note: cherche.length ? `Cherché sans résultat (${cherche.join(", ")}), le ${date?.split("-").reverse().join("/")}.` : null,
     };
   });
 
-  for (const f of faits) {
-    if (NIVEAU[f.code]) f.niveau = NIVEAU[f.code];
-  }
   const piliers: Pilier[] = [];
   for (const d of ORDRE_PILIERS) {
     const fs = faits.filter((f) => f.pilier === d);

@@ -353,3 +353,8 @@ details.pending[open] > summary::after { content: "masquer"; }
 .ci-niv-l { display: grid; grid-template-columns: 7.5em 1fr; gap: 8px; align-items: baseline; font-size: 14px; line-height: 1.45; }
 .ci-niv-k { font-weight: 600; white-space: nowrap; }
 @media (max-width: 480px) { .ci-niv-l { grid-template-columns: 1fr; gap: 2px; } }
+
+/* Trois niveaux dans chaque pilier : groupe, marque, produits */
+.ci-niv-sec { margin: 10px 0 4px; padding: 2px 0 2px 10px; border-left: 3px solid var(--border, #3a3a3a); }
+.ci-niv-t { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.ci-niv-t a { text-decoration: underline; }

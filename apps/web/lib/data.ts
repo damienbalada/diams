@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { getSupabase } from "./supabase";
-import type { JournalEntree, MarqueAnimale } from "./carte";
+import type { JournalEntree, MarqueDuGroupe } from "./carte";
 import { computeScore, type ScoreInput } from "./scoring";
 import {
   pickComparable,
@@ -66,7 +66,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v145"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v146"], { revalidate: 600 });
 
 type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
 
@@ -485,13 +485,19 @@ export async function getMarques(slug: string): Promise<{ slug: string; name: st
     .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
 }
 
+/** Vrai si l'entité est une marque (et non un groupe ou une société). */
+export async function getEstMarque(slug: string): Promise<boolean> {
+  const idx = await loadEntityIndex();
+  return !!idx?.bySlug.get(slug)?.is_brand;
+}
+
 /**
- * Pilier animal, niveau groupe : l'état de chacune des marques suivies du groupe propriétaire
- * (pour une marque) ou du groupe lui-même. Seules les preuves approuvées comptent : une marque
- * est « entièrement végétale » si une page officielle le dit pour toute la marque, « avec
- * exploitation animale » si un produit d'origine animale est documenté, sinon « non documentée ».
+ * Niveau « marques » d'un groupe (décision de l'éditeur, 15/10/2026 : groupe / marque / produit
+ * pour tout le site) : les marques suivies du groupe propriétaire (pour une marque) ou du groupe
+ * lui-même, chacune avec les indicateurs documentés pour elle-même (preuves approuvées, non
+ * contestées), et leur pilier. Sert aux résumés « ses marques » et au résumé animal.
  */
-export async function getAnimalGroupe(slug: string): Promise<{ groupe: { slug: string; name: string }; marques: MarqueAnimale[] } | null> {
+export async function getMarquesGroupe(slug: string): Promise<{ groupe: { slug: string; name: string }; marques: MarqueDuGroupe[] } | null> {
   const idx = await loadEntityIndex();
   if (!idx) return null;
   const racine = idx.rootOf(slug);
@@ -507,29 +513,31 @@ export async function getAnimalGroupe(slug: string): Promise<{ groupe: { slug: s
   const marques = idx.rows.filter((e) => e.is_brand && sous(e));
   if (!marques.length) return null;
   const supabase = getSupabase();
-  const codes = new Map<string, Set<string>>();
+  const codes = new Map<string, Map<string, string>>();
+  // Par blocs de 150 marques, et par pages de 1 000 lignes (limite du serveur de la base).
   for (let i = 0; i < marques.length; i += 150) {
+    for (let page = 0; ; page++) {
     const { data, error } = await supabase
       .from("evidence")
-      .select("entity_id, indicator:indicator_id!inner(code)")
+      .select("id, entity_id, indicator:indicator_id(code, dimension:dimension_id(code))")
       .in("entity_id", marques.slice(i, i + 150).map((m) => m.id))
-      .in("indicator.code", ["ANI_EXPLOITATION", "ANI_ANIMAL_FREE", "ANI_OFFRE_VEGETALE"])
       .eq("review_status", "approved")
-      .eq("contested", false);
+      .eq("contested", false)
+      .order("id")
+      .range(page * 1000, page * 1000 + 999);
     if (error) throw new Error(error.message);
     for (const r of (data ?? []) as any[]) {
-      if (!codes.has(r.entity_id)) codes.set(r.entity_id, new Set());
-      codes.get(r.entity_id)!.add(r.indicator?.code);
+      if (!r.indicator?.code) continue;
+      if (!codes.has(r.entity_id)) codes.set(r.entity_id, new Map());
+      codes.get(r.entity_id)!.set(r.indicator.code, r.indicator.dimension?.code ?? "");
+    }
+    if ((data ?? []).length < 1000) break;
     }
   }
   return {
     groupe: { slug: racine.slug, name: entityName(racine) },
     marques: marques
-      .map((m) => {
-        const c = codes.get(m.id) ?? new Set<string>();
-        const etat = c.has("ANI_ANIMAL_FREE") ? "vegetale" : c.has("ANI_EXPLOITATION") ? "exploitation" : "non_documentee";
-        return { slug: m.slug, nom: entityName(m), etat, offreVegetale: c.has("ANI_OFFRE_VEGETALE") } as MarqueAnimale;
-      })
+      .map((m) => ({ slug: m.slug, nom: entityName(m), codes: [...(codes.get(m.id) ?? new Map()).entries()].map(([code, pilier]) => ({ code, pilier })) }))
       .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" })),
   };
 }

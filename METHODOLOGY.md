@@ -6,7 +6,7 @@
 > sourcés, datés et vérifiés mot pour mot, et dit ce qu'il ne sait pas. La méthode
 > est publique et versionnée : c'est la condition de la confiance.
 
-Version : `0.8.0` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : `0.8.1` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -37,6 +37,24 @@ achats, avec les preuves de l'appartenance.
 
 Une donnée obligatoire absente n'est jamais affichée comme telle sans lecture du rapport qui
 devrait la contenir.
+
+**Trois niveaux : groupe, marque, produits (version 0.8.1).** Dans chaque pilier, la fiche
+range les faits selon ce qu'ils couvrent :
+
+- **groupe** : ce que publie le groupe (climat, eau, plastique, gouvernance, fiscalité, lobbying,
+  Russie, sanctions, plan de vigilance…) ; la marque le reprend, signalé « donnée de … ». L'index
+  Égapro vient de la société propriétaire directe ;
+- **marque** : ce qui est prouvé pour la marque elle-même (exploitation animale : un seul produit
+  d'origine animale suffit ; marque entièrement végétale seulement si une page officielle le dit pour
+  toute la marque ; politiques animales ; indice de transparence de la mode ; B Corp) ;
+- **produits** : ce qui ne vaut que pour certains produits et ne s'étend pas à la marque (produits
+  100 % végétaux proposés, épargne labellisée Finansol).
+
+Un fait documenté est rangé au niveau marque quand sa preuve porte sur la marque elle-même, au
+niveau groupe quand il est repris du groupe. La fiche d'un groupe montre ses propres faits, puis,
+pilier par pilier, celles de ses marques qui ont une information propre ; pour le bien-être
+animal, l'état de chacune (exploitation documentée, entièrement végétale, non documentée). Sans
+preuve propre au groupe, ce résumé devient le fait clé de son pilier animal.
 
 **Solidité des sources, pilier par pilier.** Elle ne dépend que des sources utilisées :
 **officielle** (loi, régulateur, registre public, rapport réglementé), **organisme reconnu**
@@ -824,10 +842,16 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v`0.8.0`, octobre 2026). Toute modification des paramètres de
+Document vivant (v`0.8.1`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.1 (15/10/2026)** — Décision de l'éditeur : trois niveaux, groupe, marque et produits, pour
+  tout le site (section 0). Nouvel indicateur « Produits 100 % végétaux proposés »
+  (`ANI_OFFRE_VEGETALE`, niveau produit) ; `ANI_ANIMAL_FREE` devient « Marque entièrement
+  végétale ». Lots 98 et 99 : 152 sites officiels identifiés par le SIREN du propriétaire dans
+  leurs mentions légales ; exploitation animale de 36 marques, produits 100 % végétaux chez 16,
+  Yumgo et Holibelly entièrement végétales — toutes les citations vérifiées mot pour mot.
 - **0.8.0 (15/10/2026)** — Décision de l'éditeur : fin de la note globale. La fiche devient
   une carte d'identité de faits sourcés (section 0) : cinq états par indicateur, solidité des
   sources par pilier, chronologie des sources, journal de relecture public, toutes les marques

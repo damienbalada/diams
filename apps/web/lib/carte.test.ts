@@ -64,7 +64,7 @@ test("valeurs courtes", () => {
 test("animal à trois niveaux : niveau des faits et résumé du groupe", () => {
   const c = construireCarte({ entity: { slug: "m", name: "M" }, dimensions: dims,
     applicableIndicators: [ind("ANI_EXPLOITATION", "ANI"), ind("ANI_OFFRE_VEGETALE", "ANI")],
-    evidence: [preuve("ANI_OFFRE_VEGETALE", { excerpt: "« Big Chocodark Vegan »" })] });
+    evidence: [preuve("ANI_OFFRE_VEGETALE", { excerpt: "« Big Chocodark Vegan »" })] }, [], { estMarque: true });
   const fs = c.piliers[0].faits;
   assert.equal(fs.find((f) => f.code === "ANI_EXPLOITATION")?.niveau, "marque");
   assert.equal(fs.find((f) => f.code === "ANI_EXPLOITATION")?.etat, "presume");
@@ -77,4 +77,19 @@ test("animal à trois niveaux : niveau des faits et résumé du groupe", () => {
     { slug: "c", nom: "C", etat: "non_documentee", offreVegetale: false },
   ]);
   assert.deepEqual(r, { total: 3, exploitation: 1, vegetale: 1, nonDocumentee: 1, offreVegetale: 1 });
+});
+
+test("trois niveaux pour tout le site : groupe repris, marque propre, produits", () => {
+  const c = construireCarte({ entity: { slug: "m", name: "M" }, dimensions: dims, ownership_chain: ["M", "G"],
+    applicableIndicators: [ind("ENV_CDP_CLIMATE", "ENV", { group_level: true }), ind("SUP_FTI_SCORE", "SUP"), ind("ENV_SBTI_VALIDATED", "ENV", { group_level: true }), ind("INV_SOLIDARITY_LABEL", "INV")],
+    evidence: [preuve("ENV_CDP_CLIMATE", { excerpt: "note A", inherited_from: "G" }), preuve("SUP_FTI_SCORE", { value_numeric: 40 })] });
+  const n = (code: string) => c.piliers.flatMap((p) => p.faits).find((f) => f.code === code)?.niveau;
+  assert.equal(n("ENV_CDP_CLIMATE"), "groupe");      // repris du groupe
+  assert.equal(n("SUP_FTI_SCORE"), "marque");        // preuve propre à la marque
+  assert.equal(n("ENV_SBTI_VALIDATED"), "groupe");   // vide, indicateur publié par le groupe
+  assert.equal(n("INV_SOLIDARITY_LABEL"), "produit");
+  // Fiche d'un groupe : tout ce qui n'est pas « produit » est de niveau groupe.
+  const g = construireCarte({ entity: { slug: "g", name: "G" }, dimensions: dims,
+    applicableIndicators: [ind("SUP_FTI_SCORE", "SUP")], evidence: [preuve("SUP_FTI_SCORE", { value_numeric: 40 })] }, [], { estMarque: false });
+  assert.equal(g.piliers[0].faits[0].niveau, "groupe");
 });
