@@ -38,6 +38,9 @@ ALIASES = {
     "Nestlé": "nestle",
     "Hermès": "hermes",
     "Coca-Cola": "coca-cola",
+    # Primark est évaluée à part (habillement), distincte de son groupe ABF (alimentation) :
+    # la note va à la marque Primark, pas au groupe (relecture du 15/10/2026).
+    "Primark (part of Associated British Foods)": "primark",
 }
 
 
@@ -50,8 +53,10 @@ def fetch_all(client: httpx.Client) -> list[bm.KtcScore]:
     return out
 
 
-def match_group(name: str, groups: list[dict]) -> dict | None:
-    by_slug = {g["slug"]: g for g in groups}
+def match_group(name: str, groups: list[dict], everyone: list[dict] | None = None) -> dict | None:
+    # Un alias peut désigner une marque évaluée à part (Primark) : on la cherche parmi toutes
+    # les entités ; le rapprochement par nom, lui, reste limité aux groupes.
+    by_slug = {g["slug"]: g for g in (everyone or groups)}
     if name in ALIASES:
         return by_slug.get(ALIASES[name])
     for g in groups:
@@ -97,7 +102,7 @@ def main() -> None:
         groups = [e for e in ents if not e.get("parent_id")]
         rows: list[EvidenceRow] = []
         for name, s in sorted(latest.items()):
-            g = match_group(name, groups)
+            g = match_group(name, groups, ents)
             if g:
                 rows.append(build_row(g["slug"], s))
                 print(f"  ✔ {g['slug']:<16} {s.score:>4g}/100  {s.benchmark} {s.edition}  ({name})")

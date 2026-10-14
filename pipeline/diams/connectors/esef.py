@@ -15,6 +15,7 @@ Ce que l'on lit, sans interprétation :
 from __future__ import annotations
 
 import html
+import json
 import re
 from dataclasses import dataclass
 from datetime import date, timedelta
@@ -145,10 +146,52 @@ def effective_tax_rate(facts: dict[str, float], tolerance: float = 0.01) -> TaxR
     return None
 
 
+def _stub_viewer_html(page: str) -> str | None:
+    """Visionneuse « stub » de filings.xbrl.org : le rapport n'est pas dans la page mais
+    dans un bloc JSON (chaînes échappées en \\uXXXX). On en extrait les fragments HTML."""
+    if "ixv-stub-viewer" not in page:
+        return None
+    m = re.search(r'<script type="application/x\.ixbrl-viewer\+json">(.*?)</script>', page, re.S)
+    if not m:
+        return None
+    try:
+        data = json.loads(m.group(1))
+    except ValueError:
+        return None
+    out: list[str] = []
+
+    def walk(x) -> None:
+        if isinstance(x, dict):
+            for v in x.values():
+                walk(v)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v)
+        elif isinstance(x, str) and "<" in x and len(x) > 200:
+            out.append(x)
+
+    walk(data)
+    return " ".join(out) or None
+
+
 def report_text(url: str, client: httpx.Client) -> str:
     r = client.get(url, timeout=300, follow_redirects=True)
     r.raise_for_status()
-    text = html.unescape(re.sub(r"<[^>]+>", " ", r.text))
+    page = r.text
+    if "ixv-stub-viewer" in page:
+        # La visionneuse « stub » ne contient que les notes balisées ; le rapport complet est
+        # le document qu'elle désigne (docSetFiles), dans le même dossier.
+        from urllib.parse import urljoin
+        m = re.search(r'"docSetFiles"\s*:\s*\[\s*"([^"]+)"', page)
+        if m:
+            full = client.get(urljoin(url, m.group(1)), timeout=300, follow_redirects=True)
+            if full.status_code == 200:
+                page = full.text
+            else:
+                page = _stub_viewer_html(page) or page
+        else:
+            page = _stub_viewer_html(page) or page
+    text = html.unescape(re.sub(r"<[^>]+>", " ", page))
     return re.sub(r"\s+", " ", text)
 
 

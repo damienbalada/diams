@@ -62,9 +62,18 @@ R2 à R6. Présentation à la presse après R6 et les vagues 1 à 3 au minimum.
 
 ## Avancement
 
-- [ ] R1 — données
-- [ ] Vague 0 — outillage
-- [ ] Vague 1
+- [x] R1 — données (15/10 : `evidence.event_date`, journal `indicator_reviews`)
+- [~] Vague 0 — outillage et relecture des connecteurs (outil `python -m diams.relecture`)
+  - Égapro 268/268, CDP 242/242, KSE 122/122, registre UE 205 (+2 montants mis à jour, Kellanova
+    sorti du registre), SBTi 149 (+3 statuts changés au 08/10 : Ecotone, Pilot validés ; Alsace
+    Lait engagement retiré), FTI 22/22, KnowTheChain 21/21 (Primark rattachée à la marque et non
+    au groupe ABF), Fashion Checker 16/16, Finansol 10/10, BBFAW 16/16, sans fourrure 11/11,
+    B Corp 3/3.
+  - Rapports électroniques : la visionneuse « stub » de filings.xbrl.org renvoie au rapport
+    complet (docSetFiles) ; le lecteur le suit désormais.
+  - Égapro : 8 sociétés n'ont publié aucun index depuis 2020-2021 (index expiré) — à traiter avec
+    les obligations.
+- [~] Vague 1 — citations : 186 confirmées mot pour mot, 0 écart ; obligations à lire
 - [ ] Vague 2
 - [ ] Vague 3
 - [ ] Vague 4
