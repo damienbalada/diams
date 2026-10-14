@@ -797,6 +797,14 @@ calcul (tables de config) doit être datée et justifiée ici.
   - 92 marques documentées par la présentation de leurs produits sur leur site officiel,
     passages relus puis vérifiés mot pour mot (Babybel, Kinder, Lustucru, St Michel,
     Cochonou, Rougié, fromages de Savencia…).
+  - Lot 96 : 7 marques de Sodiaal (Candia, Viva, GrandLait, Candy'Up, Yoplait, Perle de
+    Lait, Entremont), seules marques du groupe encore bloquées par l'absence de preuve
+    animale ; citations extraites telles quelles de candia.fr, yoplait.fr et
+    entremont.com, vérifiées mot pour mot. Les 7 deviennent publiables (1 058 au total).
+    Le code APE ajoute aussi 17 preuves (fromageries, volailles, pêche).
+  - Restent sans source lisible : le rattachement d'ALDI France au groupe ALDI Nord (sites
+    construits en JavaScript, aucune relation de consolidation dans GLEIF), Panzani (seule
+    mention trouvée : un nom de produit).
   - Mots-clés du vérificateur élargis à l'alimentation (fromage, beurre, charcuterie,
     poisson, foie gras, élevage, pêche…), « beurre de cacahuète / karité / cacao » exclu.
   - Autres piliers relancés sur les nouvelles sociétés : registre des représentants
