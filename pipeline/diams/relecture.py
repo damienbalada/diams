@@ -262,6 +262,7 @@ PRODUCERS = {"EGAPRO": produce_egapro, "CDP": produce_cdp, "EU_TRANSPARENCY": pr
              "FUR_FREE": produce_via_module("import_fur_free", []), "B_LAB": produce_via_module("import_bcorp", [])}
 # Lancés seulement sur demande (--sources) : relecture lourde (un rapport par groupe) ou quota serré.
 ON_DEMAND = {"ESEF", "SEC_FILING", "INPI_SIRENE"}
+# INPI_SIRENE : le connecteur ne produit que les preuves manquantes ; relu par l'annuaire (APE).
 
 
 def _same(ev: dict, r: EvidenceRow) -> bool:
@@ -277,11 +278,49 @@ def _val(x) -> str:
     return f"valeur {v if v is not None else '—'}, note {n if n is not None else '—'}"
 
 
+def check_ape(c: httpx.Client, b: Base) -> tuple[list[dict], dict]:
+    """Preuves « activité principale » (avis de situation Sirene) : le code APE cité est comparé
+    à celui de l'annuaire officiel des entreprises (recherche-entreprises.api.gouv.fr), à jour."""
+    import time
+    sid = {s_id for s_id, s in b.src.items() if s["code"] == "INPI_SIRENE"}
+    evs = [e for e in b.ev if e["source_id"] in sid]
+    cache: dict[str, str | None] = {}
+    reviews, ok, bad, ko = [], 0, [], 0
+    for ev in evs:
+        m = re.search(r"SIREN (\d{9})", ev["excerpt"] or "")
+        a = re.search(r"\(APE\) (\d{2}\.\d{2}[A-Z])", ev["excerpt"] or "")
+        if not (m and a):
+            reviews.append(review(b, ev, "non_verifiable", "SIREN ou code APE introuvable dans l'extrait.", 0))
+            ko += 1
+            continue
+        siren = m.group(1)
+        if siren not in cache:
+            time.sleep(0.2)
+            r = c.get("https://recherche-entreprises.api.gouv.fr/search", params={"q": siren})
+            if r.status_code in BLOCKING:
+                raise RuntimeError(f"annuaire : HTTP {r.status_code}")
+            hit = [x for x in r.json().get("results", []) if x.get("siren") == siren]
+            cache[siren] = hit[0].get("activite_principale") if hit else None
+        cur = cache[siren]
+        if cur == a.group(1):
+            ok += 1
+            reviews.append(review(b, ev, "confirmee", f"Annuaire officiel des entreprises : SIREN {siren}, APE {cur} (identique).", 0))
+        else:
+            bad.append((b.by_id[ev["entity_id"]]["slug"], siren, a.group(1), cur))
+            reviews.append(review(b, ev, "ecart", f"Annuaire officiel des entreprises : SIREN {siren}, APE {cur} (preuve : {a.group(1)}).", 0))
+    print(f"✔ INPI_SIRENE (annuaire officiel) : {ok} confirmées, {len(bad)} écarts, {ko} non vérifiables")
+    for x in bad:
+        print(f"    écart {x[0]} : SIREN {x[1]}, preuve {x[2]}, annuaire {x[3]}")
+    return reviews, {"confirmees": ok, "ecarts": bad}
+
+
 def cmd_connecteurs(c: httpx.Client, b: Base, args) -> dict:
     reviews, report = [], {}
+    if args.sources and "APE" in args.sources.split(","):
+        r, rep = check_ape(c, b)
+        reviews += r
+        report["APE"] = rep
     wanted = set(args.sources.split(",")) if args.sources else set(PRODUCERS) - ON_DEMAND
-    if args.ani_cache:
-        PRODUCERS["INPI_SIRENE"] = produce_via_module("import_ani_ape", ["--cache", args.ani_cache])
     PRODUCERS.setdefault("ESEF", produce_via_module("import_esef", []))
     PRODUCERS.setdefault("SEC_FILING", produce_via_module("import_sec", []))
     for code, produce in PRODUCERS.items():

@@ -10,6 +10,7 @@ tente pas de matching par nom (trop ambigu sur les raisons sociales).
 from __future__ import annotations
 
 import csv
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -28,6 +29,10 @@ class EgaproRecord:
     raison_sociale: str
     year: str
     note: float          # index /100
+    # Déclaration d'une UES (unité économique et sociale) : son nom et les SIREN de ses
+    # sociétés membres, dont l'index couvre aussi les salariés.
+    ues_name: str | None = None
+    members: tuple[str, ...] = ()
 
 
 def parse_records(payload: dict[str, Any]) -> list[EgaproRecord]:
@@ -60,6 +65,8 @@ SIREN_COLS = ("siren",)
 NOTE_COLS = ("note index", "note_index", "note", "index")
 YEAR_COLS = ("annee", "année", "year")
 NAME_COLS = ("raison_sociale", "raison sociale", "entreprise", "nom")
+UES_NAME_COLS = ("nom ues", "nom_ues")
+UES_MEMBERS_COLS = ("entreprises ues (siren)", "entreprises_ues")
 
 
 def _pick(row: dict, cols: tuple[str, ...]) -> str | None:
@@ -87,11 +94,14 @@ def parse_csv(path: str) -> list[EgaproRecord]:
                 note_f = float(str(note).replace(",", "."))
             except (TypeError, ValueError):
                 continue
+            members = tuple(re.findall(r"\((\d{9})\)", str(_pick(row, UES_MEMBERS_COLS) or "")))
             out.append(EgaproRecord(
                 siren=siren,
                 raison_sociale=str(_pick(row, NAME_COLS) or ""),
                 year=(str(_pick(row, YEAR_COLS) or "")).strip(),
                 note=note_f,
+                ues_name=(str(_pick(row, UES_NAME_COLS) or "").strip() or None) if members else None,
+                members=members,
             ))
     return out
 
@@ -103,6 +113,17 @@ def latest_by_siren(records: list[EgaproRecord]) -> dict[str, EgaproRecord]:
         cur = best.get(r.siren)
         if cur is None or r.year > cur.year:
             best[r.siren] = r
+    return best
+
+
+def latest_by_member(records: list[EgaproRecord]) -> dict[str, EgaproRecord]:
+    """Par SIREN de société membre d'une UES, la déclaration d'UES la plus récente."""
+    best: dict[str, EgaproRecord] = {}
+    for r in records:
+        for m in r.members:
+            cur = best.get(m)
+            if cur is None or r.year > cur.year:
+                best[m] = r
     return best
 
 

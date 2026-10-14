@@ -91,6 +91,7 @@ async function build() {
     "value_profiles", "profile_weights", "entities", "evidence", "political_groups",
     "civic_votes", "civic_positions", "disclosure_regimes", "indicator_regimes", "entity_regimes",
     "indicator_sectors", "sector_dimension_weights", "obligation_exemptions", "entity_ownership_sources",
+    "indicator_reviews",
   ]) T[t] = await fetchAll(t);
 
   const code = (rows, field = "code") => new Map(rows.map((r) => [r.id, r[field]]));
@@ -231,7 +232,7 @@ async function build() {
 
   section("Preuves (evidence) — clé : entité + indicateur + source + date", upsert("evidence",
     ["entity_id", "indicator_id", "source_id", "observed_on", "value_type", "value_numeric", "value_boolean", "value_text",
-     "normalized_value", "nature", "confidence", "reviewer", "review_status", "contested", "source_url", "excerpt"],
+     "normalized_value", "nature", "confidence", "reviewer", "review_status", "contested", "source_url", "excerpt", "event_date"],
     ["entity_id", "indicator_id", "source_id", "observed_on"],
     [...T.evidence]
       .sort(by((r) => `${ent.get(r.entity_id)}|${ind.get(r.indicator_id)}|${src.get(r.source_id)}|${r.observed_on}`))
@@ -239,8 +240,25 @@ async function build() {
         ref("entities", "slug", ent.get(r.entity_id)), ref("indicators", "code", ind.get(r.indicator_id)),
         ref("sources", "code", src.get(r.source_id)), lit(r.observed_on), lit(r.value_type), lit(r.value_numeric),
         lit(r.value_boolean), lit(r.value_text), lit(r.normalized_value), lit(r.nature), lit(r.confidence),
-        lit(r.reviewer), lit(r.review_status), lit(r.contested), lit(r.source_url), lit(r.excerpt),
+        lit(r.reviewer), lit(r.review_status), lit(r.contested), lit(r.source_url), lit(r.excerpt), lit(r.event_date),
       ])));
+
+  // Journal de relecture (PLAN_REFONTE.md) : la preuve relue est retrouvée par sa clé naturelle,
+  // ses identifiants changeant d'une reconstruction à l'autre.
+  const evKey = new Map(T.evidence.map((r) => [r.id, r]));
+  const evRef = (id) => {
+    const r = evKey.get(id);
+    return r ? `(select id from evidence where entity_id = ${ref("entities", "slug", ent.get(r.entity_id))}`
+      + ` and indicator_id = ${ref("indicators", "code", ind.get(r.indicator_id))}`
+      + ` and source_id = ${ref("sources", "code", src.get(r.source_id))} and observed_on = ${lit(r.observed_on)})` : "null";
+  };
+  section("Journal de relecture (relecture complète)", upsert("indicator_reviews",
+    ["id", "entity_id", "indicator_id", "evidence_id", "outcome", "detail", "source_url", "checked_on", "reviewer", "wave"],
+    ["id"],
+    [...T.indicator_reviews].sort(by((r) => `${r.created_at}|${r.id}`)).map((r) => [
+      lit(r.id), ref("entities", "slug", ent.get(r.entity_id)), ref("indicators", "code", ind.get(r.indicator_id)),
+      evRef(r.evidence_id), lit(r.outcome), lit(r.detail), lit(r.source_url), lit(r.checked_on), lit(r.reviewer), lit(r.wave),
+    ])));
 
   section("Module civique : groupes politiques", upsert("political_groups",
     ["code", "name", "short_name", "chamber", "seats", "ordinal"], ["code"],

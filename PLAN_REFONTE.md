@@ -63,7 +63,7 @@ R2 à R6. Présentation à la presse après R6 et les vagues 1 à 3 au minimum.
 ## Avancement
 
 - [x] R1 — données (15/10 : `evidence.event_date`, journal `indicator_reviews`)
-- [~] Vague 0 — outillage et relecture des connecteurs (outil `python -m diams.relecture`)
+- [x] Vague 0 — outillage et relecture des connecteurs (outil `python -m diams.relecture`)
   - Égapro 268/268, CDP 242/242, KSE 122/122, registre UE 205 (+2 montants mis à jour, Kellanova
     sorti du registre), SBTi 149 (+3 statuts changés au 08/10 : Ecotone, Pilot validés ; Alsace
     Lait engagement retiré), FTI 22/22, KnowTheChain 21/21 (Primark rattachée à la marque et non
@@ -71,13 +71,18 @@ R2 à R6. Présentation à la presse après R6 et les vagues 1 à 3 au minimum.
     B Corp 3/3.
   - Rapports électroniques : la visionneuse « stub » de filings.xbrl.org renvoie au rapport
     complet (docSetFiles) ; le lecteur le suit désormais.
-  - Égapro : 8 sociétés n'ont publié aucun index depuis 2020-2021 (index expiré) — à traiter avec
-    les obligations.
-- [~] Vague 1 — citations : 186 confirmées mot pour mot, 0 écart ; obligations à lire
-- [ ] Vague 2
-- [ ] Vague 3
-- [ ] Vague 4
-- [ ] Vague 5
+  - Activité principale (avis Sirene) : 81/81 confirmées par l'annuaire officiel ; rapports
+    électroniques 34/35, dépôts américains 35/35.
+  - Obligation Égapro (15/10) : croisement du fichier officiel des déclarations et de l'annuaire
+    (tranche d'effectif) → 296 sociétés tenues de publier (`curated/regimes_egapro_2026-10-15.csv`,
+    au lieu de 33) ; 35 sans index 2025 consignées « absence_confirmee » (12 ont cessé de déclarer,
+    23 n'ont jamais déclaré) ; 18 index d'UES attribués aux sociétés membres (connecteur étendu).
+- [x] Vague 1 — citations 186/186 ; 13 obligations lues dans les rapports : 4 absences déclarées
+  par l'entreprise (Hermès, Carrefour, Société Générale) ou constatées (BPCE, BNP Paribas), 7
+  « autre forme » (sous-périmètre, par zone ou pays, écart ajusté), H&M trouvé (en attente)
+- [~] Vagues 2 à 5 — citations : 217/217, 40/41, 146/148, 52/53 (2 pages de la CNIL en erreur 503,
+  à reprendre) ; aucune obligation sans preuve hors Égapro. Reste : absences non obligatoires
+  (« cherché, non trouvé ») consignées source par source.
 - [ ] Vague 6
 - [ ] R2 — moteur
 - [ ] R3 — fiches

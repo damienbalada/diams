@@ -19,13 +19,19 @@ from .connectors import egapro
 from .load import EvidenceRow, insert_evidence
 
 
-def build_rows(entities: list[dict], by_siren: dict[str, egapro.EgaproRecord]) -> list[EvidenceRow]:
+def build_rows(entities: list[dict], by_siren: dict[str, egapro.EgaproRecord],
+               by_member: dict[str, egapro.EgaproRecord] | None = None) -> list[EvidenceRow]:
     rows: list[EvidenceRow] = []
     for e in entities:
         siren = e.get("siren")
         if not siren:
             continue
         rec = by_siren.get(str(siren))
+        # Société membre d'une UES : l'index de l'UES couvre ses salariés. Il est retenu s'il
+        # est plus récent que la dernière déclaration propre de la société (relecture du 15/10).
+        via = (by_member or {}).get(str(siren))
+        if via is not None and (rec is None or via.year > rec.year):
+            rec = via
         if rec is None:
             continue
         # « Année » = année de CALCUL de l'index ; publication obligatoire au plus
@@ -37,7 +43,11 @@ def build_rows(entities: list[dict], by_siren: dict[str, egapro.EgaproRecord]) -
             nature="result", observed_on=observed_on, value_type="numeric",
             value_numeric=rec.note, normalized_value=max(0.0, min(1.0, rec.note / 100.0)),
             confidence=0.95, source_url=egapro.EGAPRO_SOURCE_URL,
-            excerpt=f"Index Égapro {rec.year} : {rec.note:.0f}/100 ({rec.raison_sociale or siren})",
+            excerpt=(f"Index Égapro {rec.year} : {rec.note:.0f}/100 ({rec.raison_sociale or siren})"
+                     if rec.siren == str(siren) else
+                     f"Index Égapro {rec.year} de l'UES « {rec.ues_name or rec.raison_sociale} » : {rec.note:.0f}/100 "
+                     f"(déclaration de {rec.raison_sociale}, SIREN {rec.siren} ; la société, SIREN {siren}, "
+                     f"est membre de l'UES)"),
         ))
     return rows
 
@@ -62,7 +72,7 @@ def main() -> None:
     by_siren = egapro.latest_by_siren(records)
     print(f"{len(by_siren)} index Égapro trouvés")
 
-    rows = build_rows(entities, by_siren)
+    rows = build_rows(entities, by_siren, egapro.latest_by_member(records))
     for r in rows:
         print(f"✔ {r.entity_slug}: LAB_EGAPRO_INDEX = {r.value_numeric}/100")
     print(f"\n{len(rows)} evidence à insérer (statut selon le tier de la source)")

@@ -81,3 +81,19 @@ def test_parse_csv_french_decimal(tmp_path):
     p.write_text('siren,note\n552075020,"88,5"\n', encoding="utf-8")
     recs = parse_csv(str(p))
     assert recs[0].note == 88.5
+
+
+def test_index_ues_attribue_aux_societes_membres():
+    from diams.connectors.egapro import EgaproRecord, latest_by_member, latest_by_siren
+    from diams.import_egapro import build_rows
+    recs = [
+        EgaproRecord(siren="111111111", raison_sociale="Société A", year="2020", note=80.0),
+        EgaproRecord(siren="999999999", raison_sociale="Tête d'UES", year="2025", note=91.0,
+                     ues_name="UES Exemple", members=("111111111", "222222222")),
+    ]
+    rows = build_rows([{"slug": "a", "siren": "111111111"}, {"slug": "b", "siren": "222222222"}],
+                      latest_by_siren(recs), latest_by_member(recs))
+    by = {r.entity_slug: r for r in rows}
+    # L'index 2025 de l'UES l'emporte sur la déclaration propre de 2020.
+    assert by["a"].value_numeric == 91.0 and "UES Exemple" in by["a"].excerpt
+    assert by["b"].observed_on == "2026-03-01"
