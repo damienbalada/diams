@@ -91,8 +91,14 @@ R2 à R6. Présentation à la presse après R6 et les vagues 1 à 3 au minimum.
   - Exploitation animale : lot 97 (38 marques par leur site officiel), 35 par le code APE.
   - Reste : 714 marques alimentaires rattachées par la seule liste Nutri-Score (544 sociétés,
     dont 477 à une seule marque) sans site officiel connu ; Open Food Facts indisponible (503).
-- [ ] R2 — moteur
-- [ ] R3 — fiches
-- [ ] R4 — pages
-- [ ] R5 — méthodologie
-- [ ] R6 — contrôle et mise en ligne
+  - 15/10 : recherche des sites officiels des 714 : domaines tirés des noms, site retenu seulement
+    si ses mentions légales portent le SIREN du propriétaire (écrit d'un seul tenant ou par groupes
+    de trois ; 40 correspondances fortuites rejetées) → 152 sites (`curated/sites_officiels_2026-10-15.csv`).
+    Lecture des pages produits, tri à la main (recettes, suggestions, marques végétales, arômes et
+    sites de groupe ne nommant pas la marque écartés) → lot 98 : 35 marques, 35/35 mot pour mot.
+    Reste : 80 sociétés sans SIREN, ~480 marques sans site prouvé ; Open Food Facts toujours en 503.
+- [x] R2 — moteur
+- [x] R3 — fiches
+- [x] R4 — pages
+- [x] R5 — méthodologie (v0.8.0)
+- [x] R6 — contrôle et mise en ligne (15/10 : 30 fiches, tests, déploiement prêt, aucune erreur)
