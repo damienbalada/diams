@@ -347,3 +347,9 @@ details.pending[open] > summary::after { content: "masquer"; }
 .ci-chip:hover { border-color: var(--accent); }
 @media (max-width: 480px) { .ci-card { padding: 14px 12px; border-radius: 18px; } .ci-row[open] { margin: 0 -12px; padding: 0 12px; } .ci-head h1 { font-size: 26px; } }
 .ent-kind { width: 34px; height: 34px; display: grid; place-items: center; font-size: 18px; border-radius: 10px; background: var(--panel-2); }
+
+/* Pilier animal à trois niveaux : groupe, marque, produits */
+.ci-niv { display: grid; gap: 8px; margin: 4px 0 12px; padding: 10px 12px; border: 1px solid var(--border, #2a2a2a); border-radius: 10px; }
+.ci-niv-l { display: grid; grid-template-columns: 7.5em 1fr; gap: 8px; align-items: baseline; font-size: 14px; line-height: 1.45; }
+.ci-niv-k { font-weight: 600; white-space: nowrap; }
+@media (max-width: 480px) { .ci-niv-l { grid-template-columns: 1fr; gap: 2px; } }

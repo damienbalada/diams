@@ -202,6 +202,10 @@ ESEF_KEYWORDS = {
                          r"|d.origine animale|of animal origin|animal[- ]derived|tests? sur (les )?animaux|animal testing"
                          r"|tested on animals"],
     "ANI_FUR_FREE": [r"fourrure|fur\b"],
+    # Pilier animal à trois niveaux (15/10/2026) : marque entièrement végétale, ou produits
+    # 100 % végétaux proposés.
+    "ANI_ANIMAL_FREE": [r"100 ?% v[ée]g[ée]ta|vegan|sans exploitation animale|sans (aucun )?ingr[ée]dient d.origine animale"],
+    "ANI_OFFRE_VEGETALE": [r"100 ?% v[ée]g[ée]ta|vegan|v[ée]g[ée]talien|ne contient pas de produits animaux|d.origine v[ée]g[ée]tale"],
     "GEO_LOBBYING_ALIGN": [r"InfluenceMap|Climate Policy Engagement"],
     # Évolution du plastique vierge (tonnage absolu, pas par unité vendue).
     "PLA_REDUCTION": [r"plasti", r"vierge|virgin"],

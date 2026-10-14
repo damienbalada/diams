@@ -1,4 +1,4 @@
-import { getScorePayload, getOwnerGroup, getOwnershipProofs, getJournal, getMemeRayon, getMarques, type OwnershipProof } from "@/lib/data";
+import { getScorePayload, getOwnerGroup, getOwnershipProofs, getJournal, getMemeRayon, getMarques, getAnimalGroupe, type OwnershipProof } from "@/lib/data";
 import { construireCarte } from "@/lib/carte";
 import { CarteIdentite } from "@/components/CarteIdentite";
 
@@ -27,12 +27,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
       );
     }
     // Blocs d'information : une erreur sur l'un d'eux ne doit jamais empêcher l'affichage de la carte.
-    const [journal, proprietaire, preuves, memeRayon, marques] = await Promise.all([
+    const [journal, proprietaire, preuves, memeRayon, marques, animalGroupe] = await Promise.all([
       getJournal(slug).catch(() => []),
       getOwnerGroup(slug).catch(() => null),
       getOwnershipProofs(slug).catch(() => [] as OwnershipProof[]),
       getMemeRayon(slug).catch(() => []),
       getMarques(slug).catch(() => []),
+      getAnimalGroupe(slug).catch(() => null),
     ]);
     const carte = construireCarte(payload as any, journal);
     const estGroupe = (payload.ownership_chain ?? []).length <= 1 || marques.length > 0;
@@ -44,6 +45,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         preuvesPropriete={preuves}
         memeRayon={memeRayon}
         marques={marques}
+        animalGroupe={animalGroupe}
       />
     );
   } catch (e) {

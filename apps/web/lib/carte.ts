@@ -58,6 +58,8 @@ export interface Fait {
   /** Valeur courte, dans l'échelle de la source (« 92/100 », « Note A », « Oui (lait) »). */
   valeur: string;
   contexte: boolean;
+  /** Pilier animal : niveau auquel le fait est établi (la marque entière, ou certains produits). */
+  niveau?: "marque" | "produit";
   preuve?: {
     source: string;
     url: string | null;
@@ -110,7 +112,8 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
   const v = num(p.value_numeric);
   switch (code) {
     case "ANI_EXPLOITATION": return `Oui (${m1(/exploitation animale \(([^)]+)\)/, x) ?? m1(/APE\) [\d.]+[A-Z] - ([^»]+)»/, x)?.toLowerCase() ?? "documentée"})`;
-    case "ANI_ANIMAL_FREE": return "Non — 100 % végétale (prouvé)";
+    case "ANI_ANIMAL_FREE": return "Non — marque entièrement végétale (prouvé)";
+    case "ANI_OFFRE_VEGETALE": return "Oui, au moins un produit 100 % végétal";
     case "ANI_FUR_FREE": return "Membre du label « sans fourrure »";
     case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 (1 = meilleur)`;
     case "GEO_RUSSIA_EXIT": return m1(/— ([^;]+);/, x) ?? "Documenté";
@@ -144,6 +147,23 @@ function meilleure(ps: PreuveEntree[]): PreuveEntree | null {
   return [...ps].sort((a, b) => b.specificity - a.specificity || (b.event_date ?? b.observed_on).localeCompare(a.event_date ?? a.observed_on))[0] ?? null;
 }
 
+/** Pilier animal à trois niveaux (décision de l'éditeur, 15/10/2026) : le groupe (résumé de ses
+ *  marques, calculé à part), la marque, les produits. */
+export const NIVEAU: Record<string, "marque" | "produit"> = {
+  ANI_EXPLOITATION: "marque", ANI_ANIMAL_FREE: "marque", ANI_OFFRE_VEGETALE: "produit",
+};
+
+/** Résumé animal d'un groupe à partir de l'état de chacune de ses marques suivies. */
+export type EtatAnimalMarque = "exploitation" | "vegetale" | "non_documentee";
+export interface MarqueAnimale { slug: string; nom: string; etat: EtatAnimalMarque; offreVegetale: boolean }
+export function resumeGroupe(marques: MarqueAnimale[]) {
+  const n = (e: EtatAnimalMarque) => marques.filter((m) => m.etat === e).length;
+  return {
+    total: marques.length, exploitation: n("exploitation"), vegetale: n("vegetale"), nonDocumentee: n("non_documentee"),
+    offreVegetale: marques.filter((m) => m.etat !== "vegetale" && m.offreVegetale).length,
+  };
+}
+
 const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/CDP/, "liste publique CDP"], [/SBTi/, "export SBTi"], [/Leave Russia/, "base Leave Russia (KSE)"],
   [/registre de transparence/, "registre européen"], [/HATVP/, "répertoire de la HATVP"],
@@ -166,7 +186,7 @@ export function construireCarte(
     jparCode.get(j.indicator_code)!.push(j);
   }
 
-  const faits: Fait[] = payload.applicableIndicators.map((i) => {
+  const faits: Fait[] = payload.applicableIndicators.map((i): Fait => {
     const p = meilleure(parCode.get(i.code) ?? []);
     const js = (jparCode.get(i.code) ?? []).sort((a, b) => b.checked_on.localeCompare(a.checked_on));
     const obligation = i.mandatory ? (i.mandatory_regimes ?? []) : [];
@@ -199,6 +219,9 @@ export function construireCarte(
     };
   });
 
+  for (const f of faits) {
+    if (NIVEAU[f.code]) f.niveau = NIVEAU[f.code];
+  }
   const piliers: Pilier[] = [];
   for (const d of ORDRE_PILIERS) {
     const fs = faits.filter((f) => f.pilier === d);

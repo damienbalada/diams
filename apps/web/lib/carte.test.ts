@@ -2,7 +2,7 @@
 // Lancer : node --test --experimental-strip-types apps/web/lib/carte.test.ts
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { construireCarte, valeurCourte, type IndicateurEntree, type PreuveEntree } from "./carte.ts";
+import { construireCarte, resumeGroupe, valeurCourte, type IndicateurEntree, type PreuveEntree } from "./carte.ts";
 
 const dims = [{ code: "ANI", name: "Bien-être animal" }, { code: "LAB", name: "Travail" }, { code: "ENV", name: "Environnement" }];
 const ind = (code: string, dim: string, extra: Partial<IndicateurEntree> = {}): IndicateurEntree =>
@@ -59,4 +59,22 @@ test("valeurs courtes", () => {
   assert.equal(valeurCourte("ANI_EXPLOITATION", null, preuve("x", { excerpt: "… — recours à l'exploitation animale (lait)." })), "Oui (lait)");
   assert.equal(valeurCourte("LAB_GENDER_PAYGAP", "%", preuve("x", { value_numeric: -8 })), "8 % en faveur des femmes");
   assert.equal(valeurCourte("ENV_GHG_TREND", "%/an", preuve("x", { value_numeric: -7.3 })), "−7,3 % par an");
+});
+
+test("animal à trois niveaux : niveau des faits et résumé du groupe", () => {
+  const c = construireCarte({ entity: { slug: "m", name: "M" }, dimensions: dims,
+    applicableIndicators: [ind("ANI_EXPLOITATION", "ANI"), ind("ANI_OFFRE_VEGETALE", "ANI")],
+    evidence: [preuve("ANI_OFFRE_VEGETALE", { excerpt: "« Big Chocodark Vegan »" })] });
+  const fs = c.piliers[0].faits;
+  assert.equal(fs.find((f) => f.code === "ANI_EXPLOITATION")?.niveau, "marque");
+  assert.equal(fs.find((f) => f.code === "ANI_EXPLOITATION")?.etat, "presume");
+  assert.equal(fs.find((f) => f.code === "ANI_OFFRE_VEGETALE")?.niveau, "produit");
+  // Un produit végétal ne rend pas la marque végétale : le fait clé reste l'exploitation présumée.
+  assert.equal(c.piliers[0].cle?.code, "ANI_EXPLOITATION");
+  const r = resumeGroupe([
+    { slug: "a", nom: "A", etat: "exploitation", offreVegetale: true },
+    { slug: "b", nom: "B", etat: "vegetale", offreVegetale: true },
+    { slug: "c", nom: "C", etat: "non_documentee", offreVegetale: false },
+  ]);
+  assert.deepEqual(r, { total: 3, exploitation: 1, vegetale: 1, nonDocumentee: 1, offreVegetale: 1 });
 });

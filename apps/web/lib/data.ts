@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { getSupabase } from "./supabase";
-import type { JournalEntree } from "./carte";
+import type { JournalEntree, MarqueAnimale } from "./carte";
 import { computeScore, type ScoreInput } from "./scoring";
 import {
   pickComparable,
@@ -66,7 +66,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v144"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v145"], { revalidate: 600 });
 
 type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
 
@@ -483,4 +483,53 @@ export async function getMarques(slug: string): Promise<{ slug: string; name: st
   };
   return idx.rows.filter((e) => e.is_brand && sous(e)).map((e) => ({ slug: e.slug, name: entityName(e) }))
     .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
+}
+
+/**
+ * Pilier animal, niveau groupe : l'état de chacune des marques suivies du groupe propriétaire
+ * (pour une marque) ou du groupe lui-même. Seules les preuves approuvées comptent : une marque
+ * est « entièrement végétale » si une page officielle le dit pour toute la marque, « avec
+ * exploitation animale » si un produit d'origine animale est documenté, sinon « non documentée ».
+ */
+export async function getAnimalGroupe(slug: string): Promise<{ groupe: { slug: string; name: string }; marques: MarqueAnimale[] } | null> {
+  const idx = await loadEntityIndex();
+  if (!idx) return null;
+  const racine = idx.rootOf(slug);
+  if (!racine) return null;
+  const byId = new Map(idx.rows.map((e) => [e.id, e]));
+  const sous = (e: EntityRow) => {
+    for (let cur: EntityRow | undefined = e, i = 0; cur?.parent_id && i < 20; i++) {
+      if (cur.parent_id === racine.id) return true;
+      cur = byId.get(cur.parent_id);
+    }
+    return false;
+  };
+  const marques = idx.rows.filter((e) => e.is_brand && sous(e));
+  if (!marques.length) return null;
+  const supabase = getSupabase();
+  const codes = new Map<string, Set<string>>();
+  for (let i = 0; i < marques.length; i += 150) {
+    const { data, error } = await supabase
+      .from("evidence")
+      .select("entity_id, indicator:indicator_id!inner(code)")
+      .in("entity_id", marques.slice(i, i + 150).map((m) => m.id))
+      .in("indicator.code", ["ANI_EXPLOITATION", "ANI_ANIMAL_FREE", "ANI_OFFRE_VEGETALE"])
+      .eq("review_status", "approved")
+      .eq("contested", false);
+    if (error) throw new Error(error.message);
+    for (const r of (data ?? []) as any[]) {
+      if (!codes.has(r.entity_id)) codes.set(r.entity_id, new Set());
+      codes.get(r.entity_id)!.add(r.indicator?.code);
+    }
+  }
+  return {
+    groupe: { slug: racine.slug, name: entityName(racine) },
+    marques: marques
+      .map((m) => {
+        const c = codes.get(m.id) ?? new Set<string>();
+        const etat = c.has("ANI_ANIMAL_FREE") ? "vegetale" : c.has("ANI_EXPLOITATION") ? "exploitation" : "non_documentee";
+        return { slug: m.slug, nom: entityName(m), etat, offreVegetale: c.has("ANI_OFFRE_VEGETALE") } as MarqueAnimale;
+      })
+      .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" })),
+  };
 }

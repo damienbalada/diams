@@ -1,4 +1,4 @@
-import type { Carte, Fait, Pilier, Solidite } from "@/lib/carte";
+import { resumeGroupe, type Carte, type Fait, type MarqueAnimale, type Pilier, type Solidite } from "@/lib/carte";
 import type { OwnershipProof } from "@/lib/data";
 import { CorrectionForm } from "@/components/CorrectionForm";
 
@@ -37,6 +37,7 @@ function Entree({ f, avecPilier, nomPilier }: { f: Fait; avecPilier?: boolean; n
       <div className="ci-src">
         <Pastille s={p.solidite} /> {SOLIDITE[p.solidite]} · {p.source}
         {p.reprisDe && <span className="ci-badge">donnée de {p.reprisDe}</span>}
+        {f.niveau && <span className="ci-badge">{f.niveau === "produit" ? "niveau : produits" : "niveau : marque"}</span>}
       </div>
       {(p.citation || p.url) && (
         <details className="ci-cit">
@@ -53,12 +54,74 @@ function Entree({ f, avecPilier, nomPilier }: { f: Fait; avecPilier?: boolean; n
   );
 }
 
-function LignePilier({ p }: { p: Pilier }) {
+type AnimalGroupe = { groupe: { slug: string; name: string }; marques: MarqueAnimale[] } | null;
+const pl = (n: number, un: string, plusieurs: string) => `${n} ${n > 1 ? plusieurs : un}`;
+
+/** Pilier animal à trois niveaux : le groupe (ses marques suivies), la marque, les produits. */
+function TroisNiveaux({ p, ag, estGroupe, slug }: { p: Pilier; ag: AnimalGroupe; estGroupe: boolean; slug: string }) {
+  const marque = p.faits.find((f) => f.code === "ANI_ANIMAL_FREE" && f.etat === "documente") ?? p.faits.find((f) => f.code === "ANI_EXPLOITATION");
+  const produits = p.faits.find((f) => f.code === "ANI_OFFRE_VEGETALE");
+  const r = ag ? resumeGroupe(ag.marques) : null;
+  const liste = (etat: MarqueAnimale["etat"], titre: string) => {
+    const ms = ag!.marques.filter((m) => m.etat === etat);
+    return ms.length > 0 && (
+      <div className="ci-small" style={{ marginTop: 6 }}>
+        <strong>{titre}</strong> :{" "}
+        {ms.map((m, i) => (
+          <span key={m.slug}>{i > 0 && ", "}{m.slug === slug ? <strong>{m.nom}</strong> : <a href={`/entreprise/${m.slug}`}>{m.nom}</a>}{m.offreVegetale && etat !== "vegetale" ? " (produits végétaux)" : ""}</span>
+        ))}
+      </div>
+    );
+  };
+  return (
+    <div className="ci-niv">
+      {ag && r && (
+        <div className="ci-niv-l">
+          <span className="ci-niv-k">🏢 Groupe</span>
+          <div>
+            {estGroupe ? <strong>{ag.groupe.name}</strong> : <a href={`/entreprise/${ag.groupe.slug}`}><strong>{ag.groupe.name}</strong></a>} :{" "}
+            {pl(r.total, "marque suivie", "marques suivies")} ; preuve propre à chaque marque : {r.exploitation} avec exploitation animale documentée · {pl(r.vegetale, "entièrement végétale", "entièrement végétales")} · {r.nonDocumentee} non documentée{r.nonDocumentee > 1 ? "s" : ""}
+            {r.offreVegetale > 0 && <> ; {pl(r.offreVegetale, "propose", "proposent")} aussi des produits 100 % végétaux</>}.
+            <details className="ci-cit">
+              <summary>Voir les marques</summary>
+              {liste("exploitation", "Exploitation animale documentée")}
+              {liste("vegetale", "Entièrement végétales")}
+              {liste("non_documentee", "Non documentées")}
+            </details>
+          </div>
+        </div>
+      )}
+      {!estGroupe && marque && (
+        <div className="ci-niv-l">
+          <span className="ci-niv-k">🏷️ Marque</span>
+          <div className={`ci-${marque.etat}`}>{marque.valeur}</div>
+        </div>
+      )}
+      {!estGroupe && produits && (
+        <div className="ci-niv-l">
+          <span className="ci-niv-k">🥕 Produits</span>
+          <div className={`ci-${produits.etat}`}>{produits.etat === "documente" ? produits.valeur : "Aucune information sur des produits 100 % végétaux"}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LignePilier({ p, ag, estGroupe, slug }: { p: Pilier; ag?: AnimalGroupe; estGroupe?: boolean; slug?: string }) {
   const k = p.cle;
   const doc = p.faits.filter((f) => f.etat === "documente").sort((a, b) => b.preuve!.date.localeCompare(a.preuve!.date));
-  const signales = p.faits.filter((f) => f.etat === "presume" || f.etat === "obligatoire_absent" || f.etat === "autre_forme");
+  // Fiche d'un groupe : le pilier animal se lit d'abord au niveau du groupe, d'après ses marques.
+  const r = p.code === "ANI" && estGroupe && ag ? resumeGroupe(ag.marques) : null;
+  // Une preuve propre au groupe (son rapport) reste le fait clé ; sinon, le résumé de ses marques.
+  const niveauGroupe = r && (r.exploitation > 0 || r.vegetale > 0) && k?.etat !== "documente";
+  const signales = p.faits.filter((f) => (f.etat === "presume" && !niveauGroupe) || f.etat === "obligatoire_absent" || f.etat === "autre_forme");
   const vides = p.faits.filter((f) => f.etat === "aucune_info");
-  const etatCle = k ? k.etat : "aucune_info";
+  const etatCle = niveauGroupe ? "documente" : k ? k.etat : "aucune_info";
+  const valeurCle = niveauGroupe
+    ? r!.exploitation > 0
+      ? `Oui, documentée chez ${r!.exploitation} marque${r!.exploitation > 1 ? "s" : ""} sur ${r!.total}`
+      : `${r!.vegetale} marque${r!.vegetale > 1 ? "s" : ""} entièrement végétale${r!.vegetale > 1 ? "s" : ""} sur ${r!.total}`
+    : k ? k.valeur : "Aucune information";
   return (
     <details className="ci-row">
       <summary>
@@ -69,11 +132,12 @@ function LignePilier({ p }: { p: Pilier }) {
           {p.documentes}/{p.total}
         </span>
         <span className={`ci-v ci-${etatCle}`}>
-          {k ? k.valeur : "Aucune information"}
-          {k?.preuve?.reprisDe && <span className="ci-badge">{k.preuve.reprisDe}</span>}
+          {valeurCle}
+          {!niveauGroupe && k?.preuve?.reprisDe && <span className="ci-badge">{k.preuve.reprisDe}</span>}
         </span>
       </summary>
       <div className="ci-body">
+        {p.code === "ANI" && <TroisNiveaux p={p} ag={ag ?? null} estGroupe={!!estGroupe} slug={slug ?? ""} />}
         {p.solidite && <p className="ci-faint ci-small">Ce pilier repose sur des {SOLIDITE_PILIER[p.solidite]}.</p>}
         {doc.length > 0 && (
           <ol className="ci-tl">
@@ -119,6 +183,7 @@ export function CarteIdentite({
   preuvesPropriete,
   memeRayon,
   marques,
+  animalGroupe = null,
 }: {
   carte: Carte;
   estGroupe: boolean;
@@ -126,6 +191,7 @@ export function CarteIdentite({
   preuvesPropriete: OwnershipProof[];
   memeRayon: { slug: string; name: string; group: string | null }[];
   marques: { slug: string; name: string }[];
+  animalGroupe?: AnimalGroupe;
 }) {
   const nomPilier = new Map(carte.piliers.map((p) => [p.code, p.nom]));
   return (
@@ -145,7 +211,7 @@ export function CarteIdentite({
           )}
         </div>
         {carte.piliers.map((p) => (
-          <LignePilier key={p.code} p={p} />
+          <LignePilier key={p.code} p={p} ag={animalGroupe} estGroupe={estGroupe} slug={carte.slug} />
         ))}
         <details className="ci-row">
           <summary>
@@ -175,6 +241,7 @@ export function CarteIdentite({
         <summary>Comment lire cette fiche ?</summary>
         <ul className="small">
           <li><Pastille s="officielle" /> {SOLIDITE.officielle} · <Pastille s="reconnue" /> {SOLIDITE.reconnue} · <Pastille s="declarative" /> {SOLIDITE.declarative}</li>
+          <li>Bien-être animal, à trois niveaux : le <strong>groupe</strong> (l'état de chacune de ses marques suivies), la <strong>marque</strong> (un seul produit d'origine animale suffit ; « entièrement végétale » seulement si une page officielle le dit pour toute la marque), les <strong>produits</strong> (des produits 100 % végétaux proposés, sans que la marque devienne végétale).</li>
           <li><span className="ci-presume">Présumée</span> : exploitation animale non documentée dans un secteur où elle est la règle ; elle est présumée tant que la marque ne prouve pas le contraire.</li>
           <li><span className="ci-obligatoire_absent">Obligatoire, non publié</span> : la loi impose cette donnée et la lecture du rapport officiel confirme qu'elle n'y est pas.</li>
           <li><span className="ci-autre_forme">Publié sous une autre forme</span> : l'entreprise publie l'information, mais pas sous la forme que la loi exige (pour une partie du groupe seulement, par pays…).</li>
