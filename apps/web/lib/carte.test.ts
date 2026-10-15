@@ -34,7 +34,7 @@ test("la preuve propre à l'entité passe devant celle du groupe ; la valeur gar
     evidence: [preuve("LAB_EGAPRO_INDEX", { value_numeric: "92.0", specificity: -1, inherited_from: "Groupe" }),
                preuve("LAB_EGAPRO_INDEX", { value_numeric: 88, specificity: 0, observed_on: "2025-03-01" })] });
   const f = c.piliers[0].faits[0];
-  assert.equal(f.valeur, "88/100");
+  assert.equal(f.valeur, "Index Égapro : 88/100");
   assert.equal(f.preuve?.reprisDe, null);
 });
 
@@ -58,7 +58,7 @@ test("solidité d'un pilier : d'après les seules sources utilisées", () => {
 test("valeurs courtes", () => {
   assert.equal(valeurCourte("ANI_EXPLOITATION", null, preuve("x", { excerpt: "… — recours à l'exploitation animale (lait)." })), "Vend des produits issus de l'exploitation animale : lait");
   assert.equal(valeurCourte("LAB_GENDER_PAYGAP", "%", preuve("x", { value_numeric: -8 })), "8 % en faveur des femmes");
-  assert.equal(valeurCourte("ENV_GHG_TREND", "%/an", preuve("x", { value_numeric: -7.3 })), "−7,3 % par an");
+  assert.equal(valeurCourte("ENV_GHG_TREND", "%/an", preuve("x", { value_numeric: -7.3 })), "Émissions en baisse de 7,3 % par an");
 });
 
 test("animal à trois niveaux : niveau des faits et résumé du groupe", () => {

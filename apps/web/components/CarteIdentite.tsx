@@ -1,7 +1,7 @@
 import { marqueAnimale, marquesDocumentees, raisonVide, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
 import type { OwnershipProof, Produit } from "@/lib/data";
 import { logoDe } from "@/lib/logos";
-import type { Signal } from "@/lib/seuils";
+import { REPERES, type Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
 
 const ICONE: Record<string, string> = { ANI: "🐄", ENV: "🌍", PLA: "🧴", WAT: "💧", LAB: "👥", SUP: "🔗", GOV: "🏛️", TAX: "💶", GEO: "🗺️", INV: "🏦" };
@@ -193,6 +193,7 @@ function CarteIndicateur({ f }: { f: Fait }) {
         {f.contexte && <span className="ci-badge" title="Donnée de contexte : ni bonne ni mauvaise en soi">contexte</span>}
         {p?.conteste && <span className="ci-badge">contesté</span>}
       </div>
+      {!vide && REPERES[f.code] && <div className="ci-ind-rep">{REPERES[f.code]}</div>}
       {vide && <div className="ci-ind-txt">{vide[1][0].toUpperCase() + vide[1].slice(1)}.</div>}
       {f.etat !== "documente" && f.etat !== "aucune_info" && f.obligation.length > 0 && <div className="ci-ind-txt">Obligation : {f.obligation.join(", ")}</div>}
       {f.note && <div className="ci-ind-note">{f.note}</div>}
@@ -201,7 +202,7 @@ function CarteIndicateur({ f }: { f: Fait }) {
           <span>{dfr(p.date)}{!p.dateEvenement && " (relevé)"}</span>
           <Solidite s={p.solidite} />
           <span>{p.source}</span>
-          {p.reprisDe && <span className="ci-badge">donnée de {p.reprisDe}</span>}
+          {p.reprisDe && <span className="ci-badge">donnée du groupe {p.reprisDe}</span>}
         </div>
       )}
       {f.signal && <div className={`ci-ind-seuil ci-seuil-${f.signal.niveau}`}>Seuil : {f.signal.regle}</div>}
@@ -320,13 +321,17 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
           {p.nom}
         </span>
         <span className="ci-cnt">
-          {p.documentes}/{p.total}
+          <span title="Nombre d'indicateurs renseignés sur le nombre d'indicateurs suivis dans ce pilier">{p.documentes} sur {p.total} renseignés</span>
           <Chevron />
         </span>
-        <span className={`ci-v ci-${etatCle}`}>
-          {alerte ? "⚠️ " : vigilance && sig ? "🟠 " : ""}
-          {valeurCle}
-          {!niveauGroupe && k?.preuve?.reprisDe && <span className="ci-badge">{k.preuve.reprisDe}</span>}
+        <span className="ci-v-bloc">
+          {k && !niveauGroupe && k.etat !== "aucune_info" && <span className="ci-v-nom">{k.nom}</span>}
+          <span className={`ci-v ci-${etatCle}`}>
+            {alerte ? "⚠️ " : vigilance && sig ? "🟠 " : ""}
+            {valeurCle}
+            {!niveauGroupe && k?.preuve?.reprisDe && <span className="ci-badge" title="Le groupe publie cette donnée ; la marque la reprend">donnée du groupe {k.preuve.reprisDe}</span>}
+          </span>
+          {k && !niveauGroupe && k.etat === "documente" && REPERES[k.code] && <span className="ci-v-rep">{REPERES[k.code]}</span>}
         </span>
       </summary>
       <div className="ci-body">

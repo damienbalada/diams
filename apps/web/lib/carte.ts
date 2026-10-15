@@ -130,24 +130,37 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       const produit = m1(/exploitation animale \((.+)\)/, x);
       return produit ? `Vend des produits issus de l'exploitation animale : ${produit}` : "Exploitation animale documentée";
     }
-    case "ANI_ANIMAL_FREE": return "Non — marque entièrement végétale (prouvé)";
-    case "ANI_OFFRE_VEGETALE": return "Oui, au moins un produit 100 % végétal";
+    case "ANI_ANIMAL_FREE": return "Marque entièrement végétale (prouvé)";
+    case "ANI_OFFRE_VEGETALE": return "Propose au moins un produit 100 % végétal";
     case "ANI_FUR_FREE": return "Membre du label « sans fourrure »";
-    case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 (1 = meilleur)`;
-    case "GEO_RUSSIA_EXIT": return m1(/— ([^;]+);/, x) ?? "Documenté";
-    case "GEO_LOBBYING_TRANSP": return /HATVP|répertoire/i.test(x + (p.source_name ?? "")) ? "Inscrit au répertoire de la HATVP" : "Inscrit au registre européen";
-    case "GEO_LOBBYING_SPEND": return m1(/déclarés[^:]*: ([^,]+(?:€[^,]*€)?)/, x) ?? (v === null ? "Déclaré" : `${nf(v, 0)} €`);
-    case "ENV_CDP_CLIMATE": case "WAT_CDP": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? "?"} (de A à D-, F = non-réponse)`;
+    case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 au classement du bien-être animal`;
+    case "GEO_RUSSIA_EXIT": { const s = m1(/— ([^;]+);/, x); return s ? `Russie : ${s}` : "Documenté"; }
+    case "GEO_LOBBYING_TRANSP": return /HATVP|répertoire/i.test(x + (p.source_name ?? "")) ? "Inscrit au répertoire des lobbyistes (HATVP)" : "Inscrit au registre européen des lobbyistes";
+    case "GEO_LOBBYING_SPEND": { const s = m1(/déclarés[^:]*: ([^,]+(?:€[^,]*€)?)/, x) ?? (v === null ? null : `${nf(v, 0)} €`); return s ? `${s} de lobbying déclarés par an` : "Déclaré"; }
+    case "ENV_CDP_CLIMATE": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? "?"} au questionnaire climat du CDP`;
+    case "WAT_CDP": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? "?"} au questionnaire eau du CDP`;
     case "ENV_SBTI_VALIDATED": return m1(/— (objectif[^(]+\([^)]*\))/, x) ?? m1(/— ([^(]+)\(/, x) ?? "Documenté";
-    case "SUP_LIVING_WAGE": return `Note ${m1(/note ([A-E])/, x) ?? "?"} (de A à E)`;
-    case "SUP_VIGILANCE_PLAN": return "Publié";
-    case "ENV_SCOPE3_DISCLOSED": return "Publiées";
-    case "TAX_CBCR_PUBLISHED": return "Publiée";
+    case "SUP_LIVING_WAGE": return `Note ${m1(/note ([A-E])/, x) ?? "?"} sur le salaire vital des ouvriers`;
+    case "SUP_VIGILANCE_PLAN": return "Plan de vigilance publié";
+    case "ENV_SCOPE3_DISCLOSED": return "Émissions indirectes (scope 3) publiées";
+    case "TAX_CBCR_PUBLISHED": return "Impôts publiés pays par pays";
     case "PLA_POLLUTER": return "Parmi les plus gros pollueurs plastique";
     case "SUP_FTI_SCORE": return v === null ? "Évalué" : `${nf(v)} % des points de transparence`;
-    case "LAB_CEO_PAY_RATIO": return v === null ? "Publié" : `${nf(v, 0)} fois la rémunération médiane`;
+    case "LAB_CEO_PAY_RATIO": return v === null ? "Publié" : `Le dirigeant gagne ${nf(v, 0)} fois le salaire médian`;
     case "LAB_GENDER_PAYGAP": return v === null ? "Publié" : v < 0 ? `${nf(-v)} % en faveur des femmes` : `${nf(v)} % en faveur des hommes`;
+    case "LAB_EGAPRO_INDEX": return v === null ? "Publié" : `Index Égapro : ${nf(v, 0)}/100`;
     case "GOV_BCORP": return "Certifiée B Corp";
+    case "GOV_BOARD_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes au conseil d'administration`;
+    case "GOV_BOARD_INDEP": return v === null ? "Publié" : `${nf(v)} % d'administrateurs indépendants`;
+    case "TAX_EFFECTIVE_RATE": return v === null ? "Publié" : `Impôt payé : ${nf(v)} % des bénéfices`;
+    case "ENV_GHG_TREND": return v === null ? "Publié" : v > 0 ? `Émissions en hausse de ${nf(v, 2)} % par an` : `Émissions en baisse de ${nf(-v, 2)} % par an`;
+    case "PLA_REDUCTION": return v === null ? "Publié" : v > 0 ? `Plastique neuf en hausse de ${nf(v, 2)} % par an` : `Plastique neuf en baisse de ${nf(-v, 2)} % par an`;
+    case "PLA_RECYCLED": return v === null ? "Publié" : `${nf(v)} % d'emballages recyclés ou réutilisables`;
+    case "ENV_TAXONOMY_CAPEX": return v === null ? "Publié" : `${nf(v)} % des investissements jugés verts par l'UE`;
+    case "ENV_GHG_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} tonnes de CO₂ par million d'euros de ventes`;
+    case "WAT_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} m³ d'eau prélevés par million d'euros de ventes`;
+    case "SUP_KNOWTHECHAIN": return v === null ? "Évalué" : `${nf(v, 0)}/100 contre le travail forcé (KnowTheChain)`;
+    case "INV_FOSSIL_FINANCING": return v === null ? "Documenté" : `${nf(v)} milliards de dollars liés aux énergies fossiles`;
     case "INV_SOLIDARITY_LABEL": return "Produits labellisés Finansol";
   }
   if (v === null) return "Documenté";

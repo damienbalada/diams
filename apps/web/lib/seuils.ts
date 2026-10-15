@@ -120,3 +120,25 @@ export function evaluer(f: FaitEvalue): Signal | null {
 
 /** Ordre d'affichage : alertes d'abord. */
 export const RANG_SIGNAL: Record<NiveauSignal, number> = { alerte: 0, vigilance: 1 };
+
+/** Repère pour lire un chiffre : l'échelle de la source, ou une valeur de comparaison citée. */
+export const REPERES: Record<string, string> = {
+  ENV_CDP_CLIMATE: "Échelle du CDP : de A (meilleure note) à D-, F = l'entreprise n'a pas répondu",
+  WAT_CDP: "Échelle du CDP : de A (meilleure note) à D-, F = l'entreprise n'a pas répondu",
+  ENV_GHG_TREND: "Repère : une baisse d'au moins 4,2 % par an est nécessaire pour rester sous 1,5 °C (SBTi)",
+  PLA_REDUCTION: "Repère : évolution moyenne par an sur la période publiée par l'entreprise",
+  SUP_LIVING_WAGE: "Échelle du Fashion Checker : de A (salaire vital versé) à E (ni versé ni promis)",
+  SUP_FTI_SCORE: "Repère : moyenne des 250 grandes marques de mode en 2023, 26 %",
+  SUP_KNOWTHECHAIN: "Repère : moyenne des 60 plus grands groupes alimentaires en 2023, 16/100",
+  LAB_EGAPRO_INDEX: "Repère : sous 75/100, la loi impose des mesures de correction ; sous 85, des objectifs",
+  LAB_GENDER_PAYGAP: "Repère : à partir de 5 %, l'employeur doit l'analyser avec les représentants du personnel (directive UE)",
+  LAB_CEO_PAY_RATIO: "Repère : à 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle",
+  GOV_BOARD_GENDER: "Repère : 40 % au minimum dans les sociétés cotées en France (loi Copé-Zimmermann)",
+  GOV_BOARD_INDEP: "Repère : au moins un tiers recommandé par le code Afep-Medef",
+  TAX_EFFECTIVE_RATE: "Repère : impôt minimum mondial de l'OCDE, 15 % ; taux normal en France, 25 %",
+  ANI_BBFAW_TIER: "Échelle du BBFAW : niveau 1 (meilleur) à 6 (aucun engagement visible)",
+  ENV_TAXONOMY_CAPEX: "Part des investissements de l'année conformes à la taxonomie verte européenne",
+  ENV_GHG_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",
+  WAT_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",
+  ENV_SBTI_VALIDATED: "La SBTi vérifie que l'objectif climat est compatible avec l'accord de Paris ; c'est un engagement, pas un résultat",
+};
