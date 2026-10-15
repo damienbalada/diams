@@ -200,6 +200,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/transparence de la mode/, "indice de transparence de la mode"], [/KnowTheChain/, "KnowTheChain"],
   [/BBFAW/, "classement BBFAW"], [/Fur Free/, "liste Fur Free Retailer"], [/Fashion Checker/, "Fashion Checker"],
   [/Finansol/, "liste Finansol"],
+  [/Autorité de la concurrence/, "décisions de l'Autorité de la concurrence"],
 ];
 
 /** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */

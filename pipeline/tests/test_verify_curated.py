@@ -689,3 +689,10 @@ def test_trend_pct_unite_dans_intitule():
     # Sans « (%) » dans l'intitulé, un nombre nu ne suffit pas.
     ok2, _, _ = check_trend_pct(row, q.replace("(%)", ""))
     assert not ok2
+
+
+def test_canon_accents_decomposes():
+    import unicodedata
+    from diams.verify_curated import _canon
+    nfd = unicodedata.normalize("NFD", "sanctionne quatre sociétés")
+    assert _canon("sanctionne quatre sociétés") in _canon("La décision " + nfd)

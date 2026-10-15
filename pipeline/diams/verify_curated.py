@@ -223,6 +223,9 @@ NORMALIZE = {
 
 
 def _canon(s: str) -> str:
+    # Accents décomposés (« e » + accent combinant) : certaines pages officielles (Autorité de la
+    # concurrence) sont en NFD ; la comparaison se fait en forme composée (ajout du 15/10/2026).
+    s = unicodedata.normalize("NFC", s)
     s = s.replace("’", "'").replace(" ", " ").replace(" ", " ")
     # Signe moins typographique : « –9.9 % » est la valeur -9,9.
     s = s.replace("\u2013", "-").replace("\u2212", "-").replace("\u2011", "-")
