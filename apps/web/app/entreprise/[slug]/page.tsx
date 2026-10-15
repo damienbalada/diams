@@ -1,4 +1,4 @@
-import { getScorePayload, getOwnerGroup, getOwnershipProofs, getJournal, getMemeRayon, getMarques, getMarquesGroupe, getEstMarque, type OwnershipProof } from "@/lib/data";
+import { getScorePayload, getOwnerGroup, getOwnershipProofs, getJournal, getMemeRayon, getMarques, getMarquesGroupe, getEstMarque, getProduits, type OwnershipProof } from "@/lib/data";
 import { construireCarte } from "@/lib/carte";
 import { CarteIdentite } from "@/components/CarteIdentite";
 
@@ -37,6 +37,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
       getEstMarque(slug).catch(() => false),
     ]);
     const carte = construireCarte(payload as any, journal, { estMarque });
+    const produits = estMarque ? await getProduits(slug).catch(() => null) : null;
     const estGroupe = (payload.ownership_chain ?? []).length <= 1 || marques.length > 0;
     return (
       <CarteIdentite
@@ -48,6 +49,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         marques={marques}
         marquesGroupe={marquesGroupe}
         estMarque={estMarque}
+        produits={produits}
       />
     );
   } catch (e) {

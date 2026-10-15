@@ -1,6 +1,7 @@
 import { getPublicStats, getVitrines, listEntities, listSectors, type Vitrine } from "@/lib/data";
 import { EntitySearch } from "@/components/EntitySearch";
 import type { SearchableEntity } from "@/lib/search";
+import { logoDe } from "@/lib/logos";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -11,9 +12,8 @@ const CONNUES = ["nutella", "coca-cola", "president", "zara", "lidl", "nike", "k
 // les recherches réellement mesurées. La page le dit en toutes lettres.
 const RECHERCHEES = ["shein", "nutella", "mcdonalds", "zara", "carrefour", "danone", "haribo-marque", "amazon"];
 // Logos officiels (site de la marque, ou Wikimedia Commons à défaut), copiés dans public/logos.
-const LOGOS: Record<string, string> = { "amazon": "/logos/amazon.svg", "carrefour": "/logos/carrefour.png", "coca-cola": "/logos/coca-cola.png", "danone": "/logos/danone.ico", "evian": "/logos/evian.png", "haribo-marque": "/logos/haribo-marque.png", "ikea": "/logos/ikea.svg", "kinder": "/logos/kinder.png", "lidl": "/logos/lidl.svg", "loreal": "/logos/loreal.png", "mcdonalds": "/logos/mcdonalds.png", "nike": "/logos/nike.png", "nutella": "/logos/nutella.jpg", "president": "/logos/president.png", "shein": "/logos/shein.png", "zara": "/logos/zara.svg" };
-const TEINTES = ["#6c3bff", "#1f8a4c", "#2563c9", "#b4532a", "#0e7a8a", "#a86a12", "#b8325a", "#4a43c4"];
-const teinte = (s: string) => TEINTES[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % TEINTES.length];
+// Logos : base commune des fiches (lib/logos.json).
+const LOGOS = { get: (slug: string) => logoDe(slug)?.src ?? null };
 
 export default async function HomePage() {
   let entities: Awaited<ReturnType<typeof listEntities>> = [];
@@ -53,7 +53,7 @@ export default async function HomePage() {
   const marques = entities.filter((e: any) => e.is_brand).length;
   const groupes = entities.filter((e: any) => !e.is_brand && !e.parent_id).length;
 
-  // Index par rayon (secteur), par ordre alphabétique : aucun classement.
+  // Index par secteur, par ordre alphabétique : aucun classement.
   const bySector = new Map<string, any[]>();
   for (const e of [...entities].sort(byName)) {
     const k = sectorName.get((e as any).sector_id) ?? "Autres";
@@ -79,10 +79,10 @@ export default async function HomePage() {
     <a key={v.slug} className="vit-card" href={`/entreprise/${v.slug}`}>
       <span className="vit-top">
         {rang !== undefined && <span className="vit-rang">{rang}</span>}
-        {LOGOS[v.slug] ? (
-          <span className="vit-logo vit-logo-img" aria-hidden="true"><img src={LOGOS[v.slug]} alt="" loading="lazy" /></span>
+        {LOGOS.get(v.slug) ? (
+          <span className="vit-logo vit-logo-img" aria-hidden="true"><img src={LOGOS.get(v.slug)!} alt="" loading="lazy" /></span>
         ) : (
-          <span className="vit-logo" aria-hidden="true" style={{ background: teinte(v.name) }}>{v.name.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 1).toUpperCase()}</span>
+          <span className="vit-logo vit-logo-img" aria-hidden="true">{v.group ? "🏷️" : "🏢"}</span>
         )}
         <span>
           <span className="vit-name">{v.name}</span>
@@ -148,7 +148,7 @@ export default async function HomePage() {
 
         {sectorsSorted.length > 0 && (
           <section aria-labelledby="rayons">
-            <h2 className="section-title" id="rayons">Parcourir par rayon</h2>
+            <h2 className="section-title" id="rayons">Parcourir par secteur</h2>
             <div className="rayons-tuiles">
               {sectorsSorted.map(([sector, list], i) => (
                 <a key={sector} className="rayon-tuile" href={`#rayon-${i}`}>
@@ -188,7 +188,7 @@ export default async function HomePage() {
         </section>
 
         <section id="index">
-          <h2 className="section-title">Toutes les marques, par rayon</h2>
+          <h2 className="section-title">Toutes les marques, par secteur</h2>
           <p className="muted small" style={{ margin: "0 0 12px" }}>Par ordre alphabétique : aucun classement.</p>
           {sectorsSorted.map(([sector, list], i) => (
             <details className="pending" key={sector} id={`rayon-${i}`}>

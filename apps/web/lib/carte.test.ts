@@ -95,7 +95,8 @@ test("trois niveaux pour tout le site : groupe repris, marque propre, produits",
 });
 
 test("raison d'un indicateur vide : signalement, dispense, obligation, classement externe, rien d'obligatoire", async () => {
-  const { raisonVide } = await import("./carte.ts");
+  const { raisonVide: rv } = await import("./carte.ts");
+  const raisonVide = (f: any) => rv(f).join(" · ");
   assert.match(raisonVide({ code: "GOV_SANCTIONS", obligation: [], exemption: null }), /Rien trouvé/);
   assert.match(raisonVide({ code: "ENV_SCOPE3_DISCLOSED", obligation: [], exemption: "Déclarée non matérielle" }), /pas d'obligation : Déclarée non matérielle/);
   assert.match(raisonVide({ code: "SUP_VIGILANCE_PLAN", obligation: ["Loi vigilance"], exemption: null }), /obligatoire \(Loi vigilance\)/);

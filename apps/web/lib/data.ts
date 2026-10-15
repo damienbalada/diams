@@ -593,3 +593,42 @@ export async function getVitrines(slugs: string[]): Promise<Vitrine[]> {
     };
   });
 }
+
+/**
+ * Produits vendus sous une marque alimentaire ou de boisson, d'après Open Food Facts (base
+ * collaborative, licence ouverte ODbL). Ils servent à reconnaître la marque en rayon : ce ne
+ * sont pas des preuves, et la fiche le dit. Filtre exact sur l'étiquette de marque et la France,
+ * produits les plus scannés d'abord.
+ */
+export interface Produit { code: string; nom: string; image: string | null }
+const SECTEURS_PRODUITS = new Set(["food", "beverages", "wines_spirits"]);
+const etiquetteOff = (n: string) =>
+  n.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/['’]/g, "-").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+export const getProduits = unstable_cache(
+  async (slug: string): Promise<{ total: number; produits: Produit[]; lien: string } | null> => {
+    const idx = await loadEntityIndex();
+    const self = idx?.bySlug.get(slug);
+    if (!self || !self.is_brand || !self.sector_id) return null;
+    const { data: sec } = await getSupabase().from("sectors").select("code").eq("id", self.sector_id).maybeSingle();
+    if (!sec || !SECTEURS_PRODUITS.has((sec as any).code)) return null;
+    const tag = etiquetteOff(entityName(self));
+    if (!tag) return null;
+    const q = encodeURIComponent(`brands_tags:"${tag}" AND countries_tags:"en:france"`);
+    try {
+      const r = await fetch(
+        `https://search.openfoodfacts.org/search?q=${q}&sort_by=-unique_scans_n&page_size=12&fields=code,product_name,product_name_fr,image_small_url`,
+        { headers: { "User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)" }, signal: AbortSignal.timeout(6000) },
+      );
+      if (!r.ok) return null;
+      const d = (await r.json()) as { count?: number; hits?: any[] };
+      const produits = (d.hits ?? [])
+        .map((h) => ({ code: String(h.code), nom: String(h.product_name_fr || h.product_name || "").trim(), image: h.image_small_url ?? null }))
+        .filter((p) => p.nom);
+      return produits.length ? { total: d.count ?? produits.length, produits, lien: `https://fr.openfoodfacts.org/marque/${tag}` } : null;
+    } catch {
+      return null;
+    }
+  },
+  ["produits-off-v1"],
+  { revalidate: 86400 },
+);

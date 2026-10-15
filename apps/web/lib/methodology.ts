@@ -7,7 +7,7 @@ export const METHODOLOGY_MD = `# Méthodologie — Index général des marques
 > sourcés, datés et vérifiés mot pour mot, et dit ce qu'il ne sait pas. La méthode
 > est publique et versionnée : c'est la condition de la confiance.
 
-Version : \`0.8.3\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.8.4\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -880,10 +880,19 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.8.3\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.8.4\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.4 (15/10/2026)** — Présentation, sans effet sur les faits. Logos : icône officielle du
+  site de la marque, sinon logo de Wikimedia Commons retrouvé sur Wikidata par identifiant
+  officiel (LEI, SIREN) ou par le groupe propriétaire, sinon icône du site officiel ; un logo
+  sert à reconnaître l'entreprise et ne prouve rien (outil \`logos_wikidata.py\`). Une marque ne
+  reprend jamais le logo de son groupe, et une icône partagée par des marques de noms différents
+  est écartée. Produits d'une marque alimentaire : les plus scannés en France d'après Open Food
+  Facts (base collaborative sous licence ouverte), présentés comme repères, pas comme preuves.
+  Chaque indicateur d'un pilier s'affiche, même vide, avec la raison de son absence. « Rayon »
+  devient « secteur ».
 - **0.8.3 (15/10/2026)** — Seuils d'alerte : chaque indicateur qui s'y prête a un seuil
   d'alerte et, le plus souvent, un seuil de vigilance, appuyés sur une référence citée ou
   annoncés comme choix de l'Index (section 0, « Seuils d'alerte »). Bandeau des alertes en tête de

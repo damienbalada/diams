@@ -1,5 +1,6 @@
 import { marqueAnimale, marquesDocumentees, raisonVide, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
-import type { OwnershipProof } from "@/lib/data";
+import type { OwnershipProof, Produit } from "@/lib/data";
+import { logoDe } from "@/lib/logos";
 import type { Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
 
@@ -113,43 +114,123 @@ function Entree({ f, avecPilier, nomPilier }: { f: Fait; avecPilier?: boolean; n
   );
 }
 
+/** Logo d'un groupe ou d'une marque ; à défaut, un pictogramme neutre (jamais une initiale). */
+function Logo({ slug, nom, taille, groupe }: { slug: string; nom: string; taille: number; groupe?: boolean }) {
+  const l = logoDe(slug);
+  return l ? (
+    <img className="ci-logo" src={l.src} alt={`Logo ${nom}`} title={`Logo : ${l.origine}`} width={taille} height={taille} loading="lazy" style={{ width: taille, height: taille }} />
+  ) : (
+    <span className="ci-logo ci-logo-vide" style={{ width: taille, height: taille, fontSize: Math.round(taille * 0.45) }} title="Logo non trouvé" aria-hidden="true">
+      {groupe ? "🏢" : "🏷️"}
+    </span>
+  );
+}
+
+/** Grille de vignettes (logo + nom) : marques d'un groupe. */
+function Vignettes({ items, max = 24 }: { items: { slug: string; name: string }[]; max?: number }) {
+  const v = (m: { slug: string; name: string }) => (
+    <a key={m.slug} className="ci-vign" href={`/entreprise/${m.slug}`}>
+      <Logo slug={m.slug} nom={m.name} taille={44} />
+      <span>{m.name}</span>
+    </a>
+  );
+  const tri = [...items].sort((a, b) => Number(!!logoDe(b.slug)) - Number(!!logoDe(a.slug)) || a.name.localeCompare(b.name, "fr"));
+  return (
+    <>
+      <div className="ci-vigns">{tri.slice(0, max).map(v)}</div>
+      {tri.length > max && (
+        <details className="ci-plus">
+          <summary>Voir les {tri.length - max} autres</summary>
+          <div className="ci-vigns">{tri.slice(max).map(v)}</div>
+        </details>
+      )}
+    </>
+  );
+}
+
 type MarquesGroupe = { groupe: { slug: string; name: string }; marques: MarqueDuGroupe[] } | null;
 const pl = (n: number, un: string, plusieurs: string) => `${n} ${n > 1 ? plusieurs : un}`;
 
-/** Les faits d'un niveau : chronologie des faits documentés, signalements, puis ce qui manque. */
-function Faits({ faits, cacherPresume }: { faits: Fait[]; cacherPresume?: boolean }) {
-  const doc = faits.filter((f) => f.etat === "documente").sort((a, b) => b.preuve!.date.localeCompare(a.preuve!.date));
-  const signales = faits.filter((f) => (f.etat === "presume" && !cacherPresume) || f.etat === "obligatoire_absent" || f.etat === "autre_forme");
-  const vides = faits.filter((f) => f.etat === "aucune_info");
+/** Icône propre à chaque indicateur, pour le repérer dans son pilier (repère visuel seulement). */
+const ICONE_IND: Record<string, string> = {
+  ANI_EXPLOITATION: "🥩", ANI_ANIMAL_FREE: "🌱", ANI_OFFRE_VEGETALE: "🥦", ANI_FUR_FREE: "🦊", ANI_BBFAW_TIER: "📊", ANI_ANGORA_MOHAIR: "🐇",
+  ANI_DOWN_RDS: "🪶", ANI_EXOTIC_SKINS: "🐊", ANI_LEATHER_TRACE: "👞", ANI_SLAUGHTER: "🚚", ANI_TESTING: "🧪", ANI_WOOL_MULESING: "🐑",
+  ENV_CDP_CLIMATE: "📋", ENV_GHG_INTENSITY: "🏭", ENV_GHG_TREND: "📉", ENV_GREENWASHING: "🎭", ENV_MATERIAL_CHANGE: "🧵", ENV_SBTI_VALIDATED: "🎯",
+  ENV_SCOPE3_DISCLOSED: "🌐", ENV_TAXONOMY_CAPEX: "🏗️",
+  PLA_POLLUTER: "🗑️", PLA_RECYCLED: "♻️", PLA_REDUCTION: "🧴",
+  WAT_CDP: "📋", WAT_CONTROVERSY: "🏜️", WAT_INTENSITY: "🚰",
+  LAB_CEO_PAY_RATIO: "💰", LAB_EGAPRO_INDEX: "⚖️", LAB_GENDER_PAYGAP: "👩‍💼", LAB_LITIGATION_RATE: "🧑‍⚖️", LAB_LIVING_WAGE: "🏠",
+  SUP_BHRRC_ALLEG: "📣", SUP_FTI_SCORE: "🔍", SUP_KNOWTHECHAIN: "⛓️", SUP_LIVING_WAGE: "🪙", SUP_SUPPLIER_LIST: "📃", SUP_VIGILANCE_PLAN: "🛡️",
+  GOV_BCORP: "✅", GOV_BOARD_GENDER: "👩", GOV_BOARD_INDEP: "🪑", GOV_SANCTIONS: "🔨",
+  TAX_CBCR_PUBLISHED: "🗺️", TAX_EFFECTIVE_RATE: "🧾", TAX_HAVEN_PRESENCE: "🏝️",
+  GEO_CONFLICT_TIES: "⚔️", GEO_LOBBYING_ALIGN: "🧭", GEO_LOBBYING_SPEND: "💼", GEO_LOBBYING_TRANSP: "📒", GEO_POL_FINANCING: "🗳️", GEO_RUSSIA_EXIT: "🚪",
+  INV_CONTROVERSIAL_HOLDINGS: "💣", INV_FOSSIL_FINANCING: "🛢️", INV_RESPONSIBLE_POLICY: "📜", INV_SOLIDARITY_LABEL: "🤝", INV_SUSTAINABLE_FINANCE: "🌿",
+};
+
+/** Ordre dans un pilier : alertes, vigilance, faits documentés (du plus récent), signalements, vides. */
+function rang(f: Fait) {
+  if (f.signal?.niveau === "alerte") return 0;
+  if (f.signal?.niveau === "vigilance") return 1;
+  if (f.etat === "documente") return 2;
+  if (f.etat === "aucune_info") return 4;
+  return 3;
+}
+
+/** Un indicateur, sous forme de carte : icône et nom, valeur en grand, source, seuil, citation. */
+function CarteIndicateur({ f }: { f: Fait }) {
+  const p = f.preuve;
+  const vide = f.etat === "aucune_info" ? raisonVide(f) : null;
+  const ton = f.signal?.niveau ?? (f.etat === "documente" ? "documente" : vide ? "vide" : "signale");
   return (
-    <>
-      {doc.length > 0 && (
-        <ol className="ci-tl">
-          {doc.map((f) => (
-            <Entree key={f.code} f={f} />
-          ))}
-        </ol>
-      )}
-      {signales.map((f) => (
-        <div key={f.code} className={`ci-sig ci-${f.etat}`}>
-          <strong>{f.nom}</strong> : {f.valeur}
-          {f.obligation.length > 0 && <span className="ci-faint"> — obligation : {f.obligation.join(", ")}</span>}
-          {f.note && <div className="ci-small">{f.note}</div>}
-          {f.signal && f.etat !== "presume" && <SignalFait s={f.signal} />}
+    <article className={`ci-ind ci-ind-${ton}`}>
+      <header className="ci-ind-h">
+        <span className="ci-ind-ico" aria-hidden="true">{ICONE_IND[f.code] ?? "•"}</span>
+        <span className="ci-ind-nom">{f.nom}</span>
+        {f.signal && <span className={`ci-tag ci-tag-${f.signal.niveau}`}>{f.signal.niveau === "alerte" ? "⚠️ Alerte" : "🟠 Vigilance"}</span>}
+      </header>
+      <div className="ci-ind-val">
+        {vide ? vide[0] : f.valeur}
+        {f.contexte && <span className="ci-badge" title="Donnée de contexte : ni bonne ni mauvaise en soi">contexte</span>}
+        {p?.conteste && <span className="ci-badge">contesté</span>}
+      </div>
+      {vide && <div className="ci-ind-txt">{vide[1][0].toUpperCase() + vide[1].slice(1)}.</div>}
+      {f.etat !== "documente" && f.etat !== "aucune_info" && f.obligation.length > 0 && <div className="ci-ind-txt">Obligation : {f.obligation.join(", ")}</div>}
+      {f.note && <div className="ci-ind-note">{f.note}</div>}
+      {p && (
+        <div className="ci-ind-src">
+          <span>{dfr(p.date)}{!p.dateEvenement && " (relevé)"}</span>
+          <Solidite s={p.solidite} />
+          <span>{p.source}</span>
+          {p.reprisDe && <span className="ci-badge">donnée de {p.reprisDe}</span>}
         </div>
-      ))}
-      {vides.length > 0 && (
-        <ul className="ci-vides-l">
-          {vides.map((f) => (
-            <li key={f.code}>
-              <span className="ci-vide-nom">{f.nom}</span>
-              <span className="ci-vide-raison">{raisonVide(f)}</span>
-              {f.note && <span className="ci-vide-note">{f.note}</span>}
-            </li>
-          ))}
-        </ul>
       )}
-    </>
+      {f.signal && <div className={`ci-ind-seuil ci-seuil-${f.signal.niveau}`}>Seuil : {f.signal.regle}</div>}
+      {p && (p.citation || p.url) && (
+        <details className="ci-cit">
+          <summary>Ce que dit la source</summary>
+          {p.citation && <blockquote>{p.citation}</blockquote>}
+          {p.url && (
+            <a href={p.url} target="_blank" rel="noopener noreferrer">
+              Ouvrir la source ↗
+            </a>
+          )}
+        </details>
+      )}
+    </article>
+  );
+}
+
+/** Les indicateurs d'un niveau, tous affichés, même vides (décision de l'éditeur, 15/10/2026). */
+function Faits({ faits, cacherPresume }: { faits: Fait[]; cacherPresume?: boolean }) {
+  const fs = faits
+    .filter((f) => !(cacherPresume && f.etat === "presume"))
+    .sort((a, b) => rang(a) - rang(b) || (b.preuve?.date ?? "").localeCompare(a.preuve?.date ?? ""));
+  return (
+    <div className="ci-inds">
+      {fs.map((f) => (
+        <CarteIndicateur key={f.code} f={f} />
+      ))}
+    </div>
   );
 }
 
@@ -289,6 +370,7 @@ export function CarteIdentite({
   marques,
   marquesGroupe = null,
   estMarque = false,
+  produits = null,
 }: {
   carte: Carte;
   estGroupe: boolean;
@@ -298,6 +380,7 @@ export function CarteIdentite({
   marques: { slug: string; name: string }[];
   marquesGroupe?: MarquesGroupe;
   estMarque?: boolean;
+  produits?: { total: number; produits: Produit[]; lien: string } | null;
 }) {
   const nomPilier = new Map(carte.piliers.map((p) => [p.code, p.nom]));
   // Fiche d'un groupe : l'exploitation animale se lit d'après ses marques (comme la ligne du pilier).
@@ -314,16 +397,19 @@ export function CarteIdentite({
       <a className="muted small" href="/">← rechercher une autre marque</a>
       <section className="ci-card">
         <div className="ci-head">
+          <Logo slug={carte.slug} nom={carte.nom} taille={72} groupe={estGroupe} />
+          <div className="ci-head-t">
           <div className="ci-k">{estGroupe ? "GROUPE" : "CARTE D'IDENTITÉ"}</div>
           <h1>{carte.nom}</h1>
           {proprietaire ? (
             <div className="ci-own">
-              Appartient à <a href={`/entreprise/${proprietaire.slug}`}><strong>{proprietaire.name}</strong></a>, qui reçoit l'argent de vos achats
+              Appartient à <a className="ci-own-g" href={`/entreprise/${proprietaire.slug}`}><Logo slug={proprietaire.slug} nom={proprietaire.name} taille={22} groupe /><strong>{proprietaire.name}</strong></a>, qui reçoit l'argent de vos achats
               {carte.chaine.length > 2 && <span className="ci-faint"> (via {carte.chaine.slice(1, -1).join(" → ")})</span>}
             </div>
           ) : (
-            estGroupe && marques.length > 0 && <div className="ci-own">{marques.length} marque(s) suivie(s)</div>
+            estGroupe && marques.length > 0 && <div className="ci-own">{pl(marques.length, "marque suivie", "marques suivies")}</div>
           )}
+          </div>
         </div>
         <Bandeau items={signaux} />
         {carte.piliers.map((p) => (
@@ -352,6 +438,37 @@ export function CarteIdentite({
           La date indiquée est celle de l'événement quand elle est connue, sinon celle de notre relevé.
         </p>
       </section>
+
+      {estGroupe && marques.length > 0 && (
+        <section className="panel ci-sec">
+          <h2 className="ci-sec-t">Ses marques <span className="ci-sec-n">{marques.length}</span></h2>
+          <p className="muted small">Marques détenues par {carte.nom}, directement ou par ses filiales ; chacune a sa fiche.</p>
+          <Vignettes items={marques} />
+        </section>
+      )}
+
+      {estMarque && (
+        <section className="panel ci-sec">
+          <h2 className="ci-sec-t">Ses produits {produits && <span className="ci-sec-n">{produits.total}</span>}</h2>
+          {produits ? (
+            <>
+              <p className="muted small">
+                Les produits les plus scannés en France, d'après <a className="ci-lien" href={produits.lien} target="_blank" rel="noopener noreferrer">Open Food Facts ↗</a> (base collaborative sous licence ouverte). Ils aident à reconnaître la marque en magasin ; ce ne sont pas des preuves.
+              </p>
+              <div className="ci-prods">
+                {produits.produits.map((x) => (
+                  <a key={x.code} className="ci-prod" href={`https://fr.openfoodfacts.org/produit/${x.code}`} target="_blank" rel="noopener noreferrer">
+                    {x.image ? <img src={x.image} alt="" loading="lazy" /> : <span className="ci-prod-vide" aria-hidden="true">🛒</span>}
+                    <span>{x.nom}</span>
+                  </a>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="muted small">Pas encore de liste de produits pour cette marque : elle n'existe pour l'instant que pour l'alimentation et les boissons, d'après Open Food Facts.</p>
+          )}
+        </section>
+      )}
 
       <details className="panel ci-legend">
         <summary>Comment lire cette fiche ?</summary>
@@ -382,30 +499,12 @@ export function CarteIdentite({
         </details>
       )}
 
-      {estGroupe && marques.length > 0 && (
-        <div className="panel">
-          <strong>Marques du groupe</strong>
-          <div className="ci-chips">
-            {marques.map((m) => (
-              <a key={m.slug} className="ci-chip" href={`/entreprise/${m.slug}`}>{m.name}</a>
-            ))}
-          </div>
-        </div>
-      )}
-
       {memeRayon.length > 0 && (
-        <div className="panel">
-          <strong>Autres marques du même rayon</strong>{" "}
-          <span className="muted small">— d'autres groupes, par ordre alphabétique (aucun classement) : comparez les fiches</span>
-          <div className="ci-chips">
-            {memeRayon.map((m) => (
-              <a key={m.slug} className="ci-chip" href={`/entreprise/${m.slug}`}>
-                {m.name}
-                {m.group && <small className="muted"> · {m.group}</small>}
-              </a>
-            ))}
-          </div>
-        </div>
+        <section className="panel ci-sec">
+          <h2 className="ci-sec-t">Autres marques du même secteur</h2>
+          <p className="muted small">D'autres groupes, par ordre alphabétique (aucun classement) : comparez les fiches.</p>
+          <Vignettes items={memeRayon.map((m) => ({ slug: m.slug, name: m.group ? `${m.name} · ${m.group}` : m.name }))} />
+        </section>
       )}
 
       <CorrectionForm entitySlug={carte.slug} indicators={carte.piliers.flatMap((p) => p.faits.map((f) => ({ code: f.code, name: f.nom })))} />

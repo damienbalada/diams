@@ -340,11 +340,11 @@ const EXTERNE = new Set([
 /** Indicateurs de signalement : leur absence veut dire « rien trouvé », pas « non publié ». */
 const SIGNALEMENT = new Set(["GOV_SANCTIONS", "ENV_GREENWASHING", "PLA_POLLUTER", "GEO_CONFLICT_TIES", "SUP_BHRRC_ALLEG", "WAT_CONTROVERSY"]);
 
-/** Pourquoi un indicateur est vide, en une phrase (affichée sous son nom quand on ouvre le pilier). */
-export function raisonVide(f: Pick<Fait, "code" | "obligation" | "exemption">): string {
-  if (SIGNALEMENT.has(f.code)) return "Rien trouvé dans les sources suivies (ce n'est pas la preuve qu'il n'y a rien)";
-  if (f.exemption) return `Non renseigné · pas d'obligation : ${f.exemption}`;
-  if (f.obligation.length) return `Non renseigné · publication obligatoire (${f.obligation.join(", ")}) ; le rapport n'a pas encore été relu pour cet indicateur`;
-  if (EXTERNE.has(f.code)) return "Non évalué · donnée d'un classement ou d'un registre externe, où l'entreprise n'a pas été trouvée";
-  return "Non renseigné · aucune obligation légale de le publier";
+/** Pourquoi un indicateur est vide : un statut court (« Non renseigné ») et sa raison. */
+export function raisonVide(f: Pick<Fait, "code" | "obligation" | "exemption">): [string, string] {
+  if (SIGNALEMENT.has(f.code)) return ["Rien trouvé", "dans les sources suivies (ce n'est pas la preuve qu'il n'y a rien)"];
+  if (f.exemption) return ["Non renseigné", `pas d'obligation : ${f.exemption}`];
+  if (f.obligation.length) return ["Non renseigné", `publication obligatoire (${f.obligation.join(", ")}) ; le rapport n'a pas encore été relu pour cet indicateur`];
+  if (EXTERNE.has(f.code)) return ["Non évalué", "donnée d'un classement ou d'un registre externe, où l'entreprise n'a pas été trouvée"];
+  return ["Non renseigné", "aucune obligation légale de le publier"];
 }
