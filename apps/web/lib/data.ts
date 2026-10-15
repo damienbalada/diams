@@ -634,3 +634,82 @@ export const getProduits = unstable_cache(
   ["produits-off-v1"],
   { revalidate: 86400 },
 );
+
+/**
+ * Produit lu par son code-barres dans Open Food Facts, puis Open Beauty Facts (bases collaboratives,
+ * licence ouverte). Sert à savoir de quelle marque il s'agit ; ce n'est pas une preuve.
+ */
+export interface ProduitScanne { code: string; nom: string; image: string | null; quantite: string | null; marques: string[]; proprietaire: string | null; base: string; lien: string }
+/** Les bases n'ont pas répondu (panne, limite d'appels) : jamais mis en cache comme « inconnu ». */
+export class BasesIndisponibles extends Error {}
+const lireProduit = unstable_cache(
+  async (code: string): Promise<ProduitScanne | null> => {
+    const bases = [
+      { nom: "Open Food Facts", hote: "https://world.openfoodfacts.org", fiche: "https://fr.openfoodfacts.org/produit/" },
+      { nom: "Open Beauty Facts", hote: "https://world.openbeautyfacts.org", fiche: "https://fr.openbeautyfacts.org/produit/" },
+    ];
+    let panne = false;
+    for (const b of bases) {
+      try {
+        // Une seule nouvelle tentative après une limite d'appels (429) ou une erreur passagère (5xx).
+        const lire = () => fetch(`${b.hote}/api/v2/product/${code}?fields=code,product_name,product_name_fr,brands,brand_owner,image_front_small_url,quantity`, {
+          headers: { "User-Agent": "IndexDesMarques/0.1 (DIAMS verifier; +https://awareness-score.vercel.app)" },
+          signal: AbortSignal.timeout(8000),
+        });
+        let r = await lire();
+        if (r.status === 429 || r.status >= 500) {
+          await new Promise((ok) => setTimeout(ok, 1500));
+          r = await lire();
+        }
+        if (r.status === 404) continue;
+        if (!r.ok) { panne = true; continue; }
+        const d = (await r.json()) as { status?: number; product?: any };
+        if (d.status !== 1 || !d.product) continue;
+        const p = d.product;
+        // La fiche produit ne donne parfois qu'une partie des marques (ou aucune) : on complète avec
+        // l'index de recherche de la même base (« Lidl, J.D. Gross », « Marmite, Unilever »).
+        let enPlus: string[] = [];
+        if (b.nom === "Open Food Facts") {
+          try {
+            const s = await fetch(`https://search.openfoodfacts.org/search?q=${encodeURIComponent(`code:"${code}"`)}&page_size=1&fields=brands,brand_owner`, {
+              headers: { "User-Agent": "IndexDesMarques/0.1 (DIAMS verifier; +https://awareness-score.vercel.app)" },
+              signal: AbortSignal.timeout(6000),
+            });
+            if (s.ok) {
+              const h = ((await s.json()) as { hits?: any[] }).hits?.[0];
+              enPlus = (Array.isArray(h?.brands) ? h.brands : String(h?.brands ?? "").split(",")).map((x: string) => String(x).trim()).filter(Boolean);
+              if (!p.brand_owner && h?.brand_owner) p.brand_owner = h.brand_owner;
+            }
+          } catch {
+            /* l'index de recherche est un complément : sans lui, on garde la fiche produit */
+          }
+        }
+        const propres = String(p.brands ?? "").split(",").map((x: string) => x.trim()).filter(Boolean);
+        const marques = [...propres, ...enPlus.filter((x) => !propres.some((y) => y.toLowerCase() === x.toLowerCase()))];
+        return {
+          code, nom: String(p.product_name_fr || p.product_name || "").trim() || "Produit sans nom",
+          image: p.image_front_small_url ?? null, quantite: p.quantity ? String(p.quantity) : null,
+          marques,
+          proprietaire: p.brand_owner ? String(p.brand_owner) : null, base: b.nom, lien: b.fiche + code,
+        };
+      } catch {
+        panne = true;
+      }
+    }
+    // Une panne lève une erreur : unstable_cache ne garde que les réponses réelles.
+    if (panne) throw new BasesIndisponibles("Open Food Facts ne répond pas pour l'instant.");
+    return null;
+  },
+  ["produit-par-code-v3"],
+  { revalidate: 86400 },
+);
+export async function getProduitParCode(code: string): Promise<ProduitScanne | null> {
+  return lireProduit(code);
+}
+
+/** Les noms de chaque entité (affiché et légal), pour reconnaître une marque lue sur un produit. */
+export async function listeNomsEntites(): Promise<{ slug: string; noms: string[]; is_brand: boolean }[]> {
+  const idx = await loadEntityIndex();
+  if (!idx) return [];
+  return idx.rows.map((e) => ({ slug: e.slug, noms: [e.display_name ?? "", e.legal_name ?? ""].filter(Boolean), is_brand: e.is_brand }));
+}

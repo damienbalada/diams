@@ -517,3 +517,12 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .lettres { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
 .lettre { min-width: 44px; height: 44px; display: grid; place-items: center; border-radius: 10px; background: var(--panel); border: 1px solid var(--border-strong); font-weight: 700; }
 .lettre.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* Produit scanné en tête de fiche (/code/…) */
+.ci-scan { display: flex; gap: 14px; align-items: center; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 12px 14px; margin-top: 12px; }
+.ci-scan-img { width: 72px; height: 72px; object-fit: contain; border-radius: 12px; background: #fff; border: 1px solid var(--border); flex: none; }
+.ci-scan-t { display: grid; gap: 3px; min-width: 0; }
+.ci-scan-t strong { font-size: 17px; }
+.code-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.code-form input { flex: 1 1 220px; height: 48px; border-radius: 12px; border: 1px solid var(--border-strong); padding: 0 14px; font: inherit; font-size: 17px; }
+.code-form button { height: 48px; padding: 0 18px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); font: inherit; font-weight: 700; cursor: pointer; }

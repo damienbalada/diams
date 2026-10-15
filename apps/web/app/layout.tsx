@@ -30,6 +30,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </a>
             <nav className="row" style={{ gap: 14 }} aria-label="Navigation principale">
               <a className="muted small" href="/marques">Marques</a>
+              <a className="muted small" href="/code">Code-barres</a>
               <a className="muted small" href="/pipeline">Sources</a>
               <a className="muted small" href="/methodologie">Méthodologie</a>
             </nav>

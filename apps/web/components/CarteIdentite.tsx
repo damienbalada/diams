@@ -1,5 +1,5 @@
 import { marqueAnimale, marquesDocumentees, raisonVide, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
-import type { OwnershipProof, Produit } from "@/lib/data";
+import type { OwnershipProof, Produit, ProduitScanne } from "@/lib/data";
 import { logoDe } from "@/lib/logos";
 import { REPERES, type Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
@@ -376,6 +376,7 @@ export function CarteIdentite({
   marquesGroupe = null,
   estMarque = false,
   produits = null,
+  scan = null,
 }: {
   carte: Carte;
   estGroupe: boolean;
@@ -386,6 +387,8 @@ export function CarteIdentite({
   marquesGroupe?: MarquesGroupe;
   estMarque?: boolean;
   produits?: { total: number; produits: Produit[]; lien: string } | null;
+  /** Produit scanné (page /code/…) : il s'affiche en tête, avec la façon dont la marque a été reconnue. */
+  scan?: { produit: ProduitScanne; correspondance: "exacte" | "approchee" | "proprietaire"; nomLu: string; phrase: string } | null;
 }) {
   const nomPilier = new Map(carte.piliers.map((p) => [p.code, p.nom]));
   // Fiche d'un groupe : l'exploitation animale se lit d'après ses marques (comme la ligne du pilier).
@@ -400,6 +403,19 @@ export function CarteIdentite({
   return (
     <main className="ci">
       <a className="muted small" href="/">← rechercher une autre marque</a>
+      {scan && (
+        <section className="ci-scan" aria-label="Produit scanné">
+          {scan.produit.image ? <img src={scan.produit.image} alt="" className="ci-scan-img" /> : <span className="ci-scan-img ci-prod-vide" aria-hidden="true">🛒</span>}
+          <div className="ci-scan-t">
+            <span className="ci-k">PRODUIT SCANNÉ · CODE {scan.produit.code}</span>
+            <strong>{scan.produit.nom}{scan.produit.quantite ? ` · ${scan.produit.quantite}` : ""}</strong>
+            <span className="ci-small ci-faint">
+              {scan.phrase}
+              {" "}· d'après <a className="ci-lien" href={scan.produit.lien} target="_blank" rel="noopener noreferrer">{scan.produit.base} ↗</a>
+            </span>
+          </div>
+        </section>
+      )}
       <section className="ci-card">
         <div className="ci-head">
           <Logo slug={carte.slug} nom={carte.nom} taille={72} groupe={estGroupe} />

@@ -1,5 +1,5 @@
-import { getScorePayload, getOwnerGroup, getOwnershipProofs, getJournal, getMemeRayon, getMarques, getMarquesGroupe, getEstMarque, getProduits, type OwnershipProof } from "@/lib/data";
-import { construireCarte } from "@/lib/carte";
+import { getScorePayload } from "@/lib/data";
+import { chargerFiche } from "@/lib/fiche";
 import { CarteIdentite } from "@/components/CarteIdentite";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function CompanyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   try {
-    const payload = await getScorePayload(slug);
-    if (!payload) {
+    const f = await chargerFiche(slug);
+    if (!f) {
       return (
         <main>
           <a className="muted small" href="/">← retour</a>
@@ -26,32 +26,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         </main>
       );
     }
-    // Blocs d'information : une erreur sur l'un d'eux ne doit jamais empêcher l'affichage de la carte.
-    const [journal, proprietaire, preuves, memeRayon, marques, marquesGroupe, estMarque] = await Promise.all([
-      getJournal(slug).catch(() => []),
-      getOwnerGroup(slug).catch(() => null),
-      getOwnershipProofs(slug).catch(() => [] as OwnershipProof[]),
-      getMemeRayon(slug).catch(() => []),
-      getMarques(slug).catch(() => []),
-      getMarquesGroupe(slug).catch(() => null),
-      getEstMarque(slug).catch(() => false),
-    ]);
-    const carte = construireCarte(payload as any, journal, { estMarque });
-    const produits = estMarque ? await getProduits(slug).catch(() => null) : null;
-    const estGroupe = (payload.ownership_chain ?? []).length <= 1 || marques.length > 0;
-    return (
-      <CarteIdentite
-        carte={carte}
-        estGroupe={estGroupe && !proprietaire}
-        proprietaire={proprietaire}
-        preuvesPropriete={preuves}
-        memeRayon={memeRayon}
-        marques={marques}
-        marquesGroupe={marquesGroupe}
-        estMarque={estMarque}
-        produits={produits}
-      />
-    );
+    return <CarteIdentite {...f} />;
   } catch (e) {
     return (
       <main>
