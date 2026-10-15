@@ -108,7 +108,8 @@ export function evaluer(f: FaitEvalue): Signal | null {
       if (x === null) return null;
       return x < 20 ? a(`${nf(x)} % de femmes au conseil`, ref) : x < 40 ? v(`${nf(x)} % de femmes au conseil`, ref) : null;
     case "GOV_BOARD_INDEP": return x !== null && x < 33 ? v(`${nf(x)} % d'administrateurs indépendants`, ref) : null;
-    case "TAX_EFFECTIVE_RATE": return x !== null && x < 15 ? v(`taux d'impôt effectif de ${nf(x)} %`, ref) : null;
+    // Pas de vigilance sur un exercice en perte : un taux bas ou négatif n'y dit rien de l'impôt payé.
+    case "TAX_EFFECTIVE_RATE": return x !== null && x < 15 && !/perte|loss/i.test(c) ? v(`taux d'impôt effectif de ${nf(x)} %`, ref) : null;
     case "GEO_RUSSIA_EXIT":
       if (/activité poursuivie/.test(c)) return a("activité poursuivie en Russie", ref);
       if (/investissements gelés/.test(c)) return v("toujours présent en Russie, investissements gelés", ref);

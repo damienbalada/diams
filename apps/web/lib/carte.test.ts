@@ -103,3 +103,11 @@ test("raison d'un indicateur vide : signalement, dispense, obligation, classemen
   assert.match(raisonVide({ code: "SUP_FTI_SCORE", obligation: [], exemption: null }), /Non évalué/);
   assert.match(raisonVide({ code: "PLA_RECYCLED", obligation: [], exemption: null }), /aucune obligation légale/);
 });
+
+test("sanctions et Russie : le fait lui-même, pas « Documenté »", () => {
+  const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("x", { excerpt: "Autorité de la concurrence, décision n° 23-D-15 du 29/12/2023 : « … » ; « Cofigeo : 566 000 euros » — entente ; amende de 0,566 M€ (sanction)" }));
+  assert.equal(s, "Sanctionné par l'Autorité de la concurrence (2023) : amende de 0,566 M€");
+  const c = valeurCourte("GOV_SANCTIONS", "controverse", preuve("x", { excerpt: "CNIL (Commission nationale de l'informatique et des libertés), actualité du 03/09/2025 : « … » — amende de 150 millions d’euros" }));
+  assert.equal(c, "Sanctionné par la CNIL (2025) : amende de 150 millions d’euros");
+  assert.equal(valeurCourte("GEO_RUSSIA_EXIT", "status", preuve("x", { excerpt: "KSE Institute, base « Leave Russia » : « Storck » — activité poursuivie en Russie" })), "Russie : activité poursuivie");
+});

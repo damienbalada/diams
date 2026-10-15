@@ -51,3 +51,8 @@ test("pas de seuil pour les données qui dépendent du secteur ou de contexte", 
   assert.equal(doc("ENV_GHG_INTENSITY", 4390), null);
   assert.equal(doc("GEO_LOBBYING_SPEND", 9499999.5), null);
 });
+
+test("taux d'impôt bas : pas de vigilance sur un exercice en perte", () => {
+  assert.equal(doc("TAX_EFFECTIVE_RATE", 9, "taux effectif 9 %")?.niveau, "vigilance");
+  assert.equal(doc("TAX_EFFECTIVE_RATE", -9.2, "note sur l'impôt (charge d'impôt sur une perte avant impôt)"), null);
+});

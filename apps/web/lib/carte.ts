@@ -134,7 +134,22 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "ANI_OFFRE_VEGETALE": return "Propose au moins un produit 100 % végétal";
     case "ANI_FUR_FREE": return "Membre du label « sans fourrure »";
     case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 au classement du bien-être animal`;
-    case "GEO_RUSSIA_EXIT": { const s = m1(/— ([^;]+);/, x); return s ? `Russie : ${s}` : "Documenté"; }
+    case "GEO_RUSSIA_EXIT": { const s = m1(/» — ([^;.]+)/, x) ?? m1(/— ([^;.]+)/, x); return s ? `Russie : ${s.replace(/ en Russie$/, "")}` : "Documenté"; }
+    case "GOV_SANCTIONS": case "ENV_GREENWASHING": {
+      // « Autorité de la concurrence, décision n° 23-D-15 du 29/12/2023 : … ; amende de 0,566 M€ »
+      const autorite = (x.split(/[,:(]/)[0] ?? "").trim();
+      const an = m1(/du \d{2}\/\d{2}\/(\d{4})/, x);
+      const amende = m1(/amende (?:de|d’un montant de) ([\d  ,.]+ ?(?:M€|Md€|€|millions? d[’']euros|milliards? d[’']euros|euros))/, x)
+        ?? m1(/fine of ([\d.,]+ (?:million|billion)? ?euros)/i, x);
+      const quoi = code === "GOV_SANCTIONS" ? "Sanctionné" : "Allégations écologiques trompeuses relevées";
+      // Article devant le nom de l'autorité : « l'Autorité… », « la Commission… », « la CNIL ».
+      const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|FTC)\b/.test(autorite) ? "la " : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
+      return `${quoi} par ${autorite ? art + autorite : "une autorité"}${an ? ` (${an})` : ""}${amende ? ` : amende de ${amende}` : ""}`;
+    }
+    case "GEO_CONFLICT_TIES": return "Implication dans un conflit ou une occupation, documentée";
+    case "GEO_LOBBYING_ALIGN": { const n = m1(/Climate Policy Engagement ([A-F][+-]?)/, x); return n ? `Note ${n} d'InfluenceMap sur le lobbying climat` : "Évalué par InfluenceMap"; }
+    case "LAB_LIVING_WAGE": { const s = m1(/\((salaire (?:décent|adéquat)[^)]*)\)/, x); return s ? s[0].toUpperCase() + s.slice(1) : "Salaire décent : engagement publié"; }
+    case "INV_RESPONSIBLE_POLICY": { const s = m1(/— ([^:«]+) :/, x); return s ? s[0].toUpperCase() + s.slice(1) : "Politique publiée"; }
     case "GEO_LOBBYING_TRANSP": return /HATVP|répertoire/i.test(x + (p.source_name ?? "")) ? "Inscrit au répertoire des lobbyistes (HATVP)" : "Inscrit au registre européen des lobbyistes";
     case "GEO_LOBBYING_SPEND": { const s = m1(/déclarés[^:]*: ([^,]+(?:€[^,]*€)?)/, x) ?? (v === null ? null : `${nf(v, 0)} €`); return s ? `${s} de lobbying déclarés par an` : "Déclaré"; }
     case "ENV_CDP_CLIMATE": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? "?"} au questionnaire climat du CDP`;
