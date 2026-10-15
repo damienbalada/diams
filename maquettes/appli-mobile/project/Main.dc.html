@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Accueil, iPhone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#4f22d9}a:hover{color:#3a14a8}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #f6f5fb; color: #17122b; font-family: -apple-system, system-ui, 'Segoe UI', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 22px; padding: 64px 20px 24px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="margin: 0; font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.5px">Index des marques</h1>
+      <p style="margin: 0; font-size: 16px; line-height: 22px; color: #4a4560">Qui fabrique ce que vous achetez, et ce que disent les sources officielles.</p>
+    </div>
+
+    <a href="iOS-Scanner.dc.html" style="display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 22px; background: {{accent}}; color: #ffffff; text-decoration: none; min-height: 176px; box-sizing: border-box; justify-content: space-between">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+        <path d="M6 16V8h8M42 8h8v8M50 40v8h-8M14 48H6v-8"></path>
+        <path d="M15 18v20M21 18v20M26 18v20M32 18v20M36 18v20M41 18v20"></path>
+      </svg>
+      <span style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 24px; line-height: 30px; font-weight: 700">Scanner un code-barres</span>
+        <span style="font-size: 15px; line-height: 20px; color: #ece6ff">Pointez l'appareil photo vers le code du produit</span>
+      </span>
+    </a>
+
+    <label for="recherche" style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; border-radius: 12px; background: #e9e6f3; color: #4a4560; font-size: 17px">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#4a4560" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="6"></circle><path d="M14 14l4 4"></path></svg>
+      <input id="recherche" type="search" placeholder="Rechercher une marque ou un groupe" style="flex-grow: 1; border: 0; background: transparent; font: inherit; color: #17122b; outline-offset: 4px">
+    </label>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <h2 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700">Derniers scans</h2>
+        <a href="#" style="font-size: 16px; text-decoration: none">Tout voir</a>
+      </div>
+      <div style="display: flex; flex-direction: column; background: #ffffff; border-radius: 16px; overflow: hidden">
+        <a href="iOS-Fiche.dc.html" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; min-height: 64px; color: #17122b; text-decoration: none; border-bottom: 1px solid #ece9f4">
+          <span style="width: 44px; height: 44px; border-radius: 10px; background: #f0eef7; display: grid; place-items: center; font-size: 11px; color: #4a4560; flex: none">photo</span>
+          <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0">
+            <span style="font-size: 17px; font-weight: 600">Camembert 250 g</span>
+            <span style="font-size: 14px; color: #4a4560">Président · Lactalis</span>
+          </span>
+          <span style="font-size: 13px; font-weight: 700; color: #ffffff; background: #b3261e; border-radius: 999px; padding: 4px 10px; white-space: nowrap">2 alertes</span>
+        </a>
+        <a href="iOS-Fiche.dc.html" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; min-height: 64px; color: #17122b; text-decoration: none">
+          <span style="width: 44px; height: 44px; border-radius: 10px; background: #f0eef7; display: grid; place-items: center; font-size: 11px; color: #4a4560; flex: none">photo</span>
+          <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0">
+            <span style="font-size: 17px; font-weight: 600">Coca-Cola 1,5 L</span>
+            <span style="font-size: 14px; color: #4a4560">Coca-Cola · groupe Coca-Cola</span>
+          </span>
+          <span style="font-size: 13px; font-weight: 700; color: #ffffff; background: #b3261e; border-radius: 999px; padding: 4px 10px; white-space: nowrap">3 alertes</span>
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <nav aria-label="Navigation principale" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 8px 8px 30px; background: #fbfaff; border-top: 1px solid #e3e0ee">
+    <a href="#" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 48px; font-size: 11px; font-weight: 600; text-decoration: none; color: {{accent}}">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8V3h5M18 3h5v5M23 18v5h-5M8 23H3v-5M8 8v10M12 8v10M16 8v10"></path></svg>Scanner
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 48px; font-size: 11px; text-decoration: none; color: #4a4560">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L23 23"></path></svg>Rechercher
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 48px; font-size: 11px; text-decoration: none; color: #4a4560">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M13 22s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 21 11c0 6-8 11-8 11z"></path></svg>Favoris
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 48px; font-size: 11px; text-decoration: none; color: #4a4560">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4h12l4 4v14H5z"></path><path d="M9 12h8M9 16h8"></path></svg>Méthode
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#5a2de0","options":["#5a2de0","#0e6f7c","#1f6f43"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#5a2de0' };
+}
+}
+</script>
+</body>
+</html>
