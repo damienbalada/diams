@@ -175,7 +175,7 @@ ESEF_KEYWORDS = {
     "GOV_BOARD_GENDER": [r"femmes?|administratrices?|f[ée]minisation|f[ée]minin|wom[ae]n|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,

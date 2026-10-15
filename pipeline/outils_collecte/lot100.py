@@ -23,6 +23,8 @@ def num(x: float) -> str:
 
 
 def cadre_doc(slug: str) -> str:
+    if DEP[slug].get("doc"):
+        return DEP[slug]["doc"]
     if DEP[slug].get("source") == "AMF_BDIF":
         return f"Document d'enregistrement universel {DEP[slug]['period_end'][:4]} déposé à l'AMF ({DEP[slug]['numero']})"
     return "Rapport financier annuel 2025 (ESEF)" if DEP[slug]["period_end"].startswith("2025-12") else \
@@ -47,12 +49,13 @@ def trend(slug, code, quotes, cadre, y0, y1, last, base, ghg=True):
     P(slug, code, quotes, cadre, value=r, norm=norm, calc=calc)
 
 
-def trend_pct(slug, code, quotes, cadre, y0, y1, pct, ghg=False):
-    """Variation publiée depuis l'année de référence (pct < 0 = baisse)."""
+def trend_pct(slug, code, quotes, cadre, y0, y1, pct, ghg=False, dec=None):
+    """Variation publiée depuis l'année de référence (pct < 0 = baisse) ; dec : décimales publiées."""
     n = y1 - y0
     r = round(((1 + pct / 100) ** (1 / n) - 1) * 100, 2)
     sign = "−" if pct < 0 else "+"
-    calc = f"rythme annuel moyen ({y0} → {y1}, {n} an{'s' if n > 1 else ''}) : (1 {sign} {fr(abs(pct), 0 if pct == int(pct) else 1).lstrip('+')} %)^(1/{n}) − 1 = {fr(r).lstrip('+')} %"
+    d = dec if dec is not None else (0 if pct == int(pct) else 1)
+    calc = f"rythme annuel moyen ({y0} → {y1}, {n} an{'s' if n > 1 else ''}) : (1 {sign} {fr(abs(pct), d).lstrip('+')} %)^(1/{n}) − 1 = {fr(r).lstrip('+')} %"
     P(slug, code, quotes, cadre, value=r, norm=(round(max(0.0, min(1.0, -r / 4.2)), 4) if ghg else ""), calc=calc)
 
 
@@ -458,3 +461,85 @@ s = "lvmh"
 P(s, "PLA_RECYCLED", ["Pourcentage de matériaux recyclés dans les emballages clients pour le verre et le plastique (en pourcentage du poids) 49 % 41 % 70 % (2030)"],
   "programme LIFE 360 (matériaux recyclés dans les emballages clients en verre et en plastique ; colonnes 2025, 2024, objectif 2030)", value=49)
 J(s, "PLA_REDUCTION", "non_trouvee", "Document d'enregistrement universel 2025 lu (AMF) : une seule année de comparaison — « Quantité de plastique vierge d’origine fossile dans les emballages remis aux clients (en tonnes) 7 401 8 326 0 (2026) » (2025, 2024, objectif 2026) ; une baisse sur un an ne dit pas une trajectoire.")
+
+# ================================================================ Rapports légaux publiés sur le site de l'émetteur
+# ---------------------------------------------------------------- Savencia
+s = "savencia"
+P(s, "GOV_BOARD_INDEP", ["2025 2024 Pourcentage de membres du conseil d'administration indépendants 53,3 % 60%"],
+  "gouvernance (indépendance du conseil d'administration ; colonnes 2025, 2024)", value=53.3, norm=0.533)
+trend(s, "ENV_GHG_TREND", ["Total des émissions scope 1, 2 et 3 (en market based) 9 858 044 9 494 676 10 123 659 3,8 % -2,6 %",
+                           "Bilan carbone en TCO2 2025 2024 2019 Variation vs A-1 Variation vs 2019"],
+      "environnement, ESRS E1-6, émissions totales de GES, scopes 1, 2 et 3 (fondées sur le marché, tCO2 ; colonnes 2025, 2024, 2019 (référence))",
+      2019, 2025, 9858044, 10123659)
+P(s, "ENV_GHG_INTENSITY", ["Intensité des émissions GES par revenu net", "Emissions totales scope 1,2 et 3 en market based par revenu net (Tco2/m€) 1 417 1 330 2 022 6,6 % -29,9 %"],
+  "environnement, ESRS E1-6 (intensité de GES par revenu net, fondée sur le marché ; colonnes 2025, 2024, 2019)", value=1417)
+P(s, "ENV_SCOPE3_DISCLOSED", ["Scope 3 amont 9 037 574 8 629 693 9 069 971 4,7 % -0,4 %"],
+  "environnement, ESRS E1-6 (émissions de scope 3 ; colonnes 2025, 2024, 2019)", vtype="boolean", boolean="true", norm=1)
+J(s, "LAB_GENDER_PAYGAP", "autre_forme", "Rapport de durabilité 2025 lu (site de la société) : écart publié pour la France seulement — « En 2025, sur le périmètre SAVENCIA Fromage & Dairy France l’écart de rémunération moyenne entre femmes et hommes est de 3% ».")
+J(s, "LAB_CEO_PAY_RATIO", "autre_forme", "Rapport de durabilité 2025 lu (site de la société) : ratios publiés par dirigeant et pour la France seulement — « Ratio rémunération du dirigeant mandataire social / rémunération médiane des salariés France 25,4 32,2 25,4 29,4 ».")
+
+# ---------------------------------------------------------------- Nestlé
+s = "nestle"
+trend_pct(s, "PLA_REDUCTION", ["We reduced the usage of virgin plastic by 28.0% versus the 2018 baseline"],
+          "résumé (plastique vierge, par rapport à l'année de référence 2018)", 2018, 2025, -28.0, dec=1)
+P(s, "PLA_RECYCLED", ["In 2025, the proportion of our packaging that was recyclable, reusable or compostable was 89.5%"],
+  "Part 2, économie circulaire (emballages recyclables, réutilisables ou compostables)", value=89.5)
+trend(s, "ENV_GHG_TREND", ["Indicator Unit Baseline value (2018) 2022 2023 2024 2025",
+                           "SBTi Net zero gross GHG emissions Million metric tonnes of CO₂ equivalents (tCO₂e) 87.09 71.26 69.04"],
+      "annexe 4, indicateurs climat (émissions BRUTES du périmètre de l'objectif zéro émission nette validé par la SBTi, en millions de tCO2e ; colonnes 2018 (référence), 2024, 2025 ; "
+      "la réduction nette, après absorptions, publiée à 24,52 %, n'est pas retenue)", 2018, 2025, 69.04, 87.09)
+fx(s, "ENV_GHG_INTENSITY", ["Total GHG emissions intensity market-based Metric tonnes of CO₂ equivalents (tCO₂e)/Million CHF 772"],
+   "annexe 4 (intensité de GES par chiffre d'affaires, fondée sur le marché, 2025 : 772 t CO2e par million de francs suisses)", 772, "CHF", "t CO2e/M€")
+
+# ---------------------------------------------------------------- Les Mousquetaires
+s = "mousquetaires"
+J(s, "LAB_GENDER_PAYGAP", "autre_forme", "Rapport de durabilité 2025 lu (site du groupe) : écart publié pour les cadres seulement — « Au sein de la catégorie cadres, un écart de rémunération femmes-hommes moyen de +5,7% subsiste en faveur des hommes » ; pour l'ensemble, seulement « inférieur à la moyenne française et européenne ».")
+
+# ---------------------------------------------------------------- Henkel
+s = "henkel"
+P(s, "LAB_CEO_PAY_RATIO", ["Remuneration metrics Unit 2024 2025 Unadjusted gender pay gap % 1.8 0.7 Remuneration ratio of the highest paid individual to the median for all employees Ratio 137 142"],
+  "sustainability statement, ESRS S1-16 (ratio de rémunération de la personne la mieux payée à la médiane ; colonnes 2024, 2025)", value=142)
+P(s, "LAB_GENDER_PAYGAP", ["Remuneration metrics Unit 2024 2025 Unadjusted gender pay gap % 1.8 0.7"],
+  "sustainability statement, ESRS S1-16 (écart de rémunération non ajusté ; colonnes 2024, 2025)", value=0.7)
+trend(s, "ENV_GHG_TREND", ["GHG emissions Emissions Base year 2021 N = 2024 N = 2025",
+                           "Total GHG emissions (SBTi target scope) (t CO2e) 18,768,446 14,911,095 13,352,035 -10.5% -28.9%"],
+      "sustainability statement, ESRS E1-6, émissions totales du périmètre de l'objectif validé par la SBTi (tCO2e ; colonnes 2021 (référence), 2024, 2025) ; "
+      "le total complet n'est publié que pour 2024 et 2025 (35 463 917 puis 33 847 942 t CO2e, fondées sur le marché)", 2021, 2025, 13352035, 18768446)
+P(s, "ENV_TAXONOMY_CAPEX", ["CapEx of environmentally sustainable activities (Taxonomy-aligned) (A.1) 7.9 1%"],
+  "taxonomie verte de l'UE (règlement 2020/852, art. 8), tableau réglementaire des CapEx (7,9 M€ alignés, soit 1 %)", value=1, text="1 %", norm=0.01)
+P(s, "WAT_INTENSITY", ["Water Metric Unit 2024 2025 Total water consumption m³ 3,858,063 3,721,666",
+                       "Total water consumption intensity per million EUR net revenue m³/EUR m 179 182"],
+  "sustainability statement, ESRS E3-4 (intensité hydrique réglementaire : consommation d'eau rapportée au chiffre d'affaires ; colonnes 2024, 2025)", value=182)
+P(s, "LAB_LIVING_WAGE", ["We ensure fair and timely pay based on performance and market standards • Adequate living wage reviews"],
+  "sustainability statement, ESRS S1 (salaire adéquat : revues internes, sans vérification par un tiers)", vtype="category", text="policy", norm=0.5)
+
+# ---------------------------------------------------------------- Mars (rapport volontaire)
+s = "mars"
+trend_pct(s, "ENV_GHG_TREND", ["6.4% annual reduction in GHGs compared to 2024 (as % of 2015), contributing to a total 16.9% reduction in GHGs across our full value chain from our 2015 baseline"],
+          "Healthy Planet (émissions de GES de toute la chaîne de valeur, par rapport à l'année de référence 2015)", 2015, 2025, -16.9, ghg=True, dec=1)
+trend_pct(s, "PLA_REDUCTION", ["in 2025, we have had a 5.9% reduction in virgin plastic compared to our 2019 baseline"],
+          "Healthy Planet (plastique vierge, par rapport à l'année de référence 2019)", 2019, 2025, -5.9, dec=1)
+P(s, "PLA_RECYCLED", ["67.6% of our consumer-facing packaging designed to be reusable, recyclable or compostable"],
+  "Healthy Planet (emballages destinés aux consommateurs conçus pour être réutilisables, recyclables ou compostables)", value=67.6)
+P(s, "ENV_SCOPE3_DISCLOSED", ["Scope 1 Scope 2 Scope 3 2025 GHG Emissions 26.65 MtCO2e 96% 1%3%"],
+  "Healthy Planet (émissions de GES 2025 par scope ; le scope 3 en représente 96 %)", vtype="boolean", boolean="true", norm=1)
+
+# ---------------------------------------------------------------- Lactalis (rapport RSE)
+s = "lactalis"
+P(s, "GOV_BOARD_GENDER", ["2025 Nombre de membres non exécutifs 4 Nombre de membres exécutifs 1 Nombre de représentants des salariés 0 Pourcentage de femmes (%) 40 % Pourcentage d’hommes (%) 60 % Pourcentage de membres indépendants au sein du Conseil de surveillance (%) 33 %"],
+  "gouvernance (composition du conseil de surveillance, 2025)", value=40)
+P(s, "GOV_BOARD_INDEP", ["Pourcentage de membres indépendants au sein du Conseil de surveillance (%) 33 %"],
+  "gouvernance (indépendance du conseil de surveillance, 2025)", value=33, norm=0.33)
+P(s, "SUP_VIGILANCE_PLAN", ["6. PLAN DE VIGILANCE 2025 128 6.1 Introduction 128 6.2 Gouvernance 128 6.3 Périmètre du plan de vigilance 128 6.4 Dialogue avec les parties prenantes 129 6.5 Cartographie des risques en matière de droits humains, santé & sécurité et environnement 129 6.6 Mesures d’évaluation régulières 134 6.7 Atténuation des risques et prévention des atteintes graves 137 6.8 Mécanisme d’alerte et de recueil des signalements 144 6.9 Suivi des mesures et évaluation de leur efficacité 145 6.10 Compte rendu du plan de vigilance 2025"],
+  VIG, vtype="category", text="complet", norm=1)
+P(s, "ENV_SCOPE3_DISCLOSED", ["Les principales sources d’émissions de GES de Lactalis se concentrent sur le scope 3 (95 % des émissions de GES totales)"],
+  "environnement (émissions de scope 3)", vtype="boolean", boolean="true", norm=1)
+
+# ---------------------------------------------------------------- Ferrero (exercice clos le 31/08/2025 ; rapport volontaire)
+s = "ferrero"
+trend(s, "ENV_GHG_TREND", ["Emissions Unit F Y 2022/23* FY 2023/24* FY 2024/25 GWP emissions total (Total Scope 1 + Scope 2 market-based + Scope 3) tCO2eq 10,924,391 10,192,517 10,233,649"],
+      "annual emissions performance (émissions totales, scopes 1, 2 fondé sur le marché et 3, tCO2eq ; exercices 2022/23, 2023/24, 2024/25)", 2022, 2024, 10233649, 10924391)
+P(s, "PLA_RECYCLED", ["The share of packaging recyclable, reusable or compostable in practice and at scale reached 86.8%"],
+  "emballages (part recyclable, réutilisable ou compostable en pratique et à grande échelle, exercice 2024/25)", value=86.8)
+P(s, "ENV_SCOPE3_DISCLOSED", ["GWP emissions total (Total Scope 1 + Scope 2 market-based + Scope 3) tCO2eq 10,924,391 10,192,517 10,233,649"],
+  "annual emissions performance (émissions de scope 3 incluses et détaillées)", vtype="boolean", boolean="true", norm=1)
