@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>DIAMS — Le labo des preuves</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0;background:#111315}
+a{color:#9BE3C4}a:hover{color:#C9F2E0}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #111315; color: #ECEAE4; font-family: 'JetBrains Mono', 'Courier New', monospace">
+<header style="max-width: 1240px; margin: 0 auto; padding: 26px 24px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between">
+<a href="#" style="font-family: 'Fraunces', Georgia, serif; font-size: 28px; font-weight: 700; color: #ECEAE4; text-decoration: none">DIAMS<span style="color: #9BE3C4">_</span></a>
+<nav aria-label="Navigation principale" style="display: flex; flex-wrap: wrap; gap: 26px; font-size: 15px">
+<a href="#" style="text-decoration: none; color: #B9B6AD">/groupes</a><a href="#" style="text-decoration: none; color: #B9B6AD">/méthode</a><a href="#" style="text-decoration: none; color: #B9B6AD">/journal</a><a href="#" style="text-decoration: none">/rechercher</a>
+</nav>
+</header>
+
+<section style="max-width: 1240px; margin: 0 auto; padding: 48px 24px 56px; display: flex; flex-direction: column; gap: 30px">
+<p style="margin: 0; font-size: 15px; color: #9BE3C4">&gt; vérification mot pour mot · terminée</p>
+<h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: clamp(46px, 6.5vw, 96px); font-weight: 600; line-height: 1.02; letter-spacing: -1.5px; max-width: 1100px">Ici, chaque phrase a un document derrière elle.</h1>
+<figure style="margin: 0; background: #1B1E21; border: 1px solid #2F3438; border-radius: 20px; padding: 36px; display: flex; flex-direction: column; gap: 20px">
+<blockquote style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: clamp(28px, 3.2vw, 44px); line-height: 1.25; font-style: italic">« Remuneration metrics (S1-16) Gender pay gap % 2025 2024 Women/Men <mark style="background: #9BE3C4; color: #111315; padding: 0 8px; border-radius: 6px; font-style: normal">4</mark> 6 »</blockquote>
+<figcaption style="display: flex; flex-wrap: wrap; gap: 14px 28px; font-size: 15px; color: #B9B6AD; line-height: 1.6">
+<span>Essity · rapport annuel 2025, état de durabilité</span>
+<span>écart de salaire femmes-hommes : 4 %</span>
+<span style="color: #9BE3C4">✓ citation retrouvée dans le document</span>
+<span style="color: #9BE3C4">✓ valeur présente</span>
+<span style="color: #9BE3C4">✓ mots de l’indicateur</span>
+</figcaption>
+</figure>
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<a href="#" style="padding: 16px 26px; background: #9BE3C4; color: #111315; border-radius: 12px; text-decoration: none; font-size: 16px; font-weight: 600">Vérifier une marque</a>
+<a href="#" style="padding: 16px 26px; border: 1px solid #9BE3C4; border-radius: 12px; text-decoration: none; font-size: 16px">Lire la méthode</a>
+</div>
+</section>
+
+<section aria-label="Comment un fait est vérifié" style="max-width: 1240px; margin: 0 auto; padding: 0 24px 64px">
+<ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+<li style="padding: 26px; border: 1px solid #2F3438; border-radius: 16px; display: flex; flex-direction: column; gap: 10px"><span style="color: #9BE3C4; font-size: 14px">01</span><b style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 600">Lire</b><span style="font-size: 15px; line-height: 1.6; color: #B9B6AD">Le rapport réglementé, le registre ou le site dont le propriétaire est prouvé.</span></li>
+<li style="padding: 26px; border: 1px solid #2F3438; border-radius: 16px; display: flex; flex-direction: column; gap: 10px"><span style="color: #9BE3C4; font-size: 14px">02</span><b style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 600">Citer</b><span style="font-size: 15px; line-height: 1.6; color: #B9B6AD">Le passage exact, et tout calcul écrit en toutes lettres.</span></li>
+<li style="padding: 26px; border: 1px solid #2F3438; border-radius: 16px; display: flex; flex-direction: column; gap: 10px"><span style="color: #9BE3C4; font-size: 14px">03</span><b style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 600">Recontrôler</b><span style="font-size: 15px; line-height: 1.6; color: #B9B6AD">Un programme retrouve la citation et refait le calcul. Sinon : rien n’est publié.</span></li>
+<li style="padding: 26px; border: 1px solid #2F3438; border-radius: 16px; display: flex; flex-direction: column; gap: 10px"><span style="color: #9BE3C4; font-size: 14px">04</span><b style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 600">Consigner</b><span style="font-size: 15px; line-height: 1.6; color: #B9B6AD">Même une recherche vide est écrite : où, et quand.</span></li>
+</ol>
+</section>
+
+<section style="border-top: 1px solid #2F3438">
+<div style="max-width: 1240px; margin: 0 auto; padding: 56px 24px 80px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px">
+<div><p style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 64px; font-weight: 700">2 934</p><p style="margin: 6px 0 0; font-size: 15px; color: #B9B6AD">preuves vérifiées</p></div>
+<div><p style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 64px; font-weight: 700">1 651</p><p style="margin: 6px 0 0; font-size: 15px; color: #B9B6AD">de source officielle</p></div>
+<div><p style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 64px; font-weight: 700">20 153</p><p style="margin: 6px 0 0; font-size: 15px; color: #B9B6AD">recherches consignées</p></div>
+<div><p style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 64px; font-weight: 700; color: #9BE3C4">0</p><p style="margin: 6px 0 0; font-size: 15px; color: #B9B6AD">note inventée</p></div>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

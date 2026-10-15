@@ -367,7 +367,7 @@ details.pending[open] > summary::after { content: "masquer"; }
 
 /* Piliers déroulants : teinte du pilier, ouverture animée, chevron qui pivote */
 :root { interpolate-size: allow-keywords; }
-.ci-ico { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; letter-spacing: 0;
+.ci-ico { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 17px; letter-spacing: 0;
   background: color-mix(in srgb, var(--pil, var(--accent)) 14%, var(--panel)); border: 1px solid color-mix(in srgb, var(--pil, var(--accent)) 35%, var(--panel)); flex: none; }
 .ci-cnt { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; }
 .ci-chev { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 14px; line-height: 1;
@@ -375,7 +375,7 @@ details.pending[open] > summary::after { content: "masquer"; }
 .ci-row[open] .ci-chev { transform: rotate(180deg); background: color-mix(in srgb, var(--pil, var(--accent)) 20%, var(--panel)); }
 .ci-row:not([open]) > summary:hover { background: color-mix(in srgb, var(--pil, var(--accent)) 6%, var(--panel)); }
 .ci-row > summary:focus-visible { outline: 2px solid var(--pil, var(--accent)); outline-offset: 2px; }
-.ci-row > summary .ci-v { padding-left: 34px; }
+.ci-row > summary .ci-v { padding-left: 42px; }
 .ci-row::details-content { block-size: 0; overflow: clip; transition: block-size .32s ease, content-visibility .32s allow-discrete; }
 .ci-row[open]::details-content { block-size: auto; }
 @keyframes ci-ouvre { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
@@ -415,3 +415,19 @@ details.pending[open] > summary::after { content: "masquer"; }
 @media (prefers-reduced-motion: reduce) { .vit-card { transition: none; } .vit-card:hover { transform: none; } }
 .vit-logo-img { background: #fff; border: 1px solid var(--border); padding: 5px; overflow: hidden; }
 .vit-logo-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+/* Seuils d'alerte (seuils.ts) : bandeau en tête de fiche, couleur et pastille sur la ligne du pilier */
+.ci-vigilance { color: #a85400; }
+.ci-ico-alerte { border: 2px solid #c0261a; background: #fdecea; }
+.ci-ico-vigilance { border: 2px solid #d97a00; background: #fff3e0; }
+.ci-bandeaux { display: grid; gap: 8px; margin: 12px 0 4px; }
+.ci-bandeau { border-radius: 14px; padding: 12px 14px; }
+.ci-bandeau-alerte { background: #c0261a; color: #fff; }
+.ci-bandeau-vigilance { background: #fff3e0; color: #6b3a00; border: 1px solid #f2c48a; }
+.ci-bandeau-t { font-weight: 800; font-size: 15px; }
+.ci-bandeau ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; font-size: 14px; font-weight: 600; }
+.ci-bandeau li { display: flex; gap: 8px; align-items: baseline; }
+.ci-seuil { font-size: 12.5px; margin-top: 3px; font-weight: 600; }
+.ci-seuil-alerte { color: #c0261a; }
+.ci-seuil-vigilance { color: #a85400; }
+.ci-seuil .ci-faint { font-weight: 400; }

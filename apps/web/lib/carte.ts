@@ -13,6 +13,8 @@
  * La « solidité » d'un pilier ne dépend que des sources utilisées.
  */
 
+import { evaluer, RANG_SIGNAL, type Signal } from "./seuils.ts";
+
 export type Etat = "documente" | "presume" | "obligatoire_absent" | "autre_forme" | "aucune_info";
 export type Solidite = "officielle" | "reconnue" | "declarative";
 
@@ -72,11 +74,14 @@ export interface Fait {
     citation: string | null;
     reprisDe: string | null;
     conteste: boolean;
+    valeurNum: number | null;
   };
   /** Obligation légale qui s'applique (régimes). */
   obligation: string[];
   /** Journal de relecture : ce qui a été lu ou cherché pour cet indicateur. */
   note: string | null;
+  /** Alerte ou point de vigilance, d'après les seuils (seuils.ts). */
+  signal: Signal | null;
 }
 
 export interface Pilier {
@@ -95,6 +100,8 @@ export interface Carte {
   chaine: string[];
   piliers: Pilier[];
   chronologie: Fait[];
+  /** Faits signalés (alertes puis points de vigilance). */
+  signaux: Fait[];
   documentes: number;
   total: number;
 }
@@ -117,7 +124,8 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       // Ce que la marque vend d'origine animale (« fromage », « cuir »), ou l'activité déclarée au registre.
       const ape = m1(/APE\) [\d.]+[A-Z] - ([^»]+)»/, x);
       if (ape) return `Activité déclarée au registre : ${ape.trim().toLowerCase()}`;
-      const produit = m1(/exploitation animale \(([^)]+)\)/, x);
+      // Jusqu'à la dernière parenthèse : le produit peut en contenir une (« laine (vêtements) »).
+      const produit = m1(/exploitation animale \((.+)\)/, x);
       return produit ? `Vend des produits issus de l'exploitation animale : ${produit}` : "Exploitation animale documentée";
     }
     case "ANI_ANIMAL_FREE": return "Non — marque entièrement végétale (prouvé)";
@@ -228,7 +236,7 @@ export function construireCarte(
     jparCode.get(j.indicator_code)!.push(j);
   }
 
-  const faits: Fait[] = payload.applicableIndicators.map((i): Fait => {
+  const bruts: Omit<Fait, "signal">[] = payload.applicableIndicators.map((i): Omit<Fait, "signal"> => {
     const p = meilleure(parCode.get(i.code) ?? []);
     const js = (jparCode.get(i.code) ?? []).sort((a, b) => b.checked_on.localeCompare(a.checked_on));
     const obligation = i.mandatory ? (i.mandatory_regimes ?? []) : [];
@@ -240,7 +248,7 @@ export function construireCarte(
         preuve: {
           source: p.source_name ?? p.source_code ?? "Source", url: p.source_url, solidite: SOLIDITE[p.tier] ?? "declarative",
           date: p.event_date ?? p.observed_on, dateEvenement: !!p.event_date, citation: p.excerpt, reprisDe: p.inherited_from ?? null,
-          conteste: !!p.contested,
+          conteste: !!p.contested, valeurNum: num(p.value_numeric),
         },
       };
     }
@@ -265,6 +273,11 @@ export function construireCarte(
     };
   });
 
+  const faits: Fait[] = bruts.map((f) => ({
+    ...f,
+    signal: evaluer({ code: f.code, etat: f.etat, valeurNum: f.preuve?.valeurNum ?? null, citation: f.preuve?.citation ?? null }),
+  }));
+
   const piliers: Pilier[] = [];
   for (const d of ORDRE_PILIERS) {
     const fs = faits.filter((f) => f.pilier === d);
@@ -281,6 +294,7 @@ export function construireCarte(
   return {
     slug: payload.entity.slug, nom: payload.entity.name, chaine: payload.ownership_chain ?? [payload.entity.name], piliers,
     chronologie, documentes: chronologie.length, total: faits.length,
+    signaux: faits.filter((f) => f.signal).sort((a, b) => RANG_SIGNAL[a.signal!.niveau] - RANG_SIGNAL[b.signal!.niveau] || ORDRE_PILIERS.indexOf(a.pilier) - ORDRE_PILIERS.indexOf(b.pilier)),
   };
 }
 
@@ -294,14 +308,15 @@ const PRIORITE: Record<string, string[]> = {
   GEO: ["GEO_RUSSIA_EXIT", "GEO_CONFLICT_TIES", "GEO_LOBBYING_TRANSP"],
 };
 
-/** Fait clé d'un pilier : exploitation animale d'abord ; puis un manque obligatoire lu ; puis le
- *  fait prioritaire documenté ; puis le mieux sourcé (hors donnée de contexte). */
+/** Fait clé d'un pilier : exploitation animale d'abord ; puis une alerte, un manque obligatoire lu,
+ *  un point de vigilance ; puis le fait prioritaire documenté ; puis le mieux sourcé (hors donnée
+ *  de contexte). */
 export function faitCle(pilier: string, fs: Fait[]): Fait | null {
   if (pilier === "ANI") {
     const a = fs.find((f) => f.code === "ANI_ANIMAL_FREE" && f.etat === "documente") ?? fs.find((f) => f.code === "ANI_EXPLOITATION");
     if (a) return a;
   }
-  const rouge = fs.find((f) => f.etat === "obligatoire_absent");
+  const rouge = fs.find((f) => f.signal?.niveau === "alerte") ?? fs.find((f) => f.etat === "obligatoire_absent") ?? fs.find((f) => f.signal?.niveau === "vigilance");
   if (rouge) return rouge;
   for (const c of PRIORITE[pilier] ?? []) {
     const f = fs.find((x) => x.code === c && x.etat === "documente");

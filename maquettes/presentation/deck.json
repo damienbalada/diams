@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-15T20:00:00Z"},
+  "lists": "css",
+  "title": "DIAMS — présentation du projet",
+  "cover": "cover",
+  "order": ["cover", "probleme", "reponse", "chiffres", "niveaux", "piliers", "etats", "solidite", "verification", "exemple", "animal", "regles", "collecte", "limites", "fin"],
+  "sections": {
+    "s1": {"description": "Pourquoi DIAMS existe, et ce qu’il fait autrement.", "start": "cover"},
+    "s2": {"description": "Ce que montre une fiche : niveaux, piliers, états, solidité des sources.", "start": "chiffres"},
+    "s3": {"description": "Comment un fait entre dans la base, avec un exemple réel.", "start": "verification"},
+    "s4": {"description": "Les règles, la collecte d’octobre 2026 et ce qui reste à faire.", "start": "regles"}
+  },
+  "faces": {
+    "fraunces": {"family": "Fraunces", "href": "https://fonts.googleapis.com/css2?family=Fraunces:wght@400..800&display=swap"},
+    "ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap"}
+  },
+  "designSystems": []
+}

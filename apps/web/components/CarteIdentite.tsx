@@ -1,5 +1,6 @@
 import { marqueAnimale, marquesDocumentees, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
 import type { OwnershipProof } from "@/lib/data";
+import type { Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
 
 const ICONE: Record<string, string> = { ANI: "🐄", ENV: "🌍", PLA: "🧴", WAT: "💧", LAB: "👥", SUP: "🔗", GOV: "🏛️", TAX: "💶", GEO: "🗺️", INV: "🏦" };
@@ -34,6 +35,47 @@ function Solidite({ s }: { s: Solidite }) {
   return <span className={`ci-sol ci-sol-${s}`}>{SOLIDITE[s]}</span>;
 }
 
+/** Alerte ou point de vigilance d'un fait, avec la règle qui le déclenche. */
+function SignalFait({ s }: { s: Signal }) {
+  return (
+    <div className={`ci-seuil ci-seuil-${s.niveau}`}>
+      {s.niveau === "alerte" ? "⚠️ Alerte" : "🟠 Vigilance"} : {s.motif}
+      <span className="ci-faint"> — seuil : {s.regle}</span>
+    </div>
+  );
+}
+
+/** Bandeau en tête de fiche : toutes les alertes, puis les points de vigilance. */
+function Bandeau({ items }: { items: { pilier: string; s: Signal }[] }) {
+  const al = items.filter((x) => x.s.niveau === "alerte");
+  const vi = items.filter((x) => x.s.niveau === "vigilance");
+  if (!items.length) return null;
+  return (
+    <div className="ci-bandeaux">
+      {al.length > 0 && (
+        <div className="ci-bandeau ci-bandeau-alerte" role="note">
+          <div className="ci-bandeau-t">⚠️ {pl(al.length, "alerte", "alertes")}</div>
+          <ul>
+            {al.map((x, i) => (
+              <li key={i} title={`Seuil : ${x.s.regle}`}><span aria-hidden="true">{ICONE[x.pilier]}</span> {x.s.motif}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {vi.length > 0 && (
+        <div className="ci-bandeau ci-bandeau-vigilance" role="note">
+          <div className="ci-bandeau-t">🟠 {pl(vi.length, "point de vigilance", "points de vigilance")}</div>
+          <ul>
+            {vi.map((x, i) => (
+              <li key={i} title={`Seuil : ${x.s.regle}`}><span aria-hidden="true">{ICONE[x.pilier]}</span> {x.s.motif}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Une entrée de chronologie : date, fait, source (pastille de solidité), citation à déplier. */
 function Entree({ f, avecPilier, nomPilier }: { f: Fait; avecPilier?: boolean; nomPilier?: string }) {
   const p = f.preuve!;
@@ -45,7 +87,7 @@ function Entree({ f, avecPilier, nomPilier }: { f: Fait; avecPilier?: boolean; n
         {avecPilier && nomPilier && <span className="ci-faint"> · {ICONE[f.pilier]} {nomPilier}</span>}
       </div>
       <div className="ci-fait">
-        {f.nom} : {f.code === "ANI_EXPLOITATION" ? <strong className="ci-alerte">⚠️ {f.valeur}</strong> : <strong>{f.valeur}</strong>}
+        {f.nom} : {f.signal?.niveau === "alerte" ? <strong className="ci-alerte">⚠️ {f.valeur}</strong> : f.signal ? <strong className="ci-vigilance">{f.valeur}</strong> : <strong>{f.valeur}</strong>}
         {f.contexte && <span className="ci-badge" title="Donnée de contexte : ni bonne ni mauvaise en soi">contexte</span>}
         {p.conteste && <span className="ci-badge">contesté</span>}
       </div>
@@ -55,6 +97,7 @@ function Entree({ f, avecPilier, nomPilier }: { f: Fait; avecPilier?: boolean; n
         {f.niveau === "produit" && <span className="ci-badge">niveau : produits</span>}
         {f.niveau === "marque" && <span className="ci-badge">niveau : marque</span>}
       </div>
+      {f.signal && <SignalFait s={f.signal} />}
       {(p.citation || p.url) && (
         <details className="ci-cit">
           <summary>Ce que dit la source</summary>
@@ -92,6 +135,7 @@ function Faits({ faits, cacherPresume }: { faits: Fait[]; cacherPresume?: boolea
           <strong>{f.nom}</strong> : {f.valeur}
           {f.obligation.length > 0 && <span className="ci-faint"> — obligation : {f.obligation.join(", ")}</span>}
           {f.note && <div className="ci-small">{f.note}</div>}
+          {f.signal && f.etat !== "presume" && <SignalFait s={f.signal} />}
         </div>
       ))}
       {vides.length > 0 && (
@@ -182,12 +226,15 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
   // de l'éditeur, 15/10/2026) ; présumée : ⚠️ et couleur de la présomption.
   const exploitee = p.code === "ANI" && ((niveauGroupe && r!.exploitation > 0) || (k?.code === "ANI_EXPLOITATION" && k.etat === "documente"));
   const presumee = p.code === "ANI" && !exploitee && k?.code === "ANI_EXPLOITATION" && k.etat === "presume";
-  const etatCle = exploitee ? "alerte" : niveauGroupe ? "documente" : k ? k.etat : "aucune_info";
+  const sig = niveauGroupe ? null : k?.signal ?? null;
+  const alerte = exploitee || sig?.niveau === "alerte";
+  const vigilance = !alerte && (presumee || sig?.niveau === "vigilance");
+  const etatCle = alerte ? "alerte" : vigilance && sig ? "vigilance" : niveauGroupe ? "documente" : k ? k.etat : "aucune_info";
   const valeurCle = niveauGroupe
     ? r!.exploitation > 0
       ? `Produits issus de l'exploitation animale chez ${r!.exploitation} marque${r!.exploitation > 1 ? "s" : ""} sur ${r!.total}`
       : `${r!.vegetale} marque${r!.vegetale > 1 ? "s" : ""} entièrement végétale${r!.vegetale > 1 ? "s" : ""} sur ${r!.total}`
-    : k ? k.valeur : "Aucune information";
+    : k ? (sig && k.valeur === "Documenté" ? sig.motif[0].toUpperCase() + sig.motif.slice(1) : k.valeur) : "Aucune information";
   const g = p.faits.filter((f) => f.niveau === "groupe");
   const m = p.faits.filter((f) => f.niveau === "marque");
   const pr = p.faits.filter((f) => f.niveau === "produit");
@@ -195,7 +242,7 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
     <details className="ci-row" style={{ "--pil": TEINTE[p.code] ?? "#6c3bff" } as React.CSSProperties}>
       <summary>
         <span className="ci-p">
-          <span className="ci-ico" aria-hidden="true">{exploitee || presumee ? "⚠️" : ICONE[p.code]}</span>
+          <span className={`ci-ico${alerte ? " ci-ico-alerte" : vigilance ? " ci-ico-vigilance" : ""}`} aria-hidden="true">{ICONE[p.code]}</span>
           {p.nom}
         </span>
         <span className="ci-cnt">
@@ -203,7 +250,7 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
           <Chevron />
         </span>
         <span className={`ci-v ci-${etatCle}`}>
-          {exploitee && "⚠️ "}
+          {alerte ? "⚠️ " : vigilance && sig ? "🟠 " : ""}
           {valeurCle}
           {!niveauGroupe && k?.preuve?.reprisDe && <span className="ci-badge">{k.preuve.reprisDe}</span>}
         </span>
@@ -260,6 +307,15 @@ export function CarteIdentite({
   estMarque?: boolean;
 }) {
   const nomPilier = new Map(carte.piliers.map((p) => [p.code, p.nom]));
+  // Fiche d'un groupe : l'exploitation animale se lit d'après ses marques (comme la ligne du pilier).
+  const rg = !estMarque && marquesGroupe ? resumeGroupe(marquesGroupe.marques.map(marqueAnimale)) : null;
+  const signaux = carte.signaux.flatMap((f): { pilier: string; s: Signal }[] => {
+    if (f.code === "ANI_EXPLOITATION" && f.etat === "presume" && rg && (rg.exploitation > 0 || rg.vegetale > 0)) return [];
+    return [{ pilier: f.pilier, s: f.signal! }];
+  });
+  if (rg && rg.exploitation > 0 && !carte.signaux.some((f) => f.code === "ANI_EXPLOITATION" && f.etat === "documente")) {
+    signaux.unshift({ pilier: "ANI", s: { niveau: "alerte", motif: `produits issus de l'exploitation animale chez ${rg.exploitation} marque${rg.exploitation > 1 ? "s" : ""} sur ${rg.total}`, regle: "un seul produit d'origine animale suffit" } });
+  }
   return (
     <main className="ci">
       <a className="muted small" href="/">← rechercher une autre marque</a>
@@ -276,6 +332,7 @@ export function CarteIdentite({
             estGroupe && marques.length > 0 && <div className="ci-own">{marques.length} marque(s) suivie(s)</div>
           )}
         </div>
+        <Bandeau items={signaux} />
         {carte.piliers.map((p) => (
           <LignePilier key={p.code} p={p} mg={marquesGroupe} estMarque={estMarque} nom={carte.nom} slug={carte.slug} />
         ))}
@@ -309,6 +366,7 @@ export function CarteIdentite({
           <li>Solidité de chaque source : <Solidite s="officielle" /> <Solidite s="reconnue" /> <Solidite s="declarative" /></li>
           <li>Chaque pilier se lit à trois niveaux : 🏢 le <strong>groupe</strong> (ce qu'il publie : climat, fiscalité, lobbying… ; la marque le reprend), 🏷️ la <strong>marque</strong> (ce qui est prouvé pour elle-même : un seul produit d'origine animale suffit ; « entièrement végétale » seulement si une page officielle le dit pour toute la marque), 🛒 les <strong>produits</strong> (ce qui ne vaut que pour certains produits, sans s'étendre à la marque).</li>
           <li><span className="ci-alerte">⚠️ Exploitation animale</span> : signalée en rouge dès qu'un produit d'origine animale est documenté, même si l'entreprise est bien classée par ailleurs pour le bien-être animal (BBFAW, classement des politiques d'élevage).</li>
+          <li><span className="ci-alerte">⚠️ Alerte</span> et <span className="ci-vigilance">🟠 point de vigilance</span> : le fait franchit un seuil fixé pour chaque indicateur, à partir d'une référence qu'on peut citer (loi, directive, moyenne publiée du classement) ou, à défaut, d'un choix de DIAMS annoncé comme tel. La règle s'affiche à côté de chaque signal ; la liste complète est dans la <a href="/methodologie#seuils">méthodologie</a>.</li>
           <li><span className="ci-presume">Présumée</span> : exploitation animale non documentée dans un secteur où elle est la règle ; elle est présumée tant que la marque ne prouve pas le contraire.</li>
           <li><span className="ci-obligatoire_absent">Obligatoire, non publié</span> : la loi impose cette donnée et la lecture du rapport officiel confirme qu'elle n'y est pas.</li>
           <li><span className="ci-autre_forme">Publié sous une autre forme</span> : l'entreprise publie l'information, mais pas sous la forme que la loi exige (pour une partie du groupe seulement, par pays…).</li>

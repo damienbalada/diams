@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>DIAMS — Au rayon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..800&amp;family=DM+Serif+Display:ital@0;1&amp;display=swap">
+<style>
+body{margin:0;background:#FBFAF6}
+a{color:#17331F}a:hover{color:#2F7A45}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #FBFAF6; color: #17221B; font-family: 'DM Sans', 'Trebuchet MS', sans-serif">
+<header style="max-width: 1240px; margin: 0 auto; padding: 26px 24px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between">
+<a href="#" style="font-size: 26px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="width: 30px; height: 30px; border-radius: 9px; background: #2F7A45; display: inline-block"></span>DIAMS</a>
+<nav aria-label="Navigation principale" style="display: flex; flex-wrap: wrap; gap: 24px; font-size: 16px; font-weight: 500">
+<a href="#" style="text-decoration: none">Rayons</a><a href="#" style="text-decoration: none">Groupes</a><a href="#" style="text-decoration: none">Comment ça marche</a>
+</nav>
+</header>
+
+<section style="max-width: 1240px; margin: 0 auto; padding: 40px 24px 28px; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-end; justify-content: space-between">
+<div style="flex: 1 1 560px; display: flex; flex-direction: column; gap: 18px">
+<h1 style="margin: 0; font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(46px, 6vw, 88px); font-weight: 400; line-height: 1; letter-spacing: -1px">Faites vos courses <i style="color: #2F7A45">en connaissance de cause.</i></h1>
+<p style="margin: 0; max-width: 600px; font-size: 20px; line-height: 1.55; color: #46524A">Choisissez un rayon : pour chaque marque, ce qui est prouvé sur les animaux, le climat, le plastique ou les fournisseurs. Pas de note, juste les faits et leur source.</p>
+</div>
+<div role="tablist" aria-label="Rayons" style="display: flex; flex-wrap: wrap; gap: 10px">
+<sc-for list="{{ rayons }}" as="r" hint-placeholder-count="3">
+<button type="button" role="tab" aria-selected="{{ r.actif }}" onClick="{{ r.choisir }}" style="{{ r.style }}">{{ r.nom }}</button>
+</sc-for>
+</div>
+</section>
+
+<section aria-live="polite" style="max-width: 1240px; margin: 0 auto; padding: 12px 24px 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 20px">
+<sc-for list="{{ cartes }}" as="c" hint-placeholder-count="4">
+<article style="background: #FFFFFF; border: 1.5px solid #E1E4DD; border-radius: 22px; padding: 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px">{{ c.marque }}</h2>
+<p style="margin: 0; font-size: 15px; color: #5E6A61">Groupe {{ c.groupe }}</p>
+</div>
+<sc-for list="{{ c.faits }}" as="f" hint-placeholder-count="2">
+<div style="{{ f.style }}">
+<span style="font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase">{{ f.pilier }}</span>
+<span style="font-size: 17px; line-height: 1.4; font-weight: 500">{{ f.texte }}</span>
+</div>
+</sc-for>
+<a href="#" style="margin-top: auto; font-size: 16px; font-weight: 600">Voir les preuves →</a>
+</article>
+</sc-for>
+</section>
+
+<section style="max-width: 1240px; margin: 0 auto 80px; padding: 0 24px">
+<div style="background: #17331F; color: #EEF4EE; border-radius: 28px; padding: 44px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; justify-content: space-between">
+<div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'DM Serif Display', Georgia, serif; font-size: 44px; font-weight: 400">Une couleur ne dit jamais tout seule</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.55; color: #C9D8CC">Rouge : exploitation animale prouvée ou obligation légale non respectée. Vert : un fait favorable prouvé. Chaque fait porte aussi sa source en toutes lettres.</p>
+</div>
+<a href="#" style="padding: 16px 28px; border-radius: 14px; background: #EEF4EE; color: #17331F; text-decoration: none; font-size: 18px; font-weight: 700">Chercher une marque</a>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { rayon: 'cremerie' }; }
+  renderVals() {
+    const R = { rouge: 'background: #FBE9E5; color: #8E2A1A', vert: 'background: #E5F2E8; color: #1F5E33', neutre: 'background: #F1F2EE; color: #36423A' };
+    const fait = (ton, pilier, texte) => ({ pilier, texte, style: 'display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 14px; ' + R[ton] });
+    const DATA = {
+      cremerie: [
+        { marque: 'Président', groupe: 'Lactalis', faits: [fait('rouge', 'Bien-être animal', 'Exploitation animale : oui (fromages)'), fait('neutre', 'Chaîne d’appro', 'Plan de vigilance publié par le groupe')] },
+        { marque: 'Bridélice', groupe: 'Lactalis', faits: [fait('rouge', 'Bien-être animal', 'Exploitation animale : oui (crème)'), fait('neutre', 'Propriété', 'Prouvée par les mentions légales')] },
+        { marque: 'Primevère', groupe: 'Lactalis', faits: [fait('vert', 'Bien-être animal', 'Au moins un produit 100 % végétal'), fait('neutre', 'Propriété', 'Site édité par Lactalis Beurres & Crèmes')] },
+        { marque: 'Tossolia', groupe: 'Tossolia (SCOP)', faits: [fait('vert', 'Bien-être animal', 'Marque entièrement végétale, preuve à l’appui'), fait('neutre', 'Source', 'Site officiel de la marque')] }
+      ],
+      epicerie: [
+        { marque: 'd’aucy', groupe: 'd’aucy France', faits: [fait('rouge', 'Fournisseurs', 'Amende DGCCRF de 33 000 € pour retards de paiement'), fait('neutre', 'Source', 'Décision publiée par la DGCCRF')] },
+        { marque: 'Panzani', groupe: 'Panzani', faits: [fait('vert', 'Bien-être animal', 'Au moins un produit 100 % végétal'), fait('neutre', 'Source', 'Site officiel de la marque')] },
+        { marque: 'Banania', groupe: 'Nutrimaine', faits: [fait('rouge', 'Bien-être animal', 'Exploitation animale : oui (lait)'), fait('neutre', 'Source', 'Site officiel de la marque')] },
+        { marque: 'Brets', groupe: 'Altho', faits: [fait('rouge', 'Bien-être animal', 'Exploitation animale : oui (beurre)'), fait('neutre', 'Source', 'Site officiel de la marque')] }
+      ],
+      hygiene: [
+        { marque: 'Sanex', groupe: 'Colgate-Palmolive', faits: [fait('vert', 'Plastique', 'Plastique vierge −32 % depuis 2019 (groupe)'), fait('neutre', 'Plastique', '27 % de plastique recyclé (groupe)')] },
+        { marque: 'Soupline', groupe: 'Colgate-Palmolive', faits: [fait('vert', 'Plastique', 'Plastique vierge −32 % depuis 2019 (groupe)'), fait('neutre', 'Source', 'Déclaration publique de l’entreprise')] },
+        { marque: 'A-Derma', groupe: 'Pierre Fabre', faits: [fait('neutre', 'Environnement', 'Rapport annuel lu : aucun chiffre publié'), fait('neutre', 'Propriété', 'Site édité par Pierre Fabre Dermo-Cosmétique')] },
+        { marque: 'Nuxe', groupe: 'Laboratoire Nuxe', faits: [fait('rouge', 'Bien-être animal', 'Exploitation animale : oui (miel)'), fait('neutre', 'Source', 'Site officiel de la marque')] }
+      ]
+    };
+    const NOMS = { cremerie: 'Crèmerie', epicerie: 'Épicerie', hygiene: 'Hygiène & maison' };
+    const rayons = Object.keys(NOMS).map((k) => {
+      const actif = this.state.rayon === k;
+      return { nom: NOMS[k], actif: actif ? 'true' : 'false', choisir: () => this.setState({ rayon: k }),
+        style: 'min-height: 48px; padding: 0 22px; border-radius: 999px; font-size: 17px; font-weight: 600; cursor: pointer; border: 1.5px solid #17331F; ' + (actif ? 'background: #17331F; color: #FBFAF6' : 'background: transparent; color: #17331F') };
+    });
+    return { rayons, cartes: DATA[this.state.rayon] };
+  }
+}
+</script>
+</body>
+</html>

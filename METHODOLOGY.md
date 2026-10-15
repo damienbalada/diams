@@ -6,7 +6,7 @@
 > sourcés, datés et vérifiés mot pour mot, et dit ce qu'il ne sait pas. La méthode
 > est publique et versionnée : c'est la condition de la confiance.
 
-Version : `0.8.2` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : `0.8.3` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -77,6 +77,43 @@ pour ce qu'elles sont, sans être converties en verdict ; l'inscription à un re
 lobbying est un fait (inscrit, montant déclaré), pas un mérite. Sortie de Russie : base du KSE
 Institute, à six niveaux (activité poursuivie, investissements gelés, activité réduite,
 suspendue, sortie annoncée, sortie effective).
+
+<a id="seuils"></a>
+
+### Seuils d'alerte (version 0.8.3, depuis le 15/10/2026)
+
+La fiche ne note pas, elle signale. Quand un fait documenté franchit un seuil, il est marqué
+**⚠️ alerte** (rouge) ou **🟠 point de vigilance** (orange), en tête de fiche et sur la ligne de
+son pilier, avec la règle qui le déclenche. Chaque seuil s'appuie sur une référence qu'on peut
+citer (loi, directive, moyenne publiée du classement) ; quand il n'en existe pas, le tableau
+l'indique : « choix de DIAMS ». Deux cas s'ajoutent : une donnée obligatoire dont la lecture du
+rapport confirme l'absence est une alerte ; une exploitation animale présumée est un point de
+vigilance. Pas de seuil pour les données qui dépendent trop du secteur (intensité carbone,
+intensité d'eau) ni pour les données de contexte (dépenses de lobbying).
+
+| Indicateur | ⚠️ Alerte | 🟠 Vigilance | Référence |
+|---|---|---|---|
+| Exploitation animale | un produit issu de l'exploitation animale est documenté | exploitation non documentée dans un secteur où elle est la règle | choix de DIAMS |
+| Bien-être animal (BBFAW) | niveau 6 sur 6 | niveau 5 sur 6 | échelle du classement BBFAW : niveau 6, aucun signe que le bien-être animal soit à l'ordre du jour ; niveau 5, à l'ordre du jour mais peu de preuves de mise en œuvre |
+| Note climat CDP | note F | note D ou D- | échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond |
+| Note eau CDP | note F | note D ou D- | échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond |
+| Évolution des émissions | émissions en hausse | baisse de moins de 4,2 % par an | 4,2 % par an : rythme minimal de baisse des objectifs alignés sur 1,5 °C de la SBTi |
+| Objectifs climat (SBTi) | — | engagement retiré | export de la SBTi : l'entreprise s'était engagée à fixer un objectif et ne l'a pas fait dans le délai |
+| Allégations environnementales trompeuses | décision d'une autorité | — | décision publique d'une autorité |
+| Pollueur plastique | parmi les dix plus gros pollueurs plastique | — | audit mondial des marques de Break Free From Plastic |
+| Plastique vierge | plastique vierge en hausse | — | choix de DIAMS : toute hausse |
+| Transparence de la mode (FTI) | moins de 10 % des points | moins de 26 % des points | Fashion Transparency Index 2023 : moyenne des 250 marques, 26 % ; 28 % des marques sont entre 0 et 10 % |
+| Salaire vital chez les fournisseurs | note E | note D | échelle du Fashion Checker : E, la marque ne verse ni ne prétend verser de salaire vital |
+| Travail forcé (KnowTheChain) | moins de 10 sur 100 | moins de 20 sur 100 | KnowTheChain 2023, alimentation et boissons : moyenne 16 sur 100, la moitié des entreprises sous 10 ; seuil de vigilance : choix de DIAMS |
+| Index Égapro | moins de 75 sur 100 | moins de 85 sur 100 | code du travail : sous 75, l'entreprise doit prendre des mesures de correction ; sous 85, elle doit fixer des objectifs de progression |
+| Écart de salaire femmes-hommes | écart de 15 % ou plus | écart de 5 % ou plus | directive européenne 2023/970 : à partir de 5 %, l'employeur doit évaluer l'écart avec les représentants du personnel ; alerte : trois fois ce seuil, choix de DIAMS |
+| Écart dirigeant / salarié médian | 300 fois ou plus | 100 fois ou plus | choix de DIAMS : 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle |
+| Sanctions d'une autorité | sanction d'une autorité | — | décision publique d'une autorité |
+| Femmes au conseil | moins de 20 % de femmes | moins de 40 % de femmes | loi Copé-Zimmermann : 40 % au minimum dans les conseils des sociétés cotées en France ; alerte : la moitié de ce minimum |
+| Administrateurs indépendants | — | moins d'un tiers d'indépendants | code Afep-Medef : au moins un tiers d'indépendants, même dans une société contrôlée |
+| Taux d'impôt effectif | — | taux effectif sous 15 % | impôt minimum mondial de l'OCDE : 15 % ; un taux bas une année peut aussi venir de pertes ou de crédits d'impôt |
+| Présence en Russie | activité poursuivie en Russie | activité réduite ou investissements gelés | statuts de la base Leave Russia (KSE Institute) |
+| Conflit ou occupation | implication documentée | — | choix de DIAMS : toute implication documentée par une source publique |
 
 > **Historique.** Les sections 2 à 5 décrivent le calcul de la note utilisé de la version 0.1
 > à la version 0.7.5. Il ne s'applique plus ; ces sections restent publiées pour la
@@ -842,10 +879,14 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v`0.8.2`, octobre 2026). Toute modification des paramètres de
+Document vivant (v`0.8.3`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.3 (15/10/2026)** — Seuils d'alerte : chaque indicateur qui s'y prête a un seuil
+  d'alerte et, le plus souvent, un seuil de vigilance, appuyés sur une référence citée ou
+  annoncés comme choix de DIAMS (section 0, « Seuils d'alerte »). Bandeau des alertes en tête de
+  fiche.
 - **0.8.2 (15/10/2026)** — Collecte complète (aucun paramètre de calcul modifié). Rapports
   réglementés et volontaires lus groupe par groupe (lots 100, 103, 104 : environ 155 preuves) ;
   chaque lecture sans résultat est consignée au journal (« rapport lu, donnée absente », « publiée
