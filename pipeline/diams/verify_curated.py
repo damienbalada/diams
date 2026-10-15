@@ -189,13 +189,18 @@ ESEF_KEYWORDS = {
     # Matières (mode, luxe), ingrédients (alimentation), tests (cosmétique).
     "ANI_EXPLOITATION": [r"cuirs?|peaux?|fourrures?|crocodil|leather|skins?|fur\b|\blaine|\bwool|cachemire|cashmere"
                          r"|duvet|\bsoie\b|\bsilk\b|\blait|laiti|\bmilk|dairy|viande|\bmeat|\bbeef|b[œo]euf|\bporc\b|pork"
-                         r"|poulet|chicken|volaille|poultry|[œo]eufs?\b|\beggs?\b|\bmiel\b|honey|g[ée]latine|gelatin"
+                         r"|poulet|chicken|volaille|poultry|(?:œ|oe)ufs?\b|\beggs?\b|\bmiel\b|honey|g[ée]latine|gelatin"
                          # Alimentation (règle de l'éditeur du 14/10/2026 : fromagerie, biscuits au
                          # beurre ou aux œufs…). « beurre de cacahuète / karité / cacao » exclu.
                          r"|fromages?\b|\bbeurre\b(?! de (?:cacahu|karit|cacao))|\bcr[èe]me fra[îi]che|yaourts?\b"
                          r"|foie gras|canards?\b|jambons?\b|charcuterie|saucisses?\b|saucissons?\b|rillettes"
                          r"|poissons?\b|saumons?\b|\bthons?\b|sardines?\b|maquereaux?\b|anchois|crustac|mollusques"
                          r"|hu[îi]tres|caviar|[ée]levage|aquaculture|p[êe]che en (?:mer|eau douce)"
+                         # Équivalents anglais des rapports en anglais (15/10/2026, lot 109) : fromage,
+                         # beurre (hors beurres d'oléagineux), yaourt, poisson, saumon ; pas « cream », qui
+                         # désigne aussi une crème cosmétique.
+                         r"|\bcheeses?\b|\bbutter\b(?<!nut butter)(?<!almond butter)(?<!peanut butter)(?<!cocoa butter)(?<!shea butter)"
+                         r"|yogh?urts?\b|\bfish\b|\bsalmon\b|seafood"
                          # « produits carnés » (viande) et « produits de la mer » (poissons, coquillages),
                          # ajoutés le 15/10/2026 pendant la relecture des marques (vague 6).
                          r"|produits carn[ée]s|produits de la mer"

@@ -728,3 +728,13 @@ def test_intensite_par_million_de_dollars():
     import re
     from diams.verify_curated import ESEF_KEYWORDS
     assert re.search(ESEF_KEYWORDS["ENV_GHG_INTENSITY"][1], "GHG emissions intensity METRIC VALUE (tCO2e PER $1M) Market-based 146", re.I)
+
+
+def test_mots_animaux_francais_et_anglais():
+    import re
+    from diams.verify_curated import ESEF_KEYWORDS
+    kw = ESEF_KEYWORDS["ANI_EXPLOITATION"][0]
+    for oui in ("Les œufs bio de Loué", "des oeufs frais", "specialty cheese brand", "salted butter", "Salmon Grillers", "brand fish"):
+        assert re.search(kw, oui, re.I), oui
+    for non in ("Almond Butter Protein Bars", "cocoa butter", "peanut butter"):
+        assert not re.search(kw, non, re.I), non
