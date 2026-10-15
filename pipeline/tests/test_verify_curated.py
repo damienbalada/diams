@@ -461,6 +461,26 @@ def test_conversion_depuis_des_kilogrammes_par_euro_en_anglais():
     assert check_esef_quote(y, rep).status == "ÉCART"     # 0,25 n'est pas dans la citation
 
 
+def test_conversion_depuis_des_kilotonnes_par_million_d_euros():
+    from diams.verify_curated import check_esef_quote
+    q = "Group emissions intensity – market-based (ktCO 2e/€m sales) 0.10 0.07* 0.06"
+    x = row("richemont", 60.0, f"Rapport : « {q} » ; conversion : 0,06 kt/M€ × 1 000 = 60 t/M€", ind="ENV_GHG_INTENSITY", src="ANNUAL_REPORT")
+    assert check_esef_quote(x, q).status == "OK"
+    x.value_numeric = 0.06
+    assert check_esef_quote(x, q).status == "ÉCART"
+
+
+def test_conversion_depuis_des_tonnes_par_millier_d_euros():
+    from diams.verify_curated import check_esef_quote
+    q = "Émissions totales de GES fondées sur le marché par produit net Non publié 1,00 0,92 -8%"
+    h = "Intensité des GES par produit net 2024initial 2024 recalculé 2025"
+    rep = h + " Comparaison 2024-2025 (en teqCO2/milliers d’euros) " + q
+    x = row("ldc", 920.0, f"Rapport : « {h} » ; « {q} » ; conversion : 0,92 t/k€ × 1 000 = 920 t/M€", ind="ENV_GHG_INTENSITY", src="ANNUAL_REPORT")
+    assert check_esef_quote(x, rep).status == "OK"
+    x.value_numeric = 920000.0
+    assert check_esef_quote(x, rep).status == "ÉCART"
+
+
 def test_colonnes_de_ratios_non_fusionnees_en_milliers():
     from diams.verify_curated import check_esef_quote
     q = "CEO pay ratio Year Methodology used Lower quartile Median Upper quartile 2025 Option B 137:1 126:1 104:1"

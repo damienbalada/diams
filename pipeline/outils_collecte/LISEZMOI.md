@@ -11,3 +11,8 @@ valeur ou calcul recontrôlé), ni par le journal de relecture (`ecrit_journal.p
 - `lot100.py` + `lot100_ecrire.py` : les preuves et lignes de journal du lot 100, rédigées à la main
   (citations exactes, cadre, calculs en toutes lettres) ; écrit le CSV de `curated/` et le journal.
 - `ecrit_journal.py <fichier.json> [--apply]` : écrit les lectures (`reviewer = lecture-rapport`).
+- `trouve_sites2.py` → `ani_scan8.py` → `mk_lot102.py` : sites officiels des marques (propriétaire attesté par
+  SIREN ou raison sociale dans les mentions légales), balayage des produits, lot 102 trié à la main.
+- `manques_c2.py` : manques des groupes d'au moins cinq marques ; `ajoute_doc.py <clé> <slug> …` déclare un
+  document secondaire d'un groupe (« richemont#nfr », « amazon#proxy ») ; `proxies.py` : circulaires DEF 14A.
+- `lot103.py` : rapports des groupes restants (Essity, Richemont, Puig, Beiersdorf, LDC, Lanson-BCC, circulaires).

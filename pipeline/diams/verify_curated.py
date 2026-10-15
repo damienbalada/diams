@@ -175,7 +175,7 @@ ESEF_KEYWORDS = {
     "GOV_BOARD_GENDER": [r"femmes?|administratrices?|f[ée]minisation|f[ée]minin|wom[ae]n|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b|/€m sales"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
@@ -504,7 +504,7 @@ def check_trend_yoy(row, quote: str) -> tuple[bool, list[str], bool]:
 # l'extrait et recalculée. « conversion : 0,00039 t/€ × 1 000 000 = 390 t/M€ », ou
 # depuis des kilogrammes par euro : « conversion : 0,23 kg/€ × 1 000 = 230 t/M€ ».
 # Ajout du 15/10/2026 : intensité hydrique publiée en milliers de m³ par M€ (Heineken : « 1.12 thousand m3 / mEUR »).
-UNIT_RE = re.compile(r"conversion : ([\d,]+) (t/€ × 1 000 000|kg/€ × 1 000|milliers de m³/M€ × 1 000) = ([\d ,]+) (t/M€|m³/M€)")
+UNIT_RE = re.compile(r"conversion : ([\d,]+) (t/€ × 1 000 000|kg/€ × 1 000|milliers de m³/M€ × 1 000|kt/M€ × 1 000|t/k€ × 1 000) = ([\d ,]+) (t/M€|m³/M€)")
 
 
 def check_unit(row, quote: str) -> tuple[bool, list[str], bool]:
@@ -512,7 +512,7 @@ def check_unit(row, quote: str) -> tuple[bool, list[str], bool]:
     if not m:
         return True, [], False
     a_s, unit, c_s, out = m.groups()
-    factor, unit_s = (1e6, "t/€") if unit.startswith("t/") else (1e3, unit.split(" × ")[0])
+    factor, unit_s = (1e6, "t/€") if unit.startswith("t/€") else (1e3, unit.split(" × ")[0])
     a, c = float(a_s.replace(",", ".")), float(c_s.replace(" ", "").replace(",", "."))
     # Le rapport peut être en anglais (0.23) quand l'extrait écrit 0,23.
     present = any(re.search(rf"(?<![\d,.]){re.escape(f)}(?!\d)", quote) is not None
