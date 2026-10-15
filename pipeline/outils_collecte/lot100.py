@@ -579,3 +579,24 @@ P(s, "PLA_RECYCLED", ["PackaGinG 2025 2024 2023 2022 Total weight of packaging (
   "Non-Financial Datasheet 2025 (emballages conçus pour être recyclables ; colonnes 2025, 2024, 2023, 2022)", value=96)
 P(s, "ENV_SCOPE3_DISCLOSED", ["Scope 3 (Other indirect) GHG emissions (metric tonnes CO₂e)(1) 29,174,000 32,194,000 35,067,000"],
   "Non-Financial Datasheet 2025 (émissions de scope 3 de bout en bout ; colonnes 2025, 2024, 2023)", vtype="boolean", boolean="true", norm=1)
+
+# ---------------------------------------------------------------- PepsiCo (indicateurs ESG volontaires)
+s = "pepsico"
+P(s, "PLA_RECYCLED", ["Achieve 97% or greater reusable, recyclable, or compostable (RRC) packaging by design by 2030 in our primary and secondary packaging in our key packaging markets 97% 94%1 94%2"],
+  "ESG Performance Metrics 2025 (emballages primaires et secondaires réutilisables, recyclables ou compostables dès la conception, marchés clés ; colonnes : objectif 2030, 2025, 2024)", value=94)
+P(s, "ENV_SCOPE3_DISCLOSED", ["Achieve a 42 % reduction in Scope 3 Energy & Industry (E&I) emissions by 2030 (vs 2022 baseline) 42% 11%1 8%"],
+  "ESG Performance Metrics 2025 (évolution publiée des émissions de scope 3 depuis 2022)", vtype="boolean", boolean="true", norm=1)
+
+# ---------------------------------------------------------------- The Coca-Cola Company (mise à jour environnementale volontaire)
+s = "coca-cola"
+P(s, "PLA_RECYCLED", ["Packaging Update Year ended December 31, Reporting Boundary 2023 2024 2025",
+                      "Percent of packaging recyclable globally7 • The Coca-Cola system 90% 99% 99%"],
+  "2025 Environmental Update (part des emballages recyclables, système Coca-Cola ; colonnes 2023, 2024, 2025)", value=99)
+P(s, "ENV_SCOPE3_DISCLOSED", ["Scope 3 – Franchise Emissions from Manufacturing Energy, Location-based method (metric tons of CO2e)8 • The Coca-Cola system 4,484,403 4,538,363 4,397,771"],
+  "2025 Environmental Update (émissions de scope 3 publiées par catégorie ; colonnes 2023, 2024, 2025)", vtype="boolean", boolean="true", norm=1)
+
+# ---------------------------------------------------------------- Agrial (communiqué de résultats)
+s = "agrial"
+trend_pct(s, "ENV_GHG_TREND", ["un engagement de réduire de 35 % l’empreinte carbone totale d’ici 2035 (par rapport à 2019)",
+                               "Au global, l’empreinte carbone d’Agrial a baissé de 9% en 2025 par rapport à 2019"],
+          "communiqué de résultats 2025 (empreinte carbone totale, chaîne de valeur comprise, par rapport à 2019)", 2019, 2025, -9, ghg=True)
