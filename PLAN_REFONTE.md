@@ -135,3 +135,8 @@ couvre les faits qui ne valent que pour certains produits (pas chaque produit un
   21 lectures) ; sans rapport public chiffré trouvé : Leclerc, Système U, Aldi, Léa Nature, Andros,
   Olga, Cofigeo, Nardobel, Neptune, Boisset, Perfetti Van Melle, Bacardi, Storck ; Asahi (PDF
   introuvable sur le site officiel).
+- [x] C5 — nouvelles marques (15-16/10) : lots de marques 96 à 98, 147 marques dont la propriété est
+  prouvée par le propriétaire lui-même (listes de marques des rapports annuels lus, pages « marque »
+  du site de Savencia et de Cémoi) ; licences, marques de tiers et marques dont le propriétaire change
+  selon le pays écartées. Lot 107 : exploitation animale de 10 marques Savencia (pages de marque).
+  Accueil : vitrines « les plus connues » et « les plus recherchées » (classement simulé, signalé).
