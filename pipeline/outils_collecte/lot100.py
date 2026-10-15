@@ -23,13 +23,15 @@ def num(x: float) -> str:
 
 
 def cadre_doc(slug: str) -> str:
+    if DEP[slug].get("source") == "AMF_BDIF":
+        return f"Document d'enregistrement universel {DEP[slug]['period_end'][:4]} déposé à l'AMF ({DEP[slug]['numero']})"
     return "Rapport financier annuel 2025 (ESEF)" if DEP[slug]["period_end"].startswith("2025-12") else \
         f"Rapport annuel de l'exercice clos le {'/'.join(reversed(DEP[slug]['period_end'].split('-')))} (ESEF)"
 
 
 def P(slug, code, quotes, cadre, value=None, vtype="numeric", text="", boolean="", norm="", calc=""):
     q = " ; ".join(f"« {x} »" for x in quotes)
-    rows.append({**{c: "" for c in COLS}, "entity_slug": slug, "indicator_code": code, "source_code": "ESEF", "nature": "result",
+    rows.append({**{c: "" for c in COLS}, "entity_slug": slug, "indicator_code": code, "source_code": DEP[slug].get("source", "ESEF"), "nature": "result",
                  "observed_on": DEP[slug]["date_added"][:10], "value_type": vtype,
                  "value_numeric": "" if value is None else value, "value_boolean": boolean, "value_text": text,
                  "normalized_value": norm, "confidence": 0.9, "source_url": DEP[slug]["report_url"],
@@ -385,3 +387,74 @@ P(s, "SUP_VIGILANCE_PLAN", ["5.7.2 RISQUES DIRECTS LIÉS AUX ACTIVITÉS DU GROUP
   VIG + " (« Le Plan de vigilance »)", vtype="category", text="complet", norm=1)
 P(s, "LAB_LIVING_WAGE", ["Ubisoft a identifié 7 cas de non-adéquation avec le salaire décent en Serbie, représentant 7,37 % des effectifs au niveau du pays et moins de 0,1 % au niveau du Groupe"],
   "état de durabilité, ESRS S1-10 (salaire décent : analyse interne couvrant 95 % des effectifs, sans vérification par un tiers)", vtype="category", text="policy", norm=0.5)
+
+# ---------------------------------------------------------------- Lotus Bakeries (version anglaise du rapport)
+s = "lotus-bakeries"
+trend(s, "ENV_GHG_TREND", ["GHG Indicators unit of measure 2025 2024 Base year 2023 variance 2025-2024 variance 2025-2023",
+                           "Total GHG emissions (market-based) tCO 2 e 640,963 606,923 557,275 5.6% 15.0%"],
+      "sustainability statement, ESRS E1-6, émissions totales de GES, scopes 1, 2 et 3 (fondées sur le marché, tCO2e ; colonnes 2025, 2024, 2023 (référence))",
+      2023, 2025, 640963, 557275)
+P(s, "ENV_SCOPE3_DISCLOSED", ["SCOPE 3 tCO 2 e 597,579 569,021 516,802 5.0% 15.6%"],
+  "sustainability statement, ESRS E1-6 (émissions de scope 3 ; colonnes 2025, 2024, 2023)", vtype="boolean", boolean="true", norm=1)
+P(s, "LAB_LIVING_WAGE", ["All our employees are paid adequate wages"],
+  "sustainability statement, ESRS S1-10 (salaire adéquat : déclaration, sans vérification par un tiers)", vtype="category", text="policy", norm=0.5)
+J(s, "LAB_GENDER_PAYGAP", "autre_forme", "Rapport annuel 2025 lu (ESEF, version anglaise) : écart publié comme une fourchette, sans valeur — « Maintain the gender pay gap below 5% % -5% to +5% <5% <5% » (2025, 2024).")
+J(s, "PLA_RECYCLED", "autre_forme", "Rapport annuel 2025 lu (ESEF, version anglaise) : contenu recyclé publié par matériau, sans part globale — « recycled content in paper & pulp- and glass-based packaging of 78% and 45% respectively. Recycled content for plastic packaging in food-contact applications is minimal ».")
+J(s, "WAT_INTENSITY", "non_trouvee", "Rapport annuel 2025 lu (ESEF, version anglaise) : l'eau n'est pas un enjeu matériel pour l'entreprise — « water stewardship did not come forward as material for Lotus Bakeries » ; aucune intensité publiée.")
+
+# ================================================================ Documents de l'AMF (BDIF)
+# ---------------------------------------------------------------- Bonduelle (exercice clos le 30/06/2025)
+s = "bonduelle"
+trend_pct(s, "PLA_REDUCTION", ["45 % de réduction du plastique vierge d'origine fossile utilisé dans nos emballages, par rapport à 2020"],
+          "chiffres clés de l'exercice 2024-2025 (plastique vierge d'origine fossile des emballages, en volume, par rapport à l'exercice 2019-2020)",
+          2020, 2025, -45)
+P(s, "PLA_RECYCLED", ["98 % de nos emballages sont conçus pour être recyclables ou réutilisables"],
+  "chiffres clés de l'exercice 2024-2025 (emballages conçus pour être recyclables ou réutilisables)", value=98)
+P(s, "WAT_INTENSITY", ["Près de 9 millions m 3 d'eau prélevée par nos usines Intensité hydrique 4 076 m 3 / M€ chiffre d'affaires"],
+  "état de durabilité, ESRS E3 (intensité hydrique publiée sur les prélèvements rapportés au chiffre d'affaires, exercice 2024-2025)", value=4076)
+P(s, "ENV_TAXONOMY_CAPEX", ["CapEx des activités durables sur le plan environnemental (alignées sur la taxonomie) (A.1) N/A 531 0 % 100 %"],
+  "taxonomie verte de l'UE (règlement 2020/852, art. 8), tableau réglementaire des CapEx (montant aligné en milliers d'euros, part alignée arrondie à 0 %)",
+  value=0, text="0 %", norm=0)
+
+# ---------------------------------------------------------------- Carrefour
+s = "carrefour"
+P(s, "PLA_RECYCLED", ["la part des emballages recyclables, réutilisables ou réemployables progresse de 11 pts", "67 % en 2025 contre 56 % en 2024), elle reste inférieure à la cible de 100 % fixée pour 2025"],
+  "état de durabilité (emballages des produits à marque Carrefour recyclables, réutilisables ou réemployables)", value=67)
+J(s, "PLA_REDUCTION", "non_trouvee", "Document d'enregistrement universel 2025 lu (AMF) : engagement publié sans évolution chiffrée — « supprimer 15 000 tonnes de plastique vierge dans les emballages de ses produits à marques propres d’ici 2030 (soit une réduction de 10 % de la quantité de plastique vierge utilisée dans ses emballages à usage unique) ».")
+
+# ---------------------------------------------------------------- Crédit Mutuel Alliance Fédérale
+s = "credit-mutuel-alliance-federale"
+J(s, "ENV_GHG_TREND", "non_trouvee", "Document d'enregistrement universel 2025 lu (AMF) : une seule année de comparaison — « Émissions totales de GES (basées sur le marché) (tCO2eq) 21 630 092 22 366 449 -3 % » (2025, 2024) ; une baisse sur un an ne dit pas une trajectoire.")
+J(s, "ENV_TAXONOMY_CAPEX", "autre_forme", "Document d'enregistrement universel 2025 lu (AMF) : établissement financier — l'alignement sur la taxonomie verte se publie par le ratio d'actifs verts (GAR), non par la part des CapEx.")
+J(s, "WAT_INTENSITY", "non_trouvee", "Document d'enregistrement universel 2025 lu (AMF) : « ESRS E3-4 Consommation d’eau totale en m3 par rapport au chiffre d’affaires net … Non matériel » — donnée non publiée, jugée non matérielle.")
+
+# ---------------------------------------------------------------- Danone
+s = "danone"
+P(s, "PLA_RECYCLED", ["Danone a atteint 84,9 % d’emballages recyclables, réutilisables ou compostables et a récupéré 62,7 % du plastique mis sur le marché via des systèmes de collectes (contre respectivement 85 % et 60 % en 2024)"],
+  "état de durabilité (emballages recyclables, réutilisables ou compostables, 2025)", value=84.9)
+P(s, "LAB_LIVING_WAGE", ["Danone a obtenu la certification Living Wage en 2025",
+                         "Obtenir et conserver la certification d’employeur assurant un salaire décent du Fair Wage Network (FWN) 2025 Certification Living Wage Employer du FWN"],
+  "état de durabilité, ESRS S1-10 (salaire décent ; certification par un organisme tiers)", vtype="category", text="verified", norm=1)
+P(s, "ENV_TAXONOMY_CAPEX", ["Parmi ces CapEx éligibles, 59 millions d’euros sont considérés comme alignés avec les critères de la taxonomie européenne, ce qui représente 3,4 % du total CapEx du Groupe"],
+  "taxonomie verte de l'UE (règlement 2020/852, art. 8), CapEx alignés (bâtiments, 2025)", value=3.4, text="3,4 %", norm=0.034)
+
+# ---------------------------------------------------------------- Hermès
+s = "hermes"
+P(s, "ENV_TAXONOMY_CAPEX", ["2025 CapEx éligibles CapEx alignés Montant en % du total des CapEx Montant en % du total des CapEx CapEx alignés CapEx exigibles Total général CapEx taxonomie 1 911 1 257 66 % 424 22 % 34 %"],
+  "taxonomie verte de l'UE (règlement 2020/852, art. 8), CapEx en millions d'euros : total 1 911, éligibles 1 257 (66 %), alignés 424 (22 % du total)", value=22, text="22 %", norm=0.22)
+P(s, "WAT_INTENSITY", ["2025 2024 Intensité hydrique sur les prélèvements en m 3 d’eau industrielle/M€ de CA 1 37 41 Intensité hydrique sur les consommations en m 3 d’eau industrielle/M€ de CA 2 3 1"],
+  "état de durabilité, ESRS E3-4 (intensité hydrique sur les consommations d'eau industrielle ; après le renvoi de note, colonnes 2025, 2024)", value=3)
+P(s, "LAB_LIVING_WAGE", ["Hermès garantit à ses collaborateurs un salaire décent, conformément à la réglementation locale et aux indices de référence applicables. L’analyse menée par le groupe a confirmé ce fait"],
+  "état de durabilité, ESRS S1-10 (salaire décent : analyse interne, sans vérification par un tiers)", vtype="category", text="policy", norm=0.5)
+
+# ---------------------------------------------------------------- Kering
+s = "kering"
+P(s, "ENV_TAXONOMY_CAPEX", ["Part des Capex associés à des activités économiques éligibles ou alignées sur la taxonomie pour 2025 (par activité )",
+                            "TOTAL CAPEX 81 % 398 17 % 17 %"],
+  "taxonomie verte de l'UE (règlement 2020/852, art. 8), tableau réglementaire des CapEx (éligibles 81 %, alignés 398 M€, soit 17 %)", value=17, text="17 %", norm=0.17)
+
+# ---------------------------------------------------------------- LVMH
+s = "lvmh"
+P(s, "PLA_RECYCLED", ["Pourcentage de matériaux recyclés dans les emballages clients pour le verre et le plastique (en pourcentage du poids) 49 % 41 % 70 % (2030)"],
+  "programme LIFE 360 (matériaux recyclés dans les emballages clients en verre et en plastique ; colonnes 2025, 2024, objectif 2030)", value=49)
+J(s, "PLA_REDUCTION", "non_trouvee", "Document d'enregistrement universel 2025 lu (AMF) : une seule année de comparaison — « Quantité de plastique vierge d’origine fossile dans les emballages remis aux clients (en tonnes) 7 401 8 326 0 (2026) » (2025, 2024, objectif 2026) ; une baisse sur un an ne dit pas une trajectoire.")
