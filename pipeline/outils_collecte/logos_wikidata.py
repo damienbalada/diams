@@ -121,7 +121,10 @@ print("logos après Wikidata :", len(logos))
 
 # 3. icône du site officiel
 for f, col_slug, col_site in (("sites_officiels_2026-10-15.csv", "brand_slug", "site"), ("sites_officiels_marques_2026-10-15.csv", "marque", "site"),
-                              ("sites_officiels_logos_2026-10-16.csv", "slug", "site")):
+                              ("sites_officiels_logos_2026-10-16.csv", "slug", "site"),
+                              # Sites trouvés par la raison sociale seule, sans mention légale française sur
+                              # la page : assez sûrs pour une icône, pas pour une preuve.
+                              ("sites_logos_seulement_2026-10-16.csv", "slug", "site")):
     if not os.path.exists(os.path.join(RACINE, "pipeline", "curated", f)):
         continue
     with open(os.path.join(RACINE, "pipeline", "curated", f), encoding="utf-8") as fh:

@@ -23,7 +23,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 from diams import supabase_client  # noqa: E402
 
 RACINE = r"C:\Users\damie\Downloads\claude\awareness-score"
-SORTIE = os.path.join(RACINE, "pipeline", "curated", "sites_officiels_logos_2026-10-16.csv")
+SORTIE = os.environ.get("SORTIE") or os.path.join(RACINE, "pipeline", "curated", "sites_officiels_logos_2026-10-16.csv")
 UA = "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)"
 c = httpx.Client(verify=os.environ["SSL_CERT_FILE"], timeout=120)
 ents = supabase_client.get_all(c, "entities", {"select": "id,slug,display_name,legal_name,siren,is_brand,parent_id"})
@@ -143,6 +143,9 @@ def essaie(e):
 
 # Toutes les entités sans site prouvé : le site sert au logo et à la preuve d'exploitation animale.
 cibles = [e for e in ents if e["slug"] not in connus]
+if os.environ.get("CIBLES"):  # relance ciblée : slugs séparés par des virgules
+    voulus = set(os.environ["CIBLES"].split(","))
+    cibles = [e for e in ents if e["slug"] in voulus]
 deja = {}
 if os.path.exists(SORTIE):
     with open(SORTIE, encoding="utf-8") as fh:
