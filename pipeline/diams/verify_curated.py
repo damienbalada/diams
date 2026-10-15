@@ -338,6 +338,10 @@ def check_trend_pct(row, quote: str) -> tuple[bool, list[str], bool]:
     # « (29) % » : baisse en notation comptable (rapport annuel d'Unilever).
     paren = r"\)?" if sign in "−-" else ""
     present = any(re.search(rf"(?<![\d.,]){re.escape(f)}{paren}\s?%", x) for f in pct_forms for x in (quote, joined))
+    # Tableau dont l'unité est dans l'intitulé de la ligne (« … (vs. 2020) (%)(2)(10) 11.5 4.6 ») :
+    # la variation y figure comme nombre isolé, sans « % » collé (ajout du 15/10/2026).
+    if not present and "(%)" in quote:
+        present = any(re.search(rf"(?<![\d.,]){re.escape(f)}(?![\d.,])", x) for f in pct_forms for x in (quote, joined))
     years_ok = int(y1) - int(y0) == n and n_s == n2_s and n > 0 and (y0 in quote)
     calc_ok = abs(rate - stated) <= 0.01
     value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9

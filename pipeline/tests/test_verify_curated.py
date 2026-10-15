@@ -676,3 +676,16 @@ def test_value_variants_trois_decimales():
     from diams.verify_curated import _value_variants
     assert "3,147" in _value_variants(3.147) and "3.147" in _value_variants(3.147)
     assert "3,15" in _value_variants(3.15) and not any(len(x) > 4 for x in _value_variants(3.15) if "," in x and x.startswith("3,"))
+
+
+def test_trend_pct_unite_dans_intitule():
+    from types import SimpleNamespace
+    from diams.verify_curated import check_trend_pct
+    q = "Reduction in overall virgin plastic (vs. 2020) (%)(2)(10) 11.5 4.6 + 1.7 2.9"
+    row = SimpleNamespace(indicator_code="PLA_REDUCTION", value_numeric=-2.41, normalized_value=None,
+                          excerpt="… « x » ; rythme annuel moyen (2020 → 2025, 5 ans) : (1 − 11,5 %)^(1/5) − 1 = −2,41 %")
+    ok, details, actif = check_trend_pct(row, q)
+    assert actif and ok, details
+    # Sans « (%) » dans l'intitulé, un nombre nu ne suffit pas.
+    ok2, _, _ = check_trend_pct(row, q.replace("(%)", ""))
+    assert not ok2

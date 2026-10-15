@@ -32,6 +32,8 @@ def cadre_doc(slug: str) -> str:
 
 
 def P(slug, code, quotes, cadre, value=None, vtype="numeric", text="", boolean="", norm="", calc=""):
+    if (slug, code) in DEJA:
+        return
     q = " ; ".join(f"« {x} »" for x in quotes)
     rows.append({**{c: "" for c in COLS}, "entity_slug": slug, "indicator_code": code, "source_code": DEP[slug].get("source", "ESEF"), "nature": "result",
                  "observed_on": DEP[slug]["date_added"][:10], "value_type": vtype,
@@ -64,6 +66,10 @@ def fx(slug, code, quotes, cadre, a, cur, unit_out, year="2025", d=1):
     c = round(a * rate, d)
     calc = f"taux de change annuel moyen {year} de la BCE (1 € = {str(rate).replace('.', ',')} {cur}) : {str(a).replace('.', ',')} × {str(rate).replace('.', ',')} = {str(c).replace('.', ',')}"
     P(slug, code, quotes, f"{cadre} (converti en {unit_out})", value=c, calc=calc)
+
+
+# (slug, code) déjà documentés en base avant ce lot : non régénérés (doublons écartés le 15/10/2026)
+DEJA = set([('henkel', 'ENV_GHG_TREND'), ('lactalis', 'SUP_VIGILANCE_PLAN'), ('mars', 'ENV_GHG_TREND'), ('nestle', 'ENV_GHG_TREND'), ('nestle', 'PLA_REDUCTION'), ('savencia', 'ENV_GHG_INTENSITY'), ('savencia', 'ENV_GHG_TREND'), ('savencia', 'GOV_BOARD_INDEP'), ('mondelez', 'ENV_GHG_TREND'), ('mondelez', 'PLA_REDUCTION')])
 
 
 def J(slug, code, outcome, detail):
@@ -543,3 +549,33 @@ P(s, "PLA_RECYCLED", ["The share of packaging recyclable, reusable or compostabl
   "emballages (part recyclable, réutilisable ou compostable en pratique et à grande échelle, exercice 2024/25)", value=86.8)
 P(s, "ENV_SCOPE3_DISCLOSED", ["GWP emissions total (Total Scope 1 + Scope 2 market-based + Scope 3) tCO2eq 10,924,391 10,192,517 10,233,649"],
   "annual emissions performance (émissions de scope 3 incluses et détaillées)", vtype="boolean", boolean="true", norm=1)
+
+# ---------------------------------------------------------------- Unilever (rapport 20-F déposé à la SEC ; le site refuse les outils automatiques)
+s = "unilever"
+P(s, "PLA_RECYCLED", ["Plastics Goal Unilever Unilever (including Ice Cream) 2025 2025 2024 2023",
+                      "100% of our plastic packaging to be reusable, recyclable or compostable (a)(f) 100% 57% 57% 57% 53%"],
+  "objectifs de durabilité (emballages plastiques réutilisables, recyclables ou compostables ; colonnes : objectif, 2025, 2025 avec Ice Cream, 2024, 2023)", value=57)
+P(s, "ENV_SCOPE3_DISCLOSED", ["Reduce absolute Scope 3 energy and industrial (E&I) GHG emissions by 42% by 2030 from a 2021 baseline (b)(c)(d) (42.0)% (11) % (11) % (7) %"],
+  "objectifs climat (évolution publiée des émissions de scope 3 depuis 2021)", vtype="boolean", boolean="true", norm=1)
+J(s, "ENV_GHG_TREND", "autre_forme", "Rapport 20-F 2025 lu (SEC) : évolutions publiées par périmètre, sans total des scopes 1, 2 et 3 — opérations (scopes 1 et 2) depuis 2015, « Scope 3 energy and industrial (E&I) » et « Scope 3 … (FLAG) » depuis 2021.")
+
+# ---------------------------------------------------------------- Procter & Gamble (exercice clos le 30/06/2025 ; rapport volontaire)
+s = "procter-gamble"
+P(s, "PLA_RECYCLED", ["80% of our consumer packaging is designed to be recyclableor reusable 80% 78%"],
+  "Data & Metrics Report, exercice 2025 (emballages grand public conçus pour être recyclables ou réutilisables ; colonnes 2025, 2024)", value=80)
+P(s, "ENV_SCOPE3_DISCLOSED", ["Scope 3 Categories Estimated FY25 Metric Tons CO2eq Purchased Goods and Services21 13,700,000"],
+  "Data & Metrics Report, exercice 2025 (émissions de scope 3 estimées par catégorie)", vtype="boolean", boolean="true", norm=1)
+J(s, "PLA_REDUCTION", "autre_forme", "Data & Metrics Report de l'exercice 2025 lu (site de la société) : réduction publiée par unité vendue, non en tonnage — « Reduce our use of virgin petroleum plastic in our consumer packaging by 50% per unit (2018 baseline). 24% reduction ».")
+J(s, "ENV_GHG_TREND", "autre_forme", "Data & Metrics Report de l'exercice 2025 lu (site de la société) : le total publié ne couvre que les scopes 1 et 2 — « Total GHG emissions 2,080 2,125 2,250 » (milliers de tCO2e, exercices 2025, 2024, 2023 ; « Total GHG emissions = Scope 1 + Scope 2 ») ; le scope 3 est estimé à part, par catégorie, pour 2025 seulement.")
+
+# ---------------------------------------------------------------- Mondelēz International (fiche de données volontaire)
+s = "mondelez"
+trend_pct(s, "ENV_GHG_TREND", ["35% end-to-end CO₂e emissions reduction by 2030 (vs. 2018) (%) (3)(2) 21 12 3"],
+          "Non-Financial Datasheet 2025 (réduction des émissions de bout en bout, chaîne de valeur entière, par rapport à 2018 ; colonnes 2025, 2024, 2023)",
+          2018, 2025, -21, ghg=True)
+trend_pct(s, "PLA_REDUCTION", ["Reduction in overall virgin plastic (vs. 2020) (%)(2)(10) 11.5 4.6 + 1.7 2.9"],
+          "Non-Financial Datasheet 2025 (plastique vierge, par rapport à 2020 ; colonnes 2025, 2024, 2023, 2022)", 2020, 2025, -11.5, dec=1)
+P(s, "PLA_RECYCLED", ["PackaGinG 2025 2024 2023 2022 Total weight of packaging (metric tonnes)(9) 908,200 875,800 915,500 943,600 Packaging designed to be recyclable (%)(10) 96 96 96 96"],
+  "Non-Financial Datasheet 2025 (emballages conçus pour être recyclables ; colonnes 2025, 2024, 2023, 2022)", value=96)
+P(s, "ENV_SCOPE3_DISCLOSED", ["Scope 3 (Other indirect) GHG emissions (metric tonnes CO₂e)(1) 29,174,000 32,194,000 35,067,000"],
+  "Non-Financial Datasheet 2025 (émissions de scope 3 de bout en bout ; colonnes 2025, 2024, 2023)", vtype="boolean", boolean="true", norm=1)
