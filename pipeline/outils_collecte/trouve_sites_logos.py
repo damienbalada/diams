@@ -141,12 +141,31 @@ def essaie(e):
     return None
 
 
-cibles = [e for e in ents if e["slug"] not in logos and e["slug"] not in connus]
-print(len(cibles), "entités sans logo ni site prouvé", flush=True)
-with ThreadPoolExecutor(24) as ex:
-    out = [r for r in ex.map(essaie, cibles) if r]
-with open(SORTIE, "w", encoding="utf-8", newline="") as f:
-    wr = csv.DictWriter(f, fieldnames=["slug", "site", "page_de_preuve", "preuve", "extrait"])
-    wr.writeheader()
-    wr.writerows(sorted(out, key=lambda r: r["slug"]))
+# Toutes les entités sans site prouvé : le site sert au logo et à la preuve d'exploitation animale.
+cibles = [e for e in ents if e["slug"] not in connus]
+deja = {}
+if os.path.exists(SORTIE):
+    with open(SORTIE, encoding="utf-8") as fh:
+        deja = {r["slug"]: r for r in csv.DictReader(fh)}
+cibles = [e for e in cibles if e["slug"] not in deja]
+print(len(cibles), "entités sans site prouvé", flush=True)
+out = list(deja.values())
+
+
+def ecrire():
+    with open(SORTIE, "w", encoding="utf-8", newline="") as f:
+        wr = csv.DictWriter(f, fieldnames=["slug", "site", "page_de_preuve", "preuve", "extrait"])
+        wr.writeheader()
+        wr.writerows(sorted(out, key=lambda r: r["slug"]))
+
+
+# Peu de connexions à la fois, et écriture au fil de l'eau (un arrêt ne perd rien).
+with ThreadPoolExecutor(16) as ex:
+    for n, r in enumerate(ex.map(essaie, cibles), 1):
+        if r:
+            out.append(r)
+        if n % 100 == 0:
+            ecrire()
+            print(n, "essayées ;", len(out), "sites prouvés", flush=True)
+ecrire()
 print(len(out), "sites prouvés ;", sum(r["preuve"] == "siren" for r in out), "par SIREN,", sum(r["preuve"] == "nom" for r in out), "par raison sociale")
