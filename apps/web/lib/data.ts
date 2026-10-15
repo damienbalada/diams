@@ -541,3 +541,55 @@ export async function getMarquesGroupe(slug: string): Promise<{ groupe: { slug: 
       .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" })),
   };
 }
+
+/** Fait marquant d'une vitrine : ce qui est prouvé pour l'entité ou repris de son groupe racine. */
+export interface Vitrine {
+  slug: string;
+  name: string;
+  group: string | null;
+  faits: number;
+  exploitation: boolean;
+  vegetale: boolean;
+  sanction: boolean;
+}
+
+/**
+ * Vitrines de l'accueil (« les plus connues », « les plus recherchées ») : pour chaque slug, le
+ * nombre de faits sourcés (propres ou repris du groupe racine) et trois signaux tirés des preuves
+ * approuvées. Rien n'est calculé ni noté : une simple lecture des preuves.
+ */
+export async function getVitrines(slugs: string[]): Promise<Vitrine[]> {
+  const supabase = getSupabase();
+  const entities: any[] = await listEntities();
+  const byId = new Map<string, any>(entities.map((e) => [e.id, e]));
+  const bySlug = new Map<string, any>(entities.map((e) => [e.slug, e]));
+  const root = (e: any) => {
+    let cur = e;
+    for (let i = 0; i < 20 && cur.parent_id && byId.has(cur.parent_id); i++) cur = byId.get(cur.parent_id);
+    return cur;
+  };
+  const choisies = slugs.map((s) => bySlug.get(s)).filter(Boolean);
+  const ids = [...new Set(choisies.flatMap((e) => [e.id, root(e).id]))];
+  const [{ data: ind }, { data: ev }] = await Promise.all([
+    supabase.from("indicators").select("id, code"),
+    supabase.from("evidence_active").select("entity_id, indicator_id").in("entity_id", ids),
+  ]);
+  const code = new Map<string, string>((ind ?? []).map((i: any) => [i.id, i.code]));
+  const parEntite = new Map<string, string[]>();
+  for (const r of ev ?? []) parEntite.set(r.entity_id, [...(parEntite.get(r.entity_id) ?? []), code.get(r.indicator_id) ?? ""]);
+  return choisies.map((e) => {
+    const r = root(e);
+    const propres = parEntite.get(e.id) ?? [];
+    const groupe = r.id === e.id ? [] : parEntite.get(r.id) ?? [];
+    const tous = [...propres, ...groupe];
+    return {
+      slug: e.slug,
+      name: String(e.display_name ?? e.legal_name),
+      group: r.id === e.id ? null : String(r.display_name ?? r.legal_name),
+      faits: tous.length,
+      exploitation: tous.includes("ANI_EXPLOITATION") && !propres.includes("ANI_ANIMAL_FREE"),
+      vegetale: propres.includes("ANI_ANIMAL_FREE"),
+      sanction: tous.includes("GOV_SANCTIONS"),
+    };
+  });
+}

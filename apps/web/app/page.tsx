@@ -1,19 +1,35 @@
-import { getPublicStats, listEntities, listSectors } from "@/lib/data";
+import { getPublicStats, getVitrines, listEntities, listSectors, type Vitrine } from "@/lib/data";
 import { EntitySearch } from "@/components/EntitySearch";
 import type { SearchableEntity } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+// Marques et groupes très connus du grand public, choisis à la main (aucun classement de mérite).
+const CONNUES = ["nutella", "coca-cola", "president", "zara", "lidl", "nike", "kinder", "evian", "loreal", "mcdonalds", "shein", "ikea"];
+// « Les plus recherchées » : classement SIMULÉ tant que DIAMS n'a pas d'utilisateurs ; à remplacer par
+// les recherches réellement mesurées. La page le dit en toutes lettres.
+const RECHERCHEES = ["shein", "nutella", "mcdonalds", "zara", "carrefour", "danone", "haribo-marque", "amazon"];
+const TEINTES = ["#6c3bff", "#1f8a4c", "#2563c9", "#b4532a", "#0e7a8a", "#a86a12", "#b8325a", "#4a43c4"];
+const teinte = (s: string) => TEINTES[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % TEINTES.length];
+
 export default async function HomePage() {
   let entities: Awaited<ReturnType<typeof listEntities>> = [];
   let sectorName = new Map<string, string>();
   let stats: { evidence: number; sources: number } | null = null;
   let error: string | null = null;
+  let connues: Vitrine[] = [];
+  let recherchees: Vitrine[] = [];
   try {
-    const [ents, sectors, st] = await Promise.all([listEntities(), listSectors(), getPublicStats().catch(() => null)]);
+    const [ents, sectors, st, vit] = await Promise.all([
+      listEntities(), listSectors(), getPublicStats().catch(() => null),
+      getVitrines([...new Set([...CONNUES, ...RECHERCHEES])]).catch(() => [] as Vitrine[]),
+    ]);
     entities = ents;
     stats = st;
+    const v = new Map(vit.map((x) => [x.slug, x]));
+    connues = CONNUES.map((x) => v.get(x)).filter((x): x is Vitrine => !!x);
+    recherchees = RECHERCHEES.map((x) => v.get(x)).filter((x): x is Vitrine => !!x);
     sectorName = new Map(sectors.map((x) => [x.id, x.name]));
   } catch (e) {
     error = (e as Error).message;
@@ -57,6 +73,26 @@ export default async function HomePage() {
     );
   };
 
+  const Carte = (v: Vitrine, rang?: number) => (
+    <a key={v.slug} className="vit-card" href={`/entreprise/${v.slug}`}>
+      <span className="vit-top">
+        {rang !== undefined && <span className="vit-rang">{rang}</span>}
+        <span className="vit-logo" aria-hidden="true" style={{ background: teinte(v.name) }}>{v.name.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 1).toUpperCase()}</span>
+        <span>
+          <span className="vit-name">{v.name}</span>
+          <br />
+          <span className="vit-group">{v.group ? `Groupe ${v.group}` : "Société mère"}</span>
+        </span>
+      </span>
+      <span className="vit-chips">
+        <span className="vit-chip">{v.faits} fait{v.faits > 1 ? "s" : ""} sourcé{v.faits > 1 ? "s" : ""}</span>
+        {v.exploitation && <span className="vit-chip rouge">⚠️ Exploitation animale</span>}
+        {v.vegetale && <span className="vit-chip vert">Entièrement végétale</span>}
+        {v.sanction && <span className="vit-chip rouge">Sanctionné par une autorité</span>}
+      </span>
+    </a>
+  );
+
   return (
     <main className="fiche-stack">
       <section className="hero">
@@ -84,6 +120,40 @@ export default async function HomePage() {
       )}
 
       <EntitySearch entities={searchable}>
+        {connues.length > 0 && (
+          <section aria-labelledby="connues">
+            <div className="vitrine-head">
+              <h2 className="section-title" id="connues">Les plus connues</h2>
+              <span className="vitrine-note">Des noms que tout le monde connaît, choisis à la main</span>
+            </div>
+            <div className="vitrine">{connues.map((v) => Carte(v))}</div>
+          </section>
+        )}
+
+        {recherchees.length > 0 && (
+          <section aria-labelledby="recherchees">
+            <div className="vitrine-head">
+              <h2 className="section-title" id="recherchees">Les plus recherchées</h2>
+              <span className="vitrine-note">Classement simulé : DIAMS vient d'ouvrir, les recherches ne sont pas encore mesurées</span>
+            </div>
+            <div className="vitrine">{recherchees.map((v, i) => Carte(v, i + 1))}</div>
+          </section>
+        )}
+
+        {sectorsSorted.length > 0 && (
+          <section aria-labelledby="rayons">
+            <h2 className="section-title" id="rayons">Parcourir par rayon</h2>
+            <div className="rayons-tuiles">
+              {sectorsSorted.map(([sector, list], i) => (
+                <a key={sector} className="rayon-tuile" href={`#rayon-${i}`}>
+                  <strong>{sector}</strong>
+                  <span>{list.length} marques et groupes</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="how-grid">
           <div className="how-card">
             <div className="how-num">1</div>
@@ -114,8 +184,8 @@ export default async function HomePage() {
         <section id="index">
           <h2 className="section-title">Toutes les marques, par rayon</h2>
           <p className="muted small" style={{ margin: "0 0 12px" }}>Par ordre alphabétique : aucun classement.</p>
-          {sectorsSorted.map(([sector, list]) => (
-            <details className="pending" key={sector}>
+          {sectorsSorted.map(([sector, list], i) => (
+            <details className="pending" key={sector} id={`rayon-${i}`}>
               <summary>
                 <span>{sector} <span className="muted">{list.length}</span></span>
               </summary>
