@@ -114,12 +114,18 @@ couvre les faits qui ne valent que pour certains produits (pas chaque produit un
   de la mode, KnowTheChain, BBFAW, Fur Free Retailer, Fashion Checker, Finansol (15/10 : 11 927
   recherches consignées, groupes et marques ; contrôle des noms bruts : Helly Hansen et Jockey
   rapprochés, liens ambigus exclus — Aldi, Amazon/Whole Foods, Suntory, Axa IM, Crédit Mutuel AM).
-- [ ] C2 — rapports réglementés des groupes cotés : portail ESEF (36 groupes), SEC (étendre la
-  liste des sociétés suivies), BDIF de l'AMF (sociétés françaises), rapports annuels des sites.
-  Indicateurs : mixité et indépendance du conseil, ratio de rémunération, écart salarial,
-  évolution et intensité des émissions, scope 3, taux d'imposition, plan de vigilance, taxonomie,
-  plastique, eau. Lu et absent → journal (« rapport lu, donnée absente »).
-- [ ] C3 — exploitation animale marque par marque (sites officiels prouvés par le SIREN ou par le
-  site du groupe qui nomme la marque) ; produits 100 % végétaux.
-- [ ] C4 — sociétés non cotées : registres officiels (sanctions CNIL, DGCCRF, Autorité de la
-  concurrence), plan de vigilance, Égapro (fait).
+- [x] C2 — rapports réglementés des groupes cotés (15/10) : lots 100 (ESEF, AMF, sites : ~113
+  preuves, ~60 groupes), 103 (Essity, Richemont, Puig, Beiersdorf, LDC : 27 preuves) et 104
+  (groupes américains : 10-K, circulaires DEF 14A, rapports de durabilité : 15 preuves) ; ~470
+  lectures consignées (« rapport lu, donnée absente », « publié sous une autre forme »).
+  Restent sans rapport public 2025 lisible : Casino (DEU 2025 non publié, restructuration),
+  Avril, Pierre Fabre, Sodiaal, Auchan (ELO), Carambar, Cofigeo ; sites refusant les robots
+  (Colgate, Hasbro, Mattel, Suntory : 403) non contournés.
+- [x] C3 — exploitation animale marque par marque (15/10) : lots 98-99 puis 102 (173 sites officiels
+  prouvés par SIREN ou raison sociale, liste dans `curated/sites_officiels_marques_2026-10-15.csv` ;
+  66 preuves : 57 exploitations, 8 offres végétales, Tossolia entièrement végétale).
+- [x] C4 — registres officiels (15/10) : Autorité de la concurrence, jeu de données officiel des
+  décisions (lot 101 : 17 sanctions depuis le 15/10/2021, 914 groupes « cherché sans résultat ») ;
+  Commission européenne déjà couverte (16 décisions). DGCCRF (economie.gouv.fr, 403) et
+  Légifrance (403) inaccessibles aux robots ; le jeu ouvert de la CNIL (data.gouv.fr) ne donne que
+  des totaux annuels, sans nom : non exploitable. Égapro fait.

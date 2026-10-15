@@ -8,7 +8,7 @@ export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 > sourcés, datés et vérifiés mot pour mot, et dit ce qu'il ne sait pas. La méthode
 > est publique et versionnée : c'est la condition de la confiance.
 
-Version : \`0.8.1\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.8.2\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -844,10 +844,23 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.8.1\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.8.2\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.2 (15/10/2026)** — Collecte complète (aucun paramètre de calcul modifié). Rapports
+  réglementés et volontaires lus groupe par groupe (lots 100, 103, 104 : environ 155 preuves) ;
+  chaque lecture sans résultat est consignée au journal (« rapport lu, donnée absente », « publiée
+  sous une autre forme »). Règles appliquées : l'intensité en eau retenue est celle de l'ESRS E3-4,
+  fondée sur la **consommation** d'eau rapportée au chiffre d'affaires (une intensité par litre
+  produit ou fondée sur les seuls prélèvements est consignée, non reprise) ; une baisse d'émissions
+  n'est retenue que sur deux ans au moins ; les conversions d'unités (kt/M€, t/k€, kg/€) et de
+  devises (taux annuels moyens de la BCE) sont écrites en toutes lettres et recontrôlées ; une part
+  d'écart salarial publiée par pays est signalée comme telle. Sites de marques (lot 102) : le
+  propriétaire est attesté par son SIREN **ou** sa raison sociale dans les mentions légales (173
+  sites, liste publiée) ; 66 faits du pilier animal. Sanctions : jeu de données officiel des
+  décisions de l'Autorité de la concurrence (lot 101). Sources écartées : DGCCRF et Légifrance
+  (accès refusé aux robots), jeu ouvert de la CNIL (totaux sans nom).
 - **0.8.1 (15/10/2026)** — Décision de l'éditeur : trois niveaux, groupe, marque et produits, pour
   tout le site (section 0). Nouvel indicateur « Produits 100 % végétaux proposés »
   (\`ANI_OFFRE_VEGETALE\`, niveau produit) ; \`ANI_ANIMAL_FREE\` devient « Marque entièrement
