@@ -102,3 +102,24 @@ R2 à R6. Présentation à la presse après R6 et les vagues 1 à 3 au minimum.
 - [x] R4 — pages
 - [x] R5 — méthodologie (v0.8.0)
 - [x] R6 — contrôle et mise en ligne (15/10 : 30 fiches, tests, déploiement prêt, aucune erreur)
+
+## Partie 3 — Collecte complète (demande de l'éditeur, 15/10/2026)
+
+« Sourcer chaque indicateur de chaque pilier, pour chaque groupe, marque et produit. » But : sur
+chaque fiche, chaque indicateur porte une preuve, ou la trace d'une recherche (où, quand), ou une
+absence constatée dans le rapport qui devrait le contenir. Rien n'est inventé ; le niveau produit
+couvre les faits qui ne valent que pour certains produits (pas chaque produit un à un).
+
+- [x] C1 — listes complètes : CDP, SBTi, KSE, registre UE, HATVP (vague 0) ; indice de transparence
+  de la mode, KnowTheChain, BBFAW, Fur Free Retailer, Fashion Checker, Finansol (15/10 : 11 927
+  recherches consignées, groupes et marques ; contrôle des noms bruts : Helly Hansen et Jockey
+  rapprochés, liens ambigus exclus — Aldi, Amazon/Whole Foods, Suntory, Axa IM, Crédit Mutuel AM).
+- [ ] C2 — rapports réglementés des groupes cotés : portail ESEF (36 groupes), SEC (étendre la
+  liste des sociétés suivies), BDIF de l'AMF (sociétés françaises), rapports annuels des sites.
+  Indicateurs : mixité et indépendance du conseil, ratio de rémunération, écart salarial,
+  évolution et intensité des émissions, scope 3, taux d'imposition, plan de vigilance, taxonomie,
+  plastique, eau. Lu et absent → journal (« rapport lu, donnée absente »).
+- [ ] C3 — exploitation animale marque par marque (sites officiels prouvés par le SIREN ou par le
+  site du groupe qui nomme la marque) ; produits 100 % végétaux.
+- [ ] C4 — sociétés non cotées : registres officiels (sanctions CNIL, DGCCRF, Autorité de la
+  concurrence), plan de vigilance, Égapro (fait).

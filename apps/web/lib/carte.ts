@@ -249,9 +249,12 @@ export function construireCarte(
     }
     const cherche = [...new Set(js.filter((j) => j.outcome === "non_trouvee").map((j) => SOURCES_CHERCHEES.find(([re]) => re.test(j.detail ?? ""))?.[1]).filter(Boolean))];
     const date = js.find((j) => j.outcome === "non_trouvee")?.checked_on;
+    // Lecture d'un rapport (« Rapport … lu : … ») : la phrase du journal est affichée telle quelle.
+    const lecture = js.find((j) => j.outcome === "non_trouvee" && /^Rapport/.test(j.detail ?? ""))?.detail ?? null;
+    const notes = [lecture, cherche.length ? `Cherché sans résultat (${cherche.join(", ")}), le ${date?.split("-").reverse().join("/")}.` : null].filter(Boolean);
     return {
       code: i.code, nom: i.name, pilier: i.dimension_code, etat: "aucune_info", valeur: "Aucune information", contexte, niveau: niveauDe(i, null, estMarque),
-      obligation, note: cherche.length ? `Cherché sans résultat (${cherche.join(", ")}), le ${date?.split("-").reverse().join("/")}.` : null,
+      obligation, note: notes.length ? notes.join(" ") : null,
     };
   });
 

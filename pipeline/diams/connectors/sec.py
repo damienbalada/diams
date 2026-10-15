@@ -39,6 +39,9 @@ TICKERS: dict[str, str] = {
     "mcdonalds": "MCD", "starbucks": "SBUX", "yum-brands": "YUM", "rbi": "QSR",
     # Émetteurs étrangers (rapport annuel 20-F en IFRS)
     "unilever": "UL", "toyota": "TM", "sony": "SONY", "stellantis": "STLA",
+    # Ajouts du 15/10/2026 (liste officielle de la SEC rapprochée par nom, vérifiée à la main ;
+    # homonymes écartés : Interparfums Inc ≠ Interparfums SA, BioVie Inc ≠ Biovie).
+    "beyond-meat": "BYND", "logitech": "LOGI", "oatly": "OTLY", "garmin": "GRMN",
 }
 
 _SUFFIX = {"inc", "incorporated", "corp", "corporation", "company", "co", "the", "plc", "ltd", "limited", "sa"}

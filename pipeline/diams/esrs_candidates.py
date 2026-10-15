@@ -52,7 +52,39 @@ PATTERNS: dict[str, list[str]] = {
     "SUP_VIGILANCE_PLAN": [
         r"Plan de vigilance[^.]{0,400}",
     ],
+    # Motifs ajoutés le 15/10/2026 (collecte complète, tous les piliers).
+    "ENV_GHG_TREND": [
+        r"(?:[ée]missions (?:totales|brutes) de (?:GES|gaz à effet de serre)|total GHG emissions|total (?:gross )?emissions)[^.]{0,250}",
+        r"(?:scopes? 1,? 2 et 3|scopes? 1, 2 and 3)[^.]{0,250}(?:tCO2|t CO2|tonnes|MtCO2)",
+    ],
+    "ENV_TAXONOMY_CAPEX": [
+        r"(?:CapEx|dépenses d.investissement|investissements)[^.]{0,150}align[ée]e?s?[^.]{0,150}\d+(?:[,.]\d+)?\s?%",
+        r"Taxonomy-aligned (?:CapEx|capital expenditure)[^.]{0,200}",
+    ],
+    "PLA_REDUCTION": [
+        r"plastiques? vierges?[^.]{0,250}\d+(?:[,.]\d+)?\s?%",
+        r"virgin plastic[^.]{0,250}\d+(?:\.\d+)?\s?%",
+    ],
+    "PLA_RECYCLED": [
+        r"(?:plastiques?|emballages?)[^.]{0,80}(?:recycl[ée]s?|r[ée]utilisables?)[^.]{0,200}\d+(?:[,.]\d+)?\s?%",
+        r"(?:recycled content|recycled plastic|reusable)[^.]{0,200}\d+(?:\.\d+)?\s?%",
+    ],
+    "WAT_INTENSITY": [
+        r"(?:pr[ée]l[èe]vements?|consommation) (?:totale )?d.eau[^.]{0,250}(?:m3|m³|millions? de m)",
+        r"(?:water withdrawal|water consumption)[^.]{0,250}(?:m3|m³|megalit|million)",
+    ],
+    "LAB_LIVING_WAGE": [
+        r"(?:salaire d[ée]cent|salaire vital|living wage)[^.]{0,300}",
+    ],
+    "SUP_SUPPLIER_LIST": [
+        r"(?:liste (?:des|de nos|complète des) (?:fournisseurs|sites)|supplier list|list of (?:our )?suppliers)[^.]{0,250}",
+    ],
 }
+PATTERNS["LAB_CEO_PAY_RATIO"] += [
+    r"ratio d.[ée]quit[ée][^.]{0,300}",
+    r"(?:multiple|fois) (?:de )?la r[ée]mun[ée]ration (?:moyenne|m[ée]diane)[^.]{0,250}",
+    r"(?:CEO pay ratio|pay ratio)[^.]{0,250}",
+]
 
 # Sommaires et tables de concordance : renvois de pages, pas des données.
 _TOC = re.compile(r"\s\d{1,4}\s*[-–]\s*\d{1,4}\b|\.{4,}|\bp\.\s?\d")

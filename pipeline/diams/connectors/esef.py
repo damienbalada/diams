@@ -51,13 +51,26 @@ def latest_filing(lei: str, client: httpx.Client, max_age_days: int = 550,
     cutoff = (date.today() - timedelta(days=max_age_days)).isoformat()
     # Un exercice se clôt en fin de mois : écarte les dépôts intermédiaires ou atypiques.
     cands = [x["attributes"] for x in r.json().get("data", [])
-             if (x["attributes"].get("period_end") or "") >= cutoff and _month_end(x["attributes"]["period_end"])]
+             if cutoff <= (x["attributes"].get("period_end") or "") <= date.today().isoformat()
+             and _month_end(x["attributes"]["period_end"])]
+    # (borne haute ajoutée le 15/10/2026 : des dépôts annonçaient un exercice clos dans le futur)
     if not cands:
         return None
-    latest = max(a["period_end"] for a in cands)
-    same = sorted((a for a in cands if a["period_end"] == latest),
-                  key=lambda a: (a.get("error_count") or 0, a.get("country") != prefer_country))
-    a = same[0]
+    # Un dépôt n'est retenu que s'il contient des chiffres d'un exercice de ~12 mois : certains
+    # émetteurs déposent aussi leurs comptes semestriels (Carlsberg au 30/06), qui ne sont pas
+    # des rapports annuels (contrôle ajouté le 15/10/2026).
+    a = None
+    for end in sorted({x["period_end"] for x in cands}, reverse=True)[:3]:
+        same = sorted((x for x in cands if x["period_end"] == end),
+                      key=lambda x: (x.get("error_count") or 0, x.get("country") != prefer_country))
+        try:
+            if is_annual(client.get(BASE + same[0]["json_url"]).json(), end):
+                a = same[0]
+                break
+        except (httpx.HTTPError, ValueError):
+            continue
+    if a is None:
+        return None
     return Filing(lei=lei, period_end=a["period_end"], date_added=(a.get("date_added") or "")[:10],
                   json_url=BASE + a["json_url"], report_url=BASE + a["report_url"] if a.get("report_url") else None,
                   viewer_url=BASE + a["viewer_url"] if a.get("viewer_url") else None, error_count=a.get("error_count") or 0)
@@ -69,6 +82,19 @@ CONCEPTS = {
     "net": "ifrs-full:ProfitLoss",
     "disc": "ifrs-full:ProfitLossFromDiscontinuedOperations",
 }
+
+
+def is_annual(xbrl_json: dict, period_end: str) -> bool:
+    """Vrai si le dépôt contient au moins un fait couvrant ~12 mois et clos le `period_end`."""
+    end_excl = (date.fromisoformat(period_end) + timedelta(days=1)).isoformat()
+    for f in xbrl_json.get("facts", {}).values():
+        per = str(f.get("dimensions", {}).get("period") or "")
+        if "/" not in per:
+            continue
+        start, end = per.split("/")
+        if end.startswith(end_excl) and 350 <= (date.fromisoformat(end[:10]) - date.fromisoformat(start[:10])).days <= 380:
+            return True
+    return False
 
 
 def annual_facts(xbrl_json: dict, period_end: str) -> dict[str, float]:

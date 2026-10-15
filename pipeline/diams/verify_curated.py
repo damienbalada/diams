@@ -180,7 +180,7 @@ ESEF_KEYWORDS = {
     "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
     # lus dans le plan lui-même (C. com. L225-102-4 : cinq mesures).
-    "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques", r"suivi|contr[ôo]le du respect|compte rendu"],
+    "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques|identifie les risques|risques d.atteintes graves", r"suivi|contr[ôo]le du respect|compte rendu"],
     # Taxonomie verte UE (art. 8) : part des CapEx ALIGNÉS (pas seulement éligibles).
     "ENV_TAXONOMY_CAPEX": [r"taxonom", r"capex|capital expenditure", r"align"],
     # Audit de marques Break Free From Plastic : classement des pollueurs.
@@ -232,6 +232,8 @@ def _canon(s: str) -> str:
 def _value_variants(v: float) -> list[str]:
     out = {f"{v:.2f}".replace(".", ","), f"{v:.1f}".replace(".", ",")}
     out |= {f"{v:.2f}", f"{v:.1f}"}                      # notation anglaise : 17.4
+    if round(v, 3) == v and round(v, 2) != v:            # trois décimales publiées : 3,147
+        out |= {f"{v:.3f}", f"{v:.3f}".replace(".", ",")}
     if float(v).is_integer():
         out |= {f"{int(v)}", f"{int(v):,}"}             # 1980 et 1,980
     return list(out)
@@ -494,15 +496,16 @@ def check_trend_yoy(row, quote: str) -> tuple[bool, list[str], bool]:
 # Unité publiée différente de celle de l'indicateur : la conversion est écrite dans
 # l'extrait et recalculée. « conversion : 0,00039 t/€ × 1 000 000 = 390 t/M€ », ou
 # depuis des kilogrammes par euro : « conversion : 0,23 kg/€ × 1 000 = 230 t/M€ ».
-UNIT_RE = re.compile(r"conversion : ([\d,]+) (t/€ × 1 000 000|kg/€ × 1 000) = ([\d ,]+) t/M€")
+# Ajout du 15/10/2026 : intensité hydrique publiée en milliers de m³ par M€ (Heineken : « 1.12 thousand m3 / mEUR »).
+UNIT_RE = re.compile(r"conversion : ([\d,]+) (t/€ × 1 000 000|kg/€ × 1 000|milliers de m³/M€ × 1 000) = ([\d ,]+) (t/M€|m³/M€)")
 
 
 def check_unit(row, quote: str) -> tuple[bool, list[str], bool]:
     m = UNIT_RE.search(row.excerpt or "")
     if not m:
         return True, [], False
-    a_s, unit, c_s = m.groups()
-    factor, unit_s = (1e6, "t/€") if unit.startswith("t/") else (1e3, "kg/€")
+    a_s, unit, c_s, out = m.groups()
+    factor, unit_s = (1e6, "t/€") if unit.startswith("t/") else (1e3, unit.split(" × ")[0])
     a, c = float(a_s.replace(",", ".")), float(c_s.replace(" ", "").replace(",", "."))
     # Le rapport peut être en anglais (0.23) quand l'extrait écrit 0,23.
     present = any(re.search(rf"(?<![\d,.]){re.escape(f)}(?!\d)", quote) is not None
@@ -511,7 +514,7 @@ def check_unit(row, quote: str) -> tuple[bool, list[str], bool]:
     value_ok = row.value_numeric is not None and abs(row.value_numeric - c) < 1e-9
     return present and calc_ok and value_ok, [
         f"valeur publiée {a_s} {unit_s} présente dans la citation {'✓' if present else '✗'}",
-        f"conversion {a_s} × {'1 000 000' if factor == 1e6 else '1 000'} = {a * factor:g} t/M€ = valeur {'✓' if calc_ok and value_ok else '✗'}",
+        f"conversion {a_s} × {'1 000 000' if factor == 1e6 else '1 000'} = {a * factor:g} {out} = valeur {'✓' if calc_ok and value_ok else '✗'}",
     ], True
 
 

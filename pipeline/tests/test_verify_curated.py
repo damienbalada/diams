@@ -670,3 +670,9 @@ def test_mots_cles_exploitation_animale_alimentation():
         assert pat.search(ok), ok
     for ko in ["beurre de cacahuète", "beurre de karité", "Fabrication de biscuits", "pâte à tartiner aux noisettes"]:
         assert not pat.search(ko), ko
+
+
+def test_value_variants_trois_decimales():
+    from diams.verify_curated import _value_variants
+    assert "3,147" in _value_variants(3.147) and "3.147" in _value_variants(3.147)
+    assert "3,15" in _value_variants(3.15) and not any(len(x) > 4 for x in _value_variants(3.15) if "," in x and x.startswith("3,"))
