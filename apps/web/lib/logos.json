@@ -207,10 +207,6 @@
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Logo%20Badoit.jpg?width=160",
 "origine": "Wikimedia Commons"
 },
-"badoz": {
-"src": "https://www.google.com/s2/favicons?domain=www.fromagerie-badoz.com&sz=128",
-"origine": "icône du site www.fromagerie-badoz.com"
-},
 "baiko": {
 "src": "https://www.google.com/s2/favicons?domain=baiko.fr&sz=128",
 "origine": "icône du site baiko.fr"
@@ -387,10 +383,6 @@
 "src": "https://www.google.com/s2/favicons?domain=www.bridelice.fr&sz=128",
 "origine": "icône du site www.bridelice.fr"
 },
-"brioche-pasquier": {
-"src": "https://www.google.com/s2/favicons?domain=www.pasquier.fr&sz=128",
-"origine": "icône du site www.pasquier.fr"
-},
 "brita-se": {
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Brita%20SE%20logo.svg?width=160",
 "origine": "Wikimedia Commons"
@@ -522,10 +514,6 @@
 "champagne-mercier": {
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Cendrier%20Champagne%20Mercier%20bleu.JPG?width=160",
 "origine": "Wikimedia Commons"
-},
-"champagne-taittinger": {
-"src": "https://www.google.com/s2/favicons?domain=www.taittinger.com&sz=128",
-"origine": "icône du site www.taittinger.com"
 },
 "charal": {
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/LogoCharal2019.png?width=160",
@@ -1051,10 +1039,6 @@
 "src": "/logos/haribo-marque.png",
 "origine": "site officiel"
 },
-"haricot-tarbais": {
-"src": "/logos/auto/haricot-tarbais.jpg",
-"origine": "icône du site www.haricot-tarbais.com"
-},
 "hasbro": {
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Hasbro%20logo.svg?width=160",
 "origine": "Wikimedia Commons"
@@ -1191,6 +1175,10 @@
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Jupiler%20logo.jpg?width=160",
 "origine": "Wikimedia Commons"
 },
+"kahlua": {
+"src": "/logos/auto/kahlua.jpg",
+"origine": "icône du site www.kahlua.com"
+},
 "kaoka-marque": {
 "src": "https://www.google.com/s2/favicons?domain=www.kaoka.fr&sz=128",
 "origine": "icône du site www.kaoka.fr"
@@ -1206,6 +1194,10 @@
 "kerastase": {
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Kerastase%20logo.gif?width=160",
 "origine": "Wikimedia Commons"
+},
+"kerdelys": {
+"src": "/logos/auto/kerdelys.png",
+"origine": "icône du site fishislife.com"
 },
 "kering": {
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Kering-logo.svg?width=160",
@@ -1559,6 +1551,10 @@
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Mars%20Logo.svg?width=160",
 "origine": "Wikimedia Commons"
 },
+"martell": {
+"src": "/logos/auto/martell.jpg",
+"origine": "icône du site www.martell.com"
+},
 "maserati": {
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Maserati%20logo%202.svg?width=160",
 "origine": "Wikimedia Commons"
@@ -1755,10 +1751,6 @@
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Nature-valley-logo.png?width=160",
 "origine": "Wikimedia Commons"
 },
-"nautilus": {
-"src": "https://www.google.com/s2/favicons?domain=www.nautilusfood.com&sz=128",
-"origine": "icône du site www.nautilusfood.com"
-},
 "nautilus-food-marque": {
 "src": "https://www.google.com/s2/favicons?domain=www.nautilusfood.com&sz=128",
 "origine": "icône du site www.nautilusfood.com"
@@ -1936,7 +1928,7 @@
 "origine": "icône du site www.payzan.fr"
 },
 "pearl-milling-company": {
-"src": "https://commons.wikimedia.org/wiki/Special:FilePath/Pearl%20milling%20co%20textlogo.png?width=160",
+"src": "https://commons.wikimedia.org/wiki/Special:FilePath/Aunt%20Jemima%20logo%20%28red%29.png?width=160",
 "origine": "Wikimedia Commons"
 },
 "pedigree": {
@@ -2447,6 +2439,10 @@
 "src": "https://www.google.com/s2/favicons?domain=tramier.fr&sz=128",
 "origine": "icône du site tramier.fr"
 },
+"transformers": {
+"src": "https://commons.wikimedia.org/wiki/Special:FilePath/Transformers%202014%20logo.png?width=160",
+"origine": "Wikimedia Commons"
+},
 "tregalette": {
 "src": "https://www.google.com/s2/favicons?domain=www.regalette.bzh&sz=128",
 "origine": "icône du site www.regalette.bzh"
@@ -2506,6 +2502,10 @@
 "valnoix": {
 "src": "https://www.google.com/s2/favicons?domain=www.valnoix.fr&sz=128",
 "origine": "icône du site www.valnoix.fr"
+},
+"van-cleef-arpels": {
+"src": "https://www.google.com/s2/favicons?domain=www.vancleefarpels.com&sz=128",
+"origine": "icône du site www.vancleefarpels.com"
 },
 "vanille-lavany": {
 "src": "https://www.google.com/s2/favicons?domain=www.vanillelavany.com&sz=128",
@@ -2622,5 +2622,13 @@
 "zenith-montres": {
 "src": "https://commons.wikimedia.org/wiki/Special:FilePath/Zenith%20logo.svg?width=160",
 "origine": "Wikimedia Commons"
+},
+"champagne-taittinger": {
+"src": "https://www.google.com/s2/favicons?domain=www.taittinger.com&sz=128",
+"origine": "icône du site www.taittinger.com"
+},
+"brioche-pasquier": {
+"src": "https://www.google.com/s2/favicons?domain=www.pasquier.fr&sz=128",
+"origine": "icône du site www.pasquier.fr"
 }
 }

@@ -6,7 +6,8 @@ Ordre de recherche :
   2. Wikidata, propriété « logo » (P154, fichier de Wikimedia Commons), pour l'élément
      retrouvé par identifiant officiel : LEI (P1278) ou SIREN (P1616) pour les groupes ; pour
      une marque, l'élément dont le nom correspond exactement et qui appartient au groupe
-     retrouvé (P127 propriétaire, P176 fabricant, P749 organisation mère, P1830 possède) ;
+     retrouvé (P127 propriétaire, P176 fabricant, P749 organisation mère, P1830 possède,
+     P1716 marque) ;
   3. icône du site officiel (P856 de Wikidata, ou liste des sites officiels vérifiés par les
      mentions légales), par le service d'icônes de Google, seulement si elle fait au moins
      64 pixels.
@@ -63,6 +64,9 @@ logos = {}
 for f in os.listdir(os.path.join(RACINE, "apps", "web", "public", "logos")):
     logos[os.path.splitext(f)[0]] = {"src": f"/logos/{f}", "origine": "site officiel"}
 
+# Choix manuels : l'icône du site n'est pas le logo (Coca-Cola : pictogramme noir de l'application).
+logos["coca-cola"] = {"src": "https://commons.wikimedia.org/wiki/Special:FilePath/Coca-Cola%20logo.svg?width=160", "origine": "Wikimedia Commons"}
+
 # 2a. groupes par LEI et SIREN
 qid_de = {}  # slug -> QID
 site_de = {}  # slug -> domaine officiel
@@ -98,7 +102,7 @@ qids = list(marques_de)
 for i in range(0, len(qids), 40):
     lot = qids[i:i + 40]
     q = ("SELECT ?g ?item ?lab ?logo ?site WHERE { VALUES ?g { " + " ".join(f"wd:{x}" for x in lot) + " } "
-         "{ ?item wdt:P127|wdt:P176|wdt:P749 ?g } UNION { ?g wdt:P1830 ?item } "
+         "{ ?item wdt:P127|wdt:P176|wdt:P749 ?g } UNION { ?g wdt:P1830|wdt:P1716 ?item } "
          "?item rdfs:label ?lab . FILTER(LANG(?lab) IN ('fr','en')) "
          "OPTIONAL { ?item wdt:P154 ?logo } OPTIONAL { ?item wdt:P856 ?site } }")
     res = sparql(q)
@@ -116,7 +120,10 @@ for i in range(0, len(qids), 40):
 print("logos après Wikidata :", len(logos))
 
 # 3. icône du site officiel
-for f, col_slug, col_site in (("sites_officiels_2026-10-15.csv", "brand_slug", "site"), ("sites_officiels_marques_2026-10-15.csv", "marque", "site")):
+for f, col_slug, col_site in (("sites_officiels_2026-10-15.csv", "brand_slug", "site"), ("sites_officiels_marques_2026-10-15.csv", "marque", "site"),
+                              ("sites_officiels_logos_2026-10-16.csv", "slug", "site")):
+    if not os.path.exists(os.path.join(RACINE, "pipeline", "curated", f)):
+        continue
     with open(os.path.join(RACINE, "pipeline", "curated", f), encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
             if r.get(col_site):
