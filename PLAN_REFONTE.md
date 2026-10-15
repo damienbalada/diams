@@ -126,6 +126,8 @@ couvre les faits qui ne valent que pour certains produits (pas chaque produit un
   66 preuves : 57 exploitations, 8 offres végétales, Tossolia entièrement végétale).
 - [x] C4 — registres officiels (15/10) : Autorité de la concurrence, jeu de données officiel des
   décisions (lot 101 : 17 sanctions depuis le 15/10/2021, 914 groupes « cherché sans résultat ») ;
-  Commission européenne déjà couverte (16 décisions). DGCCRF (economie.gouv.fr, 403) et
-  Légifrance (403) inaccessibles aux robots ; le jeu ouvert de la CNIL (data.gouv.fr) ne donne que
-  des totaux annuels, sans nom : non exploitable. Égapro fait.
+  Commission européenne déjà couverte (16 décisions). Nouvelle tentative (15/10) : DGCCRF
+  lisible par le vérificateur identifié (lot 105 : 5 amendes pour retards de paiement) ; Légifrance
+  refuse le vérificateur, la CNIL est en panne (503) ; le jeu ouvert de la CNIL ne donne que des
+  totaux annuels, sans nom. Rapports retrouvés : Colgate, Coty, Sodiaal, De'Longhi (anglais) ;
+  Avril et Pierre Fabre lus (rapports narratifs, consignés). Quota de l'Insee toujours atteint. Égapro fait.

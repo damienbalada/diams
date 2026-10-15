@@ -169,13 +169,13 @@ def verify_hatvp(row, client: httpx.Client, sirens: dict[str, str | None]) -> Ve
 ESEF_KEYWORDS = {
     "INV_FOSSIL_FINANCING": [r"fossile"],
     "INV_RESPONSIBLE_POLICY": [r"exclu"],
-    "LAB_GENDER_PAYGAP": [r"[ée]cart|gap", r"r[ée]mun[ée]ration|salari|pay", r"femmes?|hommes?|genres?|gender|women"],
+    "LAB_GENDER_PAYGAP": [r"[ée]cart|gap", r"r[ée]mun[ée]ration|salari|pay", r"femmes?|hommes?|genres?|gender|women|female"],
     # « ratio de rémunération annuelle totale » : intitulé ESRS S1-16, défini par rapport à la médiane.
     "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian|r[ée]mun[ée]ration annuelle totale|annual total remuneration|total remuneration ratio"],
     "GOV_BOARD_GENDER": [r"femmes?|administratrices?|f[ée]minisation|f[ée]minin|wom[ae]n|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b|/€m sales"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b|/€m sales|per \$\s?1\s?M\b"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
@@ -576,7 +576,7 @@ _SANCTION_VT = re.compile(r"amendes? de (?:plus de )?([\d ]+(?:,\d+)?) (M|Md)€
 _AMOUNT = r"\d{1,3}(?:[ ,.\u00a0\u202f]\d{3})*(?:[.,]\d+)?"
 _SCALE_WORD = r"billion|million|milliards?|millions?"
 _EUR_LEAD = re.compile(rf"(?:€|\bEUR)\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?", re.I)
-_EUR_TRAIL = re.compile(rf"(?<![\d,.])({_AMOUNT})\s?(?:({_SCALE_WORD})\s?)?(?:d'\s?)?euros?\b", re.I)
+_EUR_TRAIL = re.compile(rf"(?<![\d,.])({_AMOUNT})\s?(?:({_SCALE_WORD})\s?)?(?:d'\s?)?(?:euros?\b|€)", re.I)
 _SCALE = {"billion": 1e9, "million": 1e6, "milliard": 1e9, "milliards": 1e9, "millions": 1e6}
 
 
@@ -777,6 +777,11 @@ def document_text(url: str, client: httpx.Client) -> str:
     # bibliothèque HTTP ; la SEC exige le sien.
     ua = UA if "sec.gov" in url else {"User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)"}
     r = client.get(url, timeout=300, follow_redirects=True, headers=ua)
+    if r.status_code == 403:
+        # Refus ponctuel au premier appel (DGCCRF) : une seule nouvelle demande, même identité.
+        import time
+        time.sleep(3)
+        r = client.get(url, timeout=300, follow_redirects=True, headers=ua)
     r.raise_for_status()
     if url.lower().split("?")[0].endswith(".zip") or "zip" in r.headers.get("content-type", ""):
         # Paquet ESEF (dépôt AMF) : le rapport est le plus gros .xhtml du dossier reports/.

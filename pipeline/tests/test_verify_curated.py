@@ -716,3 +716,15 @@ def test_canon_accents_decomposes():
     from diams.verify_curated import _canon
     nfd = unicodedata.normalize("NFD", "sanctionne quatre sociétés")
     assert _canon("sanctionne quatre sociétés") in _canon("La décision " + nfd)
+
+
+def test_montant_suivi_du_symbole_euro():
+    from diams.verify_curated import euro_amounts
+    assert 55000.0 in euro_amounts("une amende de 55 000 € a été prononcée")
+    assert 65000.0 in euro_amounts("une amende de 65 000 euros a été prononcée")
+
+
+def test_intensite_par_million_de_dollars():
+    import re
+    from diams.verify_curated import ESEF_KEYWORDS
+    assert re.search(ESEF_KEYWORDS["ENV_GHG_INTENSITY"][1], "GHG emissions intensity METRIC VALUE (tCO2e PER $1M) Market-based 146", re.I)

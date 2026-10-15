@@ -859,8 +859,13 @@ calcul (tables de config) doit être datée et justifiée ici.
   d'écart salarial publiée par pays est signalée comme telle. Sites de marques (lot 102) : le
   propriétaire est attesté par son SIREN **ou** sa raison sociale dans les mentions légales (173
   sites, liste publiée) ; 66 faits du pilier animal. Sanctions : jeu de données officiel des
-  décisions de l'Autorité de la concurrence (lot 101). Sources écartées : DGCCRF et Légifrance
-  (accès refusé aux robots), jeu ouvert de la CNIL (totaux sans nom).
+  décisions de l'Autorité de la concurrence (lot 101) et sanctions publiées par la DGCCRF (lot 105 :
+  127 pages lues sur le plan du site officiel, 5 sociétés de la base retrouvées par leur SIRET, toutes
+  pour retards de paiement aux fournisseurs ; publications temporaires, donc aucune ligne « cherché sans
+  résultat »). Les outils s'identifient comme vérificateur DIAMS : certains sites refusent l'en-tête
+  générique d'un navigateur mais acceptent cette identité déclarée. Sources écartées : Légifrance et la
+  CNIL (refus au vérificateur, panne), jeu ouvert de la CNIL (totaux sans nom), sites refusant le
+  vérificateur (Hasbro, Newell, Suntory, Unilever : 403), pages sans texte lisible (Mattel).
 - **0.8.1 (15/10/2026)** — Décision de l'éditeur : trois niveaux, groupe, marque et produits, pour
   tout le site (section 0). Nouvel indicateur « Produits 100 % végétaux proposés »
   (\`ANI_OFFRE_VEGETALE\`, niveau produit) ; \`ANI_ANIMAL_FREE\` devient « Marque entièrement
