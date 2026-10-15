@@ -56,7 +56,7 @@ test("solidité d'un pilier : d'après les seules sources utilisées", () => {
 });
 
 test("valeurs courtes", () => {
-  assert.equal(valeurCourte("ANI_EXPLOITATION", null, preuve("x", { excerpt: "… — recours à l'exploitation animale (lait)." })), "Oui (lait)");
+  assert.equal(valeurCourte("ANI_EXPLOITATION", null, preuve("x", { excerpt: "… — recours à l'exploitation animale (lait)." })), "Vend des produits d'origine animale : lait");
   assert.equal(valeurCourte("LAB_GENDER_PAYGAP", "%", preuve("x", { value_numeric: -8 })), "8 % en faveur des femmes");
   assert.equal(valeurCourte("ENV_GHG_TREND", "%/an", preuve("x", { value_numeric: -7.3 })), "−7,3 % par an");
 });

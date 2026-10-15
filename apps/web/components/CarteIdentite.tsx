@@ -185,7 +185,7 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
   const etatCle = exploitee ? "alerte" : niveauGroupe ? "documente" : k ? k.etat : "aucune_info";
   const valeurCle = niveauGroupe
     ? r!.exploitation > 0
-      ? `Oui, documentée chez ${r!.exploitation} marque${r!.exploitation > 1 ? "s" : ""} sur ${r!.total}`
+      ? `Produits d'origine animale chez ${r!.exploitation} marque${r!.exploitation > 1 ? "s" : ""} sur ${r!.total}`
       : `${r!.vegetale} marque${r!.vegetale > 1 ? "s" : ""} entièrement végétale${r!.vegetale > 1 ? "s" : ""} sur ${r!.total}`
     : k ? k.valeur : "Aucune information";
   const g = p.faits.filter((f) => f.niveau === "groupe");

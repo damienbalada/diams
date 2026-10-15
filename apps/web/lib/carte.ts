@@ -56,7 +56,7 @@ export interface Fait {
   nom: string;
   pilier: string;
   etat: Etat;
-  /** Valeur courte, dans l'échelle de la source (« 92/100 », « Note A », « Oui (lait) »). */
+  /** Valeur courte, dans l'échelle de la source (« 92/100 », « Note A », « Vend des produits d'origine animale : lait »). */
   valeur: string;
   contexte: boolean;
   /** Niveau auquel le fait est établi : le groupe (ou la société propriétaire), la marque, ou
@@ -113,7 +113,13 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
   const x = p.excerpt ?? "";
   const v = num(p.value_numeric);
   switch (code) {
-    case "ANI_EXPLOITATION": return `Oui (${m1(/exploitation animale \(([^)]+)\)/, x) ?? m1(/APE\) [\d.]+[A-Z] - ([^»]+)»/, x)?.toLowerCase() ?? "documentée"})`;
+    case "ANI_EXPLOITATION": {
+      // Ce que la marque vend d'origine animale (« fromage », « cuir »), ou l'activité déclarée au registre.
+      const ape = m1(/APE\) [\d.]+[A-Z] - ([^»]+)»/, x);
+      if (ape) return `Activité déclarée au registre : ${ape.trim().toLowerCase()}`;
+      const produit = m1(/exploitation animale \(([^)]+)\)/, x);
+      return produit ? `Vend des produits d'origine animale : ${produit}` : "Exploitation animale documentée";
+    }
     case "ANI_ANIMAL_FREE": return "Non — marque entièrement végétale (prouvé)";
     case "ANI_OFFRE_VEGETALE": return "Oui, au moins un produit 100 % végétal";
     case "ANI_FUR_FREE": return "Membre du label « sans fourrure »";
