@@ -116,7 +116,7 @@ couvre les faits qui ne valent que pour certains produits (pas chaque produit un
   rapprochés, liens ambigus exclus — Aldi, Amazon/Whole Foods, Suntory, Axa IM, Crédit Mutuel AM).
 - [x] C2 — rapports réglementés des groupes cotés (15/10) : lots 100 (ESEF, AMF, sites : ~113
   preuves, ~60 groupes), 103 (Essity, Richemont, Puig, Beiersdorf, LDC : 27 preuves) et 104
-  (groupes américains : 10-K, circulaires DEF 14A, rapports de durabilité : 15 preuves) ; ~470
+  (groupes américains : 10-K, circulaires DEF 14A, rapports de durabilité : 15 preuves) ; ~440
   lectures consignées (« rapport lu, donnée absente », « publié sous une autre forme »).
   Restent sans rapport public 2025 lisible : Casino (DEU 2025 non publié, restructuration),
   Avril, Pierre Fabre, Sodiaal, Auchan (ELO), Carambar, Cofigeo ; sites refusant les robots
