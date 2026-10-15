@@ -408,7 +408,7 @@ export function CarteIdentite({
           {scan.produit.image ? <img src={scan.produit.image} alt="" className="ci-scan-img" /> : <span className="ci-scan-img ci-prod-vide" aria-hidden="true">🛒</span>}
           <div className="ci-scan-t">
             <span className="ci-k">PRODUIT SCANNÉ · CODE {scan.produit.code}</span>
-            <strong>{scan.produit.nom}{scan.produit.quantite ? ` · ${scan.produit.quantite}` : ""}</strong>
+            <strong>{scan.produit.nom}{scan.produit.quantite && /\d\s*[a-zA-Zµ]/.test(scan.produit.quantite) ? ` · ${scan.produit.quantite}` : ""}</strong>
             <span className="ci-small ci-faint">
               {scan.phrase}
               {" "}· d'après <a className="ci-lien" href={scan.produit.lien} target="_blank" rel="noopener noreferrer">{scan.produit.base} ↗</a>

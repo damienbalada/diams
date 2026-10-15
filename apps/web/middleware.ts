@@ -27,6 +27,20 @@ const challenge = (realm: string) =>
 export function middleware(req: NextRequest) {
   const auth = req.headers.get("authorization");
 
+  // Pré-vérification CORS de l'API de l'appli (le navigateur l'envoie sans identifiants) : elle ne
+  // donne accès à rien, la vraie requête reste soumise au mot de passe ci-dessous.
+  if (req.method === "OPTIONS" && req.nextUrl.pathname.startsWith("/api/")) {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Authorization, Accept",
+        "Access-Control-Max-Age": "86400",
+      },
+    });
+  }
+
   if (isAdminPath(req.nextUrl.pathname)) {
     if (!process.env.ADMIN_PASSWORD) {
       return new NextResponse(
