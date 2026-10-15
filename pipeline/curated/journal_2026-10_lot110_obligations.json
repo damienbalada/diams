@@ -1,0 +1,79 @@
+[
+ {
+  "slug": "bretagne-viandes-distribution",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par BRETAGNE VIANDES DISTRIBUTION (SIREN 420259970), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "brasserie-lancelot",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par BRASSERIE LANCELOT (SIREN 950471177), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "cafes-meo",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par MEO SOC (SIREN 459501219), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "markal",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par MARKAL (SIREN 436180582), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "celnat",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par CELNAT (SIREN 585650096), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "ets-favrichon-et-vignon",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par ETS FAVRICHON ET VIGNON (SIREN 405782459), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "distillerie-dillon",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par DISTILLERIE DILLON (SIREN 466203338), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "eaux-saint-amand",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par SOC DES EAUX MINERALES DE SAINT AMAND (SIREN 678800749), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "royal-saveurs",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par ROYAL SAVEURS (SIREN 423114669), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "cave-de-lugny",
+  "code": "LAB_EGAPRO_INDEX",
+  "outcome": "autre_forme",
+  "detail": "Fichier officiel des déclarations Égapro (ministère du Travail) lu : déclaration 2025 faite par SOC COOPERATIVE VINICOLE LUGNY L'AURORE (SIREN 778593103), avec la mention « NC » : index non calculable. La loi le prévoit, notamment quand les effectifs comparables sont insuffisants ; ce n'est ni un défaut de publication ni une note.",
+  "source_url": "https://egapro.travail.gouv.fr/index-egapro/recherche"
+ },
+ {
+  "slug": "hm-group",
+  "code": "LAB_GENDER_PAYGAP",
+  "outcome": "autre_forme",
+  "detail": "Rapport annuel et de durabilité 2025 de H&M lu (ESRS S1-16) : l'écart est publié sous forme de rapport entre salaires (« The gender pay gap, expressed as a percentage of the average pay level of male employees, amounted to 99.7 percent »), pas comme un écart en pourcentage ; nous ne le convertissons pas.",
+  "source_url": "https://hmgroup.com/wp-content/uploads/2026/03/HM-Group-Annual-and-sustainability-report-2025.pdf"
+ }
+]

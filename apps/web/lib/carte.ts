@@ -269,7 +269,9 @@ export function construireCarte(
     }
     const lu = js.find((j) => j.outcome === "absence_confirmee" || j.outcome === "autre_forme");
     if (lu?.outcome === "autre_forme") {
-      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "autre_forme", valeur: "Publié sous une autre forme", contexte, obligation, note: lu.detail, niveau: niveauDe(i, null, estMarque) };
+      // Égapro « NC » : déclaration faite, index non calculable (cas prévu par la loi).
+      const nc = /index non calculable/.test(lu.detail ?? "");
+      return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "autre_forme", valeur: nc ? "Déclaré : index non calculable" : "Publié sous une autre forme", contexte, obligation, note: lu.detail, niveau: niveauDe(i, null, estMarque) };
     }
     if (lu && obligation.length) {
       return { code: i.code, nom: i.name, pilier: i.dimension_code, etat: "obligatoire_absent", valeur: "Obligatoire, non publié", contexte, obligation, note: lu.detail, niveau: niveauDe(i, null, estMarque) };
