@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <strong>Index général des marques</strong>
             </a>
             <nav className="row" style={{ gap: 14 }} aria-label="Navigation principale">
-              <a className="muted small" href="/#index">Marques</a>
+              <a className="muted small" href="/marques">Marques</a>
               <a className="muted small" href="/pipeline">Sources</a>
               <a className="muted small" href="/methodologie">Méthodologie</a>
             </nav>

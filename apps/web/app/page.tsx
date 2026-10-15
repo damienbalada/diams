@@ -18,6 +18,7 @@ const LOGOS = { get: (slug: string) => logoDe(slug)?.src ?? null };
 export default async function HomePage() {
   let entities: Awaited<ReturnType<typeof listEntities>> = [];
   let sectorName = new Map<string, string>();
+  let sectorCode = new Map<string, string>();
   let stats: { evidence: number; sources: number } | null = null;
   let error: string | null = null;
   let connues: Vitrine[] = [];
@@ -33,6 +34,7 @@ export default async function HomePage() {
     connues = CONNUES.map((x) => v.get(x)).filter((x): x is Vitrine => !!x);
     recherchees = RECHERCHEES.map((x) => v.get(x)).filter((x): x is Vitrine => !!x);
     sectorName = new Map(sectors.map((x) => [x.id, x.name]));
+    sectorCode = new Map(sectors.map((x) => [x.name, x.code]));
   } catch (e) {
     error = (e as Error).message;
   }
@@ -60,20 +62,6 @@ export default async function HomePage() {
     bySector.set(k, [...(bySector.get(k) ?? []), e]);
   }
   const sectorsSorted = [...bySector.entries()].sort((a, b) => a[0].localeCompare(b[0], "fr"));
-
-  const Row = (e: any) => {
-    const group = rootName(e);
-    return (
-      <a key={e.slug} className="ent-row" href={`/entreprise/${e.slug}`}>
-        <span className="ent-kind" aria-hidden="true">{e.is_brand ? "🏷️" : "🏢"}</span>
-        <span className="ent-main">
-          <span className="ent-name">{name(e)}</span>
-          {group && <small className="muted">{group}</small>}
-        </span>
-        <span className="chev" aria-hidden="true">›</span>
-      </a>
-    );
-  };
 
   const Carte = (v: Vitrine, rang?: number) => (
     <a key={v.slug} className="vit-card" href={`/entreprise/${v.slug}`}>
@@ -151,7 +139,7 @@ export default async function HomePage() {
             <h2 className="section-title" id="rayons">Parcourir par secteur</h2>
             <div className="rayons-tuiles">
               {sectorsSorted.map(([sector, list], i) => (
-                <a key={sector} className="rayon-tuile" href={`#rayon-${i}`}>
+                <a key={sector} className="rayon-tuile" href={sectorCode.get(sector) ? `/marques/${sectorCode.get(sector)}` : "/marques"}>
                   <strong>{sector}</strong>
                   <span>{list.length} marques et groupes</span>
                 </a>
@@ -187,18 +175,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section id="index">
-          <h2 className="section-title">Toutes les marques, par secteur</h2>
-          <p className="muted small" style={{ margin: "0 0 12px" }}>Par ordre alphabétique : aucun classement.</p>
-          {sectorsSorted.map(([sector, list], i) => (
-            <details className="pending" key={sector} id={`rayon-${i}`}>
-              <summary>
-                <span>{sector} <span className="muted">{list.length}</span></span>
-              </summary>
-              <div className="ent-list">{list.map(Row)}</div>
-            </details>
-          ))}
-        </section>
       </EntitySearch>
 
       <p className="muted small" style={{ textAlign: "center", marginTop: 8 }}>

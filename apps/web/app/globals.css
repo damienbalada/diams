@@ -512,3 +512,8 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .ci-date { font-size: 12px; }
 .ci-ind-nom { font-size: 12px; }
 .ci-vide-note, .ci-ind-note { font-size: 12.5px; }
+
+/* Index d'un secteur : une page par lettre */
+.lettres { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
+.lettre { min-width: 44px; height: 44px; display: grid; place-items: center; border-radius: 10px; background: var(--panel); border: 1px solid var(--border-strong); font-weight: 700; }
+.lettre.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
