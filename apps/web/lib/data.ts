@@ -66,7 +66,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v166"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v167"], { revalidate: 600 });
 
 type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
 
@@ -587,7 +587,9 @@ export async function getVitrines(slugs: string[]): Promise<Vitrine[]> {
       name: String(e.display_name ?? e.legal_name),
       group: r.id === e.id ? null : String(r.display_name ?? r.legal_name),
       faits: tous.length,
-      exploitation: tous.includes("ANI_EXPLOITATION") && !propres.includes("ANI_ANIMAL_FREE"),
+      // Même règle que la fiche : l'exploitation animale se prouve marque par marque, jamais
+      // par la seule preuve du groupe (une marque de mode peut ne pas vendre de cuir).
+      exploitation: propres.includes("ANI_EXPLOITATION") && !propres.includes("ANI_ANIMAL_FREE"),
       vegetale: propres.includes("ANI_ANIMAL_FREE"),
       sanction: tous.includes("GOV_SANCTIONS"),
     };

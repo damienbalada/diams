@@ -734,7 +734,8 @@ def test_mots_animaux_francais_et_anglais():
     import re
     from diams.verify_curated import ESEF_KEYWORDS
     kw = ESEF_KEYWORDS["ANI_EXPLOITATION"][0]
-    for oui in ("Les œufs bio de Loué", "des oeufs frais", "specialty cheese brand", "salted butter", "Salmon Grillers", "brand fish"):
+    for oui in ("Les œufs bio de Loué", "des oeufs frais", "specialty cheese brand", "salted butter", "Salmon Grillers", "brand fish",
+                "für Fisch- und Fleischprodukte", "Milch und Käse"):
         assert re.search(kw, oui, re.I), oui
     for non in ("Almond Butter Protein Bars", "cocoa butter", "peanut butter"):
         assert not re.search(kw, non, re.I), non

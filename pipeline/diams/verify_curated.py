@@ -201,6 +201,8 @@ ESEF_KEYWORDS = {
                          # désigne aussi une crème cosmétique.
                          r"|\bcheeses?\b|\bbutter\b(?<!nut butter)(?<!almond butter)(?<!peanut butter)(?<!cocoa butter)(?<!shea butter)"
                          r"|yogh?urts?\b|\bfish\b|\bsalmon\b|seafood"
+                         # Rapports en allemand (16/10/2026, Schwarz) : viande, poisson, lait, fromage, œufs.
+                         r"|fleisch|\bfisch|\bmilch|\bkäse|\beier\b"
                          # « produits carnés » (viande) et « produits de la mer » (poissons, coquillages),
                          # ajoutés le 15/10/2026 pendant la relecture des marques (vague 6).
                          r"|produits carn[ée]s|produits de la mer"
