@@ -34,3 +34,26 @@ for src, ks in par_src.items():
             print("écarté :", k, "←", dom); del logos[k]; n += 1
 json.dump(logos, open(P, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 print(n, "écartés ;", len(logos), "logos")
+
+# Règle 3 (16/10/2026) : l'icône d'un site n'est gardée pour une MARQUE que si son nom figure dans
+# l'adresse du site (Wanchai Ferry sur generalmills.com, Ajax sur colgatepalmolive.fr : écartés).
+import csv as _csv
+noms = {}
+for l in open(r"C:\Users\damie\AppData\Local\Temp\claude\C--Users-damie-Downloads-claude-awareness-score\42ef682f-dd00-400c-91de-21ba754a28c1\scratchpad\db_full.tsv", encoding="utf-8"):
+    p = l.rstrip("\n").split("\t")
+    noms[p[0]] = (p[2] or p[1], p[3])
+n3 = 0
+for k in list(logos):
+    v = logos[k]
+    if not v["origine"].startswith("icône du site") or k not in noms or noms[k][1] != "M":
+        continue
+    dom = plain(v["origine"].split("icône du site", 1)[1].strip())
+    mots = [m for m in re.findall(r"[a-z0-9]+", unicodedata.normalize("NFKD", noms[k][0]).encode("ascii", "ignore").decode().lower()) if len(m) >= 3]
+    # Le nom dans l'adresse, ou l'adresse dans le nom (rebelle.co pour « Rebellesnacks »).
+    racine = re.sub(r"^www", "", dom)
+    racine = re.split(r"(?:com|fr|ch|co|bzh|be|de|es|it|net|org|eu|uk)$", racine)[0]
+    nom_colle = "".join(mots)
+    if mots and not any(m in dom for m in mots) and not (len(racine) >= 5 and racine in nom_colle):
+        print("écarté (site d'un autre nom) :", k, "←", dom); del logos[k]; n3 += 1
+json.dump(dict(sorted(logos.items())), open(P, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+print(n3, "écartés par la règle 3 ;", len(logos), "logos")
