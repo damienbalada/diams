@@ -10,6 +10,8 @@ const CONNUES = ["nutella", "coca-cola", "president", "zara", "lidl", "nike", "k
 // « Les plus recherchées » : classement SIMULÉ tant que DIAMS n'a pas d'utilisateurs ; à remplacer par
 // les recherches réellement mesurées. La page le dit en toutes lettres.
 const RECHERCHEES = ["shein", "nutella", "mcdonalds", "zara", "carrefour", "danone", "haribo-marque", "amazon"];
+// Logos officiels (site de la marque, ou Wikimedia Commons à défaut), copiés dans public/logos.
+const LOGOS: Record<string, string> = { "amazon": "/logos/amazon.svg", "carrefour": "/logos/carrefour.png", "coca-cola": "/logos/coca-cola.png", "danone": "/logos/danone.ico", "evian": "/logos/evian.png", "haribo-marque": "/logos/haribo-marque.png", "ikea": "/logos/ikea.svg", "kinder": "/logos/kinder.png", "lidl": "/logos/lidl.svg", "loreal": "/logos/loreal.png", "mcdonalds": "/logos/mcdonalds.png", "nike": "/logos/nike.png", "nutella": "/logos/nutella.jpg", "president": "/logos/president.png", "shein": "/logos/shein.png", "zara": "/logos/zara.svg" };
 const TEINTES = ["#6c3bff", "#1f8a4c", "#2563c9", "#b4532a", "#0e7a8a", "#a86a12", "#b8325a", "#4a43c4"];
 const teinte = (s: string) => TEINTES[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % TEINTES.length];
 
@@ -77,7 +79,11 @@ export default async function HomePage() {
     <a key={v.slug} className="vit-card" href={`/entreprise/${v.slug}`}>
       <span className="vit-top">
         {rang !== undefined && <span className="vit-rang">{rang}</span>}
-        <span className="vit-logo" aria-hidden="true" style={{ background: teinte(v.name) }}>{v.name.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 1).toUpperCase()}</span>
+        {LOGOS[v.slug] ? (
+          <span className="vit-logo vit-logo-img" aria-hidden="true"><img src={LOGOS[v.slug]} alt="" loading="lazy" /></span>
+        ) : (
+          <span className="vit-logo" aria-hidden="true" style={{ background: teinte(v.name) }}>{v.name.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 1).toUpperCase()}</span>
+        )}
         <span>
           <span className="vit-name">{v.name}</span>
           <br />
