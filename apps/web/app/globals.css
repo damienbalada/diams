@@ -11,8 +11,8 @@
   --border: #e7e3f6;
   --border-strong: #d6d0ee;
   --text: #160f2e;
-  --muted: #6a6485;
-  --faint: #a49dc0;
+  --muted: #5c5676;
+  --faint: #6c6689;
   --accent: #6c3bff;
   --accent-ink: #ffffff;
   --a: #08b56b; --b: #8fd117; --c: #ffb300; --d: #ff6a2c; --e: #ff2d68;
@@ -361,10 +361,10 @@ details.pending[open] > summary::after { content: "masquer"; }
 .ci-niv-t a { text-decoration: underline; }
 
 /* Solidité de la source : étiquette à contour, texte en toutes lettres */
-.ci-sol { display: inline-block; font-size: 11px; line-height: 1.3; font-weight: 600; padding: 1px 7px; border: 1px solid currentColor; border-radius: 999px; background: transparent; margin-right: 4px; vertical-align: 1px; white-space: normal; }
-.ci-sol-officielle { color: #138a5a; }
-.ci-sol-reconnue { color: #3f67c5; }
-.ci-sol-declarative { color: #9a7417; }
+.ci-sol { display: inline-block; font-size: 12px; line-height: 1.3; font-weight: 600; padding: 1px 7px; border: 1px solid currentColor; border-radius: 999px; background: transparent; margin-right: 4px; vertical-align: 1px; white-space: normal; }
+.ci-sol-officielle { color: #0b6b44; }
+.ci-sol-reconnue { color: #2f55b0; }
+.ci-sol-declarative { color: #7a5a0c; }
 
 /* Piliers déroulants : teinte du pilier, ouverture animée, chevron qui pivote */
 :root { interpolate-size: allow-keywords; }
@@ -499,3 +499,16 @@ details.pending[open] > summary::after { content: "masquer"; }
 .ci-v-rep, .ci-ind-rep { font-size: 12px; color: var(--muted); }
 @media (max-width: 480px) { .ci-v-bloc { padding-left: 0; } }
 .ci-row > summary .ci-v-bloc .ci-v { padding-left: 0; }
+
+/* Accessibilité (16/10/2026) : lien d'évitement, focus clavier visible partout, petits textes à 12 px minimum */
+.aller-contenu { position: absolute; left: 12px; top: -48px; z-index: 10; background: var(--accent); color: var(--accent-ink); padding: 10px 14px; border-radius: 10px; font-weight: 700; }
+.aller-contenu:focus { top: 12px; }
+#contenu:focus { outline: none; }
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.ci-k { font-size: 12px; }
+.ci-badge { font-size: 12px; }
+.ci-p { font-size: 12.5px; }
+.ci-date { font-size: 12px; }
+.ci-ind-nom { font-size: 12px; }
+.ci-vide-note, .ci-ind-note { font-size: 12.5px; }

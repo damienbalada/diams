@@ -22,18 +22,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <body>
+        <a className="aller-contenu" href="#contenu">Aller au contenu</a>
         <div className="container">
-          <header className="row between" style={{ marginBottom: 24 }}>
+          <header className="row between wrap" style={{ marginBottom: 24, rowGap: 8 }}>
             <a href="/">
               <strong>Index général des marques</strong>
             </a>
-            <span className="row" style={{ gap: 14 }}>
+            <nav className="row" style={{ gap: 14 }} aria-label="Navigation principale">
               <a className="muted small" href="/#index">Marques</a>
               <a className="muted small" href="/pipeline">Sources</a>
               <a className="muted small" href="/methodologie">Méthodologie</a>
-            </span>
+            </nav>
           </header>
-          {children}
+          <div id="contenu" tabIndex={-1}>{children}</div>
         </div>
       </body>
     </html>
