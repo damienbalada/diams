@@ -847,6 +847,10 @@ def approve(rows, reviewer: str = "auto:verify_curated") -> int:
             resp = c.patch(f"{base}/evidence", headers={**h, "Prefer": "return=representation"},
                            params={"entity_id": f"eq.{ents[r.entity_slug]}", "indicator_id": f"eq.{inds[r.indicator_code]}",
                                    "source_id": f"eq.{srcs[r.source_code]}", "observed_on": f"eq.{r.observed_on}",
+                                   # La citation vérifiée, et elle seule : sans ce filtre, une ancienne ligne
+                                   # en attente (même marque, indicateur, source, date) serait approuvée à sa
+                                   # place (lot 108, 15/10/2026).
+                                   "excerpt": f"eq.{r.excerpt or ''}",
                                    "review_status": "eq.pending"},
                            json={"review_status": "approved", "reviewer": reviewer})
             resp.raise_for_status()
