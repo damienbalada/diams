@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const payload = await getScorePayload(slug).catch(() => null);
   const name = payload?.entity?.name;
   return name
-    ? { title: name, description: `${name} : carte d'identité DIAMS — les faits publiés, pilier par pilier, chacun relié à sa source et daté. Aucune note, que des faits.` }
+    ? { title: name, description: `${name} : carte d'identité sur l'Index général des marques — les faits publiés, pilier par pilier, chacun relié à sa source et daté. Aucune note, que des faits.` }
     : { title: "Entité introuvable" };
 }
 

@@ -4,7 +4,7 @@
  * Le site ne note pas : il signale. Pour chaque indicateur qui s'y prête, un seuil dit quand un
  * fait documenté mérite une alerte (rouge, ⚠️) ou un point de vigilance (orange). Chaque seuil
  * s'appuie sur une référence qu'on peut citer (loi, directive, moyenne publiée du classement) ;
- * quand il n'en existe pas, la règle le dit : « choix de DIAMS ». La règle est affichée à côté
+ * quand il n'en existe pas, la règle le dit : « choix de l'Index ». La règle est affichée à côté
  * de chaque signal, pour que le lecteur la juge lui-même.
  *
  * Pas de seuil pour les données qui dépendent trop du secteur (intensité carbone, intensité
@@ -34,7 +34,7 @@ const note = (re: RegExp, s: string) => s.match(re)?.[1] ?? null;
 
 /** Règles affichées dans la méthodologie et la légende, par indicateur. */
 export const REGLES: Record<string, { alerte: string; vigilance?: string; reference: string }> = {
-  ANI_EXPLOITATION: { alerte: "un produit issu de l'exploitation animale est documenté", vigilance: "exploitation non documentée dans un secteur où elle est la règle", reference: "choix de DIAMS" },
+  ANI_EXPLOITATION: { alerte: "un produit issu de l'exploitation animale est documenté", vigilance: "exploitation non documentée dans un secteur où elle est la règle", reference: "choix de l'Index" },
   ANI_BBFAW_TIER: { alerte: "niveau 6 sur 6", vigilance: "niveau 5 sur 6", reference: "échelle du classement BBFAW : niveau 6, aucun signe que le bien-être animal soit à l'ordre du jour ; niveau 5, à l'ordre du jour mais peu de preuves de mise en œuvre" },
   ENV_CDP_CLIMATE: { alerte: "note F", vigilance: "note D ou D-", reference: "échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond" },
   WAT_CDP: { alerte: "note F", vigilance: "note D ou D-", reference: "échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond" },
@@ -42,19 +42,19 @@ export const REGLES: Record<string, { alerte: string; vigilance?: string; refere
   ENV_SBTI_VALIDATED: { alerte: "—", vigilance: "engagement retiré", reference: "export de la SBTi : l'entreprise s'était engagée à fixer un objectif et ne l'a pas fait dans le délai" },
   ENV_GREENWASHING: { alerte: "décision d'une autorité", reference: "décision publique d'une autorité" },
   PLA_POLLUTER: { alerte: "parmi les dix plus gros pollueurs plastique", reference: "audit mondial des marques de Break Free From Plastic" },
-  PLA_REDUCTION: { alerte: "plastique vierge en hausse", reference: "choix de DIAMS : toute hausse" },
+  PLA_REDUCTION: { alerte: "plastique vierge en hausse", reference: "choix de l'Index : toute hausse" },
   SUP_FTI_SCORE: { alerte: "moins de 10 % des points", vigilance: "moins de 26 % des points", reference: "Fashion Transparency Index 2023 : moyenne des 250 marques, 26 % ; 28 % des marques sont entre 0 et 10 %" },
   SUP_LIVING_WAGE: { alerte: "note E", vigilance: "note D", reference: "échelle du Fashion Checker : E, la marque ne verse ni ne prétend verser de salaire vital" },
-  SUP_KNOWTHECHAIN: { alerte: "moins de 10 sur 100", vigilance: "moins de 20 sur 100", reference: "KnowTheChain 2023, alimentation et boissons : moyenne 16 sur 100, la moitié des entreprises sous 10 ; seuil de vigilance : choix de DIAMS" },
+  SUP_KNOWTHECHAIN: { alerte: "moins de 10 sur 100", vigilance: "moins de 20 sur 100", reference: "KnowTheChain 2023, alimentation et boissons : moyenne 16 sur 100, la moitié des entreprises sous 10 ; seuil de vigilance : choix de l'Index" },
   LAB_EGAPRO_INDEX: { alerte: "moins de 75 sur 100", vigilance: "moins de 85 sur 100", reference: "code du travail : sous 75, l'entreprise doit prendre des mesures de correction ; sous 85, elle doit fixer des objectifs de progression" },
-  LAB_GENDER_PAYGAP: { alerte: "écart de 15 % ou plus", vigilance: "écart de 5 % ou plus", reference: "directive européenne 2023/970 : à partir de 5 %, l'employeur doit évaluer l'écart avec les représentants du personnel ; alerte : trois fois ce seuil, choix de DIAMS" },
-  LAB_CEO_PAY_RATIO: { alerte: "300 fois ou plus", vigilance: "100 fois ou plus", reference: "choix de DIAMS : 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle" },
+  LAB_GENDER_PAYGAP: { alerte: "écart de 15 % ou plus", vigilance: "écart de 5 % ou plus", reference: "directive européenne 2023/970 : à partir de 5 %, l'employeur doit évaluer l'écart avec les représentants du personnel ; alerte : trois fois ce seuil, choix de l'Index" },
+  LAB_CEO_PAY_RATIO: { alerte: "300 fois ou plus", vigilance: "100 fois ou plus", reference: "choix de l'Index : 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle" },
   GOV_SANCTIONS: { alerte: "sanction d'une autorité", reference: "décision publique d'une autorité" },
   GOV_BOARD_GENDER: { alerte: "moins de 20 % de femmes", vigilance: "moins de 40 % de femmes", reference: "loi Copé-Zimmermann : 40 % au minimum dans les conseils des sociétés cotées en France ; alerte : la moitié de ce minimum" },
   GOV_BOARD_INDEP: { alerte: "—", vigilance: "moins d'un tiers d'indépendants", reference: "code Afep-Medef : au moins un tiers d'indépendants, même dans une société contrôlée" },
   TAX_EFFECTIVE_RATE: { alerte: "—", vigilance: "taux effectif sous 15 %", reference: "impôt minimum mondial de l'OCDE : 15 % ; un taux bas une année peut aussi venir de pertes ou de crédits d'impôt" },
   GEO_RUSSIA_EXIT: { alerte: "activité poursuivie en Russie", vigilance: "activité réduite ou investissements gelés", reference: "statuts de la base Leave Russia (KSE Institute)" },
-  GEO_CONFLICT_TIES: { alerte: "implication documentée", reference: "choix de DIAMS : toute implication documentée par une source publique" },
+  GEO_CONFLICT_TIES: { alerte: "implication documentée", reference: "choix de l'Index : toute implication documentée par une source publique" },
 };
 
 /** Signal d'un fait, ou null s'il ne franchit aucun seuil. */

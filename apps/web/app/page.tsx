@@ -7,7 +7,7 @@ export const maxDuration = 60;
 
 // Marques et groupes très connus du grand public, choisis à la main (aucun classement de mérite).
 const CONNUES = ["nutella", "coca-cola", "president", "zara", "lidl", "nike", "kinder", "evian", "loreal", "mcdonalds", "shein", "ikea"];
-// « Les plus recherchées » : classement SIMULÉ tant que DIAMS n'a pas d'utilisateurs ; à remplacer par
+// « Les plus recherchées » : classement SIMULÉ tant que le site n'a pas d'utilisateurs ; à remplacer par
 // les recherches réellement mesurées. La page le dit en toutes lettres.
 const RECHERCHEES = ["shein", "nutella", "mcdonalds", "zara", "carrefour", "danone", "haribo-marque", "amazon"];
 // Logos officiels (site de la marque, ou Wikimedia Commons à défaut), copiés dans public/logos.
@@ -140,7 +140,7 @@ export default async function HomePage() {
           <section aria-labelledby="recherchees">
             <div className="vitrine-head">
               <h2 className="section-title" id="recherchees">Les plus recherchées</h2>
-              <span className="vitrine-note">Classement simulé : DIAMS vient d'ouvrir, les recherches ne sont pas encore mesurées</span>
+              <span className="vitrine-note">Classement simulé : le site vient d'ouvrir, les recherches ne sont pas encore mesurées</span>
             </div>
             <div className="vitrine">{recherchees.map((v, i) => Carte(v, i + 1))}</div>
           </section>
@@ -204,7 +204,7 @@ export default async function HomePage() {
       <p className="muted small" style={{ textAlign: "center", marginTop: 8 }}>
         <a href="/methodologie" style={{ textDecoration: "underline" }}>Méthodologie publique et versionnée</a>
         {" · "}
-        <a href="/civique" style={{ textDecoration: "underline" }}>DIAMS Civique (votes des partis)</a>
+        <a href="/civique" style={{ textDecoration: "underline" }}>Volet civique (votes des partis)</a>
       </p>
     </main>
   );

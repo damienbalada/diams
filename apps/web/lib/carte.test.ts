@@ -93,3 +93,12 @@ test("trois niveaux pour tout le site : groupe repris, marque propre, produits",
     applicableIndicators: [ind("SUP_FTI_SCORE", "SUP")], evidence: [preuve("SUP_FTI_SCORE", { value_numeric: 40 })] }, [], { estMarque: false });
   assert.equal(g.piliers[0].faits[0].niveau, "groupe");
 });
+
+test("raison d'un indicateur vide : signalement, dispense, obligation, classement externe, rien d'obligatoire", async () => {
+  const { raisonVide } = await import("./carte.ts");
+  assert.match(raisonVide({ code: "GOV_SANCTIONS", obligation: [], exemption: null }), /Rien trouvé/);
+  assert.match(raisonVide({ code: "ENV_SCOPE3_DISCLOSED", obligation: [], exemption: "Déclarée non matérielle" }), /pas d'obligation : Déclarée non matérielle/);
+  assert.match(raisonVide({ code: "SUP_VIGILANCE_PLAN", obligation: ["Loi vigilance"], exemption: null }), /obligatoire \(Loi vigilance\)/);
+  assert.match(raisonVide({ code: "SUP_FTI_SCORE", obligation: [], exemption: null }), /Non évalué/);
+  assert.match(raisonVide({ code: "PLA_RECYCLED", obligation: [], exemption: null }), /aucune obligation légale/);
+});

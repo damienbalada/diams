@@ -1,7 +1,6 @@
-# Méthodologie — DIAMS
+# Méthodologie — Index général des marques
 
-> **DIAMS** — **D**ocumenté, **I**ndépendant, **A**uditable, **M**ulticritère,
-> **S**ourcé. Depuis la version 0.8.0 (15/10/2026), **DIAMS ne note plus** : il
+> Depuis la version 0.8.0 (15/10/2026), **l'Index général des marques ne note plus** : il
 > publie la **carte d'identité** de chaque marque et de chaque groupe, faite de faits
 > sourcés, datés et vérifiés mot pour mot, et dit ce qu'il ne sait pas. La méthode
 > est publique et versionnée : c'est la condition de la confiance.
@@ -15,7 +14,7 @@ tech, automobile, restauration, énergie, banque** (France + international).
 
 **Décision de l'éditeur.** La note globale, les lettres A à E, la fiabilité globale et le
 seuil de publication sont abandonnés. Toute note additionne des faits selon des choix de
-pondération qui restent des opinions ; DIAMS publie les faits eux-mêmes et laisse chacun se
+pondération qui restent des opinions ; l'Index publie les faits eux-mêmes et laisse chacun se
 faire un avis. Toutes les marques sont publiées, avec leurs trous.
 
 **Ce que montre une fiche.** Une ligne par pilier, avec un fait clé et le nombre
@@ -86,14 +85,14 @@ La fiche ne note pas, elle signale. Quand un fait documenté franchit un seuil, 
 **⚠️ alerte** (rouge) ou **🟠 point de vigilance** (orange), en tête de fiche et sur la ligne de
 son pilier, avec la règle qui le déclenche. Chaque seuil s'appuie sur une référence qu'on peut
 citer (loi, directive, moyenne publiée du classement) ; quand il n'en existe pas, le tableau
-l'indique : « choix de DIAMS ». Deux cas s'ajoutent : une donnée obligatoire dont la lecture du
+l'indique : « choix de l'Index ». Deux cas s'ajoutent : une donnée obligatoire dont la lecture du
 rapport confirme l'absence est une alerte ; une exploitation animale présumée est un point de
 vigilance. Pas de seuil pour les données qui dépendent trop du secteur (intensité carbone,
 intensité d'eau) ni pour les données de contexte (dépenses de lobbying).
 
 | Indicateur | ⚠️ Alerte | 🟠 Vigilance | Référence |
 |---|---|---|---|
-| Exploitation animale | un produit issu de l'exploitation animale est documenté | exploitation non documentée dans un secteur où elle est la règle | choix de DIAMS |
+| Exploitation animale | un produit issu de l'exploitation animale est documenté | exploitation non documentée dans un secteur où elle est la règle | choix de l'Index |
 | Bien-être animal (BBFAW) | niveau 6 sur 6 | niveau 5 sur 6 | échelle du classement BBFAW : niveau 6, aucun signe que le bien-être animal soit à l'ordre du jour ; niveau 5, à l'ordre du jour mais peu de preuves de mise en œuvre |
 | Note climat CDP | note F | note D ou D- | échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond |
 | Note eau CDP | note F | note D ou D- | échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond |
@@ -101,19 +100,19 @@ intensité d'eau) ni pour les données de contexte (dépenses de lobbying).
 | Objectifs climat (SBTi) | — | engagement retiré | export de la SBTi : l'entreprise s'était engagée à fixer un objectif et ne l'a pas fait dans le délai |
 | Allégations environnementales trompeuses | décision d'une autorité | — | décision publique d'une autorité |
 | Pollueur plastique | parmi les dix plus gros pollueurs plastique | — | audit mondial des marques de Break Free From Plastic |
-| Plastique vierge | plastique vierge en hausse | — | choix de DIAMS : toute hausse |
+| Plastique vierge | plastique vierge en hausse | — | choix de l'Index : toute hausse |
 | Transparence de la mode (FTI) | moins de 10 % des points | moins de 26 % des points | Fashion Transparency Index 2023 : moyenne des 250 marques, 26 % ; 28 % des marques sont entre 0 et 10 % |
 | Salaire vital chez les fournisseurs | note E | note D | échelle du Fashion Checker : E, la marque ne verse ni ne prétend verser de salaire vital |
-| Travail forcé (KnowTheChain) | moins de 10 sur 100 | moins de 20 sur 100 | KnowTheChain 2023, alimentation et boissons : moyenne 16 sur 100, la moitié des entreprises sous 10 ; seuil de vigilance : choix de DIAMS |
+| Travail forcé (KnowTheChain) | moins de 10 sur 100 | moins de 20 sur 100 | KnowTheChain 2023, alimentation et boissons : moyenne 16 sur 100, la moitié des entreprises sous 10 ; seuil de vigilance : choix de l'Index |
 | Index Égapro | moins de 75 sur 100 | moins de 85 sur 100 | code du travail : sous 75, l'entreprise doit prendre des mesures de correction ; sous 85, elle doit fixer des objectifs de progression |
-| Écart de salaire femmes-hommes | écart de 15 % ou plus | écart de 5 % ou plus | directive européenne 2023/970 : à partir de 5 %, l'employeur doit évaluer l'écart avec les représentants du personnel ; alerte : trois fois ce seuil, choix de DIAMS |
-| Écart dirigeant / salarié médian | 300 fois ou plus | 100 fois ou plus | choix de DIAMS : 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle |
+| Écart de salaire femmes-hommes | écart de 15 % ou plus | écart de 5 % ou plus | directive européenne 2023/970 : à partir de 5 %, l'employeur doit évaluer l'écart avec les représentants du personnel ; alerte : trois fois ce seuil, choix de l'Index |
+| Écart dirigeant / salarié médian | 300 fois ou plus | 100 fois ou plus | choix de l'Index : 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle |
 | Sanctions d'une autorité | sanction d'une autorité | — | décision publique d'une autorité |
 | Femmes au conseil | moins de 20 % de femmes | moins de 40 % de femmes | loi Copé-Zimmermann : 40 % au minimum dans les conseils des sociétés cotées en France ; alerte : la moitié de ce minimum |
 | Administrateurs indépendants | — | moins d'un tiers d'indépendants | code Afep-Medef : au moins un tiers d'indépendants, même dans une société contrôlée |
 | Taux d'impôt effectif | — | taux effectif sous 15 % | impôt minimum mondial de l'OCDE : 15 % ; un taux bas une année peut aussi venir de pertes ou de crédits d'impôt |
 | Présence en Russie | activité poursuivie en Russie | activité réduite ou investissements gelés | statuts de la base Leave Russia (KSE Institute) |
-| Conflit ou occupation | implication documentée | — | choix de DIAMS : toute implication documentée par une source publique |
+| Conflit ou occupation | implication documentée | — | choix de l'Index : toute implication documentée par une source publique |
 
 > **Historique.** Les sections 2 à 5 décrivent le calcul de la note utilisé de la version 0.1
 > à la version 0.7.5. Il ne s'applique plus ; ces sections restent publiées pour la
@@ -223,14 +222,14 @@ en vigueur au 10/10/2026 :
 **Rattachement après lecture complète.** *(Depuis v0.5.1.)* L'obligation CSRD
 n'est rattachée à une entreprise qu'une fois ses six données obligatoires lues
 dans son état de durabilité : trouvées, ou constatées non publiées au niveau du
-groupe (par exemple un écart salarial donné seulement par périmètre). DIAMS ne
+groupe (par exemple un écart salarial donné seulement par périmètre). L'Index ne
 compte jamais 0 un chiffre publié qu'il n'a pas encore lu. Hors de France,
 l'obligation n'est rattachée qu'une fois la transposition nationale sourcée.
 Chaque donnée écartée est justifiée dans un journal versionné
 (`pipeline/curated/*_notes.md`).
 
 **Limite assumée.** Un manquant obligatoire compte 0, que l'entreprise n'ait pas
-publié **ou** que DIAMS n'ait pas encore collecté l'information. Dans les deux cas
+publié **ou** que l'Index n'ait pas encore collecté l'information. Dans les deux cas
 la fiabilité reste basse et la note n'est pas affichée sous le seuil (Règle 5) ;
 c'est aussi pourquoi la collecte commence par les données obligatoires.
 
@@ -584,7 +583,7 @@ la base officielle de l'organisme l'atteste :
 Personne ne doit un label : son absence n'est **jamais** comptée 0, et elle ne
 baisse pas non plus la fiabilité. L'indicateur n'existe tout simplement pas pour
 l'entité (drapeau `presence_only` en base). Sinon la fiabilité de chaque entité
-dépendrait du nombre de labels que DIAMS suit, pas de ce qu'on sait d'elle.
+dépendrait du nombre de labels que l'Index suit, pas de ce qu'on sait d'elle.
 
 ### Socle d'indicateurs
 
@@ -885,7 +884,7 @@ calcul (tables de config) doit être datée et justifiée ici.
 **Journal :**
 - **0.8.3 (15/10/2026)** — Seuils d'alerte : chaque indicateur qui s'y prête a un seuil
   d'alerte et, le plus souvent, un seuil de vigilance, appuyés sur une référence citée ou
-  annoncés comme choix de DIAMS (section 0, « Seuils d'alerte »). Bandeau des alertes en tête de
+  annoncés comme choix de l'Index (section 0, « Seuils d'alerte »). Bandeau des alertes en tête de
   fiche.
 - **0.8.2 (15/10/2026)** — Collecte complète (aucun paramètre de calcul modifié). Rapports
   réglementés et volontaires lus groupe par groupe (lots 100, 103, 104 : environ 155 preuves) ;
@@ -901,7 +900,7 @@ calcul (tables de config) doit être datée et justifiée ici.
   décisions de l'Autorité de la concurrence (lot 101) et sanctions publiées par la DGCCRF (lot 105 :
   127 pages lues sur le plan du site officiel, 5 sociétés de la base retrouvées par leur SIRET, toutes
   pour retards de paiement aux fournisseurs ; publications temporaires, donc aucune ligne « cherché sans
-  résultat »). Les outils s'identifient comme vérificateur DIAMS : certains sites refusent l'en-tête
+  résultat »). Les outils s'identifient comme vérificateur de l'Index (identité « DIAMS verifier ») : certains sites refusent l'en-tête
   générique d'un navigateur mais acceptent cette identité déclarée. Sources écartées : Légifrance et la
   CNIL (refus au vérificateur, panne), jeu ouvert de la CNIL (totaux sans nom), sites refusant le
   vérificateur (Hasbro, Newell, Suntory, Unilever : 403), pages sans texte lisible (Mattel).
@@ -1024,7 +1023,7 @@ calcul (tables de config) doit être datée et justifiée ici.
   - Bordeau Chesnel, dont la cession par Savencia n'est qu'en négociation.
 
   **Limite assumée** : une liste « de toutes les marques alimentaires vendues en France »
-  n'existe dans aucune source officielle. DIAMS n'ajoute une marque que si son
+  n'existe dans aucune source officielle. L'Index n'ajoute une marque que si son
   propriétaire est prouvé.
 - **14/10/2026 (notation des groupes très présents en rayon)** — Sans changement de
   calcul. Rappel de la Règle 8 : une marque ne reprend de son groupe racine que les

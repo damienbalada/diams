@@ -1,4 +1,4 @@
-import { marqueAnimale, marquesDocumentees, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
+import { marqueAnimale, marquesDocumentees, raisonVide, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
 import type { OwnershipProof } from "@/lib/data";
 import type { Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
@@ -139,22 +139,15 @@ function Faits({ faits, cacherPresume }: { faits: Fait[]; cacherPresume?: boolea
         </div>
       ))}
       {vides.length > 0 && (
-        <div className="ci-vides">
-          <strong>Aucune information :</strong>{" "}
-          {vides.map((f, i) => (
-            <span key={f.code} title={f.note ?? undefined}>
-              {i > 0 && " · "}
-              {f.nom}
-            </span>
+        <ul className="ci-vides-l">
+          {vides.map((f) => (
+            <li key={f.code}>
+              <span className="ci-vide-nom">{f.nom}</span>
+              <span className="ci-vide-raison">{raisonVide(f)}</span>
+              {f.note && <span className="ci-vide-note">{f.note}</span>}
+            </li>
           ))}
-          {vides.some((f) => f.note) && (
-            <div className="ci-small ci-faint">
-              {[...new Set(vides.map((f) => f.note).filter(Boolean))].map((n) => (
-                <div key={n!}>{n}</div>
-              ))}
-            </div>
-          )}
-        </div>
+        </ul>
       )}
     </>
   );
@@ -366,7 +359,7 @@ export function CarteIdentite({
           <li>Solidité de chaque source : <Solidite s="officielle" /> <Solidite s="reconnue" /> <Solidite s="declarative" /></li>
           <li>Chaque pilier se lit à trois niveaux : 🏢 le <strong>groupe</strong> (ce qu'il publie : climat, fiscalité, lobbying… ; la marque le reprend), 🏷️ la <strong>marque</strong> (ce qui est prouvé pour elle-même : un seul produit d'origine animale suffit ; « entièrement végétale » seulement si une page officielle le dit pour toute la marque), 🛒 les <strong>produits</strong> (ce qui ne vaut que pour certains produits, sans s'étendre à la marque).</li>
           <li><span className="ci-alerte">⚠️ Exploitation animale</span> : signalée en rouge dès qu'un produit d'origine animale est documenté, même si l'entreprise est bien classée par ailleurs pour le bien-être animal (BBFAW, classement des politiques d'élevage).</li>
-          <li><span className="ci-alerte">⚠️ Alerte</span> et <span className="ci-vigilance">🟠 point de vigilance</span> : le fait franchit un seuil fixé pour chaque indicateur, à partir d'une référence qu'on peut citer (loi, directive, moyenne publiée du classement) ou, à défaut, d'un choix de DIAMS annoncé comme tel. La règle s'affiche à côté de chaque signal ; la liste complète est dans la <a href="/methodologie#seuils">méthodologie</a>.</li>
+          <li><span className="ci-alerte">⚠️ Alerte</span> et <span className="ci-vigilance">🟠 point de vigilance</span> : le fait franchit un seuil fixé pour chaque indicateur, à partir d'une référence qu'on peut citer (loi, directive, moyenne publiée du classement) ou, à défaut, d'un choix éditorial de l'Index annoncé comme tel. La règle s'affiche à côté de chaque signal ; la liste complète est dans la <a href="/methodologie#seuils">méthodologie</a>.</li>
           <li><span className="ci-presume">Présumée</span> : exploitation animale non documentée dans un secteur où elle est la règle ; elle est présumée tant que la marque ne prouve pas le contraire.</li>
           <li><span className="ci-obligatoire_absent">Obligatoire, non publié</span> : la loi impose cette donnée et la lecture du rapport officiel confirme qu'elle n'y est pas.</li>
           <li><span className="ci-autre_forme">Publié sous une autre forme</span> : l'entreprise publie l'information, mais pas sous la forme que la loi exige (pour une partie du groupe seulement, par pays…).</li>

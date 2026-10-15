@@ -82,6 +82,8 @@ export interface Fait {
   note: string | null;
   /** Alerte ou point de vigilance, d'après les seuils (seuils.ts). */
   signal: Signal | null;
+  /** Raison d'une dispense de publication (CSRD : thème déclaré non matériel…). */
+  exemption: string | null;
 }
 
 export interface Pilier {
@@ -236,7 +238,7 @@ export function construireCarte(
     jparCode.get(j.indicator_code)!.push(j);
   }
 
-  const bruts: Omit<Fait, "signal">[] = payload.applicableIndicators.map((i): Omit<Fait, "signal"> => {
+  const bruts: Omit<Fait, "signal" | "exemption">[] = payload.applicableIndicators.map((i): Omit<Fait, "signal" | "exemption"> => {
     const p = meilleure(parCode.get(i.code) ?? []);
     const js = (jparCode.get(i.code) ?? []).sort((a, b) => b.checked_on.localeCompare(a.checked_on));
     const obligation = i.mandatory ? (i.mandatory_regimes ?? []) : [];
@@ -273,8 +275,10 @@ export function construireCarte(
     };
   });
 
+  const exo = new Map(payload.applicableIndicators.map((i) => [i.code, i.exemption ?? null]));
   const faits: Fait[] = bruts.map((f) => ({
     ...f,
+    exemption: exo.get(f.code) ?? null,
     signal: evaluer({ code: f.code, etat: f.etat, valeurNum: f.preuve?.valeurNum ?? null, citation: f.preuve?.citation ?? null }),
   }));
 
@@ -324,4 +328,23 @@ export function faitCle(pilier: string, fs: Fait[]): Fait | null {
   }
   const doc = fs.filter((f) => f.etat === "documente" && !f.contexte).sort((a, b) => RANG[a.preuve!.solidite] - RANG[b.preuve!.solidite]);
   return doc[0] ?? fs.find((f) => f.etat === "autre_forme") ?? null;
+}
+
+
+/** Indicateurs qui viennent d'un classement, d'un questionnaire ou d'un registre externe. */
+const EXTERNE = new Set([
+  "ENV_CDP_CLIMATE", "WAT_CDP", "ENV_SBTI_VALIDATED", "SUP_FTI_SCORE", "SUP_KNOWTHECHAIN", "SUP_LIVING_WAGE", "ANI_BBFAW_TIER",
+  "ANI_FUR_FREE", "GOV_BCORP", "GEO_RUSSIA_EXIT", "GEO_LOBBYING_ALIGN", "GEO_LOBBYING_TRANSP", "GEO_LOBBYING_SPEND",
+  "INV_SOLIDARITY_LABEL", "ENV_MATERIAL_CHANGE",
+]);
+/** Indicateurs de signalement : leur absence veut dire « rien trouvé », pas « non publié ». */
+const SIGNALEMENT = new Set(["GOV_SANCTIONS", "ENV_GREENWASHING", "PLA_POLLUTER", "GEO_CONFLICT_TIES", "SUP_BHRRC_ALLEG", "WAT_CONTROVERSY"]);
+
+/** Pourquoi un indicateur est vide, en une phrase (affichée sous son nom quand on ouvre le pilier). */
+export function raisonVide(f: Pick<Fait, "code" | "obligation" | "exemption">): string {
+  if (SIGNALEMENT.has(f.code)) return "Rien trouvé dans les sources suivies (ce n'est pas la preuve qu'il n'y a rien)";
+  if (f.exemption) return `Non renseigné · pas d'obligation : ${f.exemption}`;
+  if (f.obligation.length) return `Non renseigné · publication obligatoire (${f.obligation.join(", ")}) ; le rapport n'a pas encore été relu pour cet indicateur`;
+  if (EXTERNE.has(f.code)) return "Non évalué · donnée d'un classement ou d'un registre externe, où l'entreprise n'a pas été trouvée";
+  return "Non renseigné · aucune obligation légale de le publier";
 }

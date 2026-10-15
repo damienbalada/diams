@@ -153,14 +153,14 @@ export default async function CivicPage() {
       <a className="muted small" href="/">← accueil</a>
 
       <div className="panel" style={{ marginTop: 16 }}>
-        <h1 style={{ marginBottom: 4 }}>DIAMS Civique</h1>
+        <h1 style={{ marginBottom: 4 }}>Volet civique</h1>
         <p className="muted small" style={{ marginBottom: 8 }}>
-          Comment les groupes politiques ont voté sur les grands textes rattachés à chaque pilier DIAMS.
+          Comment les groupes politiques ont voté sur les grands textes rattachés à chaque pilier de l'Index.
         </p>
         <p className="small" style={{ lineHeight: 1.5 }}>
           🔍 <strong>On ne note pas les partis.</strong> On affiche des <strong>faits de vote</strong> —
           par appel nominal, datés, sourcés vers le scrutin officiel — pour que vous dirigiez votre pouvoir
-          de vote en connaissance de cause. À vous de décider quels piliers comptent le plus : DIAMS ne
+          de vote en connaissance de cause. À vous de décider quels piliers comptent le plus : l'Index ne
           classe personne et ne prend pas parti.
         </p>
       </div>

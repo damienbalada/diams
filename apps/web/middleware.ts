@@ -34,7 +34,7 @@ export function middleware(req: NextRequest) {
         { status: 503 },
       );
     }
-    return isAdmin(auth) ? NextResponse.next() : challenge("DIAMS administration");
+    return isAdmin(auth) ? NextResponse.next() : challenge("Index des marques - administration");
   }
 
   if (SITE_PUBLIC) return NextResponse.next();
@@ -44,7 +44,7 @@ export function middleware(req: NextRequest) {
       { status: 503 },
     );
   }
-  return basicAuthMatches(auth, SITE_USER, SITE_PASS) ? NextResponse.next() : challenge("DIAMS");
+  return basicAuthMatches(auth, SITE_USER, SITE_PASS) ? NextResponse.next() : challenge("Index des marques");
 }
 
 // S'applique à tout sauf les assets statiques.
