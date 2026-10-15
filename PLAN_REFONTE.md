@@ -131,3 +131,7 @@ couvre les faits qui ne valent que pour certains produits (pas chaque produit un
   refuse le vérificateur, la CNIL est en panne (503) ; le jeu ouvert de la CNIL ne donne que des
   totaux annuels, sans nom. Rapports retrouvés : Colgate, Coty, Sodiaal, De'Longhi (anglais) ;
   Avril et Pierre Fabre lus (rapports narratifs, consignés). Quota de l'Insee toujours atteint. Égapro fait.
+  Lot 106 (15/10) : Schwarz (Lidl, Kaufland), Castel, Intersnack, VTech, Euralis lus (4 preuves,
+  21 lectures) ; sans rapport public chiffré trouvé : Leclerc, Système U, Aldi, Léa Nature, Andros,
+  Olga, Cofigeo, Nardobel, Neptune, Boisset, Perfetti Van Melle, Bacardi, Storck ; Asahi (PDF
+  introuvable sur le site officiel).
