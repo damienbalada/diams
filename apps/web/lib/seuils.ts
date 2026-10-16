@@ -25,6 +25,8 @@ export interface FaitEvalue {
   etat: string;
   valeurNum: number | null;
   citation: string | null;
+  /** Nom de l'indicateur, pour les signaux qui doivent le citer. */
+  nom?: string;
 }
 
 const nf = (x: number, d = 1) => x.toLocaleString("fr-FR", { maximumFractionDigits: d });
@@ -60,61 +62,62 @@ export const REGLES: Record<string, { alerte: string; vigilance?: string; refere
 /** Signal d'un fait, ou null s'il ne franchit aucun seuil. */
 export function evaluer(f: FaitEvalue): Signal | null {
   const r = REGLES[f.code];
-  if (f.etat === "obligatoire_absent") return a("obligatoire, non publié", "la loi impose cette donnée et la lecture du rapport officiel confirme qu'elle n'y est pas");
-  if (f.code === "ANI_EXPLOITATION" && f.etat === "presume") return v("exploitation animale présumée", r.vigilance!);
+  if (f.etat === "obligatoire_absent") return a(f.nom ? `${f.nom} : donnée exigée par la loi, non publiée` : "donnée exigée par la loi, non publiée", "la loi impose cette donnée et la lecture du rapport officiel confirme qu'elle n'y est pas");
+  if (f.code === "ANI_EXPLOITATION" && f.etat === "presume") return v("produits d'origine animale probables (non prouvé)", r.vigilance!);
   if (f.etat !== "documente" || !r) return null;
   const x = f.valeurNum;
   const c = f.citation ?? "";
   const ref = r.reference;
   switch (f.code) {
-    case "ANI_EXPLOITATION": return a("produits issus de l'exploitation animale", "un seul produit d'origine animale suffit");
+    case "ANI_EXPLOITATION": return a("vend des produits issus de l'exploitation animale", "un seul produit d'origine animale suffit");
     case "ANI_BBFAW_TIER":
       if (x === null) return null;
-      return x >= 6 ? a("niveau 6 sur 6 au classement BBFAW", ref) : x >= 5 ? v("niveau 5 sur 6 au classement BBFAW", ref) : null;
+      return x >= 6 ? a("bien-être animal : dernier niveau (6 sur 6) du classement BBFAW", ref) : x >= 5 ? v("bien-être animal : avant-dernier niveau (5 sur 6) du classement BBFAW", ref) : null;
     case "ENV_CDP_CLIMATE": case "WAT_CDP": {
       const n = note(/note ([A-F][+-]?)/, c);
-      return n === "F" ? a("note F : pas de réponse au CDP", ref) : n?.startsWith("D") ? v(`note ${n} au CDP`, ref) : null;
+      const q = f.code === "WAT_CDP" ? "eau" : "climat";
+      return n === "F" ? a(`aucune réponse au questionnaire ${q} du CDP (note F)`, ref) : n?.startsWith("D") ? v(`note ${n} au questionnaire ${q} du CDP (de A à F)`, ref) : null;
     }
     case "ENV_GHG_TREND":
       if (x === null) return null;
-      return x > 0 ? a(`émissions en hausse de ${nf(x, 2)} % par an`, ref) : x > -4.2 ? v(`baisse de ${nf(-x, 2)} % par an seulement`, ref) : null;
-    case "ENV_SBTI_VALIDATED": return /engagement retiré/.test(c) ? v("engagement climat retiré", ref) : null;
-    case "ENV_GREENWASHING": return a("allégations environnementales trompeuses", ref);
-    case "PLA_POLLUTER": return a("parmi les plus gros pollueurs plastique", ref);
-    case "PLA_REDUCTION": return x !== null && x > 0 ? a(`plastique vierge en hausse de ${nf(x, 2)} % par an`, ref) : null;
+      return x > 0 ? a(`émissions de gaz à effet de serre en hausse de ${nf(x, 2)} % par an`, ref) : x > -4.2 ? v(`émissions de gaz à effet de serre en baisse de ${nf(-x, 2)} % par an seulement (il faudrait 4,2 %)`, ref) : null;
+    case "ENV_SBTI_VALIDATED": return /engagement retiré/.test(c) ? v("objectif climat retiré de la validation SBTi", ref) : null;
+    case "ENV_GREENWASHING": return a("allégations écologiques jugées trompeuses", ref);
+    case "PLA_POLLUTER": return a("parmi les plus gros pollueurs plastique au monde (d'après les déchets ramassés)", ref);
+    case "PLA_REDUCTION": return x !== null && x > 0 ? a(`utilise ${nf(x, 2)} % de plastique neuf en plus chaque année`, ref) : null;
     case "SUP_FTI_SCORE":
       if (x === null) return null;
-      return x < 10 ? a(`${nf(x)} % des points de transparence`, ref) : x < 26 ? v(`${nf(x)} % des points de transparence`, ref) : null;
+      return x < 10 ? a(`transparence sur ses fournisseurs : ${nf(x)} % des points seulement`, ref) : x < 26 ? v(`transparence sur ses fournisseurs : ${nf(x)} % des points seulement`, ref) : null;
     case "SUP_LIVING_WAGE": {
       const n = note(/note ([A-E])/, c);
-      return n === "E" ? a("aucun salaire vital versé chez les fournisseurs", ref) : n === "D" ? v("note D sur le salaire vital", ref) : null;
+      return n === "E" ? a("aucun salaire vital chez ses fournisseurs (note E, la plus basse)", ref) : n === "D" ? v("salaire vital chez ses fournisseurs : note D (de A à E)", ref) : null;
     }
     case "SUP_KNOWTHECHAIN":
       if (x === null) return null;
-      return x < 10 ? a(`${nf(x, 0)}/100 contre le travail forcé`, ref) : x < 20 ? v(`${nf(x, 0)}/100 contre le travail forcé`, ref) : null;
+      return x < 10 ? a(`lutte contre le travail forcé chez ses fournisseurs : ${nf(x, 0)}/100`, ref) : x < 20 ? v(`lutte contre le travail forcé chez ses fournisseurs : ${nf(x, 0)}/100`, ref) : null;
     case "LAB_EGAPRO_INDEX":
       if (x === null) return null;
-      return x < 75 ? a(`index Égapro de ${nf(x, 0)}/100`, ref) : x < 85 ? v(`index Égapro de ${nf(x, 0)}/100`, ref) : null;
+      return x < 75 ? a(`égalité femmes-hommes (index Égapro) : ${nf(x, 0)}/100, sous le minimum légal de 75`, ref) : x < 85 ? v(`égalité femmes-hommes (index Égapro) : ${nf(x, 0)}/100`, ref) : null;
     case "LAB_GENDER_PAYGAP": {
       if (x === null) return null;
       const e = Math.abs(x), qui = x < 0 ? "en faveur des femmes" : "en faveur des hommes";
-      return e >= 15 ? a(`écart de salaire de ${nf(e)} % ${qui}`, ref) : e >= 5 ? v(`écart de salaire de ${nf(e)} % ${qui}`, ref) : null;
+      return e >= 15 ? a(`écart de salaire femmes-hommes de ${nf(e)} % ${qui}`, ref) : e >= 5 ? v(`écart de salaire femmes-hommes de ${nf(e)} % ${qui}`, ref) : null;
     }
     case "LAB_CEO_PAY_RATIO":
       if (x === null) return null;
-      return x >= 300 ? a(`dirigeant payé ${nf(x, 0)} fois le salaire médian`, ref) : x >= 100 ? v(`dirigeant payé ${nf(x, 0)} fois le salaire médian`, ref) : null;
-    case "GOV_SANCTIONS": return a("sanctionné par une autorité", ref);
+      return x >= 300 ? a(`patron payé ${nf(x, 0)} fois le salaire médian de ses salariés`, ref) : x >= 100 ? v(`patron payé ${nf(x, 0)} fois le salaire médian de ses salariés`, ref) : null;
+    case "GOV_SANCTIONS": return a("sanctionné par une autorité (amende ou condamnation)", ref);
     case "GOV_BOARD_GENDER":
       if (x === null) return null;
-      return x < 20 ? a(`${nf(x)} % de femmes au conseil`, ref) : x < 40 ? v(`${nf(x)} % de femmes au conseil`, ref) : null;
-    case "GOV_BOARD_INDEP": return x !== null && x < 33 ? v(`${nf(x)} % d'administrateurs indépendants`, ref) : null;
+      return x < 20 ? a(`seulement ${nf(x)} % de femmes au conseil d'administration`, ref) : x < 40 ? v(`seulement ${nf(x)} % de femmes au conseil d'administration (repère : 40 %, minimum légal en France)`, ref) : null;
+    case "GOV_BOARD_INDEP": return x !== null && x < 33 ? v(`seulement ${nf(x)} % d'administrateurs indépendants au conseil`, ref) : null;
     // Pas de vigilance sur un exercice en perte : un taux bas ou négatif n'y dit rien de l'impôt payé.
-    case "TAX_EFFECTIVE_RATE": return x !== null && x < 15 && !/perte|loss/i.test(c) ? v(`taux d'impôt effectif de ${nf(x)} %`, ref) : null;
+    case "TAX_EFFECTIVE_RATE": return x !== null && x < 15 && !/perte|loss/i.test(c) ? v(`impôt sur les bénéfices : taux réel de ${nf(x)} %, sous le minimum mondial de 15 %`, ref) : null;
     case "GEO_RUSSIA_EXIT":
-      if (/activité poursuivie/.test(c)) return a("activité poursuivie en Russie", ref);
+      if (/activité poursuivie/.test(c)) return a("poursuit ses activités en Russie", ref);
       if (/investissements gelés/.test(c)) return v("toujours présent en Russie, investissements gelés", ref);
       return /activité réduite/.test(c) ? v("toujours présent en Russie, activité réduite", ref) : null;
-    case "GEO_CONFLICT_TIES": return a("implication dans un conflit ou une occupation", ref);
+    case "GEO_CONFLICT_TIES": return a("liens documentés avec un conflit armé ou une occupation", ref);
   }
   return null;
 }

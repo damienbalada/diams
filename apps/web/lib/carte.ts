@@ -309,7 +309,7 @@ export function construireCarte(
   const faits: Fait[] = bruts.map((f) => ({
     ...f,
     exemption: exo.get(f.code) ?? null,
-    signal: evaluer({ code: f.code, etat: f.etat, valeurNum: f.preuve?.valeurNum ?? null, citation: f.preuve?.citation ?? null }),
+    signal: evaluer({ code: f.code, etat: f.etat, valeurNum: f.preuve?.valeurNum ?? null, citation: f.preuve?.citation ?? null, nom: f.nom }),
   }));
 
   const piliers: Pilier[] = [];
