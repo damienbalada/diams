@@ -56,3 +56,26 @@ test("taux d'impôt bas : pas de vigilance sur un exercice en perte", () => {
   assert.equal(doc("TAX_EFFECTIVE_RATE", 9, "taux effectif 9 %")?.niveau, "vigilance");
   assert.equal(doc("TAX_EFFECTIVE_RATE", -9.2, "note sur l'impôt (charge d'impôt sur une perte avant impôt)"), null);
 });
+
+const pays = (code: string, valeurNum: number, p: string | null) => evaluer({ code, etat: "documente", valeurNum, citation: "", pays: p });
+
+test("femmes au conseil : la loi française est dite non applicable à une entreprise étrangère", () => {
+  assert.doesNotMatch(pays("GOV_BOARD_GENDER", 36.4, "FR")!.motif, /ne s'applique pas/);
+  assert.doesNotMatch(pays("GOV_BOARD_GENDER", 36.4, null)!.motif, /ne s'applique pas/);
+  const ch = pays("GOV_BOARD_GENDER", 36.4, "CH")!;
+  assert.equal(ch.niveau, "vigilance");
+  assert.match(ch.motif, /ne s'applique pas à une entreprise suisse/);
+  assert.doesNotMatch(ch.regle, /directive/);
+  assert.match(pays("GOV_BOARD_GENDER", 30, "DE")!.regle, /directive de 2022/);
+  assert.match(pays("GOV_BOARD_GENDER", 10, "US")!.motif, /une entreprise américaine/);
+});
+
+test("Égapro d'un groupe étranger : c'est l'index de sa filiale française", () => {
+  assert.match(pays("LAB_EGAPRO_INDEX", 80, "US")!.motif, /filiale française/);
+  assert.doesNotMatch(pays("LAB_EGAPRO_INDEX", 80, "FR")!.motif, /filiale/);
+});
+
+test("indépendants au conseil : le code Afep-Medef est dit français pour une entreprise étrangère", () => {
+  assert.match(pays("GOV_BOARD_INDEP", 25, "NL")!.motif, /repère français/);
+  assert.doesNotMatch(pays("GOV_BOARD_INDEP", 25, "FR")!.motif, /repère français/);
+});

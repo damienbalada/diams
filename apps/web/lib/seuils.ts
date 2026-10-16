@@ -27,7 +27,20 @@ export interface FaitEvalue {
   citation: string | null;
   /** Nom de l'indicateur, pour les signaux qui doivent le citer. */
   nom?: string;
+  /** Pays du siège (code ISO) de l'entité qui publie la donnée : certains repères sont des lois françaises. */
+  pays?: string | null;
 }
+
+/** États membres de l'Union européenne (codes ISO). */
+const UE = new Set(["AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"]);
+const ADJ: Record<string, string> = {
+  US: "américaine", GB: "britannique", CH: "suisse", NL: "néerlandaise", DE: "allemande", ES: "espagnole", IT: "italienne",
+  BE: "belge", DK: "danoise", SE: "suédoise", FI: "finlandaise", NO: "norvégienne", IE: "irlandaise", LU: "luxembourgeoise",
+  AT: "autrichienne", PT: "portugaise", PL: "polonaise", LT: "lituanienne", CA: "canadienne", JP: "japonaise", KR: "sud-coréenne",
+  CN: "chinoise", IN: "indienne", BR: "brésilienne", MX: "mexicaine", AU: "australienne", TH: "thaïlandaise", TR: "turque",
+};
+/** « une entreprise suisse », ou null si la loi française s'applique (siège en France ou inconnu). */
+const etrangere = (p?: string | null) => (p && p !== "FR" ? `une entreprise ${ADJ[p] ?? "étrangère"}` : null);
 
 const nf = (x: number, d = 1) => x.toLocaleString("fr-FR", { maximumFractionDigits: d });
 const a = (motif: string, regle: string): Signal => ({ niveau: "alerte", motif, regle });
@@ -97,7 +110,12 @@ export function evaluer(f: FaitEvalue): Signal | null {
       return x < 10 ? a(`lutte contre le travail forcé chez ses fournisseurs : ${nf(x, 0)}/100`, ref) : x < 20 ? v(`lutte contre le travail forcé chez ses fournisseurs : ${nf(x, 0)}/100`, ref) : null;
     case "LAB_EGAPRO_INDEX":
       if (x === null) return null;
-      return x < 75 ? a(`égalité femmes-hommes (index Égapro) : ${nf(x, 0)}/100, sous le minimum légal de 75`, ref) : x < 85 ? v(`égalité femmes-hommes (index Égapro) : ${nf(x, 0)}/100`, ref) : null;
+      {
+        // L'index Égapro n'existe qu'en France : pour un groupe étranger, c'est celui de sa filiale française,
+        // qui est bien soumise à la loi française.
+        const fil = etrangere(f.pays) ? " (filiale française)" : "";
+        return x < 75 ? a(`égalité femmes-hommes (index Égapro${fil}) : ${nf(x, 0)}/100, sous le minimum légal de 75`, ref) : x < 85 ? v(`égalité femmes-hommes (index Égapro${fil}) : ${nf(x, 0)}/100`, ref) : null;
+      }
     case "LAB_GENDER_PAYGAP": {
       if (x === null) return null;
       const e = Math.abs(x), qui = x < 0 ? "en faveur des femmes" : "en faveur des hommes";
@@ -109,8 +127,24 @@ export function evaluer(f: FaitEvalue): Signal | null {
     case "GOV_SANCTIONS": return a("sanctionné par une autorité (amende ou condamnation)", ref);
     case "GOV_BOARD_GENDER":
       if (x === null) return null;
-      return x < 20 ? a(`seulement ${nf(x)} % de femmes au conseil d'administration`, ref) : x < 40 ? v(`seulement ${nf(x)} % de femmes au conseil d'administration (repère : 40 %, minimum légal en France)`, ref) : null;
-    case "GOV_BOARD_INDEP": return x !== null && x < 33 ? v(`seulement ${nf(x)} % d'administrateurs indépendants au conseil`, ref) : null;
+      {
+        // La loi Copé-Zimmermann ne vaut que pour les sociétés françaises : ailleurs, 40 % reste le repère
+        // de l'Index, et la phrase dit que l'entreprise n'y est pas tenue.
+        const hors = etrangere(f.pays);
+        const regle = hors
+          ? `choix de l'Index, d'après la loi française Copé-Zimmermann (40 % au minimum dans les conseils des sociétés cotées en France), qui ne s'applique pas à ${hors} ; alerte : la moitié de ce repère` +
+            (UE.has(f.pays!) ? " ; dans l'Union européenne, une directive de 2022 fixe aux sociétés cotées un objectif de 40 % des administrateurs non exécutifs, ou 33 % de l'ensemble du conseil, d'ici juin 2026" : "")
+          : ref;
+        const precision = hors ? ` (repère : 40 %, minimum légal en France, qui ne s'applique pas à ${hors})` : " (repère : 40 %, minimum légal en France)";
+        return x < 20 ? a(`seulement ${nf(x)} % de femmes au conseil d'administration${precision}`, regle) : x < 40 ? v(`seulement ${nf(x)} % de femmes au conseil d'administration${precision}`, regle) : null;
+      }
+    case "GOV_BOARD_INDEP": {
+      if (x === null || x >= 33) return null;
+      const hors = etrangere(f.pays);
+      return hors
+        ? v(`seulement ${nf(x)} % d'administrateurs indépendants au conseil (repère français : un tiers, qui ne s'applique pas à ${hors})`, `choix de l'Index, d'après le code de gouvernance français Afep-Medef (au moins un tiers d'indépendants), qui ne s'applique pas à ${hors}`)
+        : v(`seulement ${nf(x)} % d'administrateurs indépendants au conseil`, ref);
+    }
     // Pas de vigilance sur un exercice en perte : un taux bas ou négatif n'y dit rien de l'impôt payé.
     case "TAX_EFFECTIVE_RATE": return x !== null && x < 15 && !/perte|loss/i.test(c) ? v(`impôt sur les bénéfices : taux réel de ${nf(x)} %, sous le minimum mondial de 15 %`, ref) : null;
     case "GEO_RUSSIA_EXIT":

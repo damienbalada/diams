@@ -251,7 +251,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
 export function construireCarte(
   payload: { entity: { slug: string; name: string }; ownership_chain?: string[]; applicableIndicators: IndicateurEntree[]; evidence: PreuveEntree[]; dimensions: { code: string; name: string }[] },
   journal: JournalEntree[] = [],
-  options: { estMarque?: boolean } = {},
+  options: { estMarque?: boolean; pays?: string | null; paysGroupe?: string | null } = {},
 ): Carte {
   const estMarque = options.estMarque ?? (payload.ownership_chain ?? []).length > 1;
   const nomPilier = new Map(payload.dimensions.map((d) => [d.code, d.name]));
@@ -309,7 +309,9 @@ export function construireCarte(
   const faits: Fait[] = bruts.map((f) => ({
     ...f,
     exemption: exo.get(f.code) ?? null,
-    signal: evaluer({ code: f.code, etat: f.etat, valeurNum: f.preuve?.valeurNum ?? null, citation: f.preuve?.citation ?? null, nom: f.nom }),
+    signal: evaluer({ code: f.code, etat: f.etat, valeurNum: f.preuve?.valeurNum ?? null, citation: f.preuve?.citation ?? null, nom: f.nom,
+      // Donnée reprise du groupe : c'est le pays du groupe qui compte (son conseil, sa loi).
+      pays: (f.preuve?.reprisDe ? options.paysGroupe : options.pays) ?? options.pays ?? null }),
   }));
 
   const piliers: Pilier[] = [];

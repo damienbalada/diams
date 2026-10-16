@@ -205,6 +205,7 @@ interface EntityRow {
   is_brand: boolean;
   parent_id: string | null;
   sector_id: string | null;
+  country: string | null;
 }
 
 /**
@@ -218,7 +219,7 @@ async function loadEntityIndex() {
     rows = await selectAll<EntityRow>((from, to) =>
       supabase
         .from("entities")
-        .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id")
+        .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id, country")
         .order("id")
         .range(from, to),
     );
@@ -338,6 +339,15 @@ export async function getOwnerGroup(slug: string): Promise<{ slug: string; name:
   const root = idx.rootOf(slug);
   if (!root || root.slug === slug) return null; // l'entité est déjà la racine
   return { slug: root.slug, name: entityName(root) };
+}
+
+/** Pays du siège (code ISO) de l'entité et de son groupe racine, pour les seuils qui dépendent d'une loi nationale. */
+export async function getPays(slug: string): Promise<{ pays: string | null; paysGroupe: string | null }> {
+  const idx = await loadEntityIndex();
+  if (!idx) return { pays: null, paysGroupe: null };
+  const e = idx.bySlug.get(slug) ?? null;
+  const root = idx.rootOf(slug);
+  return { pays: e?.country ?? null, paysGroupe: root?.country ?? e?.country ?? null };
 }
 
 // --- Alternatives mieux notées ------------------------------------------------

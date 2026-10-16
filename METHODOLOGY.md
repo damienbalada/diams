@@ -90,6 +90,13 @@ rapport confirme l'absence est une alerte ; une exploitation animale présumée 
 vigilance. Pas de seuil pour les données qui dépendent trop du secteur (intensité carbone,
 intensité d'eau) ni pour les données de contexte (dépenses de lobbying).
 
+Certains repères sont des règles françaises : loi Copé-Zimmermann (femmes au conseil), code
+Afep-Medef (administrateurs indépendants). Pour une entreprise dont le siège est hors de France,
+le seuil reste celui de l'Index, mais la fiche précise que la règle française ne s'applique pas à
+elle ; pour un siège dans l'Union européenne, elle rappelle l'objectif de la directive de 2022 sur
+les conseils des sociétés cotées. L'index Égapro n'existant qu'en France, celui d'un groupe
+étranger est celui de sa filiale française, soumise à la loi française : la fiche le dit.
+
 | Indicateur | ⚠️ Alerte | 🟠 Vigilance | Référence |
 |---|---|---|---|
 | Exploitation animale | un produit issu de l'exploitation animale est documenté | exploitation non documentée dans un secteur où elle est la règle | choix de l'Index |
