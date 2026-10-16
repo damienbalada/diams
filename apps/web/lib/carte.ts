@@ -136,6 +136,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
         ? "Cadre structuré d'émission d'obligations vertes ou sociales" : "Émet des obligations vertes ou sociales (cadre non cité)";
     case "ANI_OFFRE_VEGETALE": return "Propose au moins un produit 100 % végétal";
     case "ANI_FUR_FREE": return "Membre du label « sans fourrure »";
+    case "ANI_TESTING": return /Leaping Bunny de Cruelty Free/.test(x) ? "Certifiée sans tests sur les animaux (Leaping Bunny)" : "Arrêt des tests sur les animaux déclaré (sans certification du groupe)";
     // Matières animales de la mode : objectif ou politique publiés (aucune interdiction ni certification constatée).
     case "ANI_DOWN_RDS": return /objectif|horizon/i.test(x) ? "Objectif de duvet recyclé ou certifié (norme RDS, sans plumage à vif)" : "Politique sur le duvet publiée";
     case "ANI_WOOL_MULESING": return /objectif|horizon/i.test(x) ? "Objectif de laine recyclée ou certifiée (norme RWS, sans mulesing)" : "Politique sur la laine publiée";
@@ -287,6 +288,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/aucun index Égapro/, "index Égapro"],
   [/base de données de l'ONU des entreprises impliquées dans les colonies/, "base de données de l'ONU sur les colonies israéliennes"],
   [/annuaire B Lab/, "annuaire B Corp de B Lab"],
+  [/annuaire Leaping Bunny/, "annuaire Leaping Bunny des marques sans tests sur les animaux"],
 ];
 
 /** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */
