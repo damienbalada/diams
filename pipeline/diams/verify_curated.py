@@ -616,10 +616,11 @@ def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
 # Sanction d'une autorité : la gravité suit le montant de l'amende, relu dans la
 # citation officielle. « amende de 74,9 M€ » ↔ « Stellantis 50% €74 934 000 ».
 SANCTION_TIERS = ((1e9, 0.9), (1e8, 0.7), (0.0, 0.5))
-_SANCTION_VT = re.compile(r"amendes? de (?:plus de )?([\d ]+(?:,\d+)?) (M|Md)(€|£|\$)")
+_SANCTION_VT = re.compile(r"amendes? de (?:plus de )?([\d ]+(?:,\d+)?) (M|Md)(€|£|A\$|\$)")
 # Amende prononcée en livres ou en dollars (CMA, FTC) : montant relu dans la devise du
 # communiqué, gravité calculée après conversion au taux annuel moyen de la BCE.
-_DEVISES = {"£": "GBP", "$": "USD"}
+# Dollar australien (« MA$ ») : les jugements australiens écrivent « $60 million » sans préfixe.
+_DEVISES = {"£": "GBP", "$": "USD", "A$": "AUD"}
 # Montant en euros, quelle que soit l'écriture du communiqué : « €1.8 billion », « EUR 114,681,657 »,
 # « 98,635,416.67 euro », « € 1,128 billion » (virgule décimale), « 150 millions d'euros »,
 # « 100 000 euros ». Chaque nombre est lu à l'anglaise et à la française ; le montant
@@ -630,6 +631,7 @@ _EUR_LEAD = re.compile(rf"(?:€|\bEUR)\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?",
 _EUR_TRAIL = re.compile(rf"(?<![\d,.])({_AMOUNT})\s?(?:({_SCALE_WORD})\s?)?(?:d'\s?)?(?:euros?\b|€)", re.I)
 _FX_LEAD = {cur: re.compile(rf"(?:{re.escape(sym)}|\b{cur})\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?", re.I)
             for sym, cur in {"£": "GBP", "$": "USD"}.items()}
+_FX_LEAD["AUD"] = re.compile(rf"(?:A\$|\bAUD|\$)\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?", re.I)
 _SCALE = {"bn": 1e9, "m": 1e6, "billion": 1e9, "million": 1e6, "milliard": 1e9, "milliards": 1e9, "millions": 1e6}
 
 

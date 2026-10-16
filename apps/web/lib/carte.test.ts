@@ -123,3 +123,8 @@ test("matières animales et tests : interdiction, exigence et objectif ne se con
   assert.equal(v("ANI_TESTING", "Annuaire des marques approuvées Leaping Bunny de Cruelty Free International : « … »"), "Certifiée sans tests sur les animaux (Leaping Bunny)");
   assert.equal(v("ANI_TESTING", "« mettre fin aux tests sur animaux pour les produits finis dès 1989 »"), "Arrêt des tests sur les animaux déclaré (sans certification du groupe)");
 });
+
+test("sanction en dollars australiens : devise écrite en clair", () => {
+  const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("x", { excerpt: "Cour fédérale d'Australie, jugement du 12/08/2022 : « … » — amende civile ; amende de 60 MA$ (sévérité 0,5)." }));
+  assert.equal(s, "Sanctionné par la Cour fédérale d'Australie (2022) : amende de 60 M$ australiens");
+});

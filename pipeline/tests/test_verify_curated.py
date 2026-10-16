@@ -788,3 +788,10 @@ def test_sanction_en_dollars_milliard():
     assert check_esef_quote(x, rep, rates={("USD", "2025"): 1.13}).status == "OK"       # ≈ 885 M€ : 0,7
     x.normalized_value = 0.9
     assert check_esef_quote(x, rep, rates={("USD", "2025"): 1.13}).status == "ÉCART"
+
+
+def test_dollars_australiens_lus_sans_prefixe():
+    # Les jugements australiens écrivent « $60 million » : le dollar y est australien.
+    from diams.verify_curated import foreign_amounts
+    assert 60e6 in foreign_amounts("penalties cumulatively totalling $60 million for the said", "AUD")
+    assert 14e6 in foreign_amounts("pecuniary penalties of A$14 million", "AUD")
