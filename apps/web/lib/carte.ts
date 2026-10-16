@@ -258,6 +258,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/Jury de déontologie publicitaire/, "avis du Jury de déontologie publicitaire"],
   [/Business & Human Rights Resource Centre/, "Business & Human Rights Resource Centre"],
   [/Autorité de la concurrence/, "décisions de l'Autorité de la concurrence"],
+  [/Géorisques/, "arrêtés de mise en demeure publiés sur Géorisques"],
 ];
 
 /** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */
