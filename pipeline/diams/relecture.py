@@ -463,8 +463,10 @@ ABSENCE_SOURCES = {
     "CDP": (("ENV_CDP_CLIMATE", "WAT_CDP"), "absente de la liste publique complète des notes CDP 2025"),
     "SBTI": (("ENV_SBTI_VALIDATED",), "absente de l'export complet SBTi « Companies taking action » (08/10/2026)"),
     "KSE_LEAVE_RUSSIA": (("GEO_RUSSIA_EXIT",), "absente de la base « Leave Russia » du KSE Institute"),
-    "EU_TRANSPARENCY": (("GEO_LOBBYING_TRANSP",), "aucune inscription au registre de transparence de l'UE"),
-    "HATVP": (("GEO_LOBBYING_TRANSP",), "aucune inscription à son nom au répertoire des représentants d'intérêts (HATVP)"),
+    # Sans inscription, aucune dépense de lobbying n'est déclarée : l'absence vaut aussi pour les
+    # dépenses (ajout du 16/10/2026).
+    "EU_TRANSPARENCY": (("GEO_LOBBYING_TRANSP", "GEO_LOBBYING_SPEND"), "aucune inscription au registre de transparence de l'UE"),
+    "HATVP": (("GEO_LOBBYING_TRANSP", "GEO_LOBBYING_SPEND"), "aucune inscription à son nom au répertoire des représentants d'intérêts (HATVP)"),
     # Listes complètes ajoutées le 15/10/2026 (trois niveaux : on cherche aussi chaque marque quand
     # la liste nomme des marques).
     "FTI": (("SUP_FTI_SCORE",), "absente de l'indice de transparence de la mode 2023 (Fashion Transparency Index, 250 marques)"),
@@ -473,6 +475,8 @@ ABSENCE_SOURCES = {
     "FUR_FREE": (("ANI_FUR_FREE",), "absente de la liste des membres Fur Free Retailer (Fur Free Alliance)"),
     "CCC": (("SUP_LIVING_WAGE",), "absente du Fashion Checker (Clean Clothes Campaign)"),
     "FINANSOL": (("INV_SOLIDARITY_LABEL",), "aucun produit labellisé à son nom dans la liste officielle Finansol"),
+    # Le classement ne publie que les dix plus gros pollueurs (ajout du 16/10/2026).
+    "BFFP": (("PLA_POLLUTER",), "absente des dix plus gros pollueurs plastique de l'audit mondial des marques 2023 de Break Free From Plastic"),
 }
 # Listes qui nomment aussi des marques : l'absence est consignée pour les marques, pas seulement
 # pour les groupes.
@@ -491,17 +495,31 @@ ABSENCE_EXCLUSIONS = {
 }
 
 
+def produce_bffp(c, b, args):
+    """Groupes nommés dans le classement de l'audit 2023 (lot 14, relu sur la page de Break Free From Plastic)."""
+    import os
+    from .import_curated import parse_file
+    path = os.path.join(os.path.dirname(__file__), "..", "curated", "groupes_2026-10_lot14_bffp.csv")
+    rows, _ = parse_file(path, "ai:relecture")
+    return "audit mondial des marques 2023 de Break Free From Plastic", rows
+
+
 def cmd_absences(c: httpx.Client, b: Base, args) -> dict:
     """Pour chaque groupe racine sans preuve sur un indicateur, consigne « non_trouvee » pour chaque
     source dont la liste complète a été relue sans y trouver le groupe. C'est ce qui permet d'écrire
     sur la fiche « aucune information : absent de … (date) » plutôt qu'un simple vide."""
-    producers = {**PRODUCERS, "HATVP": produce_hatvp}
+    producers = {**PRODUCERS, "HATVP": produce_hatvp, "BFFP": produce_bffp}
     have = {(e["entity_id"], e["indicator_id"]) for e in b.ev}
     wave_of = {r: w for w, rs in b.waves().items() for r in rs}
     roots = [e for e in b.ents if not e.get("parent_id") and not e["is_brand"]]
     brands = [e for e in b.ents if e["is_brand"]]
     reviews, report = [], {}
     wanted = set(args.sources.split(",")) if args.sources else set(ABSENCE_SOURCES)
+    # Absences déjà consignées (même entité, indicateur et source) : pas de doublon (16/10/2026).
+    from . import supabase_client as _sc
+    deja = {(r["entity_id"], r["indicator_id"], (r["detail"] or "").split(" (")[0])
+            for r in _sc.get_all(c, "indicator_reviews", {"select": "entity_id,indicator_id,detail",
+                                                          "outcome": "eq.non_trouvee", "reviewer": f"eq.{REVIEWER}"})}
     for code, (inds, phrase) in ABSENCE_SOURCES.items():
         if code not in wanted:
             continue
@@ -532,7 +550,7 @@ def cmd_absences(c: httpx.Client, b: Base, args) -> dict:
                 continue
             for ind in inds:
                 iid = b.ind_id[ind]
-                if (e["id"], iid) in have:
+                if (e["id"], iid) in have or (e["id"], iid, f"Cherché, non trouvé : {phrase}".split(" (")[0]) in deja:
                     continue
                 reviews.append({"entity_id": e["id"], "indicator_id": iid, "evidence_id": None,
                                 "outcome": "non_trouvee", "detail": f"Cherché, non trouvé : {phrase} ({label}, relu le "
