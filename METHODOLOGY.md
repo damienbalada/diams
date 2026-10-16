@@ -848,7 +848,10 @@ pas du nombre de marques. Trois garde-fous invariants :
 
 1. **Matching conservateur.** Un fait n'est rattaché à une entité que si les noms
    correspondent nettement (`is_strong_match`). En cas de doute : on saute, on ne
-   devine pas.
+   devine pas. Une société identifiée par son SIREN n'est rapprochée que par son SIREN.
+   Les sigles sont conservés (« H&M » ≠ « B&S », « AT&T ») ; un nom réduit à des mots
+   génériques (« Group ») ne correspond à rien ; deux noms qui portent des lettres
+   isolées différentes (« Bio-D », « U BIO ») restent distincts (audit du 16/10/2026).
 2. **Publication graduée par tier** (voir `REVIEW_MODEL.md`). Les sources de
    tier 1-2 ingérées par un connecteur déterministe sont publiées directement
    (reviewer `auto:<connecteur>`, audit par échantillon) ; tier 3, crowd ou tier

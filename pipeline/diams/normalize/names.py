@@ -19,16 +19,28 @@ LEGAL_SUFFIXES = {
 }
 
 
-def normalize_name(name: str) -> str:
+# Mots qui, seuls, ne désignent aucune entreprise en particulier.
+GENERIC = {"group", "groupe", "international", "holding", "holdings", "company", "companies", "france",
+           "industries", "corporation", "the", "de", "la", "le", "les", "et", "and", "of"}
+
+
+def normalize_name(name: str, keep_letters: bool = False) -> str:
     """minuscule, sans accents, sans ponctuation ni suffixe juridique."""
     if not name:
         return ""
     s = unicodedata.normalize("NFKD", name)
     s = "".join(c for c in s if not unicodedata.combining(c))
     s = s.lower()
+    # Sigles à esperluette ou à points recollés avant de retirer la ponctuation : « H&M » -> « hm »,
+    # « P&G » -> « pg », « S.p.A. » -> « spa » (16/10/2026 : « H&M Group » et « B&S Group » se
+    # réduisaient tous deux à « group » et se correspondaient).
+    s = re.sub(r"(?<![a-z0-9])[a-z0-9]{1,2}(?:\s*&\s*[a-z0-9]{1,2})+(?![a-z0-9])", lambda m: re.sub(r"\s*&\s*", "", m.group(0)), s)
+    s = re.sub(r"(?<![a-z0-9])[a-z0-9](?:\.[a-z0-9])+(?![a-z0-9])", lambda m: m.group(0).replace(".", ""), s)
     s = re.sub(r"[^a-z0-9\s]", " ", s)
     # on retire les tokens d'une seule lettre (issus d'abréviations à points,
     # ex: "S.p.A." -> "s p a") et les formes juridiques.
+    if keep_letters:
+        return " ".join(t for t in s.split() if len(t) == 1)
     tokens = [t for t in s.split() if len(t) > 1 and t not in LEGAL_SUFFIXES]
     return " ".join(tokens)
 
@@ -38,6 +50,13 @@ def is_strong_match(query: str, candidate: str) -> bool:
     q = normalize_name(query)
     c = normalize_name(candidate)
     if not q or not c:
+        return False
+    # Un nom réduit à des mots génériques ne prouve rien (« Group », « International Holding »).
+    if set(q.split()) <= GENERIC or set(c.split()) <= GENERIC:
+        return False
+    # Lettres isolées différentes de part et d'autre : deux noms distincts (« Bio-D » ≠ « U BIO »).
+    lq, lc = normalize_name(query, keep_letters=True), normalize_name(candidate, keep_letters=True)
+    if lq and lc and lq != lc:
         return False
     if q == c:
         return True
