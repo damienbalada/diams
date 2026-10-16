@@ -35,6 +35,20 @@ le coffre sécurisé fonctionnent dans Expo Go.
 
 Aperçu dans un navigateur (sans scanner) : `npx expo start --web`.
 
+## La faire essayer à quelqu'un (Expo Go, sans ordinateur allumé)
+
+1. La personne crée un compte Expo gratuit et s'y connecte dans Expo Go.
+2. L'inviter dans l'organisation Expo **index-awareness** (expo.dev → Members → Invite) ; elle accepte.
+3. Lui envoyer le lien `exp://u.expo.dev/98895628-5edd-4267-a32c-83b0ca5d4e15?channel-name=apercu`
+   (ou le QR code `maquettes/qr-appli-expo-go.png`). Le projet n'apparaît pas tout seul dans l'accueil d'Expo Go.
+4. Elle saisit le mot de passe du site dans les Réglages de l'appli, tant que le site est privé.
+
+Publier une nouvelle version sur ce lien :
+
+```bash
+npx eas-cli@latest update --branch apercu --environment preview --message "…"
+```
+
 ## Publier dans les magasins
 
 Construction dans le cloud avec EAS (pas besoin de Mac pour l'iPhone) :
