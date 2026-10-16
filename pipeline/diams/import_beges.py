@@ -130,7 +130,9 @@ def main() -> None:
     for x in recs:
         by_siren.setdefault(str(x.get("siren_principal") or ""), []).append(x)
     ents = supabase_client.get_all(c, "entities", {"select": "id,slug,siren,is_brand,parent_id"})
-    groups = [e for e in ents if not e["is_brand"] and not e["parent_id"] and e.get("siren")]
+    # Toute société ayant un SIREN (groupe, filiale, marque exploitée par sa propre société) : le bilan est
+    # celui de la société déclarante, et une preuve propre passe devant celle du groupe (16/10/2026).
+    groups = [e for e in ents if e.get("siren")]
     ind = supabase_client.get_all(c, "indicators", {"select": "id,code", "code": "eq.ENV_SCOPE3_DISCLOSED"})[0]["id"]
     ev = supabase_client.get_all(c, "evidence", {"select": "entity_id", "indicator_id": f"eq.{ind}",
                                                   "review_status": "in.(approved,pending)"})
