@@ -753,3 +753,19 @@ def test_sanction_en_livres_convertie_au_taux_de_la_bce():
     assert check_esef_quote(x, rep, rates={}).status == "ÉCART"
     x.value_text = "amende de 11,1 M€ (entente)"   # devise erronée : aucun montant en euros cité
     assert check_esef_quote(x, rep, rates={("GBP", "2025"): 0.8568}).status == "ÉCART"
+
+
+def test_independants_nommes_comptes_dans_la_citation():
+    from diams.verify_curated import check_esef_quote
+    rep = ("The Board is currently comprised of ten members. The Board has determined that Messrs. Dinkins, Douglas, "
+           "Pizula and Vidergauz and Mses. Demel, Hall and Jackson are independent, as that term is defined")
+    q = ("The Board is currently comprised of ten members » ; « The Board has determined that Messrs. Dinkins, Douglas, "
+         "Pizula and Vidergauz and Mses. Demel, Hall and Jackson are independent")
+    x = row("monster-beverage", 70.0, f"Circulaire : « {q} » ; calcul : 7 administrateurs nommés indépendants / 10 = 70 % (administrateurs indépendants).",
+            ind="GOV_BOARD_INDEP", src="SEC_FILING")
+    x.normalized_value = 0.7
+    assert check_esef_quote(x, rep).status == "OK"
+    y = row("monster-beverage", 80.0, f"Circulaire : « {q} » ; calcul : 8 administrateurs nommés indépendants / 10 = 80 % (administrateurs indépendants).",
+            ind="GOV_BOARD_INDEP", src="SEC_FILING")
+    y.normalized_value = 0.8
+    assert check_esef_quote(y, rep).status == "ÉCART"   # 7 noms seulement

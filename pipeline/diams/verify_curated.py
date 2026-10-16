@@ -453,6 +453,35 @@ def _cited(n: int, quote: str) -> bool:
         re.search(rf"\b{re.escape(w)}\b", quote, re.I) for w in words)
 
 
+# Indépendants désignés par leur nom (« The Board has determined that Messrs. A, B and C and Mses. D
+# and E are independent ») : les noms sont comptés dans la citation (16/10/2026).
+# « … calcul : 7 administrateurs nommés indépendants / 10 = 70 % … »
+NAMED_RE = re.compile(r"calcul : (\d+) administrateurs nommés indépendants / (\d+) = ([\d,]+) %")
+_NAMED_LIST = re.compile(r"determined that (.+?) (?:are independent|do not have a relationship|is independent)", re.I)
+
+
+def check_named(row, quote: str) -> tuple[bool, list[str], bool]:
+    m = NAMED_RE.search(row.excerpt or "")
+    if not m:
+        return True, [], False
+    n, b, v_s = int(m.group(1)), int(m.group(2)), m.group(3)
+    lst = _NAMED_LIST.search(quote)
+    names = []
+    if lst:
+        body = re.sub(r"(?:Messrs|Mses|Mmes|Mr|Mrs|Ms|Dr)\.\s*", "", lst.group(1))
+        names = [x for x in re.split(r",\s*(?:and\s+)?|\s+and\s+", body) if x.strip()]
+    count_ok = len(names) == n
+    total_ok = _cited(b, quote)
+    stated = float(v_s.replace(",", "."))
+    calc_ok = 0 < n <= b and abs(round(100 * n / b, 1) - stated) < 1e-9
+    value_ok = row.value_numeric is not None and abs(row.value_numeric - stated) < 1e-9
+    return count_ok and total_ok and calc_ok and value_ok, [
+        f"{len(names)} noms d'indépendants comptés dans la citation = {n} {'✓' if count_ok else '✗'}",
+        f"effectif {b} cité {'✓' if total_ok else '✗'}",
+        f"part recalculée {n} / {b} = {round(100 * n / b, 1) if b else '—'} % = valeur {'✓' if calc_ok and value_ok else '✗'}",
+    ], True
+
+
 def check_ratio(row, quote: str) -> tuple[bool, list[str], bool]:
     m = RATIO_RE.search(row.excerpt or "")
     if not m:
@@ -733,6 +762,8 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         tr_active = True
         tr_ok = row.value_numeric is not None and int(row.value_numeric) == len(quotes)
         tr_details = [f"nombre d'articles cités {len(quotes)} = valeur {'✓' if tr_ok else '✗'}"]
+    if not tr_active:
+        tr_ok, tr_details, tr_active = check_named(row, quote)
     if not tr_active:
         tr_ok, tr_details, tr_active = check_ratio(row, quote)
     if not tr_active:
