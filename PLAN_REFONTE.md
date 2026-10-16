@@ -145,8 +145,8 @@ couvre les faits qui ne valent que pour certains produits (pas chaque produit un
   Leclerc), Husson (le vérificateur envoie désormais « Accept: */* ») approuvées mot pour mot ;
   ancienne preuve Fendi écartée. Restent en attente, recherche consignée : Dior (aucune matière
   nommée, dior.com refuse), Tostitos (pages produits illisibles, Frito-Lay refuse), Starbucks (rapport
-  refusé, 403), Decathlon (page en JavaScript). À trancher par l'éditeur : H&M (écart de 0,3 % déduit
-  de « 99,7 % »), Michelin et Les Mousquetaires (lobbying déclaré par une autre société du groupe).
+  refusé, 403), Decathlon (page en JavaScript). Arbitrés par l'éditeur le 16/10 et approuvés : H&M (écart de
+  0,3 % déduit de « 99,7 % »), Michelin et Les Mousquetaires (lobbying attribué au groupe, société déclarante citée).
   Nouvelles marques : Krisprolls (Pågen Aktiebolag, LEI GLEIF) et La Fournée Dorée (SIREN 817390941,
   œufs et beurre). Casino et Auchan (ELO) : toujours aucun rapport annuel 2025 publié au 16/10/2026
   (derniers : DEU 2024 de Casino, RFA 2024 d'ELO, déjà exploités). Rio Mare : lien et citation
