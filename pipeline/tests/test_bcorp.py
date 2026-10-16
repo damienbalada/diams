@@ -38,3 +38,9 @@ def test_candidats_de_decouverte():
     c = candidates({"slug": "la-nef", "display_name": "La Nef", "legal_name": "Société Financière de la Nef"})
     assert [s for s, _ in c] == ["la-nef", "societe-financiere-de-la-nef"]
     assert norm_name("La Nef") in c[0][1]
+
+
+def test_annee_de_certification_au_referentiel_2_2():
+    page = "<title>Nespresso Global - Certified B Corporation - B Lab Global</title><p>Website www.nespresso.com</p><p>Brands Nespresso</p><p>2022</p><p>Certified since</p>"
+    b = parse_page(page, "https://x/")
+    assert b and b.certified_since == "2022"

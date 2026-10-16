@@ -42,6 +42,12 @@ VERIFIED: dict[str, tuple[str, str]] = {
     "rogue-creamery": ("rogue-creamery", "roguecreamery"),  # fromagerie de l'Oregon, Savencia
     "sipsmith": ("sipsmith", "sipsmith"),                 # gin, Suntory Global Spirits
     "valrhona": ("valrhona", "valrhona"),                 # chocolat, Savencia
+    # Fiches retrouvées le 17/10/2026 (adresse de la fiche distincte du nom de l'entité), relues.
+    "ben-jerrys": ("ben-and-jerrys", "benjerry"),         # Ben & Jerry's Homemade, Inc.
+    "weleda": ("weleda-a-g-group", "weleda"),             # Weleda AG Group (25 sociétés)
+    "weleda-marque": ("weleda-a-g-group", "weleda"),
+    "aesop": ("aesop", "aesop"),                          # Emeis Cosmetics (Aesop), L'Oréal
+    "nespresso": ("nespresso-global", "nespresso"),       # Nespresso Global, Nestlé
 }
 
 
@@ -74,6 +80,8 @@ def parse_page(page_html: str, url: str) -> BCorp | None:
     name = html.unescape(title.group(1).split(" - Certified B Corporation")[0]).strip()
     text = re.sub(r"\s+", " ", html.unescape(re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", page_html, flags=re.S)))
     since = re.search(r"Certified Since ([A-Z][a-z]+ \d{4})", text)
+    # Fiches au référentiel 2.2 (2026) : l'année précède le libellé (« Nespresso 2022 Certified since »).
+    since = since or re.search(r"\b((?:19|20)\d{2}) Certified since", text)
     score = re.search(r"earned an overall score of (\d+(?:\.\d+)?)", text)
     operates = re.search(r"Operates In (.+?) (?:Website|Sector|Industry|$)", text)
     website = re.search(r"Website (\S+)", text)
