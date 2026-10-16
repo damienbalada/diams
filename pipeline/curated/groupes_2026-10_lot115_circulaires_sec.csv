@@ -1,0 +1,2 @@
+entity_slug,indicator_code,source_code,nature,observed_on,value_type,value_numeric,value_boolean,value_text,normalized_value,confidence,source_url,excerpt,review_note
+hp-inc,GOV_BOARD_GENDER,SEC_FILING,result,2026-02-25,numeric,58.3,,,,0.9,https://www.sec.gov/Archives/edgar/data/47217/000004721726000015/hpq-20260225.htm,"Circulaire de procuration de HP Inc. déposée à la SEC (en anglais), candidats au conseil d'administration : « Seven of our director nominees are women and five are men » ; calcul : 7 / (7 + 5) = 58,3 %",
