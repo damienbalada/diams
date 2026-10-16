@@ -177,7 +177,10 @@ ESEF_KEYWORDS = {
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
     "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b|/€m sales|per \$\s?1\s?M\b|net sales|per €"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
-    "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
+    # Avis du Jury de déontologie publicitaire (16/10/2026) : « Recommandation » (Développement durable
+    # de l'ARPP) et ses verbes de conclusion.
+    "ENV_GREENWASHING": [r"sustainab|durab|environment|environnement|green|[ée]colog|ambienta|Recommandation",
+                         r"mislead|tromp|unclear|vague|claims?|all[ée]gation|m[ée]conna|contrevien|contraire|ne respecte"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
     # lus dans le plan lui-même (C. com. L225-102-4 : cinq mesures).
     "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques|identifie les risques|risques d.atteintes graves", r"suivi|contr[ôo]le du respect|compte rendu"],
