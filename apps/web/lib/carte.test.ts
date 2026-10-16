@@ -111,3 +111,15 @@ test("sanctions et Russie : le fait lui-même, pas « Documenté »", () => {
   assert.equal(c, "Sanctionné par la CNIL (2025) : amende de 150 millions d’euros");
   assert.equal(valeurCourte("GEO_RUSSIA_EXIT", "status", preuve("x", { excerpt: "KSE Institute, base « Leave Russia » : « Storck » — activité poursuivie en Russie" })), "Russie : activité poursuivie");
 });
+
+test("matières animales et tests : interdiction, exigence et objectif ne se confondent pas", () => {
+  const v = (code: string, excerpt: string) => valeurCourte(code, "policy", preuve(code, { excerpt }));
+  assert.equal(v("ANI_DOWN_RDS", "« does not accept the use of virgin down or feathers in our products »"), "Duvet et plumes neufs exclus (seulement recyclés)");
+  assert.equal(v("ANI_DOWN_RDS", "objectifs à l'horizon 2026 : « … certifiés Responsible Down standard (RDS) … »"), "Objectif de duvet recyclé ou certifié (norme RDS, sans plumage à vif)");
+  assert.equal(v("ANI_WOOL_MULESING", "« All virgin sheep wool must be certified in accordance with the Responsible Wool Standard (RWS) »"), "Laine neuve certifiée sans mulesing (norme RWS) exigée");
+  assert.equal(v("ANI_EXOTIC_SKINS", "« does not accept the use of exotic skins or skins from wild animals »"), "Peaux exotiques exclues");
+  assert.equal(v("ANI_EXOTIC_SKINS", "« le pôle ne commercialise que des peaux exotiques dont la provenance est … auditée »"), "Peaux exotiques : approvisionnement certifié ou audité (pas d'interdiction)");
+  assert.equal(v("ANI_LEATHER_TRACE", "« en 2025, l’ensemble des tanneries … et 83 % étaient certifiées LWG »"), "83 % des tanneries du groupe certifiées par le Leather Working Group");
+  assert.equal(v("ANI_TESTING", "Annuaire des marques approuvées Leaping Bunny de Cruelty Free International : « … »"), "Certifiée sans tests sur les animaux (Leaping Bunny)");
+  assert.equal(v("ANI_TESTING", "« mettre fin aux tests sur animaux pour les produits finis dès 1989 »"), "Arrêt des tests sur les animaux déclaré (sans certification du groupe)");
+});

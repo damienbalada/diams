@@ -138,12 +138,18 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "ANI_FUR_FREE": return "Membre du label « sans fourrure »";
     case "ANI_TESTING": return /Leaping Bunny de Cruelty Free/.test(x) ? "Certifiée sans tests sur les animaux (Leaping Bunny)" : "Arrêt des tests sur les animaux déclaré (sans certification du groupe)";
     // Matières animales de la mode : objectif ou politique publiés (aucune interdiction ni certification constatée).
-    case "ANI_DOWN_RDS": return /objectif|horizon/i.test(x) ? "Objectif de duvet recyclé ou certifié (norme RDS, sans plumage à vif)" : "Politique sur le duvet publiée";
-    case "ANI_WOOL_MULESING": return /objectif|horizon/i.test(x) ? "Objectif de laine recyclée ou certifiée (norme RWS, sans mulesing)" : "Politique sur la laine publiée";
-    case "ANI_EXOTIC_SKINS": return "Peaux exotiques : approvisionnement certifié ou audité (pas d'interdiction)";
+    case "ANI_DOWN_RDS":
+      if (/virgin down|duvet neuf exclu/i.test(x)) return "Duvet et plumes neufs exclus (seulement recyclés)";
+      return /objectif|horizon/i.test(x) ? "Objectif de duvet recyclé ou certifié (norme RDS, sans plumage à vif)" : "Duvet certifié (norme RDS) exigé";
+    case "ANI_WOOL_MULESING":
+      if (/must be certified|exigée/i.test(x)) return "Laine neuve certifiée sans mulesing (norme RWS) exigée";
+      return /objectif|horizon/i.test(x) ? "Objectif de laine recyclée ou certifiée (norme RWS, sans mulesing)" : "Politique sur la laine publiée";
+    case "ANI_ANGORA_MOHAIR": return /angora rabbit hair|angora exclu/i.test(x) ? "Angora exclu ; mohair certifié (norme RMS) exigé" : "Politique sur l'angora et le mohair publiée";
+    case "ANI_EXOTIC_SKINS": return /does not accept the use of exotic|exclues/i.test(x) ? "Peaux exotiques exclues" : "Peaux exotiques : approvisionnement certifié ou audité (pas d'interdiction)";
     case "ANI_LEATHER_TRACE": {
       const part = m1(/(\d+ ?%) étaient certifiées LWG/, x);
       if (part) return `${part} des tanneries du groupe certifiées par le Leather Working Group`;
+      if (/tanneries certified by the Leather Working Group/.test(x)) return "Cuir de tanneries certifiées (Leather Working Group) exigé";
       return "Objectifs de traçabilité et de certification des tanneries (Leather Working Group)";
     }
     case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 au classement du bien-être animal`;
