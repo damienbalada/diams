@@ -139,7 +139,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       // « Autorité de la concurrence, décision n° 23-D-15 du 29/12/2023 : … ; amende de 0,566 M€ »
       const autorite = (x.split(/[,:(]/)[0] ?? "").trim();
       const an = m1(/du \d{2}\/\d{2}\/(\d{4})/, x);
-      const amende = m1(/amende (?:de|d’un montant de) ([\d  ,.]+ ?(?:M€|Md€|M£|M\$|€|millions? d[’']euros|milliards? d[’']euros|euros))/, x)
+      const amende = m1(/amendes? (?:civiles? )?(?:de(?: plus de)?|d’un montant de) ([\d  ,.]+ ?(?:M€|Md€|M£|M\$|Md\$|€|millions? d[’']euros|milliards? d[’']euros|euros))/, x)
         ?? m1(/fine of ([\d.,]+ (?:million|billion)? ?euros)/i, x);
       const quoi = code === "GOV_SANCTIONS" ? "Sanctionné" : "Allégations écologiques trompeuses relevées";
       // Article devant le nom de l'autorité : « l'Autorité… », « la Commission… », « la CNIL ».
@@ -198,9 +198,16 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
   return `${nf(v)}${unit ? ` ${unit}` : ""}`;
 }
 
-/** Preuve retenue : la plus spécifique (propre à l'entité), puis la plus récente. */
-function meilleure(ps: PreuveEntree[]): PreuveEntree | null {
-  return [...ps].sort((a, b) => b.specificity - a.specificity || (b.event_date ?? b.observed_on).localeCompare(a.event_date ?? a.observed_on))[0] ?? null;
+/** Indicateurs de décision dont la valeur normalisée est la gravité : la plus grave est affichée. */
+const PAR_GRAVITE = new Set(["GOV_SANCTIONS"]);
+
+/** Preuve retenue : la plus spécifique (propre à l'entité), puis la plus récente. Pour une sanction,
+ *  la plus grave d'abord (méthode : « plusieurs décisions : la plus grave compte, et c'est elle que la
+ *  fiche affiche »), puis la plus récente. */
+function meilleure(ps: PreuveEntree[], code?: string): PreuveEntree | null {
+  const g = (p: PreuveEntree) => (code && PAR_GRAVITE.has(code) ? Number(p.normalized_value ?? 0) : 0);
+  return [...ps].sort((a, b) => b.specificity - a.specificity || g(b) - g(a)
+    || (b.event_date ?? b.observed_on).localeCompare(a.event_date ?? a.observed_on))[0] ?? null;
 }
 
 /**
@@ -287,7 +294,7 @@ export function construireCarte(
   }
 
   const bruts: Omit<Fait, "signal" | "exemption">[] = payload.applicableIndicators.map((i): Omit<Fait, "signal" | "exemption"> => {
-    const p = meilleure(parCode.get(i.code) ?? []);
+    const p = meilleure(parCode.get(i.code) ?? [], i.code);
     const js = (jparCode.get(i.code) ?? []).sort((a, b) => b.checked_on.localeCompare(a.checked_on));
     const obligation = i.mandatory ? (i.mandatory_regimes ?? []) : [];
     const contexte = i.direction === "contextual";

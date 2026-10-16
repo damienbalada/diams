@@ -776,3 +776,15 @@ def test_montants_abreges_m_et_bn():
     assert any(abs(x - 17e6) < 1 for x in euro_amounts("imposing a fine of €17m on Meta Platforms"))
     assert any(abs(x - 1.2e9) < 1 for x in euro_amounts("a fine of €1.2bn"))
     assert not any(abs(x - 17e6) < 1 for x in euro_amounts("€17 per month"))
+
+
+def test_sanction_en_dollars_milliard():
+    from diams.verify_curated import check_esef_quote, foreign_amounts
+    assert any(abs(x - 1e9) < 1 for x in foreign_amounts("pay a $1 billion civil penalty", "USD"))
+    rep = "Amazon will be required to pay a $1 billion civil penalty, provide $1.5 billion in refunds"
+    x = row("amazon", None, f"FTC : « {rep} »", ind="GOV_SANCTIONS", src="US_FTC")
+    x.value_numeric, x.value_text, x.normalized_value, x.nature = None, "amende de 1 Md$ (Prime)", 0.7, "controversy"
+    x.observed_on = "2025-09-25"
+    assert check_esef_quote(x, rep, rates={("USD", "2025"): 1.13}).status == "OK"       # ≈ 885 M€ : 0,7
+    x.normalized_value = 0.9
+    assert check_esef_quote(x, rep, rates={("USD", "2025"): 1.13}).status == "ÉCART"

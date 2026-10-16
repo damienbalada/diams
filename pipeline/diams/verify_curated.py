@@ -468,7 +468,7 @@ def check_named(row, quote: str) -> tuple[bool, list[str], bool]:
     lst = _NAMED_LIST.search(quote)
     names = []
     if lst:
-        body = re.sub(r"(?:Messrs|Mses|Mmes|Mr|Mrs|Ms|Dr)\.\s*", "", lst.group(1))
+        body = re.sub(r"\b(?:Messrs|Mses|Mmes|Mr|Mrs|Ms|Dr)\.\s*", "", lst.group(1))
         names = [x for x in re.split(r",\s*(?:and\s+)?|\s+and\s+", body) if x.strip()]
     count_ok = len(names) == n
     total_ok = _cited(b, quote)
@@ -621,7 +621,7 @@ _AMOUNT = r"\d{1,3}(?:[ ,.\u00a0\u202f]\d{3})*(?:[.,]\d+)?"
 _SCALE_WORD = r"billion|million|milliards?|millions?|bn|m"   # « €17m », « €1.2bn »
 _EUR_LEAD = re.compile(rf"(?:€|\bEUR)\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?", re.I)
 _EUR_TRAIL = re.compile(rf"(?<![\d,.])({_AMOUNT})\s?(?:({_SCALE_WORD})\s?)?(?:d'\s?)?(?:euros?\b|€)", re.I)
-_FX_LEAD = {cur: re.compile(rf"(?:{re.escape(sym)}|{cur})\s?({_AMOUNT})(?:\s?({_SCALE_WORD}))?", re.I)
+_FX_LEAD = {cur: re.compile(rf"(?:{re.escape(sym)}|\b{cur})\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?", re.I)
             for sym, cur in {"£": "GBP", "$": "USD"}.items()}
 _SCALE = {"bn": 1e9, "m": 1e6, "billion": 1e9, "million": 1e6, "milliard": 1e9, "milliards": 1e9, "millions": 1e6}
 
@@ -693,7 +693,7 @@ def check_sanction(row, quote: str, rates: dict | None = None) -> tuple[bool, li
             return False, [f"taux {cur} {sanction_rate_year(row)} de la BCE introuvable ✗"]
         eur = stated * scale / rate
         taux_s, eur_s = f"{rate:.4f}".replace(".", ","), f"{eur / 1e6:.1f}".replace(".", ",")
-        conv = [f"converti au taux annuel moyen {sanction_rate_year(row)} de la BCE (1 € = {taux_s} {cur}) : ≈ {eur_s} M€"]
+        conv = [f"converti au taux annuel moyen {(rates or {}).get(('annee', cur, sanction_rate_year(row)), sanction_rate_year(row))} de la BCE (1 € = {taux_s} {cur}) : ≈ {eur_s} M€"]
     present = any(round(q / scale, decimals) == stated for q in quoted)
     sev = sanction_severity(eur)
     norm_ok = row.normalized_value is not None and abs(row.normalized_value - sev) < 1e-9
@@ -1007,10 +1007,15 @@ def main() -> None:
                 sm = _SANCTION_VT.search(r.value_text or "") if r.indicator_code == "GOV_SANCTIONS" else None
                 if sm and sm.group(3) != "€":
                     cur, year = _DEVISES[sm.group(3)], sanction_rate_year(r)
-                    try:
-                        rates[(cur, year)] = ecb_annual_rate(cur, year, client)
-                    except Exception:
-                        pass
+                    # Année en cours : le taux annuel moyen n'est publié qu'en janvier suivant ;
+                    # on prend alors celui de l'année précédente, et le contrôle le dit.
+                    for y in (year, str(int(year) - 1)):
+                        try:
+                            rates[(cur, year)] = ecb_annual_rate(cur, y, client)
+                            rates[("annee", cur, year)] = y
+                            break
+                        except Exception:
+                            continue
                 v = check_esef_quote(r, reports[r.source_url], ignore_keywords=bool(note), rates=rates)
             else:
                 v = Verdict("NON VÉRIFIABLE", [f"aucun vérificateur pour la source {r.source_code}"])
