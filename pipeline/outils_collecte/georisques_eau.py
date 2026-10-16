@@ -9,7 +9,7 @@ arrêté est retenu si son texte contient un passage sur l'eau, cité mot pour m
 
 Usage : georisques_eau.py <dossier> <taille_sirene.json>   (cache georisques_cache.json ; reprise)
 """
-import datetime as dt, io, json, logging, os, re, sys, time
+import datetime as dt, json, os, re, sys, time
 import httpx
 
 OUT, TAILLE = sys.argv[1], sys.argv[2]
@@ -19,20 +19,29 @@ w = httpx.Client(verify=os.environ["SSL_CERT_FILE"], timeout=120, headers=UA, fo
 cache = json.load(open(CACHE, encoding="utf-8")) if os.path.exists(CACHE) else {}
 societes = json.load(open(TAILLE, encoding="utf-8"))
 DEPUIS = (dt.date.today() - dt.timedelta(days=5 * 365)).isoformat()
-EAU = re.compile(r"[^.;:]{0,200}\b(rejets? (?:aqueux|d.eaux|dans le milieu|au milieu)|eaux (?:usées|résiduaires|pluviales)|effluents?|station d.épuration|"
-                 r"prélèvements? d.eau|cours d.eau|milieu aquatique|pollution (?:des eaux|de la rivière|du ruisseau))\b[^.;]{0,200}", re.I)
-logging.getLogger("pypdf").setLevel(logging.ERROR)
-
-
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from diams.ocr import pdf_text_or_ocr, loose_pattern
+# Thèmes de l'eau, cherchés sans tenir compte des accents ni des espaces perdus par l'OCR.
+THEMES = ["rejets aqueux", "rejet aqueux", "eaux usées", "eaux résiduaires", "eaux pluviales", "effluents", "effluent",
+          "station d'épuration", "prélèvement d'eau", "prélèvements d'eau", "cours d'eau", "milieu aquatique",
+          "pollution des eaux", "rejets dans le milieu", "rejet dans le milieu naturel"]
+EAU = re.compile("|".join(loose_pattern(t).replace("'", "[’'\s]?") for t in THEMES), re.I)
 def texte_pdf(url):
-    import pypdf
     r = w.get(url)
     if r.status_code != 200 or b"%PDF" not in r.content[:1024]:
-        return None
+        return None, False
     try:
-        return re.sub(r"\s+", " ", " ".join((p.extract_text() or "") for p in pypdf.PdfReader(io.BytesIO(r.content)).pages))
+        return pdf_text_or_ocr(r.content)
     except Exception:
-        return None
+        return None, False
+
+
+def phrase(t, m):
+    """Phrase entière autour du thème trouvé, telle que reconnue (bornée aux signes de ponctuation)."""
+    i = max(t.rfind(".", 0, m.start()), t.rfind(";", 0, m.start()), t.rfind(":", 0, m.start()), m.start() - 300)
+    j_candidats = [k for k in (t.find(".", m.end()), t.find(";", m.end())) if k != -1]
+    j = min(j_candidats + [m.end() + 300])
+    return t[i + 1:j].strip()
 
 
 for n, (siren, v) in enumerate(societes.items(), 1):
@@ -60,12 +69,12 @@ for n, (siren, v) in enumerate(societes.items(), 1):
             date = doc.get("dateFichier") or ""
             if date and date < DEPUIS:
                 continue
-            t = texte_pdf(doc["urlFichier"]) if doc.get("urlFichier") else None
+            t, ocr = texte_pdf(doc["urlFichier"]) if doc.get("urlFichier") else (None, False)
             time.sleep(0.3)
             m = EAU.search(t or "")
             arretes.append({"siret": s["siret"], "commune": s.get("commune"), "date": date, "nom": doc.get("nomFichier"),
-                            "url": doc.get("urlFichier"), "lisible": t is not None,
-                            "eau": m.group(0).strip() if m else None})
+                            "url": doc.get("urlFichier"), "lisible": bool(t), "ocr": ocr,
+                            "eau": phrase(t, m) if m else None, "theme": m.group(0) if m else None})
     cache[v["slug"]] = {"siren": siren, "nom": nom, "sites": len(sites), "arretes": arretes}
     if n % 20 == 0:
         json.dump(cache, open(CACHE, "w", encoding="utf-8"), ensure_ascii=False); print(n, "sociétés")

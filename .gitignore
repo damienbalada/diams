@@ -47,3 +47,4 @@ npm-debug.log*
 /companies-excel.xlsx
 pipeline/*.csv
 pipeline/*.xlsx
+pipeline/.cache/

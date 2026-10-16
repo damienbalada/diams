@@ -174,6 +174,7 @@ export const REPERES: Record<string, string> = {
   GOV_BOARD_GENDER: "Repère : 40 % au minimum dans les sociétés cotées en France (loi Copé-Zimmermann)",
   GOV_BOARD_INDEP: "Repère : au moins un tiers recommandé par le code Afep-Medef",
   TAX_EFFECTIVE_RATE: "Repère : impôt minimum mondial de l'OCDE, 15 % ; taux normal en France, 25 %",
+  WAT_CONTROVERSY: "Repère : arrêtés préfectoraux de mise en demeure des installations classées (Géorisques), cinq dernières années ; ces arrêtés sont des scans : la citation est le texte reconnu par OCR, parfois sans accents",
   GEO_POL_FINANCING: "Repère : en France, une entreprise ne peut pas financer un parti ni une campagne (loi du 11 mars 1988) ; aux États-Unis, elle le fait par un comité d'action politique déclaré à la Commission électorale fédérale",
   SUP_BHRRC_ALLEG: "Repère : articles de presse et d'ONG relayés par le Business & Human Rights Resource Centre ; ce sont des allégations, pas des faits établis",
   TAX_HAVEN_PRESENCE: "Repère : les dix premiers du classement des paradis fiscaux pour les entreprises du Tax Justice Network (décembre 2025) : îles Vierges britanniques, îles Caïmans, Suisse, Bermudes, Singapour, Hong Kong, Pays-Bas, Jersey, Irlande, Luxembourg ; le pays du siège n'est pas compté",

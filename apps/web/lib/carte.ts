@@ -168,6 +168,12 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "GOV_BOARD_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes au conseil d'administration`;
     case "GOV_BOARD_INDEP": return v === null ? "Publié" : `${nf(v)} % d'administrateurs indépendants`;
     case "TAX_EFFECTIVE_RATE": return v === null ? "Publié" : `Impôt payé : ${nf(v)} % des bénéfices`;
+    case "WAT_CONTROVERSY": {
+      // « … arrêté préfectoral de mise en demeure du 19/08/2026, site de Formerie … »
+      const an = m1(/mise en demeure du \d{2}\/\d{2}\/(\d{4})/, x);
+      const site = m1(/site de ([^,(]+)/, x);
+      return `Mise en demeure de la préfecture portant sur l'eau${site ? ` (site de ${site.trim()}` : ""}${an ? `${site ? ", " : " ("}${an})` : site ? ")" : ""}`;
+    }
     case "GEO_POL_FINANCING": return v === null ? "Publié" : v === 0 ? "Comité politique déclaré aux États-Unis, sans contribution ce cycle" : `${nf(v, 0)} $ versés à des candidats et comités politiques aux États-Unis (2025-2026)`;
     case "SUP_BHRRC_ALLEG": return v === null ? "Relayé" : `${nf(v, 0)} article${v > 1 ? "s" : ""} relayant des allégations en 12 mois (BHRRC)`;
     case "TAX_HAVEN_PRESENCE": return v === null ? "Publié" : v === 0 ? "Aucune filiale listée dans les dix premiers paradis fiscaux" : `Au moins ${nf(v, 0)} filiale${v > 1 ? "s" : ""} dans les dix premiers paradis fiscaux`;

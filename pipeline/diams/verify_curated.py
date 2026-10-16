@@ -818,7 +818,13 @@ def document_text(url: str, client: httpx.Client) -> str:
 
         import pypdf
         logging.getLogger("pypdf").setLevel(logging.ERROR)
-        return "\n".join(_page_text(p) for p in pypdf.PdfReader(io.BytesIO(r.content)).pages)
+        text = "\n".join(_page_text(p) for p in pypdf.PdfReader(io.BytesIO(r.content)).pages)
+        if len(text.strip()) < 200:
+            # PDF scanné, sans texte (arrêtés de Géorisques) : texte reconnu par OCR, le même que
+            # celui de l'outil de collecte grâce au cache (16/10/2026).
+            from .ocr import pdf_text_or_ocr
+            text = pdf_text_or_ocr(r.content)[0]
+        return text
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", r.text, flags=re.S)))
 
 
