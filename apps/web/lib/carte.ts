@@ -263,6 +263,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/Commission électorale fédérale/, "fichiers de la Commission électorale fédérale (FEC)"],
   [/loi Rixain/, "déclarations de la loi Rixain"],
   [/aucun index Égapro/, "index Égapro"],
+  [/base de données de l'ONU des entreprises impliquées dans les colonies/, "base de données de l'ONU sur les colonies israéliennes"],
   [/annuaire B Lab/, "annuaire B Corp de B Lab"],
 ];
 
