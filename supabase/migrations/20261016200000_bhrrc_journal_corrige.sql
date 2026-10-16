@@ -1,0 +1,12 @@
+-- BHRRC (16/10/2026) : journal corrigé après la recherche élargie des noms de pages.
+-- 1) Rapprochements faux retirés : la page retenue était celle d'une filiale (Bavaria pour AB InBev,
+--    Nabisco pour Mondelez) ou d'une autre société (Reserve Bank of India pour RBI, C. Hafner pour
+--    Hafner, « Meta Limited » pour Meta).
+-- 2) « Aucune page entreprise » retiré pour les groupes dont la page a été trouvée depuis.
+delete from indicator_reviews r using entities e, indicators i
+where r.entity_id = e.id and r.indicator_id = i.id and i.code = 'SUP_BHRRC_ALLEG'
+  and e.slug in ('rbi', 'ab-inbev', 'mondelez', 'hafner-entreprises', 'meta');
+delete from indicator_reviews r using entities e, indicators i
+where r.entity_id = e.id and r.indicator_id = i.id and i.code = 'SUP_BHRRC_ALLEG'
+  and r.detail like 'Cherché, non trouvé : aucune page entreprise au nom de%'
+  and e.slug in ('3m', 'abf', 'acer', 'adidas', 'apple', 'arla', 'asahi', 'auchan', 'axa', 'bacardi', 'barilla', 'beiersdorf', 'beyond-meat', 'bic', 'bigard', 'bmw', 'bnp-paribas', 'boiron', 'bolton', 'bonduelle', 'bpce', 'brother-industries', 'brown-forman', 'campari', 'canon', 'carrefour', 'casino', 'chanel', 'church-dwight', 'coca-cola', 'colgate-palmolive', 'coty', 'credit-agricole', 'cristal-union', 'danone', 'decathlon', 'diageo', 'dr-oetker', 'dyson', 'edgewell', 'electrolux', 'engie', 'essity', 'fast-retailing', 'ferrero', 'garmin', 'general-mills', 'good-food', 'google', 'hasbro', 'heineken', 'henkel', 'hermes', 'hipp-vertrieb', 'hp-inc', 'ikea', 'inditex', 'interparfums', 'kenvue', 'kering', 'keurig-dr-pepper', 'kimberly-clark', 'kontoor', 'kraft-heinz', 'la-banque-postale', 'lactalis', 'ldc', 'lego', 'lenovo', 'lg-electronics', 'lindt', 'lipton-teas-and-infusions', 'logitech', 'loreal', 'lvmh', 'mars', 'mattel', 'mccain', 'mccormick', 'mcdonalds', 'mercedes-benz', 'merisant', 'michelin', 'microsoft', 'monster-beverage', 'nestle', 'netflix', 'newell-brands', 'nike', 'nintendo', 'nomad-foods', 'panasonic', 'paul-hartmann', 'pepsico', 'perfetti-van-melle', 'pernod-ricard', 'philips', 'picard', 'pierre-fabre', 'post-holdings', 'procter-gamble', 'puig', 'ravensburger', 'reckitt', 'remy-cointreau', 'renault', 'richemont', 'samsung', 'seb', 'seiko-epson', 'shein', 'shell', 'societe-generale', 'sony', 'spectrum-brands', 'stanley-black-decker', 'starbucks', 'stellantis', 'suntory-beverage-food', 'systeme-u', 'tereos', 'tesla', 'thai-union', 'totalenergies', 'toyota', 'ubisoft', 'unilever', 'volkswagen', 'wd-40', 'weleda', 'xiaomi');

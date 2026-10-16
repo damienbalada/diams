@@ -38,10 +38,27 @@ def variantes(n):
     return {x for x in out if x}
 
 
+def principal(cand):
+    """Nom de la page hors parenthèses : « Reserve Bank of India (RBI) » → Reserve Bank of India."""
+    return re.sub(r"\s*\(.*?\)\s*", " ", cand).strip()
+
+
 def correspond(nom, legal, cand):
     from diams.normalize.names import normalize_name
+    main = {normalize_name(v) for v in variantes(principal(cand))}
+    if any(normalize_name(x) in main for x in (nom, legal) if x):
+        return True
+    # Sigle entre parenthèses (« Hennes & Mauritz (H&M) ») : retenu seulement si le nom principal de la
+    # page correspond aussi à la raison sociale (la « Reserve Bank of India (RBI) » n'est pas RBI, 16/10/2026).
     vs = {normalize_name(v) for v in variantes(cand)}
-    return any(normalize_name(x) in vs for x in (nom, legal) if x)
+    return any(normalize_name(x) in vs for x in (nom, legal) if x) and bool(legal) and is_strong_match(legal, principal(cand))
+
+
+def strict(nom, legal, cand):
+    """Règle d'origine appliquée au seul nom principal de la page : « Google (part of Alphabet) » est
+    la page de Google ; « Bavaria (part of AB InBev) » n'est pas celle d'AB InBev."""
+    main = principal(cand)
+    return is_strong_match(nom, main) or (bool(legal) and is_strong_match(legal, main))
 
 
 def poli(url, **kw):
@@ -69,7 +86,7 @@ for n, e in enumerate(roots, 1):
             res = poli(f"{BASE}/en/api/companies/", params={"search": nom_q}, headers={"Accept": "application/json"}).json().get("results", [])
         except Exception as err:
             print("  erreur", e["slug"], err); continue
-        hit = next((x for x in res if is_strong_match(nom_q, x["name"]) or is_strong_match(e["legal_name"], x["name"])), None)             or next((x for x in res if correspond(nom_q, e["legal_name"], x["name"])), None)
+        hit = next((x for x in res if strict(nom_q, e["legal_name"], x["name"])), None) or next((x for x in res if correspond(nom_q, e["legal_name"], x["name"])), None)
     if not hit:
         cache[e["slug"]] = {"trouve": False, "requete": nom_q, "v2": True}
     else:
