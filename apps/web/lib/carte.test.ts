@@ -146,3 +146,8 @@ test("duvet : politique sans certification", () => {
   const s = valeurCourte("ANI_DOWN_RDS", "policy", preuve("x", { excerpt: "« Suppliers must not supply down harvested from live birds … » — politique publiée, sans certification du duvet exigée." }));
   assert.equal(s, "Plumage à vif exclu (politique, sans certification)");
 });
+
+test("sanction partagée entre deux filiales : le total n'est pas sous-estimé", () => {
+  const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("x", { excerpt: "Cour fédérale d'Australie, ordonnance du 26/07/2023 : « … » — amende de 10 MA$ pour chacune des deux filiales (sévérité 0,5)." }));
+  assert.equal(s, "Sanctionné par la Cour fédérale d'Australie (2023) : amende de 10 M$ australiens pour chacune de deux filiales");
+});
