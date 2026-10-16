@@ -47,3 +47,13 @@ def test_lettres_isolees_differentes():
     from diams.normalize.names import is_strong_match
     assert not is_strong_match("Bio-D", "U BIO")
     assert is_strong_match("E.Leclerc", "Leclerc")
+
+
+def test_hatvp_homonymes_ecartes():
+    from diams.connectors.hatvp import HatvpOrg, match_org
+    orgs = [HatvpOrg("AXE 3 E", None, None, None), HatvpOrg("MOUVEMENT DES ENTREPRISES DE FRANCE EN COTE D'OR (MEDEF COTE D'OR)", None, None, None),
+            HatvpOrg("FNATH, ASSOCIATION DES ACCIDENTÉS DE LA VIE", None, None, None), HatvpOrg("KRONENBOURG", None, None, None)]
+    assert match_org({"display_name": "Axe"}, orgs) is None
+    assert match_org({"display_name": "Côte d'Or"}, orgs) is None
+    assert match_org({"display_name": "La Vie"}, orgs) is None
+    assert match_org({"display_name": "Kronenbourg"}, orgs).denomination == "KRONENBOURG"

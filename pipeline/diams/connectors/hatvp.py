@@ -17,7 +17,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from ..normalize.names import is_strong_match
+from ..normalize.names import is_exact_match
 
 HATVP_SOURCE_URL = "https://www.hatvp.fr/le-repertoire/"
 
@@ -93,8 +93,16 @@ def match_org(entity: dict[str, Any], orgs: list[HatvpOrg]) -> HatvpOrg | None:
         # Société identifiée par son SIREN : pas de repli sur le nom, qui rattacherait l'inscription
         # d'une autre société du groupe (« Essity PLD France » ≠ « Essity France », 16/10/2026).
         return None
-    name =entity.get("legal_name") or entity.get("display_name") or ""
+    # Sans SIREN (marques, groupes étrangers) : nom strictement égal, et jamais une organisation
+    # professionnelle ou associative homonyme (17/10/2026 : « Côte d'Or » rattachée au MEDEF Côte d'Or,
+    # « La Vie » à la FNATH, « Axe » à « AXE 3 E »).
+    name = entity.get("legal_name") or entity.get("display_name") or ""
     for o in orgs:
-        if is_strong_match(name, o.denomination):
+        if _ORGANISATION.search(o.denomination):
+            continue
+        if is_exact_match(name, o.denomination):
             return o
     return None
+
+
+_ORGANISATION = re.compile(r"\b(?:MEDEF|CHAMBRE|COLLECTIF|ASSOCIATION|F[ÉE]D[ÉE]RATION|SYNDICAT|MOUVEMENT|UNION|CONF[ÉE]D[ÉE]RATION|COMIT[ÉE])\b", re.I)

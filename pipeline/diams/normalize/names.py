@@ -69,6 +69,15 @@ def is_strong_match(query: str, candidate: str) -> bool:
     return False
 
 
+def is_exact_match(query: str, candidate: str) -> bool:
+    """Égalité stricte des noms normalisés, lettres et chiffres isolés compris (« Axe » ≠ « AXE 3 E »).
+    Pour les registres où une inclusion rattacherait une homonyme (répertoire HATVP, 17/10/2026)."""
+    q, c = normalize_name(query), normalize_name(candidate)
+    if not q or not c or set(q.split()) <= GENERIC:
+        return False
+    return q == c and normalize_name(query, keep_letters=True) == normalize_name(candidate, keep_letters=True)
+
+
 def best_match(query: str, candidates: list[dict], name_key: str) -> dict | None:
     """Retourne le 1er candidat en correspondance nette, sinon None (pas de devinette)."""
     for cand in candidates:
