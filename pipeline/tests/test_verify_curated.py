@@ -769,3 +769,10 @@ def test_independants_nommes_comptes_dans_la_citation():
             ind="GOV_BOARD_INDEP", src="SEC_FILING")
     y.normalized_value = 0.8
     assert check_esef_quote(y, rep).status == "ÉCART"   # 7 noms seulement
+
+
+def test_montants_abreges_m_et_bn():
+    from diams.verify_curated import euro_amounts
+    assert any(abs(x - 17e6) < 1 for x in euro_amounts("imposing a fine of €17m on Meta Platforms"))
+    assert any(abs(x - 1.2e9) < 1 for x in euro_amounts("a fine of €1.2bn"))
+    assert not any(abs(x - 17e6) < 1 for x in euro_amounts("€17 per month"))

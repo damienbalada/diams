@@ -618,12 +618,12 @@ _DEVISES = {"£": "GBP", "$": "USD"}
 # « 100 000 euros ». Chaque nombre est lu à l'anglaise et à la française ; le montant
 # déclaré doit correspondre à l'une des lectures.
 _AMOUNT = r"\d{1,3}(?:[ ,.\u00a0\u202f]\d{3})*(?:[.,]\d+)?"
-_SCALE_WORD = r"billion|million|milliards?|millions?"
+_SCALE_WORD = r"billion|million|milliards?|millions?|bn|m"   # « €17m », « €1.2bn »
 _EUR_LEAD = re.compile(rf"(?:€|\bEUR)\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?", re.I)
 _EUR_TRAIL = re.compile(rf"(?<![\d,.])({_AMOUNT})\s?(?:({_SCALE_WORD})\s?)?(?:d'\s?)?(?:euros?\b|€)", re.I)
 _FX_LEAD = {cur: re.compile(rf"(?:{re.escape(sym)}|{cur})\s?({_AMOUNT})(?:\s?({_SCALE_WORD}))?", re.I)
             for sym, cur in {"£": "GBP", "$": "USD"}.items()}
-_SCALE = {"billion": 1e9, "million": 1e6, "milliard": 1e9, "milliards": 1e9, "millions": 1e6}
+_SCALE = {"bn": 1e9, "m": 1e6, "billion": 1e9, "million": 1e6, "milliard": 1e9, "milliards": 1e9, "millions": 1e6}
 
 
 def _readings(n_s: str) -> list[float]:
