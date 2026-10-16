@@ -880,6 +880,10 @@ pas du nombre de marques. Trois garde-fous invariants :
 | Finansol | INV | label de finance solidaire (oui seulement) : distributeur nommé dans la liste officielle | FAIR (Finansol) | établissement distributeur |
 | B Corp | GOV | certification B Corp (oui seulement), domaine du site vérifié | annuaire B Lab | entité certifiée |
 | ONU — HCDH | GEO | présence dans la base des entreprises liées aux colonies (controverse), nom exact | Conseil des droits de l'homme (A/HRC/63/20) | entité listée |
+| Leaping Bunny | ANI | marque certifiée sans tests sur les animaux : fiche dans l'annuaire des marques approuvées (absences consignées) | Cruelty Free International | marque |
+| Politiques matières des marques de mode | ANI | duvet, laine, angora et mohair, peaux exotiques, cuir : interdiction ou certification exigée (1), politique ou objectif (0,5) | rapports annuels, politiques publiées par l'entreprise | groupe et marque |
+| SEC, Bureau de la concurrence du Canada | ENV, GOV | sanctions pour déclarations ou allégations trompeuses (ex. recyclabilité) | communiqués officiels | groupe |
+| Cour fédérale d'Australie | GOV | amendes civiles obtenues par l'ACCC, en dollars australiens convertis au taux de la BCE | jugements de la Cour | groupe |
 
 **Présence dans les paradis fiscaux** (top 10 de l'indice du Tax Justice Network, édition du
 2 décembre 2025) : pour un groupe américain, lignes de l'annexe 21 de son rapport 10-K ; pour un
