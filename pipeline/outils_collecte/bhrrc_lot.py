@@ -37,19 +37,30 @@ def poli(url, **kw):
 
 
 for n, e in enumerate(roots, 1):
-    if e["slug"] in cache:
+    prev = cache.get(e["slug"])
+    if prev and (not prev["trouve"] or "page_id" in prev):
         continue
     nom = e.get("display_name") or e["legal_name"]
     nom_q = re.sub(r"\s*\((?:groupe|société|coopérative)\)\s*$", "", nom)
-    try:
-        res = poli(f"{BASE}/en/api/companies/", params={"search": nom_q}, headers={"Accept": "application/json"}).json().get("results", [])
-    except Exception as err:
-        print("  erreur", e["slug"], err); continue
-    hit = next((x for x in res if is_strong_match(nom_q, x["name"]) or is_strong_match(e["legal_name"], x["name"])), None)
+    if prev:
+        hit = {"name": prev["nom_bhrrc"], "bhrrc_id": prev["id"], "url": prev["url"].replace(BASE, "")}
+    else:
+        try:
+            res = poli(f"{BASE}/en/api/companies/", params={"search": nom_q}, headers={"Accept": "application/json"}).json().get("results", [])
+        except Exception as err:
+            print("  erreur", e["slug"], err); continue
+        hit = next((x for x in res if is_strong_match(nom_q, x["name"]) or is_strong_match(e["legal_name"], x["name"])), None)
     if not hit:
         cache[e["slug"]] = {"trouve": False, "requete": nom_q}
     else:
-        feed_url = f"{BASE}/en/feeds/latest-news/3/?companies={hit['bhrrc_id']}&contains_allegations=YES"
+        # Le flux se filtre par l'identifiant de la page de l'entreprise (lien « flux » de la page),
+        # pas par l'identifiant de l'API : avec ce dernier, le flux renvoie les dernières
+        # nouvelles de tout le site (constaté le 16/10/2026).
+        page = poli(BASE + hit["url"]).text
+        pid = (re.search(r'/en/feeds/latest-news/3/\?companies=(\d+)', page) or [None, None])[1]
+        if not pid:
+            print("  pas de flux", e["slug"]); continue
+        feed_url = f"{BASE}/en/feeds/latest-news/3/?companies={pid}&contains_allegations=YES"
         xml = poli(feed_url).text
         items = []
         for it in re.findall(r"<item>(.*?)</item>", xml, flags=re.S):
@@ -60,11 +71,17 @@ for n, e in enumerate(roots, 1):
             except Exception:
                 d = ""
             items.append({"titre": re.sub(r"\s+", " ", t), "date": d})
-        cache[e["slug"]] = {"trouve": True, "nom_bhrrc": hit["name"], "id": hit["bhrrc_id"], "url": BASE + hit["url"],
+        cache[e["slug"]] = {"trouve": True, "nom_bhrrc": hit["name"], "id": hit["bhrrc_id"], "page_id": pid, "url": BASE + hit["url"],
                             "flux": feed_url, "articles": items}
     if n % 20 == 0:
         json.dump(cache, open(CACHE, "w", encoding="utf-8"), ensure_ascii=False); print(n, "groupes lus")
 json.dump(cache, open(CACHE, "w", encoding="utf-8"), ensure_ascii=False)
+
+# Garde-fou : un flux non filtré renvoie les mêmes articles pour tout le monde.
+import collections
+premiers = collections.Counter(v["articles"][0]["titre"] for v in cache.values() if v.get("trouve") and v.get("articles"))
+if premiers and premiers.most_common(1)[0][1] > max(5, 0.2 * sum(premiers.values())):
+    sys.exit(f"Flux suspect : le même premier article revient {premiers.most_common(1)[0][1]} fois — lot non écrit.")
 
 # Lot de preuves et journal
 today = dt.date.today()

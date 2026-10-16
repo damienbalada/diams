@@ -24,7 +24,7 @@ from dataclasses import dataclass
 import httpx
 
 PAGE = "https://www.bcorporation.net/en-us/find-a-b-corp/company/{}/"
-HEADERS = {"User-Agent": "Mozilla/5.0 (DIAMS, recherche documentaire)"}
+HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)", "Accept": "*/*"}
 
 # Paires vérifiées (revue humaine) : slug DIAMS → (slug de la fiche B Lab, domaine du site attendu).
 VERIFIED: dict[str, tuple[str, str]] = {

@@ -139,11 +139,11 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       // « Autorité de la concurrence, décision n° 23-D-15 du 29/12/2023 : … ; amende de 0,566 M€ »
       const autorite = (x.split(/[,:(]/)[0] ?? "").trim();
       const an = m1(/du \d{2}\/\d{2}\/(\d{4})/, x);
-      const amende = m1(/amende (?:de|d’un montant de) ([\d  ,.]+ ?(?:M€|Md€|€|millions? d[’']euros|milliards? d[’']euros|euros))/, x)
+      const amende = m1(/amende (?:de|d’un montant de) ([\d  ,.]+ ?(?:M€|Md€|M£|M\$|€|millions? d[’']euros|milliards? d[’']euros|euros))/, x)
         ?? m1(/fine of ([\d.,]+ (?:million|billion)? ?euros)/i, x);
       const quoi = code === "GOV_SANCTIONS" ? "Sanctionné" : "Allégations écologiques trompeuses relevées";
       // Article devant le nom de l'autorité : « l'Autorité… », « la Commission… », « la CNIL ».
-      const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|FTC)\b/.test(autorite) ? "la " : /^Jury\b/.test(autorite) ? "le " : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
+      const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|FTC|CMA)\b/.test(autorite) ? "la " : /^Jury\b/.test(autorite) ? "le " : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
       return `${quoi} par ${autorite ? art + autorite : "une autorité"}${an ? ` (${an})` : ""}${amende ? ` : amende de ${amende}` : ""}`;
     }
     case "GEO_CONFLICT_TIES": return "Implication dans un conflit ou une occupation, documentée";

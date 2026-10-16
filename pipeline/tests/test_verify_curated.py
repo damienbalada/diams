@@ -739,3 +739,17 @@ def test_mots_animaux_francais_et_anglais():
         assert re.search(kw, oui, re.I), oui
     for non in ("Almond Butter Protein Bars", "cocoa butter", "peanut butter"):
         assert not re.search(kw, non, re.I), non
+
+
+def test_sanction_en_livres_convertie_au_taux_de_la_bce():
+    from diams.verify_curated import check_esef_quote
+    rep = "The fines for each company are: BMW £10,660,781 £400,144 £11,060,925 (20% settlement reduction) Ford"
+    q = "The fines for each company are: BMW £10,660,781 £400,144 £11,060,925 (20% settlement reduction)"
+    x = row("bmw", None, f"CMA : « {q} » — amende", ind="GOV_SANCTIONS", src="UK_COMPETITION")
+    x.value_numeric, x.value_text, x.normalized_value, x.nature = None, "amende de 11,1 M£ (entente)", 0.5, "controversy"
+    x.observed_on = "2025-04-01"
+    assert check_esef_quote(x, rep, rates={("GBP", "2025"): 0.8568}).status == "OK"
+    # Sans taux de la BCE, la gravité ne peut pas être calculée : écart.
+    assert check_esef_quote(x, rep, rates={}).status == "ÉCART"
+    x.value_text = "amende de 11,1 M€ (entente)"   # devise erronée : aucun montant en euros cité
+    assert check_esef_quote(x, rep, rates={("GBP", "2025"): 0.8568}).status == "ÉCART"

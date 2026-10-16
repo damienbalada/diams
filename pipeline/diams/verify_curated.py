@@ -220,7 +220,7 @@ ESEF_KEYWORDS = {
     # Évolution du plastique vierge (tonnage absolu, pas par unité vendue).
     "PLA_REDUCTION": [r"plasti", r"vierge|virgin"],
     # Décision officielle d'une autorité : amende, ou infraction constatée sans amende.
-    "GOV_SANCTIONS": [r"fine[ds]?\b|fining|amende|sanction"],
+    "GOV_SANCTIONS": [r"fine[ds]?\b|fining|amende|sanction|penalt(?:y|ies)"],
 }
 
 
@@ -578,7 +578,10 @@ def check_trend(row, quote: str) -> tuple[bool, list[str], bool]:
 # Sanction d'une autorité : la gravité suit le montant de l'amende, relu dans la
 # citation officielle. « amende de 74,9 M€ » ↔ « Stellantis 50% €74 934 000 ».
 SANCTION_TIERS = ((1e9, 0.9), (1e8, 0.7), (0.0, 0.5))
-_SANCTION_VT = re.compile(r"amendes? de (?:plus de )?([\d ]+(?:,\d+)?) (M|Md)€")
+_SANCTION_VT = re.compile(r"amendes? de (?:plus de )?([\d ]+(?:,\d+)?) (M|Md)(€|£|\$)")
+# Amende prononcée en livres ou en dollars (CMA, FTC) : montant relu dans la devise du
+# communiqué, gravité calculée après conversion au taux annuel moyen de la BCE.
+_DEVISES = {"£": "GBP", "$": "USD"}
 # Montant en euros, quelle que soit l'écriture du communiqué : « €1.8 billion », « EUR 114,681,657 »,
 # « 98,635,416.67 euro », « € 1,128 billion » (virgule décimale), « 150 millions d'euros »,
 # « 100 000 euros ». Chaque nombre est lu à l'anglaise et à la française ; le montant
@@ -587,6 +590,8 @@ _AMOUNT = r"\d{1,3}(?:[ ,.\u00a0\u202f]\d{3})*(?:[.,]\d+)?"
 _SCALE_WORD = r"billion|million|milliards?|millions?"
 _EUR_LEAD = re.compile(rf"(?:€|\bEUR)\s?({_AMOUNT})(?:\s?({_SCALE_WORD})\b)?", re.I)
 _EUR_TRAIL = re.compile(rf"(?<![\d,.])({_AMOUNT})\s?(?:({_SCALE_WORD})\s?)?(?:d'\s?)?(?:euros?\b|€)", re.I)
+_FX_LEAD = {cur: re.compile(rf"(?:{re.escape(sym)}|{cur})\s?({_AMOUNT})(?:\s?({_SCALE_WORD}))?", re.I)
+            for sym, cur in {"£": "GBP", "$": "USD"}.items()}
 _SCALE = {"billion": 1e9, "million": 1e6, "milliard": 1e9, "milliards": 1e9, "millions": 1e6}
 
 
@@ -614,13 +619,24 @@ def euro_amounts(quote: str) -> list[float]:
     return found
 
 
+def foreign_amounts(quote: str, currency: str) -> list[float]:
+    found = []
+    for n_s, word in _FX_LEAD[currency].findall(quote):
+        found += [n * _SCALE.get(word.lower(), 1) for n in _readings(n_s)]
+    return found
+
+
+def sanction_rate_year(row) -> str:
+    return str(row.observed_on)[:4]
+
+
 def sanction_severity(amount_eur: float) -> float:
     """Amende d'au moins 1 Md€ = 0,9 ; de 100 M€ à 1 Md€ = 0,7 ; moins (ou infraction
     sans amende, immunité de clémence) = 0,5."""
     return next(sev for floor, sev in SANCTION_TIERS if amount_eur >= floor)
 
 
-def check_sanction(row, quote: str) -> tuple[bool, list[str]]:
+def check_sanction(row, quote: str, rates: dict | None = None) -> tuple[bool, list[str]]:
     vt = row.value_text or ""
     if "immunité" in vt:
         cited = re.search(r"not fined|immunity|immunité", quote, re.I) is not None
@@ -631,16 +647,27 @@ def check_sanction(row, quote: str) -> tuple[bool, list[str]]:
     m = _SANCTION_VT.search(vt)
     if not m:
         return False, [f"montant illisible dans « {vt} » ✗"]
-    num_s, unit = m.groups()
+    num_s, unit, sym = m.groups()
     decimals = len(num_s.split(",")[1]) if "," in num_s else 0
     stated = float(num_s.replace(" ", "").replace(",", "."))
     scale = 1e9 if unit == "Md" else 1e6
-    quoted = euro_amounts(quote)
+    conv = []
+    if sym == "€":
+        quoted, eur = euro_amounts(quote), stated * scale
+    else:
+        cur = _DEVISES[sym]
+        quoted = foreign_amounts(quote, cur)
+        rate = (rates or {}).get((cur, sanction_rate_year(row)))
+        if rate is None:
+            return False, [f"taux {cur} {sanction_rate_year(row)} de la BCE introuvable ✗"]
+        eur = stated * scale / rate
+        taux_s, eur_s = f"{rate:.4f}".replace(".", ","), f"{eur / 1e6:.1f}".replace(".", ",")
+        conv = [f"converti au taux annuel moyen {sanction_rate_year(row)} de la BCE (1 € = {taux_s} {cur}) : ≈ {eur_s} M€"]
     present = any(round(q / scale, decimals) == stated for q in quoted)
-    sev = sanction_severity(stated * scale)
+    sev = sanction_severity(eur)
     norm_ok = row.normalized_value is not None and abs(row.normalized_value - sev) < 1e-9
     return present and norm_ok, [
-        f"montant {num_s} {unit}€ retrouvé dans la citation {'✓' if present else '✗'}",
+        f"montant {num_s} {unit}{sym} retrouvé dans la citation {'✓' if present else '✗'}", *conv,
         f"sévérité {sev} conforme au barème {'✓' if norm_ok else '✗'}"]
 
 
@@ -711,7 +738,7 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
     ok &= tr_ok
     details += tr_details
     if row.indicator_code == "GOV_SANCTIONS":
-        sc_ok, sc_details = check_sanction(row, quote)
+        sc_ok, sc_details = check_sanction(row, quote, rates)
         ok &= sc_ok
         details += sc_details
     if row.value_numeric is not None and not ignore_keywords and not tr_active:
@@ -944,6 +971,13 @@ def main() -> None:
                 fx = FX_RE.search(r.excerpt or "")
                 if fx:
                     rates[(fx.group(3), fx.group(1))] = ecb_annual_rate(fx.group(3), fx.group(1), client)
+                sm = _SANCTION_VT.search(r.value_text or "") if r.indicator_code == "GOV_SANCTIONS" else None
+                if sm and sm.group(3) != "€":
+                    cur, year = _DEVISES[sm.group(3)], sanction_rate_year(r)
+                    try:
+                        rates[(cur, year)] = ecb_annual_rate(cur, year, client)
+                    except Exception:
+                        pass
                 v = check_esef_quote(r, reports[r.source_url], ignore_keywords=bool(note), rates=rates)
             else:
                 v = Verdict("NON VÉRIFIABLE", [f"aucun vérificateur pour la source {r.source_code}"])
