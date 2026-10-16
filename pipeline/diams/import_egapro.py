@@ -64,11 +64,8 @@ def main() -> None:
         records = egapro.parse_csv(args.file)
         print(f"{len(records)} lignes Égapro lues depuis {args.file}")
     else:
-        sirens = sorted({str(e["siren"]) for e in entities if e.get("siren")})
-        if not sirens:
-            raise SystemExit("Aucun SIREN renseigné — lancer d'abord enrich_entities.")
-        print(f"{len(sirens)} SIREN à interroger")
-        records = egapro.fetch_for_sirens(sirens)
+        records = egapro.fetch_export()
+        print(f"{len(records)} déclarations lues dans l'export public du site Égapro")
     by_siren = egapro.latest_by_siren(records)
     print(f"{len(by_siren)} index Égapro trouvés")
 

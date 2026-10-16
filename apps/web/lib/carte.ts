@@ -260,6 +260,10 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/Business & Human Rights Resource Centre/, "Business & Human Rights Resource Centre"],
   [/Autorité de la concurrence/, "décisions de l'Autorité de la concurrence"],
   [/Géorisques/, "arrêtés de mise en demeure publiés sur Géorisques"],
+  [/Commission électorale fédérale/, "fichiers de la Commission électorale fédérale (FEC)"],
+  [/loi Rixain/, "déclarations de la loi Rixain"],
+  [/aucun index Égapro/, "index Égapro"],
+  [/annuaire B Lab/, "annuaire B Corp de B Lab"],
 ];
 
 /** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */
