@@ -73,7 +73,9 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
 - Wikidata, Open Food Facts, la recherche web : **découverte seulement, jamais preuve**.
   Wikidata répond 403 : ne plus l'utiliser.
 - Ne jamais mettre `animal_free` sans preuve.
-- Ne pas citer de noms de personnes dans les citations (directeurs de publication…).
+- Ne pas citer de noms de particuliers dans les citations (directeurs de publication…).
+  Les dirigeants nommés dans les documents officiels des sociétés (rémunération du PDG dans
+  une circulaire SEC, par exemple) sont admis : information publique (décision du 16/10/2026).
 - Ne pas rattacher : marques sous licence au licencié ; copropriétés et coentreprises
   (Mamie Nova, Régilait, céréales CPW, Clearblue, Havana Club, Froneri, La Laitière) ;
   marques cédées (Timotei, Clan Campbell, Cinzano, Herta/Nestlé, Tropicana à 61 % PAI,
