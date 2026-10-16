@@ -32,3 +32,13 @@ def test_societe_et_marques_directes_hors_vegetales_et_deja_documentees():
 def test_activite_non_animale_ignoree():
     co = {"id": "c1", "slug": "biscuits", "siren": "1"}
     assert build_rows([co], {}, {"1": ("10.72Z", "Fabrication de biscuits", "u")}, set(), "2026-10-14") == []
+
+
+def test_marques_hors_activite_et_spiruline_exclues():
+    from diams.import_ani_ape import build_rows
+    co = {"id": "c1", "slug": "groupe-bel", "legal_name": "Groupe Bel", "siren": "542088067"}
+    algue = {"id": "c2", "slug": "spirales-de-lux", "legal_name": "SPIRALES DE LUX SPIRULINE", "siren": "881203723"}
+    brands = {"c1": [{"slug": "pompotes"}, {"slug": "kiri"}]}
+    avis = {"542088067": ("10.51C", "Fabrication de fromage", "u1"), "881203723": ("03.22Z", "Aquaculture en eau douce", "u2")}
+    rows = build_rows([co, algue], brands, avis, set(), "2026-10-17")
+    assert sorted(r.entity_slug for r in rows) == ["groupe-bel", "kiri"]

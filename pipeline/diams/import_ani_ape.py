@@ -50,6 +50,18 @@ def parse_avis(text: str) -> tuple[str, str] | None:
     return (m.group(1), m.group(2).strip()) if m else None
 
 
+# Marques dont les produits ne relèvent pas de l'activité principale du propriétaire (17/10/2026) :
+# l'APE de la société ne dit rien d'elles. La spiruline est une algue, classée en aquaculture.
+HORS_ACTIVITE = {
+    "sojasun": "soja (Olga, lait liquide)", "sojade": "soja (Olga, lait liquide)",
+    "tablee-vegetale": "plats végétaux (Madrange, viande)",
+    "materne": "compotes (Groupe Bel, fromage)", "pompotes": "compotes (Groupe Bel, fromage)",
+    "confipote": "confitures (Groupe Bel, fromage)", "recre-o-le": "desserts de fruits (Groupe Bel, fromage)",
+    "legumes-et-vous": "produits non confirmés", "le-petit-vert": "produits non confirmés",
+}
+_NON_ANIMAL = re.compile(r"spirulin", re.I)
+
+
 def build_rows(companies: list[dict], brands_by_parent: dict[str, list[dict]], avis: dict[str, tuple[str, str, str]],
                documented: set[str], today: str) -> list[EvidenceRow]:
     """avis : SIREN -> (code, libellé, url de l'avis). Une ligne par société et par
@@ -59,12 +71,14 @@ def build_rows(companies: list[dict], brands_by_parent: dict[str, list[dict]], a
         rec = avis.get(str(co.get("siren") or ""))
         if not rec or not ape_is_animal(rec[0]):
             continue
+        if _NON_ANIMAL.search(co.get("legal_name") or co["slug"]):
+            continue
         code, label, url = rec
         quote = f"« Activité Principale Exercée (APE) {code} - {label} »"
         name = co.get("legal_name") or co["slug"]
         targets = [(co, f"Avis de situation au répertoire Sirene (Insee) de {name} (SIREN {co['siren']}) : {quote}")]
         for b in brands_by_parent.get(co["id"], []):
-            if b.get("animal_free"):
+            if b.get("animal_free") or b["slug"] in HORS_ACTIVITE or _NON_ANIMAL.search(b["slug"]):
                 continue
             targets.append((b, f"Avis de situation au répertoire Sirene (Insee) de {name} (SIREN {co['siren']}), "
                                f"propriétaire de la marque : {quote}"))
