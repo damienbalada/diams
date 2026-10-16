@@ -58,7 +58,17 @@ export function middleware(req: NextRequest) {
       { status: 503 },
     );
   }
-  return basicAuthMatches(auth, SITE_USER, SITE_PASS) ? NextResponse.next() : challenge("Index des marques");
+  if (basicAuthMatches(auth, SITE_USER, SITE_PASS)) return NextResponse.next();
+  // API et logos lus par l'appli : refus sans demande d'identification (l'iPhone attendrait sans fin
+  // une réponse à cette demande au lieu de rendre le refus à l'appli).
+  const p = req.nextUrl.pathname;
+  if (p.startsWith("/api/") || p.startsWith("/logos/")) {
+    return NextResponse.json(
+      { erreur: "Site privé : mot de passe requis." },
+      { status: 401, headers: { "Access-Control-Allow-Origin": "*" } },
+    );
+  }
+  return challenge("Index des marques");
 }
 
 // S'applique à tout sauf les assets statiques.

@@ -63,10 +63,19 @@ export class ErreurSite extends Error {
 async function appeler<T>(chemin: string): Promise<T> {
   const r = await lireReglages();
   let rep: Response;
+  // Jamais d'attente sans fin : abandon au bout de 20 secondes.
+  const arret = new AbortController();
+  const minuterie = setTimeout(() => arret.abort(), 20000);
   try {
-    rep = await fetch(r.site + chemin, { headers: await entetes() });
+    rep = await fetch(r.site + chemin, { headers: await entetes(), signal: arret.signal });
   } catch {
-    throw new ErreurSite("Pas de connexion au site. Vérifiez votre réseau, puis réessayez.");
+    throw new ErreurSite(
+      arret.signal.aborted
+        ? 'Le site ne répond pas. Vérifiez votre réseau, puis réessayez.'
+        : 'Pas de connexion au site. Vérifiez votre réseau, puis réessayez.',
+    );
+  } finally {
+    clearTimeout(minuterie);
   }
   if (rep.status === 401) throw new ErreurSite("Le site est encore privé : saisissez son mot de passe dans les Réglages.", 401);
   const corps = await rep.json().catch(() => null);
