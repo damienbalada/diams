@@ -31,6 +31,17 @@ VERIFIED: dict[str, tuple[str, str]] = {
     "boursobank": ("boursorama", "boursobank"),        # BoursoBank, filiale de Société Générale
     "innocent": ("innocent-drinks", "innocentdrinks"),  # innocent Drinks, marque de Coca-Cola
     "isigny-sainte-mere": ("isigny-sainte-mere", "isigny-ste-mere"),  # coopérative laitière normande
+    # Découverte du 16/10/2026, relue : domaine du site de la fiche B Lab et propriétaire connu.
+    "isigny-sainte-mere-marque": ("isigny-sainte-mere", "isigny-ste-mere"),  # marque de la coopérative
+    "edgard-cooper": ("edgard-cooper", "edgardcooper"),   # aliments pour animaux, General Mills
+    "la-marzocco": ("la-marzocco", "lamarzocco"),         # machines à café, De'Longhi
+    "modibodi": ("modibodi", "modibodi"),                 # sous-vêtements menstruels, Essity
+    "nxtfood": ("nxtfood", "nxtfood"),                    # groupe français (marque Accro)
+    "ponthier": ("ponthier", "ponthier"),                 # purées de fruits, Corrèze
+    "ponthier-marque": ("ponthier", "ponthier"),
+    "rogue-creamery": ("rogue-creamery", "roguecreamery"),  # fromagerie de l'Oregon, Savencia
+    "sipsmith": ("sipsmith", "sipsmith"),                 # gin, Suntory Global Spirits
+    "valrhona": ("valrhona", "valrhona"),                 # chocolat, Savencia
 }
 
 
