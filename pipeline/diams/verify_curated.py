@@ -1006,6 +1006,9 @@ def main() -> None:
     parser.add_argument("--file", required=True)
     parser.add_argument("--bocc-pdf", help="PDF des tableaux BOCC (sector-tables)")
     parser.add_argument("--apply", action="store_true", help="approuve les preuves OK encore en attente")
+    parser.add_argument("--copie", action="append", default=[], metavar="URL=FICHIER",
+                        help="copie locale d'une page dont le site refuse le vérificateur, obtenue sous la même "
+                             "identité déclarée ; tous les contrôles s'y appliquent, l'approbation le mentionne")
     parser.add_argument("--delegue", action="store_true",
                         help="délégation de l'éditeur : approuve aussi les preuves de tier 3 vérifiées mot pour mot")
     args = parser.parse_args()
@@ -1031,6 +1034,7 @@ def main() -> None:
 
     ok_rows, delegated_rows, counts, reports = [], [], {}, {}
     raws: dict = {}
+    copies = dict(c.split("=", 1) for c in args.copie)
     with httpx.Client(timeout=300) as client:
         for r, note in zip(rows, notes):
             if r.source_code == "BOCC" and tables:
@@ -1039,6 +1043,11 @@ def main() -> None:
                 v = verify_hatvp(r, client, sirens)
             elif r.source_url and "«" in (r.excerpt or ""):
                 # Citation verbatim d'un document public : rapport ESEF, page web ou PDF.
+                if r.source_url not in reports and r.source_url in copies:
+                    raw = open(copies[r.source_url], encoding="utf-8", errors="replace").read()
+                    reports[r.source_url] = re.sub(r"\s+", " ", html.unescape(
+                        re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", raw, flags=re.S)))
+                    print(f"  copie locale lue : {copies[r.source_url]}")
                 if r.source_url not in reports:
                     try:
                         if r.source_code == "ESEF":
@@ -1093,6 +1102,12 @@ def main() -> None:
             elif v.status == "OK-DÉLÉGUÉ":
                 delegated_rows.append(r)
     print("\nBilan : " + ", ".join(f"{k} {n}" for k, n in sorted(counts.items())))
+    if args.apply and copies:
+        # Vérifiées sur copie locale : la trace le dit (17/10/2026).
+        cop = [r for r in ok_rows if r.source_url in copies]
+        ok_rows = [r for r in ok_rows if r.source_url not in copies]
+        if cop:
+            print(f"Approuvées sur copie locale (auto:verify_curated:copie) : {approve(cop, 'auto:verify_curated:copie')}")
     if args.apply:
         print(f"Approuvées (auto:verify_curated) : {approve(ok_rows)}")
         if delegated_rows:
