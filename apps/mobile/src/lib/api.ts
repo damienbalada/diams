@@ -94,6 +94,8 @@ export interface Fait {
   valeur: string;
   raison: string | null;
   repere: string | null;
+  /** Comment lire ce chiffre (règles de calcul de la source, pièges de comparaison). */
+  enSavoirPlus?: string | null;
   signal: Signal | null;
   note: string | null;
   preuve: { source: string; solidite: 'officielle' | 'reconnue' | 'declarative'; date: string; url: string | null; citation: string | null; reprisDe: string | null } | null;

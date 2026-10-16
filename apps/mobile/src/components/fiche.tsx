@@ -145,7 +145,7 @@ function CarteFait({ f, teinte, niveau }: { f: Fait; teinte: string; niveau: str
   const bordGauche = sig === 'alerte' ? C.alerte : sig === 'vigilance' ? '#d97a00' : teinte;
   // Avec un signal, la valeur dit déjà le repère (« il faudrait 4,2 % ») : il passe dans le détail.
   const repereVisible = f.repere && !f.signal ? f.repere : null;
-  const aDetail = !!(f.preuve || f.raison || f.note || f.signal || (f.repere && !repereVisible));
+  const aDetail = !!(f.preuve || f.raison || f.note || f.signal || f.enSavoirPlus || (f.repere && !repereVisible));
   const sol = f.preuve ? SOLIDITE[f.preuve.solidite] : null;
   return (
     <View style={[s.fait, { backgroundColor: fond, borderLeftColor: bordGauche }]}>
@@ -170,12 +170,15 @@ function CarteFait({ f, teinte, niveau }: { f: Fait; teinte: string; niveau: str
           <Text style={[s.sourceCourte, s.flex]} numberOfLines={1}>
             {f.preuve ? `${f.preuve.source} · ${dfr(f.preuve.date)}` : 'Détail'}
           </Text>
-          <Text style={s.lienPetit}>{details ? 'Moins ▲' : 'Détail ▼'}</Text>
+          <Text style={s.lienPetit}>{details ? 'Moins ▲' : f.enSavoirPlus ? 'En savoir plus ▼' : 'Détail ▼'}</Text>
         </Pressable>
       )}
 
       {details && (
         <View style={s.details}>
+          {f.enSavoirPlus && (
+            <Text style={s.savoir}><Text style={s.gras}>En savoir plus · </Text>{f.enSavoirPlus}</Text>
+          )}
           {f.raison && <Text style={s.detailTexte}>{majuscule(f.raison)}.</Text>}
           {/* Avec un signal, le seuil retenu dit déjà le repère. */}
           {f.repere && !repereVisible && !f.signal && <Text style={s.detailTexte}>{f.repere}</Text>}
@@ -281,6 +284,7 @@ const s = StyleSheet.create({
   details: { gap: 10, paddingBottom: 10 },
   detailTexte: { fontSize: 14, lineHeight: 20, color: C.texte },
   gras: { fontWeight: '700' },
+  savoir: { fontSize: 14, lineHeight: 21, color: C.texte, backgroundColor: C.carte2, borderRadius: 10, padding: 12, overflow: 'hidden' },
   vides: { borderRadius: 14, backgroundColor: C.carte2, paddingHorizontal: 14 },
   videsTete: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48 },
   videsTitre: { fontSize: 15, fontWeight: '600', color: C.gris },

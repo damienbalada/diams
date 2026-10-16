@@ -1,0 +1,9 @@
+-- Coca-Cola, écart de rémunération PDG / salarié médian : la citation reprend aussi les phrases de la
+-- circulaire SEC qui expliquent le chiffre (rémunération du PDG, salaire médian, qui est le salarié
+-- médian, calcul sur les salariés du monde entier, temps partiel, pas de correction du coût de la vie).
+-- Les 7 extraits ont été retrouvés mot pour mot dans le document par verify_curated (16/10/2026).
+update evidence ev
+set excerpt = 'Circulaire de procuration (SEC, DEF 14A), ratio de rémunération PDG / salarié médian (Reg. S-K Item 402(u)) : « for 2025, the ratio of the compensation of the CEO to the median annual total compensation of all other employees was estimated to be 1,739 to 1 » ; rémunération totale du PDG en 2025 (total du tableau récapitulatif des rémunérations, actions attribuées comprises) : « in the 2025 Summary Compensation Table, was $31,208,165 » ; salaire médian : « the median annual total compensation of all employees (other than the CEO) of the Company and its consolidated subsidiaries was $17,947 » ; qui est le salarié médian : « our median employee was a part-time, hourly barista employed in the United Kingdom by Costa Limited » ; calcul sur les salariés du monde entier : « The median annual total compensation disclosed below is based on the Company’s global workforce and is not designed to capture the median compensation of the Company’s U.S. employees » ; effet du temps partiel : « employees in flexible, part-time roles, such as certain employees at retail stores operated by Costa Limited, our coffee business, lower the annual total compensation for our median employee » ; sans correction du coût de la vie : « We did not make any cost-of-living adjustments to compensation »'
+from entities en, indicators i
+where en.id = ev.entity_id and i.id = ev.indicator_id and en.slug = 'coca-cola' and i.code = 'LAB_CEO_PAY_RATIO'
+  and ev.excerpt like '%1,739 to 1%';

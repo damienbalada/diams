@@ -3,7 +3,7 @@
  * repères et raisons que la page web, sans mise en page.
  */
 import { raisonVide, type Carte } from "@/lib/carte";
-import { REPERES } from "@/lib/seuils";
+import { EN_SAVOIR_PLUS, REPERES } from "@/lib/seuils";
 import { logoDe } from "@/lib/logos";
 import type { ProduitScanne } from "@/lib/data";
 
@@ -38,6 +38,7 @@ export function ficheEnJson(
         valeur: f.etat === "aucune_info" ? raisonVide(f)[0] : f.valeur,
         raison: f.etat === "aucune_info" ? raisonVide(f)[1] : null,
         repere: f.etat === "documente" ? REPERES[f.code] ?? null : null,
+        enSavoirPlus: f.etat === "documente" ? EN_SAVOIR_PLUS[f.code] ?? null : null,
         signal: f.signal ? { niveau: f.signal.niveau, motif: f.signal.motif, regle: f.signal.regle } : null,
         note: f.note,
         preuve: f.preuve

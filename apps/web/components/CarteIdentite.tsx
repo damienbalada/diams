@@ -1,7 +1,7 @@
 import { marqueAnimale, marquesDocumentees, raisonVide, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
 import type { OwnershipProof, Produit, ProduitScanne } from "@/lib/data";
 import { logoDe } from "@/lib/logos";
-import { REPERES, type Signal } from "@/lib/seuils";
+import { EN_SAVOIR_PLUS, REPERES, type Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
 
 const ICONE: Record<string, string> = { ANI: "🐄", ENV: "🌍", PLA: "🧴", WAT: "💧", LAB: "👥", SUP: "🔗", GOV: "🏛️", TAX: "💶", GEO: "🗺️", INV: "🏦" };
@@ -188,7 +188,8 @@ function CarteIndicateur({ f }: { f: Fait }) {
   // Avec un signal, la valeur et le seuil retenu disent déjà le repère.
   const repere = !f.signal && f.etat === "documente" ? REPERES[f.code] : null;
   const obligation = f.etat !== "documente" && f.obligation.length > 0 ? f.obligation.join(", ") : null;
-  const aDetail = !!(p || f.note || f.signal || obligation);
+  const savoir = f.etat === "documente" ? EN_SAVOIR_PLUS[f.code] ?? null : null;
+  const aDetail = !!(p || f.note || f.signal || obligation || savoir);
   return (
     <article className={`ci-ind ci-ind-${ton}`}>
       <header className="ci-ind-h">
@@ -206,9 +207,10 @@ function CarteIndicateur({ f }: { f: Fait }) {
         <details className="ci-det">
           <summary>
             <span className="ci-det-src">{p ? `${p.source} · ${dfr(p.date)}` : "Détail"}</span>
-            <span className="ci-det-btn" aria-hidden="true" />
+            <span className={`ci-det-btn${savoir ? " ci-det-savoir" : ""}`} aria-hidden="true" />
           </summary>
           <div className="ci-det-corps">
+            {savoir && <p className="ci-savoir"><strong>En savoir plus · </strong>{savoir}</p>}
             {f.signal && <div className={`ci-ind-seuil ci-seuil-${f.signal.niveau}`}>Seuil retenu : {f.signal.regle}</div>}
             {obligation && <div className="ci-ind-txt">Obligation : {obligation}</div>}
             {f.note && <div className="ci-ind-note">{f.note}</div>}

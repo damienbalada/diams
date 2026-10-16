@@ -553,3 +553,8 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .ci-vides-g .ci-vides-l { margin: 0 0 10px; }
 .ci-vides-g .ci-vides-l li { background: var(--panel); gap: 2px; }
 .ci-vides-g .ci-vides-l li strong { font-size: 14px; }
+.ci-det-savoir::after { content: "En savoir plus ▾"; }
+.ci-det[open] > summary .ci-det-savoir::after { content: "Moins ▴"; }
+.ci-savoir { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--panel-2); font-size: 13.5px; line-height: 1.55; color: var(--text); }
+.ci-ind > * { min-width: 0; }
+.ci-det > summary > * { min-width: 0; }

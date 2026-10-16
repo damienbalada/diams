@@ -146,3 +146,13 @@ export const REPERES: Record<string, string> = {
   WAT_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",
   ENV_SBTI_VALIDATED: "La SBTi vérifie que l'objectif climat est compatible avec l'accord de Paris ; c'est un engagement, pas un résultat",
 };
+
+/**
+ * « En savoir plus » : comment lire un chiffre dont le sens n'est pas évident (règles de calcul de la
+ * source, pièges de comparaison). Texte général, valable pour toutes les entreprises ; ce qui est
+ * propre à une entreprise reste dans la citation vérifiée de sa source.
+ */
+export const EN_SAVOIR_PLUS: Record<string, string> = {
+  LAB_CEO_PAY_RATIO:
+    "Le ratio compare la rémunération totale du dirigeant sur un an (salaire, primes et actions attribuées) à celle du salarié « médian », celui qui se trouve pile au milieu : la moitié des salariés gagne plus, l'autre moitié moins. Le nombre de salariés ou de niveaux hiérarchiques ne fait donc pas monter le chiffre en soi ; ce qui compte, c'est qui se trouve au milieu. Les entreprises cotées aux États-Unis calculent ce salarié médian sur leurs salariés du monde entier, sans corriger le coût de la vie et en comptant les temps partiels tels quels : un groupe qui emploie beaucoup de vendeurs, de serveurs ou d'ouvriers à temps partiel ou dans des pays à bas salaires affiche un ratio très élevé. En France, le « ratio d'équité » de la loi PACTE porte souvent sur les seuls salariés de la société en France : les chiffres de deux pays ne se comparent pas directement.",
+};
