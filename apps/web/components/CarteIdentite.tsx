@@ -176,11 +176,19 @@ function rang(f: Fait) {
   return 3;
 }
 
-/** Un indicateur, sous forme de carte : icône et nom, valeur en grand, source, seuil, citation. */
+const majuscule = (t: string) => t[0].toUpperCase() + t.slice(1);
+
+/**
+ * Un indicateur, en deux temps : d'abord le fait (icône et nom, valeur en grand, repère, source en
+ * une ligne), puis, sur demande, le détail (seuil retenu, solidité, note, citation, lien).
+ */
 function CarteIndicateur({ f }: { f: Fait }) {
   const p = f.preuve;
-  const vide = f.etat === "aucune_info" ? raisonVide(f) : null;
-  const ton = f.signal?.niveau ?? (f.etat === "documente" ? "documente" : vide ? "vide" : "signale");
+  const ton = f.signal?.niveau ?? (f.etat === "documente" ? "documente" : "signale");
+  // Avec un signal, la valeur et le seuil retenu disent déjà le repère.
+  const repere = !f.signal && f.etat === "documente" ? REPERES[f.code] : null;
+  const obligation = f.etat !== "documente" && f.obligation.length > 0 ? f.obligation.join(", ") : null;
+  const aDetail = !!(p || f.note || f.signal || obligation);
   return (
     <article className={`ci-ind ci-ind-${ton}`}>
       <header className="ci-ind-h">
@@ -189,49 +197,92 @@ function CarteIndicateur({ f }: { f: Fait }) {
         {f.signal && <span className={`ci-tag ci-tag-${f.signal.niveau}`}>{f.signal.niveau === "alerte" ? "⚠️ Alerte" : "🟠 Vigilance"}</span>}
       </header>
       <div className="ci-ind-val">
-        {vide ? vide[0] : f.valeur}
+        {majuscule(f.valeur)}
         {f.contexte && <span className="ci-badge" title="Donnée de contexte : ni bonne ni mauvaise en soi">contexte</span>}
         {p?.conteste && <span className="ci-badge">contesté</span>}
       </div>
-      {!vide && REPERES[f.code] && <div className="ci-ind-rep">{REPERES[f.code]}</div>}
-      {vide && <div className="ci-ind-txt">{vide[1][0].toUpperCase() + vide[1].slice(1)}.</div>}
-      {f.etat !== "documente" && f.etat !== "aucune_info" && f.obligation.length > 0 && <div className="ci-ind-txt">Obligation : {f.obligation.join(", ")}</div>}
-      {f.note && <div className="ci-ind-note">{f.note}</div>}
-      {p && (
-        <div className="ci-ind-src">
-          <span>{dfr(p.date)}{!p.dateEvenement && " (relevé)"}</span>
-          <Solidite s={p.solidite} />
-          <span>{p.source}</span>
-          {p.reprisDe && <span className="ci-badge">donnée du groupe {p.reprisDe}</span>}
-        </div>
-      )}
-      {f.signal && <div className={`ci-ind-seuil ci-seuil-${f.signal.niveau}`}>Seuil : {f.signal.regle}</div>}
-      {p && (p.citation || p.url) && (
-        <details className="ci-cit">
-          <summary>Ce que dit la source</summary>
-          {p.citation && <blockquote>{p.citation}</blockquote>}
-          {p.url && (
-            <a href={p.url} target="_blank" rel="noopener noreferrer">
-              Ouvrir la source ↗
-            </a>
-          )}
+      {repere && <div className="ci-ind-rep">{repere}</div>}
+      {aDetail && (
+        <details className="ci-det">
+          <summary>
+            <span className="ci-det-src">{p ? `${p.source} · ${dfr(p.date)}` : "Détail"}</span>
+            <span className="ci-det-btn" aria-hidden="true" />
+          </summary>
+          <div className="ci-det-corps">
+            {f.signal && <div className={`ci-ind-seuil ci-seuil-${f.signal.niveau}`}>Seuil retenu : {f.signal.regle}</div>}
+            {obligation && <div className="ci-ind-txt">Obligation : {obligation}</div>}
+            {f.note && <div className="ci-ind-note">{f.note}</div>}
+            {p && (
+              <div className="ci-ind-src">
+                <Solidite s={p.solidite} />
+                <span>{p.source}, {dfr(p.date)}{!p.dateEvenement && " (relevé)"}</span>
+                {p.reprisDe && <span className="ci-badge">donnée du groupe {p.reprisDe}</span>}
+              </div>
+            )}
+            {p?.citation && (
+              <div className="ci-cit-bloc">
+                <blockquote>{p.citation}</blockquote>
+                {p.citation.length > 240 && (
+                  <details className="ci-cit-toute">
+                    <summary><span className="ci-plus-t">Lire toute la citation</span><span className="ci-moins-t">Raccourcir la citation</span></summary>
+                  </details>
+                )}
+              </div>
+            )}
+            {p?.url && (
+              <a className="ci-det-lien" href={p.url} target="_blank" rel="noopener noreferrer">
+                Ouvrir la source ↗
+              </a>
+            )}
+          </div>
         </details>
       )}
     </article>
   );
 }
 
-/** Les indicateurs d'un niveau, tous affichés, même vides (décision de l'éditeur, 15/10/2026). */
+/** Les indicateurs sans information, regroupés en une ligne (dépliée d'office si rien d'autre n'est documenté). */
+function SansInformation({ faits, toutVide }: { faits: Fait[]; toutVide: boolean }) {
+  const n = faits.length;
+  return (
+    <details className="ci-vides-g" open={toutVide}>
+      <summary>
+        <span>{toutVide ? "Rien de documenté pour l'instant" : `${n} indicateur${n > 1 ? "s" : ""} sans information`}</span>
+        <span className="ci-det-btn ci-vides-btn" aria-hidden="true" />
+      </summary>
+      <ul className="ci-vides-l">
+        {faits.map((f) => {
+          const [statut, raison] = raisonVide(f);
+          return (
+            <li key={f.code}>
+              <strong><span aria-hidden="true">{ICONE_IND[f.code] ?? "•"}</span> {f.nom}</strong>
+              <span className="ci-small">{statut}. {majuscule(raison)}.{f.note ? ` ${f.note}` : ""}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </details>
+  );
+}
+
+/** Les indicateurs d'un niveau, tous présents, même vides (décision de l'éditeur, 15/10/2026). */
 function Faits({ faits, cacherPresume }: { faits: Fait[]; cacherPresume?: boolean }) {
   const fs = faits
     .filter((f) => !(cacherPresume && f.etat === "presume"))
     .sort((a, b) => rang(a) - rang(b) || (b.preuve?.date ?? "").localeCompare(a.preuve?.date ?? ""));
+  const pleins = fs.filter((f) => f.etat !== "aucune_info");
+  const vides = fs.filter((f) => f.etat === "aucune_info");
   return (
-    <div className="ci-inds">
-      {fs.map((f) => (
-        <CarteIndicateur key={f.code} f={f} />
-      ))}
-    </div>
+    <>
+      {pleins.length > 0 && (
+        <div className="ci-inds">
+          {pleins.map((f) => (
+            <CarteIndicateur key={f.code} f={f} />
+          ))}
+        </div>
+      )}
+      {vides.length > 0 && <SansInformation faits={vides} toutVide={!pleins.length} />}
+    </>
   );
 }
 
@@ -324,7 +375,8 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
           <span title="Nombre d'indicateurs renseignés sur le nombre d'indicateurs suivis dans ce pilier">{p.documentes} sur {p.total} renseignés</span>
           <Chevron />
         </span>
-        <span className="ci-v-bloc">
+        {/* Pilier ouvert : le résumé s'efface quand le premier indicateur, juste dessous, le dit déjà. */}
+        <span className={`ci-v-bloc${niveauGroupe ? "" : " ci-v-repli"}`}>
           {k && !niveauGroupe && k.etat !== "aucune_info" && <span className="ci-v-nom">{k.nom}</span>}
           <span className={`ci-v ci-${etatCle}`}>
             {alerte ? "⚠️ " : vigilance && sig ? "🟠 " : ""}
