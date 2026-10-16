@@ -140,3 +140,15 @@ couvre les faits qui ne valent que pour certains produits (pas chaque produit un
   du site de Savencia et de Cémoi) ; licences, marques de tiers et marques dont le propriétaire change
   selon le pays écartées. Lot 107 : exploitation animale de 10 marques Savencia (pages de marque).
   Accueil : vitrines « les plus connues » et « les plus recherchées » (classement simulé, signalé).
+- [x] Dossiers en attente (16/10/2026, lot 113) : Celine (soie, rapport de LVMH), Fendi (fourrure,
+  page Fendi du site de LVMH), Sibert (boudin noir), « Soutenons nos agriculteurs » (dossier de presse
+  Leclerc), Husson (le vérificateur envoie désormais « Accept: */* ») approuvées mot pour mot ;
+  ancienne preuve Fendi écartée. Restent en attente, recherche consignée : Dior (aucune matière
+  nommée, dior.com refuse), Tostitos (pages produits illisibles, Frito-Lay refuse), Starbucks (rapport
+  refusé, 403), Decathlon (page en JavaScript). À trancher par l'éditeur : H&M (écart de 0,3 % déduit
+  de « 99,7 % »), Michelin et Les Mousquetaires (lobbying déclaré par une autre société du groupe).
+  Nouvelles marques : Krisprolls (Pågen Aktiebolag, LEI GLEIF) et La Fournée Dorée (SIREN 817390941,
+  œufs et beurre). Casino et Auchan (ELO) : toujours aucun rapport annuel 2025 publié au 16/10/2026
+  (derniers : DEU 2024 de Casino, RFA 2024 d'ELO, déjà exploités). Rio Mare : lien et citation
+  confirmés. CNIL : les deux sanctions (Google, Shein) relues mot pour mot. Avis Sirene : 28 lus,
+  85 restants (quota de l'Insee), relancés par passes successives.

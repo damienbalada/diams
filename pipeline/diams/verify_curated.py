@@ -193,7 +193,7 @@ ESEF_KEYWORDS = {
                          # Alimentation (règle de l'éditeur du 14/10/2026 : fromagerie, biscuits au
                          # beurre ou aux œufs…). « beurre de cacahuète / karité / cacao » exclu.
                          r"|fromages?\b|\bbeurre\b(?! de (?:cacahu|karit|cacao))|\bcr[èe]me fra[îi]che|yaourts?\b"
-                         r"|foie gras|canards?\b|jambons?\b|charcuterie|saucisses?\b|saucissons?\b|rillettes"
+                         r"|foie gras|canards?\b|jambons?\b|charcuterie|saucisses?\b|saucissons?\b|rillettes|boudins?\b"
                          r"|poissons?\b|saumons?\b|\bthons?\b|sardines?\b|maquereaux?\b|anchois|crustac|mollusques"
                          r"|hu[îi]tres|caviar|[ée]levage|aquaculture|p[êe]che en (?:mer|eau douce)"
                          # Équivalents anglais des rapports en anglais (15/10/2026, lot 109) : fromage,
@@ -782,7 +782,10 @@ def document_text(url: str, client: httpx.Client) -> str:
     from .connectors.sec import UA
     # Identifiant déclaré : certains sites refusent celui, par défaut, de la
     # bibliothèque HTTP ; la SEC exige le sien.
-    ua = UA if "sec.gov" in url else {"User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)"}
+    # Même identité déclarée, avec « Accept: */* » : certains sites refusent une requête qui ne le
+    # précise pas (Biscuiterie Husson, 16/10/2026).
+    ua = UA if "sec.gov" in url else {"User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)",
+                                      "Accept": "*/*"}
     r = client.get(url, timeout=300, follow_redirects=True, headers=ua)
     if r.status_code == 403:
         # Refus ponctuel au premier appel (DGCCRF) : une seule nouvelle demande, même identité.
