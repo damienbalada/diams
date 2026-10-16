@@ -142,9 +142,12 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       if (/virgin down|duvet neuf exclu/i.test(x)) return "Duvet et plumes neufs exclus (seulement recyclés)";
       return /objectif|horizon/i.test(x) ? "Objectif de duvet recyclé ou certifié (norme RDS, sans plumage à vif)" : "Duvet certifié (norme RDS) exigé";
     case "ANI_WOOL_MULESING":
+      if (/sans certification/i.test(x)) return "Laine issue du mulesing refusée (politique, sans certification)";
       if (/must be certified|exigée/i.test(x)) return "Laine neuve certifiée sans mulesing (norme RWS) exigée";
       return /objectif|horizon/i.test(x) ? "Objectif de laine recyclée ou certifiée (norme RWS, sans mulesing)" : "Politique sur la laine publiée";
-    case "ANI_ANGORA_MOHAIR": return /angora rabbit hair|angora exclu/i.test(x) ? "Angora exclu ; mohair certifié (norme RMS) exigé" : "Politique sur l'angora et le mohair publiée";
+    case "ANI_ANGORA_MOHAIR":
+      if (/angora et mohair exclus/i.test(x)) return "Angora et mohair exclus";
+      return /angora rabbit hair|angora exclu/i.test(x) ? "Angora exclu ; mohair certifié (norme RMS) exigé" : "Politique sur l'angora et le mohair publiée";
     case "ANI_EXOTIC_SKINS": return /does not accept the use of exotic|exclues/i.test(x) ? "Peaux exotiques exclues" : "Peaux exotiques : approvisionnement certifié ou audité (pas d'interdiction)";
     case "ANI_LEATHER_TRACE": {
       const part = m1(/(\d+ ?%) étaient certifiées LWG/, x);

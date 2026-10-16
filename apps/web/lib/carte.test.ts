@@ -134,3 +134,10 @@ test("allégation trompeuse : article devant la SEC et le Bureau de la concurren
   assert.equal(v("SEC (autorité américaine des marchés financiers), communiqué 2024-122 du 10/09/2024 : « … » — amende civile de 1,5 M$ pour …"), "Allégations écologiques trompeuses relevées par la SEC (2024) : amende de 1,5 M$");
   assert.equal(v("Bureau de la concurrence du Canada, communiqué du 06/01/2022 (en anglais) : « … »"), "Allégations écologiques trompeuses relevées par le Bureau de la concurrence du Canada (2022)");
 });
+
+test("matières animales : politique sans certification et double interdiction", () => {
+  const v = (code: string, excerpt: string) => valeurCourte(code, "policy", preuve(code, { excerpt }));
+  assert.equal(v("ANI_WOOL_MULESING", "« refusing to procure Merino wool … mulesing » — politique publiée, sans certification de la laine exigée."), "Laine issue du mulesing refusée (politique, sans certification)");
+  assert.equal(v("ANI_ANGORA_MOHAIR", "« Mohair (Angora goat hair), Angora (Angora rabbit hair) » — angora et mohair exclus."), "Angora et mohair exclus");
+  assert.equal(v("ANI_DOWN_RDS", "« … are RDS (Responsible Down Standard) certified as of the end of December 2019 » — ateliers certifiés RDS."), "Duvet certifié (norme RDS) exigé");
+});
