@@ -161,6 +161,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "ENV_SBTI_VALIDATED": return m1(/— (objectif[^(]+\([^)]*\))/, x) ?? m1(/— ([^(]+)\(/, x) ?? "Documenté";
     case "SUP_LIVING_WAGE": return `Note ${m1(/note ([A-E])/, x) ?? "?"} sur le salaire vital des ouvriers`;
     case "SUP_VIGILANCE_PLAN": return "Plan de vigilance publié";
+    case "SUP_SUPPLIER_LIST": return /huileries de palme/.test(x) ? "Liste nominative des huileries de palme fournisseurs publiée (filière palme seulement)" : "Liste des sites de production fournisseurs publiée";
     case "ENV_SCOPE3_DISCLOSED": return "Émissions indirectes (scope 3) publiées";
     case "TAX_CBCR_PUBLISHED": return "Impôts publiés pays par pays";
     case "PLA_POLLUTER": return "Parmi les plus gros pollueurs plastique";
