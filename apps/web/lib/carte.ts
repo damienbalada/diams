@@ -132,7 +132,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     }
     case "ANI_ANIMAL_FREE": return "Marque entièrement végétale (prouvé)";
     case "INV_SUSTAINABLE_FINANCE":
-      return /Green Bond Framework|cadre d.émission/i.test(x)
+      return /Green Bond Framework|bonds framework|cadre d.émission|cadre établi/i.test(x)
         ? "Cadre structuré d'émission d'obligations vertes ou sociales" : "Émet des obligations vertes ou sociales (cadre non cité)";
     case "ANI_OFFRE_VEGETALE": return "Propose au moins un produit 100 % végétal";
     case "ANI_FUR_FREE": return "Membre du label « sans fourrure »";
