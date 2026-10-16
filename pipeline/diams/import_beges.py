@@ -67,10 +67,52 @@ def build_rows(groups: list[dict], by_siren: dict[str, list[dict]], documented: 
     return rows
 
 
+def build_trend_rows(groups: list[dict], by_siren: dict[str, list[dict]], documented: set[str],
+                     today: str) -> list[EvidenceRow]:
+    """Évolution des émissions (scopes 1, 2 et 3) entre le premier et le dernier bilan v5 d'une société
+    (16/10/2026) : au moins deux ans d'écart (règle de l'indicateur) et les mêmes catégories d'émissions
+    indirectes chiffrées dans les deux bilans, sinon la variation mesurerait un changement de périmètre."""
+    from .verify_curated import trend_score
+    rows = []
+    for g in groups:
+        if g["slug"] in documented:
+            continue
+        recs = [r for r in by_siren.get(str(g["siren"]), [])
+                if r.get("methode_beges_v4v5") == "v5" and total(r, SCOPE3) > 0]
+        last = {}
+        for r in sorted(recs, key=lambda r: (int(r.get("annee_de_reporting") or 0), r.get("date_de_publication") or "")):
+            last[int(r["annee_de_reporting"])] = r
+        if len(last) < 2:
+            continue
+        y0, y1 = min(last), max(last)
+        a, b = last[y0], last[y1]
+        cats = lambda r: {k for k, ps in GROUPES.items() if total(r, ps) > 0}
+        if y1 - y0 < 2 or cats(a) != cats(b):
+            continue
+        t0, t1 = round(total(a, SCOPE12 + SCOPE3)), round(total(b, SCOPE12 + SCOPE3))
+        if t0 <= 0 or t1 <= 0:
+            continue
+        n = y1 - y0
+        rate = round(((t1 / t0) ** (1 / n) - 1) * 100, 2)
+        fr = lambda x: f"{x}".replace(".", ",")
+        date = (b.get("date_de_publication") or "")[:10]
+        excerpt = (f"Bilans d'émissions de gaz à effet de serre de {b.get('raison_sociale')} (SIREN {g['siren']}) déposés sur la "
+                   f"plateforme de l'Ademe, méthode BEGES v5, périmètre de la société déclarante, mêmes catégories d'émissions "
+                   f"indirectes chiffrées dans les deux bilans : total des scopes 1, 2 et 3 de {t0} tCO2e (année {y0}) et de "
+                   f"{t1} tCO2e (année {y1}) ; rythme annuel moyen ({y0} → {y1}, {n} ans) : ({t1} / {t0})^(1/{n}) − 1 = "
+                   f"{fr(rate)} %")
+        rows.append(EvidenceRow(
+            entity_slug=g["slug"], indicator_code="ENV_GHG_TREND", source_code="ADEME_BEGES", nature="result",
+            observed_on=date or today, value_type="numeric", value_numeric=rate, normalized_value=trend_score(rate),
+            confidence=0.85, source_url=f"{DATASET}?qs=id:%22{up.quote(str(b.get('id')))}%22", excerpt=excerpt, reviewer=REVIEWER))
+    return rows
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Scope 3 publié, d'après les bilans GES de l'Ademe.")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--absences", action="store_true", help="consigne les groupes sans bilan v5 (journal)")
+    ap.add_argument("--evolution", action="store_true", help="évolution des émissions entre deux bilans v5 (ENV_GHG_TREND)")
     args = ap.parse_args()
     config.require_supabase()
     c = httpx.Client(timeout=120)
@@ -95,6 +137,18 @@ def main() -> None:
     slug_by_id = {e["id"]: e["slug"] for e in ents}
     documented = {slug_by_id.get(r["entity_id"]) for r in ev}
     today = dt.date.today().isoformat()
+    if args.evolution:
+        it = supabase_client.get_all(c, "indicators", {"select": "id,code", "code": "eq.ENV_GHG_TREND"})[0]["id"]
+        evt = supabase_client.get_all(c, "evidence", {"select": "entity_id", "indicator_id": f"eq.{it}",
+                                                       "review_status": "in.(approved,pending)"})
+        doc_t = {slug_by_id.get(r["entity_id"]) for r in evt}
+        rows = build_trend_rows(groups, by_siren, doc_t, dt.date.today().isoformat())
+        for r in rows:
+            print("  ", r.entity_slug, "|", r.excerpt[-150:])
+        if args.apply and rows:
+            stats = insert_evidence(rows)
+            print(f"Insérées: {stats['inserted']} · ignorées: {stats['skipped']}")
+        return
     rows = build_rows(groups, by_siren, documented, today)
     print(f"{len(recs)} bilans lus ; {len(rows)} preuves ({sum(1 for r in rows if r.value_boolean)} avec scope 3 chiffré)")
     for r in rows[:15]:
