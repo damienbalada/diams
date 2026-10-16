@@ -294,6 +294,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/aucun index Égapro/, "index Égapro"],
   [/base de données de l'ONU des entreprises impliquées dans les colonies/, "base de données de l'ONU sur les colonies israéliennes"],
   [/annuaire B Lab/, "annuaire B Corp de B Lab"],
+  [/radar du devoir de vigilance/, "radar du devoir de vigilance (CCFD-Terre Solidaire, Sherpa) et site de l'entreprise"],
   [/annuaire Leaping Bunny/, "annuaire Leaping Bunny des marques sans tests sur les animaux"],
 ];
 

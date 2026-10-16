@@ -34,7 +34,7 @@ def normalize_name(name: str, keep_letters: bool = False) -> str:
     # Sigles à esperluette ou à points recollés avant de retirer la ponctuation : « H&M » -> « hm »,
     # « P&G » -> « pg », « S.p.A. » -> « spa » (16/10/2026 : « H&M Group » et « B&S Group » se
     # réduisaient tous deux à « group » et se correspondaient).
-    s = re.sub(r"(?<![a-z0-9])[a-z0-9]{1,2}(?:\s*&\s*[a-z0-9]{1,2})+(?![a-z0-9])", lambda m: re.sub(r"\s*&\s*", "", m.group(0)), s)
+    s = re.sub(r"(?<![a-z0-9])[a-z0-9]{1,2}(?:\s*[&+]\s*[a-z0-9]{1,2})+(?![a-z0-9])", lambda m: re.sub(r"\s*[&+]\s*", "", m.group(0)), s)
     s = re.sub(r"(?<![a-z0-9])[a-z0-9](?:\.[a-z0-9])+(?![a-z0-9])", lambda m: m.group(0).replace(".", ""), s)
     s = re.sub(r"[^a-z0-9\s]", " ", s)
     # on retire les tokens d'une seule lettre (issus d'abréviations à points,
