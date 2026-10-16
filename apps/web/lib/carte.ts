@@ -305,7 +305,7 @@ export function construireCarte(
         niveau: niveauDe(i, p, estMarque),
         preuve: {
           source: p.source_name ?? p.source_code ?? "Source", url: p.source_url, solidite: SOLIDITE[p.tier] ?? "declarative",
-          date: p.event_date ?? p.observed_on, dateEvenement: !!p.event_date, citation: p.excerpt, reprisDe: p.inherited_from ?? null,
+          date: p.event_date ?? p.observed_on, dateEvenement: !!p.event_date, citation: p.excerpt, reprisDe: p.inherited_from ? (p.specificity === -2 ? `la filiale française ${p.inherited_from}` : p.inherited_from) : null,
           conteste: !!p.contested, valeurNum: num(p.value_numeric),
         },
       };

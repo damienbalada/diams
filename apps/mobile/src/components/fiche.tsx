@@ -188,7 +188,7 @@ function CarteFait({ f, teinte, niveau }: { f: Fait; teinte: string; niveau: str
             <View style={s.source}>
               {sol && <Text style={[s.solidite, { color: sol.couleur, borderColor: sol.couleur }]}>{sol.texte}</Text>}
               <Text style={s.petit}>
-                {f.preuve.source}, {dfr(f.preuve.date)}{f.preuve.reprisDe ? ` · donnée du groupe ${f.preuve.reprisDe}` : ''}
+                {f.preuve.source}, {dfr(f.preuve.date)}{f.preuve.reprisDe ? ` · ${f.preuve.reprisDe.startsWith('la filiale') ? 'donnée de' : 'donnée du groupe'} ${f.preuve.reprisDe}` : ''}
               </Text>
             </View>
           )}

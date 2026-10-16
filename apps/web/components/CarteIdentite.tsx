@@ -218,7 +218,7 @@ function CarteIndicateur({ f }: { f: Fait }) {
               <div className="ci-ind-src">
                 <Solidite s={p.solidite} />
                 <span>{p.source}, {dfr(p.date)}{!p.dateEvenement && " (relevé)"}</span>
-                {p.reprisDe && <span className="ci-badge">donnée du groupe {p.reprisDe}</span>}
+                {p.reprisDe && <span className="ci-badge">{p.reprisDe.startsWith("la filiale") ? `donnée de ${p.reprisDe}` : `donnée du groupe ${p.reprisDe}`}</span>}
               </div>
             )}
             {p?.citation && (
@@ -383,7 +383,7 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
           <span className={`ci-v ci-${etatCle}`}>
             {alerte ? "⚠️ " : vigilance && sig ? "🟠 " : ""}
             {valeurCle}
-            {!niveauGroupe && k?.preuve?.reprisDe && <span className="ci-badge" title="Le groupe publie cette donnée ; la marque la reprend">donnée du groupe {k.preuve.reprisDe}</span>}
+            {!niveauGroupe && k?.preuve?.reprisDe && <span className="ci-badge" title="Le groupe publie cette donnée ; la marque la reprend">{k.preuve.reprisDe.startsWith("la filiale") ? `donnée de ${k.preuve.reprisDe}` : `donnée du groupe ${k.preuve.reprisDe}`}</span>}
           </span>
           {k && !niveauGroupe && k.etat === "documente" && REPERES[k.code] && <span className="ci-v-rep">{REPERES[k.code]}</span>}
         </span>

@@ -106,6 +106,15 @@ la part parmi les cadres dirigeants étant citée à côté. Comme l'index Égap
 par chaque société employeuse d'au moins 1 000 salariés en France ; une marque reprend celle de
 son propriétaire direct, et un groupe étranger celle de sa filiale française.
 
+**Filiale française d'un groupe étranger.** *(Décision de l'éditeur du 16/10/2026.)* L'index
+Égapro et la déclaration Rixain sont dus par chaque société employeuse en France ; pour un groupe
+étranger, c'est sa filiale française qui les publie. Les filiales sont retenues sur trois registres :
+le lien de contrôle déclaré au registre mondial des identifiants d'entités (GLEIF, lien publié et mis
+à jour depuis 2025 ; un lien périmé est écarté), le SIREN actif dans le répertoire Sirene, et la
+présence dans l'export Égapro ou Rixain. Une filiale principale par groupe, la plus grande d'après la
+tranche d'effectif de Sirene, transmet ces données à la fiche du groupe et de ses marques, signalées
+« donnée de la filiale française … ».
+
 | Indicateur | ⚠️ Alerte | 🟠 Vigilance | Référence |
 |---|---|---|---|
 | Exploitation animale | un produit issu de l'exploitation animale est documenté | exploitation non documentée dans un secteur où elle est la règle | choix de l'Index |
