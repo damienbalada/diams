@@ -245,6 +245,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/BBFAW/, "classement BBFAW"], [/Fur Free/, "liste Fur Free Retailer"], [/Fashion Checker/, "Fashion Checker"],
   [/Finansol/, "liste Finansol"],
   [/Break Free From Plastic/, "audit Break Free From Plastic"],
+  [/plateforme de l'Ademe/, "bilans GES déposés à l'Ademe"],
   [/Autorité de la concurrence/, "décisions de l'Autorité de la concurrence"],
 ];
 
