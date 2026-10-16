@@ -174,6 +174,7 @@ export const REPERES: Record<string, string> = {
   GOV_BOARD_GENDER: "Repère : 40 % au minimum dans les sociétés cotées en France (loi Copé-Zimmermann)",
   GOV_BOARD_INDEP: "Repère : au moins un tiers recommandé par le code Afep-Medef",
   TAX_EFFECTIVE_RATE: "Repère : impôt minimum mondial de l'OCDE, 15 % ; taux normal en France, 25 %",
+  TAX_HAVEN_PRESENCE: "Repère : les dix premiers du classement des paradis fiscaux pour les entreprises du Tax Justice Network (décembre 2025) : îles Vierges britanniques, îles Caïmans, Suisse, Bermudes, Singapour, Hong Kong, Pays-Bas, Jersey, Irlande, Luxembourg ; le pays du siège n'est pas compté",
   ANI_BBFAW_TIER: "Échelle du BBFAW : niveau 1 (meilleur) à 6 (aucun engagement visible)",
   ENV_TAXONOMY_CAPEX: "Part des investissements de l'année conformes à la taxonomie verte européenne",
   ENV_GHG_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",

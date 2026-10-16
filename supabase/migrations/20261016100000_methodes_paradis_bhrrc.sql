@@ -1,0 +1,5 @@
+-- Décision de l'éditeur du 16/10/2026 : définitions applicables avec des sources publiques.
+update indicators set methodology = 'Nombre de filiales situées dans les dix premières juridictions du classement des paradis fiscaux pour les entreprises du Tax Justice Network (Corporate Tax Haven Index, édition du 2 décembre 2025 : îles Vierges britanniques, îles Caïmans, Suisse, Bermudes, Singapour, Hong Kong, Pays-Bas, Jersey, Irlande, Luxembourg), d''après la liste des filiales publiée par le groupe (annexe 21 du rapport 10-K, liste des sociétés consolidées). Le pays du siège n''est pas compté. Une liste limitée aux filiales importantes donne un minimum.'
+where code = 'TAX_HAVEN_PRESENCE';
+update indicators set methodology = 'Nombre d''articles relayant des allégations d''atteintes aux droits humains publiés par le Business & Human Rights Resource Centre au cours des 12 derniers mois, dans la limite des 12 plus récents que publie son flux public par entreprise (le site ne garantit pas l''exactitude des articles relayés : ce sont des allégations, pas des faits établis).'
+where code = 'SUP_BHRRC_ALLEG';
