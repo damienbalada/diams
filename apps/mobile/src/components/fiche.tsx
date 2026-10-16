@@ -89,9 +89,12 @@ function LignePilier({ p, dernier }: { p: Pilier; dernier: boolean }) {
   const teinte = TEINTE[p.code] ?? C.accent;
   const signal = p.cle?.signal;
   const couleurValeur = signal === 'alerte' ? C.alerteTexte : signal === 'vigilance' ? C.vigilance : p.cle && p.cle.etat !== 'aucune_info' ? C.texte : C.gris;
-  const groupes = (['groupe', 'marque', 'produit'] as const)
-    .map((n) => ({ n, faits: p.faits.filter((f) => f.niveau === n) }))
-    .filter((g) => g.faits.length);
+  // D'abord ce qui est documenté (alertes en tête), puis, repliés en bas, les indicateurs sans information.
+  const rang = (f: Fait) => (f.signal?.niveau === 'alerte' ? 0 : f.signal?.niveau === 'vigilance' ? 1 : 2);
+  const pleins = p.faits.filter((f) => f.etat !== 'aucune_info').sort((a, b) => rang(a) - rang(b));
+  const vides = p.faits.filter((f) => f.etat === 'aucune_info');
+  // Le niveau (groupe, marque, produits) n'est précisé que s'il y en a plusieurs.
+  const plusieursNiveaux = new Set(pleins.map((f) => f.niveau)).size > 1;
   return (
     <View style={[s.pilier, !dernier && s.separateur, ouvert && { borderLeftColor: teinte, borderLeftWidth: 4 }]}>
       <Pressable
@@ -108,70 +111,98 @@ function LignePilier({ p, dernier }: { p: Pilier; dernier: boolean }) {
             <Text style={[s.pilierNom, { color: teinte }]}>{p.nom.toUpperCase()}</Text>
             <Text style={s.compteur}>{p.renseignes} sur {p.total} {ouvert ? '▲' : '▼'}</Text>
           </View>
-          {p.cle && p.cle.etat !== 'aucune_info' && <Text style={s.cleNom}>{p.cle.nom}</Text>}
-          <Text style={[s.cleValeur, { color: couleurValeur }]}>
-            {signal === 'alerte' ? '⚠️ ' : signal === 'vigilance' ? '🟠 ' : ''}
-            {p.cle?.valeur ?? 'Aucune information'}
-          </Text>
+          {/* Ouvert, le résumé disparaît : le premier indicateur, juste dessous, le dit déjà. */}
+          {!ouvert && p.cle && p.cle.etat !== 'aucune_info' && <Text style={s.cleNom}>{p.cle.nom}</Text>}
+          {!ouvert && (
+            <Text style={[s.cleValeur, { color: couleurValeur }]}>
+              {signal === 'alerte' ? '⚠️ ' : signal === 'vigilance' ? '🟠 ' : ''}
+              {p.cle?.valeur ?? 'Aucune information'}
+            </Text>
+          )}
         </View>
       </Pressable>
       {ouvert && (
         <View style={s.corps}>
-          {groupes.map((g) => (
-            <View key={g.n} style={s.pile8}>
-              <Text style={s.niveau}>{NIVEAU[g.n]}</Text>
-              {g.faits.map((f) => <CarteFait key={f.code} f={f} teinte={teinte} />)}
-            </View>
-          ))}
+          {pleins.map((f) => <CarteFait key={f.code} f={f} teinte={teinte} niveau={plusieursNiveaux ? NIVEAU[f.niveau] : null} />)}
+          {vides.length > 0 && <SansInformation faits={vides} toutVide={!pleins.length} />}
         </View>
       )}
     </View>
   );
 }
 
-function CarteFait({ f, teinte }: { f: Fait; teinte: string }) {
-  const [citation, setCitation] = useState(false);
-  const vide = f.etat === 'aucune_info';
-  const fond = f.signal?.niveau === 'alerte' ? C.alerteFond : f.signal?.niveau === 'vigilance' ? '#fffaf2' : vide ? C.carte2 : C.carte;
-  const bordGauche = f.signal?.niveau === 'alerte' ? C.alerte : f.signal?.niveau === 'vigilance' ? '#d97a00' : vide ? C.bordFort : teinte;
+const majuscule = (t: string) => t[0].toUpperCase() + t.slice(1);
+
+/**
+ * Un indicateur documenté, en deux temps : d'abord le fait (nom, valeur, repère), puis, sur demande,
+ * le détail (raison, note, seuil, solidité, citation de la source).
+ */
+function CarteFait({ f, teinte, niveau }: { f: Fait; teinte: string; niveau: string | null }) {
+  const [details, setDetails] = useState(false);
+  const [toute, setToute] = useState(false);
+  const sig = f.signal?.niveau;
+  const fond = sig === 'alerte' ? C.alerteFond : sig === 'vigilance' ? '#fffaf2' : C.carte;
+  const bordGauche = sig === 'alerte' ? C.alerte : sig === 'vigilance' ? '#d97a00' : teinte;
+  // Avec un signal, la valeur dit déjà le repère (« il faudrait 4,2 % ») : il passe dans le détail.
+  const repereVisible = f.repere && !f.signal ? f.repere : null;
+  const aDetail = !!(f.preuve || f.raison || f.note || f.signal || (f.repere && !repereVisible));
+  const sol = f.preuve ? SOLIDITE[f.preuve.solidite] : null;
   return (
     <View style={[s.fait, { backgroundColor: fond, borderLeftColor: bordGauche }]}>
       <View style={s.ligne}>
-        <Text style={[s.faitNom, s.flex]}>{f.nom.toUpperCase()}</Text>
+        <Text style={[s.faitNom, s.flex]}>{f.nom}{niveau ? ` · ${niveau.toLowerCase()}` : ''}</Text>
         {f.signal && (
-          <Text style={[s.etiquette, f.signal.niveau === 'alerte' ? s.etiquetteAlerte : s.etiquetteVigilance]}>
-            {f.signal.niveau === 'alerte' ? '⚠️ Alerte' : '🟠 Vigilance'}
+          <Text style={[s.etiquette, sig === 'alerte' ? s.etiquetteAlerte : s.etiquetteVigilance]}>
+            {sig === 'alerte' ? '⚠️ Alerte' : '🟠 Vigilance'}
           </Text>
         )}
       </View>
-      <Text style={[s.faitValeur, vide && { color: C.gris, fontSize: 16 }, f.signal?.niveau === 'alerte' && { color: C.alerteTexte }, f.signal?.niveau === 'vigilance' && { color: C.vigilance }]}>
-        {f.valeur}
-      </Text>
-      {f.raison && <Text style={s.petit}>{f.raison[0].toUpperCase() + f.raison.slice(1)}.</Text>}
-      {f.repere && <Text style={s.petit}>{f.repere}</Text>}
-      {f.note && <Text style={s.note}>{f.note}</Text>}
-      {f.preuve && (
-        <View style={s.source}>
-          <Text style={s.petit}>{dfr(f.preuve.date)}</Text>
-          <Text style={[s.solidite, { color: SOLIDITE[f.preuve.solidite]?.couleur, borderColor: SOLIDITE[f.preuve.solidite]?.couleur }]}>
-            {SOLIDITE[f.preuve.solidite]?.texte}
+      <Text style={[s.faitValeur, sig === 'alerte' && { color: C.alerteTexte }, sig === 'vigilance' && { color: C.vigilance }]}>{majuscule(f.valeur)}</Text>
+      {repereVisible && <Text style={s.repere}>{repereVisible}</Text>}
+
+      {aDetail && (
+        <Pressable
+          onPress={() => setDetails(!details)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: details }}
+          accessibilityLabel={details ? 'Masquer le détail' : `Détail et source : ${f.preuve?.source ?? f.nom}`}
+          style={({ pressed }) => [s.basFait, pressed && { opacity: 0.6 }]}>
+          <Text style={[s.sourceCourte, s.flex]} numberOfLines={1}>
+            {f.preuve ? `${f.preuve.source} · ${dfr(f.preuve.date)}` : 'Détail'}
           </Text>
-          <Text style={s.petit}>{f.preuve.source}{f.preuve.reprisDe ? ` · donnée du groupe ${f.preuve.reprisDe}` : ''}</Text>
-        </View>
+          <Text style={s.lienPetit}>{details ? 'Moins ▲' : 'Détail ▼'}</Text>
+        </Pressable>
       )}
-      {f.signal && <Text style={[s.petit, { fontWeight: '600' }]}>Seuil : {f.signal.regle}</Text>}
-      {f.preuve && (f.preuve.citation || f.preuve.url) && (
-        <View>
-          <Pressable onPress={() => setCitation(!citation)} accessibilityRole="button" accessibilityState={{ expanded: citation }} hitSlop={8} style={s.bouton44}>
-            <Text style={s.lien}>{citation ? 'Masquer la source' : 'Ce que dit la source'}</Text>
-          </Pressable>
-          {citation && (
-            <View style={s.citation}>
-              {f.preuve.citation && <Text style={s.citationTexte}>{f.preuve.citation}</Text>}
-              {f.preuve.url && (
-                <Text style={s.lien} onPress={() => ouvrir(f.preuve!.url!)} accessibilityRole="link">Ouvrir la source ↗</Text>
+
+      {details && (
+        <View style={s.details}>
+          {f.raison && <Text style={s.detailTexte}>{majuscule(f.raison)}.</Text>}
+          {/* Avec un signal, le seuil retenu dit déjà le repère. */}
+          {f.repere && !repereVisible && !f.signal && <Text style={s.detailTexte}>{f.repere}</Text>}
+          {f.signal && <Text style={s.detailTexte}><Text style={s.gras}>Seuil retenu : </Text>{f.signal.regle}</Text>}
+          {f.note && <Text style={s.note}>{f.note}</Text>}
+          {f.preuve && (
+            <View style={s.source}>
+              {sol && <Text style={[s.solidite, { color: sol.couleur, borderColor: sol.couleur }]}>{sol.texte}</Text>}
+              <Text style={s.petit}>
+                {f.preuve.source}, {dfr(f.preuve.date)}{f.preuve.reprisDe ? ` · donnée du groupe ${f.preuve.reprisDe}` : ''}
+              </Text>
+            </View>
+          )}
+          {f.preuve?.citation && (
+            <View>
+              <Text style={s.citationTexte} numberOfLines={toute ? undefined : 4}>« {f.preuve.citation} »</Text>
+              {f.preuve.citation.length > 180 && (
+                <Pressable onPress={() => setToute(!toute)} accessibilityRole="button" accessibilityState={{ expanded: toute }} hitSlop={8} style={s.bouton44}>
+                  <Text style={s.lienPetit}>{toute ? 'Raccourcir la citation' : 'Lire toute la citation'}</Text>
+                </Pressable>
               )}
             </View>
+          )}
+          {f.preuve?.url && (
+            <Pressable onPress={() => ouvrir(f.preuve!.url!)} accessibilityRole="link" hitSlop={8} style={s.bouton44}>
+              <Text style={s.lien}>Ouvrir la source ↗</Text>
+            </Pressable>
           )}
         </View>
       )}
@@ -179,9 +210,39 @@ function CarteFait({ f, teinte }: { f: Fait; teinte: string }) {
   );
 }
 
+/** Les indicateurs sans information, repliés en une ligne (dépliés d'office si le pilier n'a rien d'autre). */
+function SansInformation({ faits, toutVide }: { faits: Fait[]; toutVide: boolean }) {
+  const [ouvert, setOuvert] = useState(toutVide);
+  const n = faits.length;
+  return (
+    <View style={s.vides}>
+      <Pressable
+        onPress={() => setOuvert(!ouvert)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: ouvert }}
+        style={({ pressed }) => [s.videsTete, pressed && { opacity: 0.6 }]}>
+        <Text style={[s.videsTitre, s.flex]}>
+          {toutVide ? 'Rien de documenté pour l’instant' : `${n} indicateur${n > 1 ? 's' : ''} sans information`}
+        </Text>
+        <Text style={s.lienPetit}>{ouvert ? 'Masquer ▲' : 'Pourquoi ▼'}</Text>
+      </Pressable>
+      {ouvert &&
+        faits.map((f) => (
+          <View key={f.code} style={s.videLigne}>
+            <Text style={s.videNom}>{f.nom}</Text>
+            <Text style={s.petit}>
+              {f.valeur !== 'Aucune information' ? `${f.valeur}. ` : ''}
+              {f.raison ? `${majuscule(f.raison)}.` : ''}
+              {f.note ? ` ${f.note}` : ''}
+            </Text>
+          </View>
+        ))}
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
   pile: { gap: 14 },
-  pile8: { gap: 8 },
   flex: { flex: 1, minWidth: 0 },
   centre: { alignItems: 'center', justifyContent: 'center' },
   ligne: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -209,11 +270,22 @@ const s = StyleSheet.create({
   compteur: { fontSize: 12.5, color: C.gris },
   cleNom: { fontSize: 13, color: C.gris, marginTop: 2 },
   cleValeur: { fontSize: 16, lineHeight: 22, fontWeight: '700', marginTop: 2 },
-  corps: { paddingHorizontal: 14, paddingBottom: 14, gap: 14 },
-  niveau: { fontSize: 13, fontWeight: '800', color: C.gris, textTransform: 'uppercase', letterSpacing: 0.5 },
-  fait: { borderRadius: 14, padding: 14, gap: 6, borderWidth: 1, borderColor: C.bord, borderLeftWidth: 4 },
-  faitNom: { fontSize: 12, fontWeight: '800', color: C.gris, letterSpacing: 0.3 },
-  faitValeur: { fontSize: 18, lineHeight: 24, fontWeight: '800', color: C.texte },
+  corps: { paddingHorizontal: 14, paddingBottom: 16, paddingTop: 2, gap: 12 },
+  fait: { borderRadius: 14, paddingHorizontal: 14, paddingTop: 14, paddingBottom: 4, gap: 6, borderWidth: 1, borderColor: C.bord, borderLeftWidth: 4 },
+  faitNom: { fontSize: 14, fontWeight: '600', color: C.gris },
+  faitValeur: { fontSize: 19, lineHeight: 25, fontWeight: '800', color: C.texte },
+  repere: { fontSize: 14, lineHeight: 20, color: C.texte },
+  basFait: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44, borderTopWidth: 1, borderTopColor: C.bord, marginTop: 6 },
+  sourceCourte: { fontSize: 13, color: C.gris },
+  lienPetit: { fontSize: 14, fontWeight: '700', color: C.accent },
+  details: { gap: 10, paddingBottom: 10 },
+  detailTexte: { fontSize: 14, lineHeight: 20, color: C.texte },
+  gras: { fontWeight: '700' },
+  vides: { borderRadius: 14, backgroundColor: C.carte2, paddingHorizontal: 14 },
+  videsTete: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48 },
+  videsTitre: { fontSize: 15, fontWeight: '600', color: C.gris },
+  videLigne: { paddingVertical: 10, borderTopWidth: 1, borderTopColor: C.bord, gap: 2 },
+  videNom: { fontSize: 14, fontWeight: '700', color: C.texte },
   etiquette: { fontSize: 12, fontWeight: '800', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
   etiquetteAlerte: { backgroundColor: C.alerte, color: '#fff' },
   etiquetteVigilance: { backgroundColor: '#ffe2b8', color: C.vigilanceTexte },
@@ -223,7 +295,6 @@ const s = StyleSheet.create({
   solidite: { fontSize: 12, fontWeight: '700', borderWidth: 1, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1 },
   lien: { fontSize: 15, fontWeight: '600', color: C.accent },
   bouton44: { minHeight: 44, justifyContent: 'center' },
-  citation: { backgroundColor: C.carte2, borderRadius: 10, padding: 10, gap: 8 },
-  citationTexte: { fontSize: 13.5, lineHeight: 19, color: C.texte },
+  citationTexte: { fontSize: 14, lineHeight: 20, color: C.texte, fontStyle: 'italic', borderLeftWidth: 3, borderLeftColor: C.bordFort, paddingLeft: 10 },
   pied: { fontSize: 13, lineHeight: 18, color: C.gris },
 });
