@@ -244,6 +244,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/transparence de la mode/, "indice de transparence de la mode"], [/KnowTheChain/, "KnowTheChain"],
   [/BBFAW/, "classement BBFAW"], [/Fur Free/, "liste Fur Free Retailer"], [/Fashion Checker/, "Fashion Checker"],
   [/Finansol/, "liste Finansol"],
+  [/Break Free From Plastic/, "audit Break Free From Plastic"],
   [/Autorité de la concurrence/, "décisions de l'Autorité de la concurrence"],
 ];
 
@@ -298,7 +299,9 @@ export function construireCarte(
     const date = js.find((j) => j.outcome === "non_trouvee")?.checked_on;
     // Lecture d'un rapport (« Rapport … lu : … ») : la phrase du journal est affichée telle quelle.
     const lecture = js.find((j) => j.outcome === "non_trouvee" && /^Rapport/.test(j.detail ?? ""))?.detail ?? null;
-    const notes = [lecture, cherche.length ? `Cherché sans résultat (${cherche.join(", ")}), le ${date?.split("-").reverse().join("/")}.` : null].filter(Boolean);
+    // Taille officielle (répertoire Sirene) : dit pourquoi une PME ne publie pas ces données.
+    const taille = js.find((j) => /^Catégorie d'entreprise/.test(j.detail ?? ""))?.detail ?? null;
+    const notes = [lecture, taille, cherche.length ? `Cherché sans résultat (${cherche.join(", ")}), le ${date?.split("-").reverse().join("/")}.` : null].filter(Boolean);
     return {
       code: i.code, nom: i.name, pilier: i.dimension_code, etat: "aucune_info", valeur: "Aucune information", contexte, niveau: niveauDe(i, null, estMarque),
       obligation, note: notes.length ? notes.join(" ") : null,
