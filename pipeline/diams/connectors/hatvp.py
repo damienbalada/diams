@@ -90,7 +90,10 @@ def match_org(entity: dict[str, Any], orgs: list[HatvpOrg]) -> HatvpOrg | None:
         for o in orgs:
             if o.siren and o.siren == str(siren):
                 return o
-    name = entity.get("legal_name") or entity.get("display_name") or ""
+        # Société identifiée par son SIREN : pas de repli sur le nom, qui rattacherait l'inscription
+        # d'une autre société du groupe (« Essity PLD France » ≠ « Essity France », 16/10/2026).
+        return None
+    name =entity.get("legal_name") or entity.get("display_name") or ""
     for o in orgs:
         if is_strong_match(name, o.denomination):
             return o
