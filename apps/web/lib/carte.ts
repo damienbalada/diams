@@ -168,6 +168,8 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "GOV_BOARD_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes au conseil d'administration`;
     case "GOV_BOARD_INDEP": return v === null ? "Publié" : `${nf(v)} % d'administrateurs indépendants`;
     case "TAX_EFFECTIVE_RATE": return v === null ? "Publié" : `Impôt payé : ${nf(v)} % des bénéfices`;
+    case "GEO_POL_FINANCING": return v === null ? "Publié" : v === 0 ? "Comité politique déclaré aux États-Unis, sans contribution ce cycle" : `${nf(v, 0)} $ versés à des candidats et comités politiques aux États-Unis (2025-2026)`;
+    case "SUP_BHRRC_ALLEG": return v === null ? "Relayé" : `${nf(v, 0)} article${v > 1 ? "s" : ""} relayant des allégations en 12 mois (BHRRC)`;
     case "TAX_HAVEN_PRESENCE": return v === null ? "Publié" : v === 0 ? "Aucune filiale listée dans les dix premiers paradis fiscaux" : `Au moins ${nf(v, 0)} filiale${v > 1 ? "s" : ""} dans les dix premiers paradis fiscaux`;
     case "ENV_GHG_TREND": return v === null ? "Publié" : v > 0 ? `Émissions en hausse de ${nf(v, 2)} % par an` : `Émissions en baisse de ${nf(-v, 2)} % par an`;
     case "PLA_REDUCTION": return v === null ? "Publié" : v > 0 ? `Plastique neuf en hausse de ${nf(v, 2)} % par an` : `Plastique neuf en baisse de ${nf(-v, 2)} % par an`;

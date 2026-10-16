@@ -695,6 +695,12 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         tr_ok, tr_details, tr_active = check_trend_yoy(row, quote)
     if not tr_active:
         tr_ok, tr_details, tr_active = check_except(row, quote)
+    if not tr_active and row.indicator_code == "SUP_BHRRC_ALLEG":
+        # Allégations relayées par le BHRRC (16/10/2026) : la valeur est le nombre d'articles
+        # cités, chacun par son titre exact dans le flux public.
+        tr_active = True
+        tr_ok = row.value_numeric is not None and int(row.value_numeric) == len(quotes)
+        tr_details = [f"nombre d'articles cités {len(quotes)} = valeur {'✓' if tr_ok else '✗'}"]
     if not tr_active:
         tr_ok, tr_details, tr_active = check_ratio(row, quote)
     if not tr_active:
