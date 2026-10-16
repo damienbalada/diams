@@ -26,6 +26,24 @@ roots = [e for e in ents if not e["is_brand"] and not e["parent_id"]]
 print(len(roots), "groupes")
 
 
+def variantes(n):
+    """Noms comparables d'une page du BHRRC : « TotalEnergies (formerly Total) » → TotalEnergies ;
+    « Hennes & Mauritz (H&M) » → aussi H&M ; « LEGO Group » → aussi LEGO. Les mentions « part of »
+    ou « subsidiary of » désignent une filiale : jamais retenues."""
+    if re.search(r"\((?:part of|subsidiary of|see )", n, re.I):
+        return set()
+    out = {re.sub(r"\s*\(.*?\)\s*", " ", n).strip()}
+    out |= {x.strip() for x in re.findall(r"\(([^)]*)\)", n) if not re.match(r"(?:formerly|now|ex)\W", x.strip() + " ", re.I)}
+    out |= {re.sub(r"\s+(Group|Groupe|plc|Inc\.?|Ltd\.?|S\.?A\.?|SE|AG|N\.?V\.?)$", "", x, flags=re.I).strip() for x in list(out)}
+    return {x for x in out if x}
+
+
+def correspond(nom, legal, cand):
+    from diams.normalize.names import normalize_name
+    vs = {normalize_name(v) for v in variantes(cand)}
+    return any(normalize_name(x) in vs for x in (nom, legal) if x)
+
+
 def poli(url, **kw):
     time.sleep(5)
     for _ in range(3):
@@ -38,8 +56,10 @@ def poli(url, **kw):
 
 for n, e in enumerate(roots, 1):
     prev = cache.get(e["slug"])
-    if prev and (not prev["trouve"] or "page_id" in prev):
+    if prev and ("page_id" in prev or (not prev["trouve"] and prev.get("v2"))):
         continue
+    if prev and not prev["trouve"]:
+        prev = None   # nouvelle recherche avec la règle élargie (16/10/2026)
     nom = e.get("display_name") or e["legal_name"]
     nom_q = re.sub(r"\s*\((?:groupe|société|coopérative)\)\s*$", "", nom)
     if prev:
@@ -49,9 +69,9 @@ for n, e in enumerate(roots, 1):
             res = poli(f"{BASE}/en/api/companies/", params={"search": nom_q}, headers={"Accept": "application/json"}).json().get("results", [])
         except Exception as err:
             print("  erreur", e["slug"], err); continue
-        hit = next((x for x in res if is_strong_match(nom_q, x["name"]) or is_strong_match(e["legal_name"], x["name"])), None)
+        hit = next((x for x in res if is_strong_match(nom_q, x["name"]) or is_strong_match(e["legal_name"], x["name"])), None)             or next((x for x in res if correspond(nom_q, e["legal_name"], x["name"])), None)
     if not hit:
-        cache[e["slug"]] = {"trouve": False, "requete": nom_q}
+        cache[e["slug"]] = {"trouve": False, "requete": nom_q, "v2": True}
     else:
         # Le flux se filtre par l'identifiant de la page de l'entreprise (lien « flux » de la page),
         # pas par l'identifiant de l'API : avec ce dernier, le flux renvoie les dernières
@@ -99,7 +119,7 @@ for slug, v in cache.items():
                         "detail": f"Cherché, non trouvé : aucun article relayant des allégations dans les 12 derniers mois sur la page « {v['nom_bhrrc']} » du Business & Human Rights Resource Centre (flux public relu le {today.strftime('%d/%m/%Y')})."})
         continue
     cites = " ; ".join(f"{'/'.join(reversed(a['date'].split('-')))} : « {a['titre']} »" for a in recents)
-    excerpt = (f"Business & Human Rights Resource Centre, page « {v['nom_bhrrc']} », flux public des articles contenant des allégations "
+    excerpt = (f"Business & Human Rights Resource Centre, page de l'entreprise ({v['nom_bhrrc']}), flux public des articles contenant des allégations "
                f"(12 plus récents au plus ; le site ne garantit pas l'exactitude des articles relayés), articles des 12 derniers mois : {cites}")
     rows.append([slug, "SUP_BHRRC_ALLEG", "BHRRC", "controversy", today.isoformat(), "numeric", str(len(recents)), "", "", "", "0.6",
                  v["flux"], excerpt, ""])
