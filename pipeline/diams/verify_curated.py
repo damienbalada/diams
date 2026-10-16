@@ -213,6 +213,11 @@ ESEF_KEYWORDS = {
                          r"|d.origine animale|of animal origin|animal[- ]derived|tests? sur (les )?animaux|animal testing"
                          r"|tested on animals"],
     "ANI_FUR_FREE": [r"fourrure|fur\b"],
+    # Politiques des matières animales de la mode (16/10/2026) : la citation nomme la matière.
+    "ANI_DOWN_RDS": [r"duvet|plumes|\bdown\b", r"Responsible Down|RDS|plumage"],
+    "ANI_WOOL_MULESING": [r"laine|wool", r"mulesing|Responsible Wool|RWS"],
+    "ANI_EXOTIC_SKINS": [r"exotiques?|exotic|crocodil|python|autruche|ostrich|l[ée]zard|lizard"],
+    "ANI_LEATHER_TRACE": [r"cuirs?|leather|tanneri", r"Leather Working Group|LWG|tra[çc]abilit|traceab"],
     # Pilier animal à trois niveaux (15/10/2026) : marque entièrement végétale, ou produits
     # 100 % végétaux proposés.
     "ANI_ANIMAL_FREE": [r"100 ?% v[ée]g[ée]ta|vegan|sans exploitation animale|sans (aucun )?ingr[ée]dient d.origine animale"],
