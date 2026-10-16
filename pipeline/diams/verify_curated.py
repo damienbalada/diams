@@ -168,7 +168,8 @@ def verify_hatvp(row, client: httpx.Client, sirens: dict[str, str | None]) -> Ve
 # Mots qui doivent figurer dans la citation pour qu'elle porte bien sur l'indicateur.
 ESEF_KEYWORDS = {
     "INV_FOSSIL_FINANCING": [r"fossile"],
-    "INV_RESPONSIBLE_POLICY": [r"exclu"],
+    # Politique d'exclusion, ou signature des Principes pour l'investissement responsable (méthode : « signataire UN PRI »).
+    "INV_RESPONSIBLE_POLICY": [r"exclu|Principes pour l.[Ii]nvestissement [Rr]esponsable|Principles for Responsible Investment|\bPRI\b"],
     "LAB_GENDER_PAYGAP": [r"[ée]cart|gap", r"r[ée]mun[ée]ration|salari|pay", r"femmes?|hommes?|genres?|gender|women|female"],
     # « ratio de rémunération annuelle totale » : intitulé ESRS S1-16, défini par rapport à la médiane.
     "LAB_CEO_PAY_RATIO": [r"ratio", r"m[ée]dian|r[ée]mun[ée]ration annuelle totale|annual total remuneration|total remuneration ratio"],

@@ -149,7 +149,8 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "GEO_CONFLICT_TIES": return "Implication dans un conflit ou une occupation, documentée";
     case "GEO_LOBBYING_ALIGN": { const n = m1(/Climate Policy Engagement ([A-F][+-]?)/, x); return n ? `Note ${n} d'InfluenceMap sur le lobbying climat` : "Évalué par InfluenceMap"; }
     case "LAB_LIVING_WAGE": { const s = m1(/\((salaire (?:décent|adéquat)[^)]*)\)/, x); return s ? s[0].toUpperCase() + s.slice(1) : "Salaire décent : engagement publié"; }
-    case "INV_RESPONSIBLE_POLICY": { const s = m1(/— ([^:«]+) :/, x); return s ? s[0].toUpperCase() + s.slice(1) : "Politique publiée"; }
+    case "INV_RESPONSIBLE_POLICY": if (/Principes pour l.[Ii]nvestissement [Rr]esponsable|\bUN PRI\b|signataires? des PRI/.test(x)) return "Signataire des Principes pour l'investissement responsable de l'ONU (par ses filiales de gestion ou d'assurance)"; {
+      const s = m1(/— ([^:«]+) :/, x); return s ? s[0].toUpperCase() + s.slice(1) : "Politique publiée"; }
     case "GEO_LOBBYING_TRANSP": return /HATVP|répertoire/i.test(x + (p.source_name ?? "")) ? "Inscrit au répertoire des lobbyistes (HATVP)" : "Inscrit au registre européen des lobbyistes";
     case "GEO_LOBBYING_SPEND": { const s = m1(/déclarés[^:]*: ([^,]+(?:€[^,]*€)?)/, x) ?? (v === null ? null : `${nf(v, 0)} €`); return s ? `${s} de lobbying déclarés par an` : "Déclaré"; }
     case "ENV_CDP_CLIMATE": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? "?"} au questionnaire climat du CDP`;
