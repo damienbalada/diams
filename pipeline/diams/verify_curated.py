@@ -175,7 +175,7 @@ ESEF_KEYWORDS = {
     "GOV_BOARD_GENDER": [r"femmes?|administratrices?|f[ée]minisation|f[ée]minin|wom[ae]n|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b|/€m sales|per \$\s?1\s?M\b"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b|/€m sales|per \$\s?1\s?M\b|net sales|per €"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     "ENV_GREENWASHING": [r"sustainab|durab|environment|green|[ée]colog|ambienta", r"mislead|tromp|unclear|vague|claims?|all[ée]gation"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
@@ -715,6 +715,7 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         # ou en notation comptable entre parenthèses, « (8,0) % ».
         if row.value_numeric < 0 and re.search(
                 r"in favou?r of women|en faveur des femmes|higher for (female|women)"
+                r"|women (?:have been |were |are )?paid [\d.,]+ ?% more than men"
                 r"|sup[ée]rieure? pour les (salari[ée]es )?femmes", quote, re.I):
             variants += _value_variants(-row.value_numeric)
         if row.value_numeric < 0:
