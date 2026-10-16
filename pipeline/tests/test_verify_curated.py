@@ -795,3 +795,13 @@ def test_dollars_australiens_lus_sans_prefixe():
     from diams.verify_curated import foreign_amounts
     assert 60e6 in foreign_amounts("penalties cumulatively totalling $60 million for the said", "AUD")
     assert 14e6 in foreign_amounts("pecuniary penalties of A$14 million", "AUD")
+
+
+def test_taux_d_impot_sur_une_perte_refuse():
+    from diams.verify_curated import check_esef_quote
+    from diams.load import EvidenceRow
+    row = EvidenceRow(entity_slug="x", indicator_code="TAX_EFFECTIVE_RATE", source_code="ESEF", nature="result",
+                      observed_on="2026-03-01", value_type="numeric", value_numeric=16.1, confidence=0.9,
+                      source_url="u", excerpt="Note sur l'impôt (produit d'impôt sur une perte avant impôt) : « Effective tax rate 16.1 % »")
+    v = check_esef_quote(row, "Total Tax benefit Effective tax rate 16.1 % for the year")
+    assert v.status != "OK"

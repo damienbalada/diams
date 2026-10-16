@@ -784,6 +784,11 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         tr_ok, tr_details, tr_active = check_unit(row, quote)
     ok &= tr_ok
     details += tr_details
+    if row.indicator_code == "TAX_EFFECTIVE_RATE" and re.search(
+            r"perte avant impôt|sur une perte|loss(?:es)? before (?:income )?tax", row.excerpt or "", re.I):
+        # Méthodologie : un exercice en perte avant impôt n'a pas de taux interprétable (17/10/2026).
+        ok = False
+        details.append("exercice en perte avant impôt : taux non interprétable, pas de preuve ✗")
     if row.indicator_code == "GOV_SANCTIONS":
         sc_ok, sc_details = check_sanction(row, quote, rates)
         ok &= sc_ok
