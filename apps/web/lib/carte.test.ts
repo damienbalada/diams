@@ -141,3 +141,8 @@ test("matières animales : politique sans certification et double interdiction",
   assert.equal(v("ANI_ANGORA_MOHAIR", "« Mohair (Angora goat hair), Angora (Angora rabbit hair) » — angora et mohair exclus."), "Angora et mohair exclus");
   assert.equal(v("ANI_DOWN_RDS", "« … are RDS (Responsible Down Standard) certified as of the end of December 2019 » — ateliers certifiés RDS."), "Duvet certifié (norme RDS) exigé");
 });
+
+test("duvet : politique sans certification", () => {
+  const s = valeurCourte("ANI_DOWN_RDS", "policy", preuve("x", { excerpt: "« Suppliers must not supply down harvested from live birds … » — politique publiée, sans certification du duvet exigée." }));
+  assert.equal(s, "Plumage à vif exclu (politique, sans certification)");
+});

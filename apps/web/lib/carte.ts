@@ -139,6 +139,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "ANI_TESTING": return /Leaping Bunny de Cruelty Free/.test(x) ? "Certifiée sans tests sur les animaux (Leaping Bunny)" : "Arrêt des tests sur les animaux déclaré (sans certification du groupe)";
     // Matières animales de la mode : objectif ou politique publiés (aucune interdiction ni certification constatée).
     case "ANI_DOWN_RDS":
+      if (/sans certification/i.test(x)) return "Plumage à vif exclu (politique, sans certification)";
       if (/virgin down|duvet neuf exclu/i.test(x)) return "Duvet et plumes neufs exclus (seulement recyclés)";
       return /objectif|horizon/i.test(x) ? "Objectif de duvet recyclé ou certifié (norme RDS, sans plumage à vif)" : "Duvet certifié (norme RDS) exigé";
     case "ANI_WOOL_MULESING":
