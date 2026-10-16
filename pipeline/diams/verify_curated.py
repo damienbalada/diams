@@ -771,6 +771,11 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         tr_active = True
         tr_ok = row.value_numeric is not None and int(row.value_numeric) == len(quotes)
         tr_details = [f"nombre d'articles cités {len(quotes)} = valeur {'✓' if tr_ok else '✗'}"]
+    if not tr_active and row.indicator_code == "TAX_HAVEN_PRESENCE" and _HAVEN_MARK in (row.excerpt or ""):
+        # Filiales dans les paradis fiscaux d'après les tableaux des sociétés consolidées
+        # (17/10/2026) : la valeur est un décompte, refait depuis le rapport original (main).
+        tr_active, tr_ok = True, True
+        tr_details = ["décompte des filiales refait depuis le rapport original (ci-dessous)"]
     if not tr_active:
         tr_ok, tr_details, tr_active = check_named(row, quote)
     if not tr_active:
@@ -851,6 +856,44 @@ def presscorner_text(url: str, client: httpx.Client) -> str | None:
     doc = r.json().get("docuLanguageResource") or {}
     raw = " ".join(str(doc.get(k) or "") for k in ("title", "subtitle", "htmlContent"))
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", raw)))
+
+
+_HAVEN_MARK = "tableaux des sociétés consolidées"
+
+
+def document_raw(url: str, client: httpx.Client) -> str:
+    """Document brut (balises conservées) : tableaux d'un rapport ESEF ou d'un paquet AMF."""
+    ua = {"User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)", "Accept": "*/*"}
+    r = client.get(url, timeout=600, follow_redirects=True, headers=ua)
+    r.raise_for_status()
+    if url.lower().split("?")[0].endswith(".zip") or "zip" in r.headers.get("content-type", ""):
+        import io
+        import zipfile
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        name = max((i for i in z.infolist() if i.filename.lower().endswith((".xhtml", ".html"))),
+                   key=lambda i: i.file_size).filename
+        return z.read(name).decode("utf-8", errors="replace")
+    page = r.text
+    if "ixv-stub-viewer" in page:
+        from urllib.parse import urljoin
+        m = re.search(r'"docSetFiles"\s*:\s*\[\s*"([^"]+)"', page)
+        if m:
+            full = client.get(urljoin(url, m.group(1)), timeout=600, follow_redirects=True, headers=ua)
+            if full.status_code == 200:
+                page = full.text
+    return page
+
+
+def recount_havens(row, client: httpx.Client, raws: dict) -> tuple[bool, list[str]]:
+    from .paradis_europe import compter, detail
+    if row.source_url not in raws:
+        raws[row.source_url] = document_raw(row.source_url, client)
+    m = re.search(r"hors pays du siège \(([A-Z]{2})\)", row.excerpt or "")
+    n, _, lignes = compter(raws[row.source_url], m.group(1) if m else None)
+    total = sum(n.values())
+    ok = row.value_numeric is not None and total == int(row.value_numeric) and total > 0
+    return ok, [f"décompte refait : {total} filiales sur {lignes} lignes de tableau ({detail(n) or 'aucune'}) = valeur "
+                f"{'✓' if ok else '✗'}"]
 
 
 def document_text(url: str, client: httpx.Client) -> str:
@@ -982,6 +1025,7 @@ def main() -> None:
         tiers = {code: tier for code, (_, tier) in _lookup_ids(c)[2].items()}
 
     ok_rows, delegated_rows, counts, reports = [], [], {}, {}
+    raws: dict = {}
     with httpx.Client(timeout=300) as client:
         for r, note in zip(rows, notes):
             if r.source_code == "BOCC" and tables:
@@ -1026,6 +1070,12 @@ def main() -> None:
                         except Exception:
                             continue
                 v = check_esef_quote(r, reports[r.source_url], ignore_keywords=bool(note), rates=rates)
+                if r.indicator_code == "TAX_HAVEN_PRESENCE" and _HAVEN_MARK in (r.excerpt or ""):
+                    try:
+                        h_ok, h_details = recount_havens(r, client, raws)
+                    except httpx.HTTPError as err:
+                        h_ok, h_details = False, [f"rapport original inaccessible ({type(err).__name__}) ✗"]
+                    v = Verdict(v.status if h_ok or v.status not in ("OK",) else "ÉCART", v.details + h_details)
             else:
                 v = Verdict("NON VÉRIFIABLE", [f"aucun vérificateur pour la source {r.source_code}"])
             v = finalize(v, note, tiers.get(r.source_code), delegated=args.delegue)

@@ -883,6 +883,15 @@ pas du nombre de marques. Trois garde-fous invariants :
 | B Corp | GOV | certification B Corp (oui seulement), domaine du site vérifié | annuaire B Lab | entité certifiée |
 | ONU — HCDH | GEO | présence dans la base des entreprises liées aux colonies (controverse), nom exact | Conseil des droits de l'homme (A/HRC/63/20) | entité listée |
 
+**Présence dans les paradis fiscaux** (top 10 de l'indice du Tax Justice Network, édition du
+2 décembre 2025) : pour un groupe américain, lignes de l'annexe 21 de son rapport 10-K ; pour un
+groupe européen, lignes des tableaux des sociétés consolidées de son rapport annuel (ESEF ou paquet
+AMF). Une ligne compte si c'est une société détenue à 50 % au moins, immatriculée (premier pays de la
+ligne) dans l'une des dix juridictions ; succursales, mises en équivalence, coentreprises, lignes
+d'emprunts, doublons et pays du siège sont exclus. Le vérificateur refait le décompte depuis le
+rapport original. Un rapport peut ne lister que ses principales sociétés : la valeur est un minimum,
+et un zéro issu d'un tableau illisible n'est jamais publié (17/10/2026).
+
 Les quantitatifs (taux effectif, présence en paradis fiscaux) sont chargés en
 **valeur brute** : c'est le moteur qui calcule le percentile intra-secteur et
 applique la direction (\`higher_better\` / \`lower_better\`, ou \`closer_to_zero\` quand
