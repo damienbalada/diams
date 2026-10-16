@@ -398,9 +398,14 @@ l'autorité ; jamais un article de presse ou un recensement d'ONG.
   Europe), CNIL (tant qu'elle publie le nom de l'entreprise sanctionnée : ses
   anciennes décisions sont anonymisées et ne peuvent plus être citées),
   Autorité de la concurrence française, autorité italienne de la concurrence
-  et des consommateurs (AGCM). Pas encore couvertes : les autorités
-  américaines (FTC, ministère de la Justice, SEC) et les autres autorités
-  nationales européennes. Légifrance, qui publie les délibérations de la CNIL,
+  et des consommateurs (AGCM) ; depuis le 16/10/2026 : autorités britannique (CMA)
+  et espagnole (CNMC) de la concurrence, autorité néerlandaise de protection des
+  données, Commission fédérale du commerce (FTC) et, pour les allégations
+  trompeuses, Commission des opérations de bourse (SEC) des États-Unis, Bureau de
+  la concurrence du Canada, autorité britannique de la publicité (ASA). Pas encore
+  couvertes : le ministère américain de la Justice, les autres autorités
+  nationales européennes et l'autorité australienne (ACCC), dont le site et celui
+  de la Cour fédérale refusent le vérificateur. Légifrance, qui publie les délibérations de la CNIL,
   bloque les programmes : seules les actualités de la CNIL sont lues.
 - La vérification automatique retrouve chaque citation dans le communiqué
   officiel (Commission européenne : texte servi par l'interface publique du
