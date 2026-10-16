@@ -140,7 +140,11 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "ANI_DOWN_RDS": return /objectif|horizon/i.test(x) ? "Objectif de duvet recyclé ou certifié (norme RDS, sans plumage à vif)" : "Politique sur le duvet publiée";
     case "ANI_WOOL_MULESING": return /objectif|horizon/i.test(x) ? "Objectif de laine recyclée ou certifiée (norme RWS, sans mulesing)" : "Politique sur la laine publiée";
     case "ANI_EXOTIC_SKINS": return "Peaux exotiques : approvisionnement certifié ou audité (pas d'interdiction)";
-    case "ANI_LEATHER_TRACE": return "Objectifs de traçabilité et de certification des tanneries (Leather Working Group)";
+    case "ANI_LEATHER_TRACE": {
+      const part = m1(/(\d+ ?%) étaient certifiées LWG/, x);
+      if (part) return `${part} des tanneries du groupe certifiées par le Leather Working Group`;
+      return "Objectifs de traçabilité et de certification des tanneries (Leather Working Group)";
+    }
     case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 au classement du bien-être animal`;
     case "GEO_RUSSIA_EXIT": { const s = m1(/» — ([^;.]+)/, x) ?? m1(/— ([^;.]+)/, x); return s ? `Russie : ${s.replace(/ en Russie$/, "")}` : "Documenté"; }
     case "GOV_SANCTIONS": case "ENV_GREENWASHING": {
