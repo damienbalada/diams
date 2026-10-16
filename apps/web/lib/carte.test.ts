@@ -128,3 +128,9 @@ test("sanction en dollars australiens : devise écrite en clair", () => {
   const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("x", { excerpt: "Cour fédérale d'Australie, jugement du 12/08/2022 : « … » — amende civile ; amende de 60 MA$ (sévérité 0,5)." }));
   assert.equal(s, "Sanctionné par la Cour fédérale d'Australie (2022) : amende de 60 M$ australiens");
 });
+
+test("allégation trompeuse : article devant la SEC et le Bureau de la concurrence", () => {
+  const v = (excerpt: string) => valeurCourte("ENV_GREENWASHING", "controverse", preuve("x", { excerpt }));
+  assert.equal(v("SEC (autorité américaine des marchés financiers), communiqué 2024-122 du 10/09/2024 : « … » — amende civile de 1,5 M$ pour …"), "Allégations écologiques trompeuses relevées par la SEC (2024) : amende de 1,5 M$");
+  assert.equal(v("Bureau de la concurrence du Canada, communiqué du 06/01/2022 (en anglais) : « … »"), "Allégations écologiques trompeuses relevées par le Bureau de la concurrence du Canada (2022)");
+});

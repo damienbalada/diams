@@ -162,7 +162,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
         ?? m1(/fine of ([\d.,]+ (?:million|billion)? ?euros)/i, x);
       const quoi = code === "GOV_SANCTIONS" ? "Sanctionné" : "Allégations écologiques trompeuses relevées";
       // Article devant le nom de l'autorité : « l'Autorité… », « la Commission… », « la CNIL ».
-      const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|FTC|CMA)\b/.test(autorite) ? "la " : /^Jury\b/.test(autorite) ? "le " : /^ASA\b/.test(autorite) ? "l'" : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
+      const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|FTC|CMA|SEC)\b/.test(autorite) ? "la " : /^(Jury|Bureau)\b/.test(autorite) ? "le " : /^ASA\b/.test(autorite) ? "l'" : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
       return `${quoi} par ${autorite ? art + autorite : "une autorité"}${an ? ` (${an})` : ""}${amende ? ` : amende de ${amende.replace(/MA\$$/, "M$ australiens")}` : ""}`;
     }
     case "GEO_CONFLICT_TIES": return "Implication dans un conflit ou une occupation, documentée";

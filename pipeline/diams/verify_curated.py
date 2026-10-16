@@ -180,8 +180,8 @@ ESEF_KEYWORDS = {
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     # Avis du Jury de déontologie publicitaire (16/10/2026) : « Recommandation » (Développement durable
     # de l'ARPP) et ses verbes de conclusion.
-    "ENV_GREENWASHING": [r"sustainab|durab|environment|environnement|green|[ée]colog|ambienta|Recommandation",
-                         r"mislead|tromp|unclear|vague|claims?|all[ée]gation|m[ée]conna|contrevien|contraire|ne respecte"],
+    "ENV_GREENWASHING": [r"sustainab|durab|environment|environnement|green|[ée]colog|ambienta|recycl|Recommandation",
+                         r"mislead|inaccurate|inexact|tromp|unclear|vague|claims?|all[ée]gation|m[ée]conna|contrevien|contraire|ne respecte"],
     # Plan de vigilance « complet » (barème de l'indicateur) : cartographie ET suivi,
     # lus dans le plan lui-même (C. com. L225-102-4 : cinq mesures).
     "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques|identifie les risques|risques d.atteintes graves", r"suivi|contr[ôo]le du respect|compte rendu"],
