@@ -166,6 +166,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "LAB_EGAPRO_INDEX": return v === null ? "Publié" : `Index Égapro : ${nf(v, 0)}/100`;
     case "GOV_BCORP": return "Certifiée B Corp";
     case "GOV_BOARD_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes au conseil d'administration`;
+    case "GOV_EXEC_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes dans les instances dirigeantes (comité de direction)`;
     case "GOV_BOARD_INDEP": return v === null ? "Publié" : `${nf(v)} % d'administrateurs indépendants`;
     case "TAX_EFFECTIVE_RATE": return v === null ? "Publié" : `Impôt payé : ${nf(v)} % des bénéfices`;
     case "WAT_CONTROVERSY": {
@@ -214,7 +215,7 @@ function meilleure(ps: PreuveEntree[]): PreuveEntree | null {
  */
 export type Niveau = "groupe" | "marque" | "produit";
 export const NIVEAU_PRODUIT = new Set(["ANI_OFFRE_VEGETALE", "INV_SOLIDARITY_LABEL"]);
-const NIVEAU_PROPRIETAIRE = new Set(["LAB_EGAPRO_INDEX"]);
+const NIVEAU_PROPRIETAIRE = new Set(["LAB_EGAPRO_INDEX", "GOV_EXEC_GENDER"]);
 export function niveauDe(i: IndicateurEntree, p: PreuveEntree | null, estMarque: boolean): Niveau {
   if (NIVEAU_PRODUIT.has(i.code)) return "produit";
   if (!estMarque) return "groupe";

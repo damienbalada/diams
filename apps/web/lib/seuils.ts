@@ -66,6 +66,7 @@ export const REGLES: Record<string, { alerte: string; vigilance?: string; refere
   LAB_CEO_PAY_RATIO: { alerte: "300 fois ou plus", vigilance: "100 fois ou plus", reference: "choix de l'Index, pas une limite légale : aucune loi ne plafonne cet écart, ni en France ni dans l'Union européenne (la loi impose seulement de le publier) ; à 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle" },
   GOV_SANCTIONS: { alerte: "sanction d'une autorité", reference: "décision publique d'une autorité" },
   GOV_BOARD_GENDER: { alerte: "moins de 20 % de femmes", vigilance: "moins de 40 % de femmes", reference: "loi Copé-Zimmermann : 40 % au minimum dans les conseils des sociétés cotées en France ; alerte : la moitié de ce minimum" },
+  GOV_EXEC_GENDER: { alerte: "moins de 15 % de femmes", vigilance: "moins de 30 % de femmes", reference: "loi Rixain : depuis le 1er mars 2026, au moins 30 % de chaque sexe parmi les membres des instances dirigeantes des entreprises d'au moins 1 000 salariés en France (40 % au 1er mars 2029) ; alerte : la moitié de ce minimum" },
   GOV_BOARD_INDEP: { alerte: "—", vigilance: "moins d'un tiers d'indépendants", reference: "code Afep-Medef : au moins un tiers d'indépendants, même dans une société contrôlée" },
   TAX_EFFECTIVE_RATE: { alerte: "—", vigilance: "taux effectif sous 15 %", reference: "impôt minimum mondial de l'OCDE : 15 % ; un taux bas une année peut aussi venir de pertes ou de crédits d'impôt" },
   GEO_RUSSIA_EXIT: { alerte: "activité poursuivie en Russie", vigilance: "activité réduite ou investissements gelés", reference: "statuts de la base Leave Russia (KSE Institute)" },
@@ -125,6 +126,19 @@ export function evaluer(f: FaitEvalue): Signal | null {
       if (x === null) return null;
       return x >= 300 ? a(`patron payé ${nf(x, 0)} fois le salaire médian de ses salariés`, ref) : x >= 100 ? v(`patron payé ${nf(x, 0)} fois le salaire médian de ses salariés`, ref) : null;
     case "GOV_SANCTIONS": return a("sanctionné par une autorité (amende ou condamnation)", ref);
+    case "GOV_EXEC_GENDER":
+      if (x === null) return null;
+      {
+        // Obligation française, déclarée par chaque société employeuse : pour un groupe étranger,
+        // c'est sa filiale française qui déclare.
+        const fil = etrangere(f.pays) ? " (filiale française)" : "";
+        // L'objectif de 30 % ne vaut que depuis le 1er mars 2026 (déclaration au titre de 2025) :
+        // une déclaration plus ancienne est signalée sans être jugée contre ce minimum.
+        const an = Number(note(/au titre de (\d{4})/, c) ?? 0);
+        if (an && an < 2025) return x < 30 ? v(`${nf(x)} % de femmes au comité de direction${fil} en ${an}, avant l'objectif légal de 30 % applicable depuis 2026 (loi Rixain)`, ref) : null;
+        const t = `seulement ${nf(x)} % de femmes au comité de direction${fil} (minimum légal : 30 % depuis 2026, loi Rixain)`;
+        return x < 15 ? a(t, ref) : x < 30 ? v(t, ref) : null;
+      }
     case "GOV_BOARD_GENDER":
       if (x === null) return null;
       {
@@ -172,6 +186,7 @@ export const REPERES: Record<string, string> = {
   LAB_GENDER_PAYGAP: "Repère : à partir de 5 %, l'employeur doit l'analyser avec les représentants du personnel (directive UE)",
   LAB_CEO_PAY_RATIO: "Repère : aucune loi ne plafonne cet écart ; à 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle",
   GOV_BOARD_GENDER: "Repère : 40 % au minimum dans les sociétés cotées en France (loi Copé-Zimmermann)",
+  GOV_EXEC_GENDER: "Repère : 30 % de chaque sexe au minimum dans les instances dirigeantes depuis le 1er mars 2026, 40 % en 2029 (loi Rixain, entreprises d'au moins 1 000 salariés en France) ; ce sont le comité exécutif ou de direction, pas le conseil d'administration",
   GOV_BOARD_INDEP: "Repère : au moins un tiers recommandé par le code Afep-Medef",
   TAX_EFFECTIVE_RATE: "Repère : impôt minimum mondial de l'OCDE, 15 % ; taux normal en France, 25 %",
   WAT_CONTROVERSY: "Repère : arrêtés préfectoraux de mise en demeure des installations classées (Géorisques), cinq dernières années ; ces arrêtés sont des scans : la citation est le texte reconnu par OCR, parfois sans accents",

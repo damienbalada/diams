@@ -78,6 +78,7 @@ const fmt = (n: number, digits = 1) => n.toLocaleString("fr-FR", { maximumFracti
  */
 const DESCRIBE: Record<string, (v: number | null | undefined) => string | null> = {
   GOV_BOARD_GENDER: (v) => (v == null ? null : `${fmt(v)} % de femmes au conseil.`),
+  GOV_EXEC_GENDER: (v) => (v == null ? null : `${fmt(v)} % de femmes dans les instances dirigeantes (comité de direction).`),
   GOV_BOARD_INDEP: (v) => (v == null ? null : `${fmt(v)} % d'administrateurs indépendants.`),
   LAB_CEO_PAY_RATIO: (v) =>
     v == null ? null : `La rémunération la plus élevée vaut ${fmt(v, 0)} fois la rémunération médiane.`,

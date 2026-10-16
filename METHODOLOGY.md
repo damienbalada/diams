@@ -97,6 +97,15 @@ elle ; pour un siège dans l'Union européenne, elle rappelle l'objectif de la d
 les conseils des sociétés cotées. L'index Égapro n'existant qu'en France, celui d'un groupe
 étranger est celui de sa filiale française, soumise à la loi française : la fiche le dit.
 
+**Femmes dans les instances dirigeantes (loi Rixain).** *(Décision de l'éditeur du
+16/10/2026.)* Indicateur distinct de la mixité du conseil : les instances dirigeantes sont le
+comité exécutif ou de direction, pas le conseil d'administration. La donnée vient des
+déclarations publiques de la représentation équilibrée (export du site Égapro du ministère du
+Travail), rapprochées par SIREN : part de femmes parmi les membres des instances dirigeantes,
+la part parmi les cadres dirigeants étant citée à côté. Comme l'index Égapro, elle est déclarée
+par chaque société employeuse d'au moins 1 000 salariés en France ; une marque reprend celle de
+son propriétaire direct, et un groupe étranger celle de sa filiale française.
+
 | Indicateur | ⚠️ Alerte | 🟠 Vigilance | Référence |
 |---|---|---|---|
 | Exploitation animale | un produit issu de l'exploitation animale est documenté | exploitation non documentée dans un secteur où elle est la règle | choix de l'Index |
@@ -115,6 +124,7 @@ les conseils des sociétés cotées. L'index Égapro n'existant qu'en France, ce
 | Écart de salaire femmes-hommes | écart de 15 % ou plus | écart de 5 % ou plus | directive européenne 2023/970 : à partir de 5 %, l'employeur doit évaluer l'écart avec les représentants du personnel ; alerte : trois fois ce seuil, choix de l'Index |
 | Écart dirigeant / salarié médian | 300 fois ou plus | 100 fois ou plus | choix de l'Index : 100 fois, le dirigeant gagne en un an ce que le salarié médian gagne en un siècle |
 | Sanctions d'une autorité | sanction d'une autorité | — | décision publique d'une autorité |
+| Femmes dans les instances dirigeantes | moins de 15 % de femmes | moins de 30 % de femmes | loi Rixain : depuis le 1er mars 2026, au moins 30 % de chaque sexe parmi les membres des instances dirigeantes des entreprises d'au moins 1 000 salariés en France (40 % au 1er mars 2029) ; alerte : la moitié de ce minimum |
 | Femmes au conseil | moins de 20 % de femmes | moins de 40 % de femmes | loi Copé-Zimmermann : 40 % au minimum dans les conseils des sociétés cotées en France ; alerte : la moitié de ce minimum |
 | Administrateurs indépendants | — | moins d'un tiers d'indépendants | code Afep-Medef : au moins un tiers d'indépendants, même dans une société contrôlée |
 | Taux d'impôt effectif | — | taux effectif sous 15 % | impôt minimum mondial de l'OCDE : 15 % ; un taux bas une année peut aussi venir de pertes ou de crédits d'impôt |
@@ -224,6 +234,7 @@ en vigueur au 10/10/2026 :
 | CSRD — 1re vague | directive (UE) 2022/2464 + ESRS | mixité et indépendance du conseil (ESRS 2), Scope 3 et intensité carbone (E1), écart salarial F/H et ratio de rémunération (S1) |
 | Devoir de vigilance | loi n° 2017-399 ; C. com. art. L225-102-4 | plan de vigilance |
 | Copé-Zimmermann | loi n° 2011-103 ; C. com. art. L225-18-1 | mixité du conseil |
+| Représentation équilibrée (loi Rixain) | loi n° 2021-1774, art. 14 ; C. trav. art. L1142-11 à L1142-13 (≥ 1 000 salariés) | femmes dans les instances dirigeantes |
 | Ratio PDG / salarié médian (États-Unis) | Dodd-Frank Act art. 953(b) ; Reg. S-K Item 402(u) | ratio de rémunération |
 
 **Rattachement après lecture complète.** *(Depuis v0.5.1.)* L'obligation CSRD
