@@ -2,6 +2,7 @@
   "expo": {
     "name": "Index des marques",
     "slug": "index-des-marques",
+    "owner": "index-awareness",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -24,6 +25,7 @@
       "predictiveBackGestureEnabled": false,
       "package": "fr.indexdesmarques.app",
       "permissions": [
+        "android.permission.CAMERA",
         "android.permission.CAMERA"
       ]
     },
@@ -59,6 +61,18 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "98895628-5edd-4267-a32c-83b0ca5d4e15"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/98895628-5edd-4267-a32c-83b0ca5d4e15"
     }
   }
 }
