@@ -58,9 +58,19 @@ export default function ProduitScanne() {
         )}
         <Text style={s.texte}>{rep.raison}</Text>
         <Text style={s.code}>Code lu : {ean}</Text>
+        <Pressable
+          onPress={() => router.push({
+            pathname: '/produit-inconnu/[ean]',
+            params: { ean: String(ean), nom: rep.produit?.nom ?? '', marque: rep.produit?.marques?.[0] ?? '' },
+          })}
+          accessibilityRole="button"
+          accessibilityHint="Ouvre l'envoi de photos du produit"
+          style={[s.bouton, { paddingHorizontal: 16, paddingVertical: 10 }]}>
+          <Text style={[s.boutonTexte, { textAlign: 'center' }]}>📷 Aidez-nous : envoyez des photos du produit</Text>
+        </Pressable>
         <Link href="/recherche" asChild>
-          <Pressable accessibilityRole="button" style={s.bouton}>
-            <Text style={s.boutonTexte}>Chercher la marque par son nom</Text>
+          <Pressable accessibilityRole="button" style={s.secondaire}>
+            <Text style={s.secondaireTexte}>Chercher la marque par son nom</Text>
           </Pressable>
         </Link>
         <Pressable onPress={() => router.replace('/scanner')} accessibilityRole="button" style={s.secondaire}>

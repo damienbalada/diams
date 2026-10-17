@@ -29,7 +29,7 @@ export default async function ScansPage() {
   return (
     <main className="fiche-stack">
       <div>
-        <a className="muted small" href="/admin/revue">← file de revue des preuves</a>
+        <a className="muted small" href="/admin/revue">← file de revue des preuves</a>{" "}<a className="muted small" href="/admin/produits-inconnus">photos de produits inconnus →</a>
         <h1 style={{ margin: "8px 0 0" }}>Scans non reconnus</h1>
         <p className="muted small">
           Chaque code scanné sans résultat est compté ici (aucune donnée sur la personne qui scanne). Les marques

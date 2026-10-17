@@ -30,6 +30,7 @@ export default function Racine() {
         <Stack.Screen name="recherche" options={{ title: 'Rechercher' }} />
         <Stack.Screen name="reglages" options={{ title: 'Réglages' }} />
         <Stack.Screen name="etiquette/[slug]" options={{ title: 'Étiquette' }} />
+        <Stack.Screen name="produit-inconnu/[ean]" options={{ title: 'Photos du produit' }} />
       </Stack>
     </>
   );

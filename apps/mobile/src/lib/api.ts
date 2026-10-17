@@ -172,6 +172,40 @@ export async function deposerEtiquette(d: {
   return (await rep.json().catch(() => null)) ?? { status: 'error', message: `Réponse illisible du site (code ${rep.status}).` };
 }
 
+/**
+ * Photos d'un produit non reconnu (face avant obligatoire, dos et ingrédients facultatifs), pour que
+ * l'équipe trouve la marque et son propriétaire. Rien n'est publié sans vérification.
+ */
+export async function envoyerProduitInconnu(d: {
+  code: string; produit: string; marque: string; alimentaire: boolean | null; lieuAchat: string;
+  photos: { champ: 'photo_face' | 'photo_dos' | 'photo_ingredients'; uri: string }[];
+}): Promise<{ status: 'ok' | 'error'; message?: string }> {
+  const r = await lireReglages();
+  const fd = new FormData();
+  fd.append('code', d.code);
+  if (d.produit) fd.append('product_name', d.produit);
+  if (d.marque) fd.append('brand_name', d.marque);
+  if (d.alimentaire !== null) fd.append('alimentaire', d.alimentaire ? 'oui' : 'non');
+  if (d.lieuAchat) fd.append('purchase_place', d.lieuAchat);
+  fd.append('consent', 'on');
+  for (const p of d.photos) {
+    const nom = `${p.champ.replace('photo_', '')}.jpg`;
+    if (typeof document !== 'undefined') fd.append(p.champ, await (await fetch(p.uri)).blob(), nom);
+    else fd.append(p.champ, { uri: p.uri, type: 'image/jpeg', name: nom } as unknown as Blob);
+  }
+  const h = await entetes();
+  delete h.Accept;
+  let rep: Response;
+  try {
+    rep = await fetch(r.site + '/api/produits-inconnus', { method: 'POST', headers: { ...h, Accept: 'application/json' }, body: fd });
+  } catch {
+    return { status: 'error', message: 'Pas de connexion au site. Vérifiez votre réseau, puis réessayez.' };
+  }
+  if (rep.status === 401) return { status: 'error', message: 'Le site est encore privé : saisissez son mot de passe dans les Réglages.' };
+  if (rep.status === 413) return { status: 'error', message: 'Photos trop lourdes : réessayez avec moins de photos.' };
+  return (await rep.json().catch(() => null)) ?? { status: 'error', message: `Réponse illisible du site (code ${rep.status}).` };
+}
+
 // Historique des scans (sur le téléphone seulement : rien n'est envoyé)
 export interface Scan { code: string; produit: string; marque: string; alertes: number; date: string }
 export async function historique(): Promise<Scan[]> {
