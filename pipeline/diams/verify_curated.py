@@ -832,6 +832,10 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         # une négative en notation comptable : elle ne la confirme pas.
         paren = "" if row.value_numeric < 0 else r"(?<!\()"
         pats = [rf"(?<![\d,])(?<!(?<![A-Za-z])-){paren}{re.escape(c)}(?![\d])" for c in variants]
+        # Part entre parenthèses suivie de « % » (« 9 out of 13 … independent (69.2%) ») :
+        # ce n'est pas la notation comptable « (8,0) % », où la parenthèse fermante précède « % ».
+        if row.value_numeric >= 0:
+            pats += [rf"(?<![\d,])\({re.escape(c)}\s?%" for c in variants]
         hit = any(re.search(pt, flat) for pt in pats)
         # Colonnes voisines de 3 chiffres (« 345 352 ») : fusionnées à tort en un
         # seul nombre ; on accepte la valeur lue comme nombre isolé, la lecture des

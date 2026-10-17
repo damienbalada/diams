@@ -828,3 +828,15 @@ def test_valeur_nulle_ecrite_en_lettres():
     assert any("valeur nulle" in d for d in v.details)
     v2 = check_esef_quote(esef_row("ENV_TAXONOMY_CAPEX", 2, q), rapport)
     assert not any("valeur nulle" in d for d in v2.details)
+
+
+def test_part_entre_parentheses_suivie_de_pourcent():
+    from diams.verify_curated import check_esef_quote
+    phrase = "At 31 December 2025, 9 out of 13 Board of Directors were independent (69.2%) and 4 were women (30.8%)"
+    q = f"Rapport annuel : « {phrase} »"
+    v = check_esef_quote(esef_row("GOV_BOARD_GENDER", 30.8, q), phrase)
+    assert any("valeur 30.8 présente dans la citation ✓" in d for d in v.details)
+    # Notation comptable « (8,0) % » : toujours refusée pour une valeur positive.
+    q2 = "Rapport : « écart de rémunération femmes-hommes board (8,0) % »"
+    v2 = check_esef_quote(esef_row("GOV_BOARD_GENDER", 8.0, q2), "écart de rémunération femmes-hommes board (8,0) %")
+    assert not any("valeur 8.0 présente dans la citation ✓" in d for d in v2.details)
