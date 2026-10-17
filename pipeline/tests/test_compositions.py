@@ -65,3 +65,10 @@ def test_rubrique_composition_decathlon():
     page = ("matière principale cuir largeur de pied standard état neuf Composition Extérieur en: 100.0% Cuir de bovin "
             "Semelle en: 100.0% Caoutchouc synthétique Fabricant Ce contact assure le suivi de la sécurité")
     assert C.bloc_composition(page) == "Extérieur en: 100.0% Cuir de bovin Semelle en: 100.0% Caoutchouc synthétique"
+
+
+def test_peaux_et_motifs():
+    assert C.analyse("Sac en veau Swift")["animaux"] == ["veau"]
+    assert C.analyse("Cuir d'alligator Doublure en cuir naturel")["animaux"] == ["alligator", "cuir"]
+    # Le motif embossé n'est pas la matière : seul le cuir de veau compte.
+    assert C.analyse("cuir brillant embossé crocodile")["animaux"] == ["cuir"]

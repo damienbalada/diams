@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v318`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v319`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -317,8 +317,13 @@ marques**, à continuer :
    **Site qui refuse : pages enregistrées par l'éditeur** (lot 226, Decathlon : 10 fiches,
    laine, duvet, cuir, soie) : copies dans `pipeline/curated/copies/` (en-tête « saved from
    url=… »), puis `import_produits.py lecture.json lot.csv --matieres --copies curated/copies`
-   et `verify_curated --delegue --apply --copie URL=FICHIER`. Même voie possible pour Louis
-   Vuitton, Hermès, Saint Laurent, Uniqlo, Zara, H&M ;
+   et `verify_curated --delegue --apply --copie URL=FICHIER`. Lot 240 (même voie) : Louis
+   Vuitton (8 fiches : cuir de veau, alligator, python, laine d'agneau, cachemire, soie),
+   Saint Laurent (7) et Hermès (2). Sans rubrique « Composition », la matière est relevée à la
+   lecture (champ `releve` du fichier de lecture) et n'est retenue que si elle figure mot pour
+   mot dans la copie : descriptif chez Louis Vuitton, ligne des matières en capitales avant
+   « STYLE ID » chez Saint Laurent, phrase de description chez Hermès. Reste possible pour
+   Uniqlo, Zara, H&M ;
 3. pour les sociétés moyennes non notées (Rians, Ermitage, Juraflore, Monbana, Jacquart,
    Camus, Cellier des Dauphins, bofrost*, Toupargel…) : Egapro, HATVP, registre européen,
    B Corp, sanctions (DGCCRF, Autorité de la concurrence), rapports et plans de vigilance

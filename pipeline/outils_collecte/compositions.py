@@ -28,7 +28,7 @@ ANIMAL = [
     r"laine", r"m[ée]rinos", r"cachemire", r"mohair", r"angora", r"alpaga", r"lama", r"yacks?", r"yaks?", r"vigogne",
     r"chameau", r"poils? de \w+", r"soie", r"cuir", r"daim", r"nubuck", r"cro[ûu]te de cuir", r"peau(?:x)?(?: lain[ée]e| d.agneau| de mouton| de ch[èe]vre| de veau| de vache)?",
     r"fourrure", r"duvet", r"plumes?", r"lapin", r"vison", r"renard", r"crocodile", r"python", r"autruche", r"l[ée]zard", r"galuchat",
-    r"\bcorne\b", r"nacre", r"shearling",
+    r"\bcorne\b", r"nacre", r"shearling", r"alligator", r"veau", r"agneau", r"chevreau", r"vachette",
     r"wool", r"merino", r"cashmere", r"silk", r"leather", r"suede", r"\bdown\b", r"feathers?", r"\bfur\b",
 ]
 ANIMAL_RE = re.compile(r"\b(?:" + "|".join(ANIMAL) + r")\b", re.I)
@@ -38,7 +38,9 @@ IMITATION_RE = re.compile(
     r"(?:fausse|fake) fourrure|fourrure (?:synth[ée]tique|artificielle|en polyester)|faux (?:cuir|daim)|daim synth[ée]tique|su[ée]dine|"
     r"laine polaire|polaire|peau de p[êe]che|effet (?:cuir|daim|fourrure|laine)|aspect (?:cuir|daim|fourrure|laine)|toucher (?:cuir|daim|soie|laine)|"
     r"fa[çc]on (?:cuir|daim|fourrure)|soie v[ée]g[ée]tale|plumetis|sans (?:laine|cuir|duvet|plumes?|fourrure|soie)(?:(?:,| ni| et| ou) (?:laine|cuir|duvet|plumes?|fourrure|soie))*|"
-    r"vegan leather|faux leather|faux fur|synthetic (?:leather|fur|down)|recycled polyester down",
+    r"vegan leather|faux leather|faux fur|synthetic (?:leather|fur|down)|recycled polyester down|"
+    # Motif imprimé ou embossé sur un autre cuir (« cuir de veau embossé crocodile », Saint Laurent).
+    r"(?:embossée?|imprimée?|effet|motif|fa[çc]on|croco-embossed) (?:crocodile|croco|python|autruche|l[ée]zard|alligator)|croco-embossed",
     re.I,
 )
 VEGETAL_RE = re.compile(r"\b(?:100 ?% v[ée]g[ée]tal\w*|v[ée]gan\w*|vegan|PETA[- ]approved|sans mati[èe]re animale)", re.I)

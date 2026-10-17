@@ -12,6 +12,10 @@ d'ingrédients et les matières animales (laine, cuir, soie, duvet…) les ingr�
 Avec --copies DOSSIER : pages enregistrées par l'éditeur depuis son navigateur (« saved from url=… »), lues
 à la place du site quand celui-ci refuse le vérificateur ; la fiche et la preuve le disent.
 
+Champ « releve » d'une fiche : passage indiquant la matière, relevé à la lecture quand la page n'a pas de
+rubrique « Composition » (descriptif de Louis Vuitton, ligne des matières de Saint Laurent) ; il n'est
+retenu que s'il figure mot pour mot dans la page.
+
 Usage : python outils_collecte/import_produits.py lecture.json lot.csv [--apply] [--matieres] [--copies DOSSIER]
 """
 from __future__ import annotations
@@ -131,7 +135,8 @@ def main() -> None:
         except Exception as e:
             print("   injoignable", r["url"], type(e).__name__)
             continue
-        ingr = C.bloc_composition(page) if matieres else I.bloc_ingredients(page)
+        releve = r.get("releve")
+        ingr = releve or (C.bloc_composition(page) if matieres else I.bloc_ingredients(page))
         mot_pour_mot = bool(ingr) and norm(ingr) in norm(page)
         a = M.analyse(ingr) if ingr else {"animaux": [], "douteux": [], "statut": "aucun_ingredient_animal_declare"}
         statut, preuve_veg = a["statut"], None
@@ -143,7 +148,8 @@ def main() -> None:
             "ingredients": ingr, "animal_ingredients": a["animaux"], "doubtful_ingredients": a["douteux"],
             "status": statut, "vegetal_proof": preuve_veg, "observed_on": JOUR,
             "nature": "composition" if matieres else "ingredients",
-            "reviewer": (("auto:composition-mot-pour-mot" if matieres else "auto:ingredients-mot-pour-mot") + (":copie" if copie else "")) if mot_pour_mot else None,
+            "reviewer": (("auto:releve-mot-pour-mot" if releve else "auto:composition-mot-pour-mot" if matieres else "auto:ingredients-mot-pour-mot")
+                         + (":copie" if copie else "")) if mot_pour_mot else None,
             "review_status": "approved" if mot_pour_mot else "pending",
         })
         print(f"   {'✓' if mot_pour_mot else '…'} {statut:32} {r['slug']:16} {r['produit'][:50]}")
@@ -157,7 +163,7 @@ def main() -> None:
                     "nature": "result", "observed_on": JOUR, "value_type": "category", "value_numeric": "",
                     "value_boolean": "", "value_text": ", ".join(a["animaux"][:4]), "normalized_value": "0",
                     "confidence": "0.85", "source_url": r["url"],
-                    "excerpt": (f"Site officiel de la marque ({dom}), fiche produit « {r['produit']} », {'composition' if matieres else 'liste des ingrédients'}, "
+                    "excerpt": (f"Site officiel de la marque ({dom}), fiche produit « {r['produit']} », {'matière indiquée' if releve else 'composition' if matieres else 'liste des ingrédients'}, "
                                 f"consultée le 17/10/2026{' (copie de la page enregistrée par l’éditeur, le site refusant le vérificateur)' if copie else ''} : « {q} » — recours à l'exploitation animale ({', '.join(a['animaux'][:4])})."),
                     "review_note": "", "_rang": rang,
                 }
