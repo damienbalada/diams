@@ -930,10 +930,20 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.8.4\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.8.5\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.5 (17/10/2026)** — Cohérence, sans changement de barème. Toutes les devises sont
+  converties en euros au taux annuel moyen de la BCE avant comparaison, dollar compris (les
+  intensités carbone d'AB InBev et de TotalEnergies étaient restées en dollars). Les indicateurs
+  classés entre pairs du secteur (emballages, eau, intensité carbone, écart et ratio de rémunération,
+  taux effectif, paradis fiscaux, plastique vierge) ne portent jamais de note précalculée ; ceux qui
+  ont un barème fixe (mixité et indépendance du conseil, taxonomie) la portent toujours ; le
+  vérificateur refuse l'un et l'autre écart. Libellés de fiche alignés sur la donnée : taux effectif
+  d'impôt présenté comme une charge comptable rapportée au bénéfice avant impôt (et non comme
+  l'impôt payé), eau « consommée » ou « prélevée » selon le rapport, conseil de surveillance nommé
+  comme tel, taxonomie présentée comme l'évaluation de l'entreprise.
 - **0.8.4 (15/10/2026)** — Présentation, sans effet sur les faits. Logos : icône officielle du
   site de la marque, sinon logo de Wikimedia Commons retrouvé sur Wikidata par identifiant
   officiel (LEI, SIREN) ou par le groupe propriétaire, sinon icône du site officiel ; un logo
