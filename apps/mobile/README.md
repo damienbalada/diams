@@ -61,6 +61,8 @@ npx eas-cli@latest update --branch apercu --environment preview --message "…"
 
 ## Publier dans les magasins
 
+Pour l'iPhone, le pas-à-pas TestFlight et le texte d'aide aux testeurs sont dans [TESTFLIGHT.md](TESTFLIGHT.md).
+
 Construction dans le cloud avec EAS (pas besoin de Mac pour l'iPhone) :
 
 ```bash
