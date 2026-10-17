@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v312`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v313`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -392,6 +392,15 @@ Colonne `entities.aliases` : autres graphies pour reconnaître un code-barres (�
 `pipeline/curated/suivi_open_products_facts_france.csv` (692 marques d'Open Products Facts vendues en
 France, chacune avec son cas : reconnue 246, à prouver 189, distributeur 33, non prioritaire 186, hors
 France 20, tabac 18). Mesure avec la logique de l'appli : `scratchpad/suivi_opf.py`.
+
+**Lots 221-223 (17/10/2026)** : 53 marques prouvées par les mentions légales ou le pied de page de leur
+site (outil `scratchpad/trouve_mentions.py` : accueil → lien « mentions légales » → société éditrice ;
+identité déclarée, une seule nouvelle tentative) et par les rapports de BSH (Siemens sous licence de
+Siemens AG, Neff, Gaggenau) et de FDJ (FDJ, illiko, Loto). Nouvelles sociétés qualifiées (SBTi, Égapro,
+CDP). **Retrait** d'une note CDP rattachée par homonymie (« Delta Corp Ltd. », Inde, sur Delta,
+éditrice de Livoo) : contrôler le pays après `import_cdp_scores` pour un nom court. **Suivi** : 300
+reconnues, 88 mises de côté (raison notée : refus du site, site injoignable, page sans propriétaire,
+licence), 49 encore à prouver (petites marques), 33 de distributeur.
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour

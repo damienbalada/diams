@@ -4,12 +4,12 @@ Auchan,866,reconnue,Auchan
 Cosmia,187,reconnue,Cosmia (Auchan)
 carrefour,129,reconnue,Carrefour
 Bosch,109,reconnue,Bosch (électroménager)
-Brandt,87,à prouver,
+Brandt,87,mis de côté,site injoignable
 Skip,77,reconnue,Skip (lessive)
-Miele,70,à prouver,
+Miele,70,mis de côté,site refusant le vérificateur (403)
 Pouce,65,reconnue,Pouce (Auchan)
-Signal,60,à prouver,
-Siemens,58,à prouver,
+Signal,60,mis de côté,aucun document d'Unilever ne cite la marque
+Siemens,58,reconnue,"Siemens (électroménager, licence BSH)"
 Samsung,54,reconnue,Samsung
 Marque Repère,52,reconnue,Marque Repère
 BiC,51,reconnue,BIC
@@ -18,7 +18,7 @@ Apple,47,reconnue,Apple
 IKEA,46,reconnue,IKEA
 Persil,43,reconnue,Persil
 u,42,reconnue,U (marque de distributeur Système U)
-haier-france,41,à prouver,
+haier-france,41,mis de côté,page sans « Haier » à côté de la société
 Ariel,38,reconnue,Ariel
 Auchan Baby,37,reconnue,Auchan Baby
 LEGO,35,reconnue,LEGO
@@ -52,7 +52,7 @@ febreze,17,reconnue,Febreze
 Leader Price,17,reconnue,Leader Price
 Lenor,17,reconnue,Lenor
 unilever,17,reconnue,Unilever
-odlo,16,à prouver,
+odlo,16,mis de côté,site refusant le vérificateur (404)
 scott,16,reconnue,Scott
 sun,16,reconnue,Sun (lave-vaisselle)
 clairefontaine,15,reconnue,Clairefontaine (papeterie)
@@ -61,7 +61,7 @@ google,15,reconnue,Google
 le-chat,15,reconnue,Le Chat
 Lotus,15,reconnue,Lotus (papier)
 Nintendo,15,reconnue,Nintendo
-paic,15,à prouver,
+paic,15,mis de côté,aucun document de Colgate-Palmolive ne cite la marque
 soupline,15,reconnue,Soupline
 W5,15,marque de distributeur,Lidl (Schwarz)
 whirlpool,15,reconnue,Whirlpool (licence Beko Europe)
@@ -72,45 +72,45 @@ Duracell,13,reconnue,Duracell
 esquisse,13,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 finish,13,reconnue,Finish
 domedia,12,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-gigamic,12,à prouver,
+gigamic,12,mis de côté,page sans propriétaire lisible
 mp,12,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-neff,12,à prouver,
+neff,12,reconnue,Neff
 pampers,12,reconnue,Pampers
 Fairy,11,reconnue,Fairy
-polti,11,à prouver,
+polti,11,reconnue,Polti
 colgate-palmolive,10,reconnue,Colgate-Palmolive
-faber-castell,10,à prouver,
+faber-castell,10,reconnue,Faber-Castell
 gartenland,10,à prouver,
 lucky-strike,10,tabac (exclu),
-zefal,10,à prouver,
+zefal,10,reconnue,Zéfal
 3m,9,reconnue,3M
-bulle-verte,9,à prouver,
+bulle-verte,9,mis de côté,page sans propriétaire lisible
 camel,9,tabac (exclu),
 carolin,9,reconnue,Carolin
 dragon-ball,9,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-elembal,9,à prouver,
+elembal,9,mis de côté,site injoignable
 harpic,9,reconnue,Harpic
 harvestown,9,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 lexman,9,marque de distributeur,Leroy Merlin (Adeo)
-motorola,9,à prouver,
+motorola,9,mis de côté,page sans propriétaire lisible
 mr-propre,9,reconnue,Mr Propre
 pilot,9,reconnue,Pilot (stylos)
 rainett,9,reconnue,Rainett
 Sony,9,reconnue,Sony
 xiaomi,9,reconnue,Xiaomi
 angel-soft,8,hors France ou société sans marque,
-briochin,8,à prouver,
-caillard,8,à prouver,
+briochin,8,mis de côté,page sans propriétaire lisible
+caillard,8,mis de côté,site injoignable
 dexter,8,marque de distributeur,Leroy Merlin (Adeo)
 dexter-pro,8,marque de distributeur,Leroy Merlin (Adeo)
-fairphone,8,à prouver,
+fairphone,8,reconnue,Fairphone
 folio,8,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 garmin,8,reconnue,Garmin
 homeside,8,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-illiko,8,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
+illiko,8,reconnue,illiko (jeux de grattage)
 kiabi,8,marque de distributeur,Enseigne (propre marque)
 la-croix,8,reconnue,La Croix (eau de Javel)
-la-francaise-des-jeux,8,à prouver,
+la-francaise-des-jeux,8,reconnue,FDJ United (La Française des Jeux)
 leclerc,8,reconnue,E.Leclerc
 lidl,8,reconnue,Lidl
 mercurochrome,8,reconnue,Mercurochrome
@@ -121,22 +121,22 @@ playmobil,8,reconnue,Playmobil
 pyrex,8,reconnue,Pyrex
 ravensburger,8,reconnue,Ravensburger
 salomon,8,reconnue,Salomon
-sanofi,8,à prouver,
+sanofi,8,mis de côté,santé grand public cédée (Opella) : propriétaire à trancher
 seb,8,reconnue,SEB (marque)
 action,7,marque de distributeur,Enseigne (propre marque)
 belle-france,7,reconnue,Belle France
 Colgate,7,reconnue,Colgate
-Exacompta,7,à prouver,
+Exacompta,7,mis de côté,page sans propriétaire lisible
 labell,7,marque de distributeur,Intermarché (Les Mousquetaires)
-Mimosa,7,à prouver,
-Sega,7,à prouver,
+Mimosa,7,mis de côté,site injoignable
+Sega,7,mis de côté,site refusant le vérificateur (429)
 uniqlo,7,reconnue,Uniqlo
-wolfcraft,7,à prouver,
+wolfcraft,7,reconnue,wolfcraft
 air-wick,6,reconnue,Air Wick
 Ajax,6,reconnue,Ajax
 Aldi,6,reconnue,Aldi (France)
-alfapac,6,à prouver,
-baranne,6,à prouver,
+alfapac,6,mis de côté,site injoignable
+baranne,6,mis de côté,site injoignable
 boiron,6,reconnue,Boiron
 brita,6,reconnue,Brita
 carrefour-home,6,reconnue,Carrefour
@@ -156,34 +156,34 @@ ASTIGARRAGA KIT LINE S.L.,5,hors France ou société sans marque,
 biovie,5,reconnue,Biovie (bio)
 boulanger,5,marque de distributeur,Boulanger
 cedar,5,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-chanteclair,5,à prouver,
+chanteclair,5,mis de côté,page sans propriétaire lisible
 collection-parfum,5,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 Creacom Afrique Éditions,5,hors France ou société sans marque,
-duralex,5,à prouver,
+duralex,5,reconnue,Duralex
 durance,5,reconnue,Durance
-glenat,5,à prouver,
+glenat,5,reconnue,Glénat
 global-applius-sas,5,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 great-value,5,hors France ou société sans marque,
-honor,5,à prouver,
+honor,5,mis de côté,page sans propriétaire lisible
 inventiv,5,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 j-ai-lu,5,à prouver,
-jbl,5,à prouver,
+jbl,5,mis de côté,site refusant le vérificateur (403)
 johnson,5,à prouver,
 L'arbre vert,5,reconnue,L'Arbre Vert
-la-droguerie-ecologique,5,à prouver,
-le-parfait,5,à prouver,
+la-droguerie-ecologique,5,mis de côté,site injoignable
+le-parfait,5,reconnue,Le Parfait
 legrand,5,reconnue,Legrand (marque)
 love-home-and-planet,5,à prouver,
 maison-verte,5,reconnue,Maison Verte
 melitta,5,reconnue,Groupe Melitta
 muji,5,marque de distributeur,Enseigne (propre marque)
-nathan,5,à prouver,
+nathan,5,mis de côté,page sans propriétaire lisible
 ocb,5,tabac (exclu),
 onyx,5,à prouver,
 p-tit-clown,5,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 palmolive,5,reconnue,Palmolive
-pentax,5,à prouver,
-petzl,5,à prouver,
+pentax,5,reconnue,Pentax
+petzl,5,mis de côté,page sans propriétaire lisible
 poss,5,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 prix-mini,5,reconnue,Prix Mini (Système U)
 procter-gamble,5,reconnue,Procter & Gamble
@@ -193,16 +193,16 @@ rubson,5,reconnue,Rubson
 scjohnson,5,reconnue,SC Johnson
 scotch,5,reconnue,Scotch (rubans adhésifs)
 Spontex,5,reconnue,Spontex
-st-marc,5,à prouver,
+st-marc,5,mis de côté,site injoignable
 steripan,5,reconnue,Steripan (La Brosse et Dupont)
-super-croix,5,à prouver,
+super-croix,5,mis de côté,page sans propriétaire lisible
 tesa,5,reconnue,tesa
-tivoly,5,à prouver,
-upsa,5,à prouver,
+tivoly,5,mis de côté,page sans propriétaire lisible
+upsa,5,reconnue,UPSA
 varta,5,reconnue,VARTA
-Westmark,5,à prouver,
+Westmark,5,reconnue,Westmark
 3en1,4,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-abus,4,à prouver,
+abus,4,mis de côté,site refusant le vérificateur (403)
 asmodee,4,reconnue,Asmodee (jeux de société)
 astigarraga,4,hors France ou société sans marque,
 canard,4,reconnue,Canard WC
@@ -211,16 +211,16 @@ cif,4,reconnue,Cif
 clementoni,4,reconnue,Clementoni
 cottonelle,4,reconnue,Cottonelle
 crivit,4,reconnue,Crivit
-dji,4,à prouver,
-elsay,4,à prouver,
+dji,4,mis de côté,page sans propriétaire lisible
+elsay,4,mis de côté,site injoignable
 essentiel-b,4,marque de distributeur,Boulanger
-etamine,4,à prouver,
-flam-up,4,à prouver,
+etamine,4,reconnue,Étamine du Lys
+flam-up,4,reconnue,Flam'Up
 Floralys,4,marque de distributeur,Lidl (Schwarz)
-granions,4,à prouver,
+granions,4,mis de côté,page sans « Granions » à côté de la société
 handy-bag,4,reconnue,Handy Bag
 hatier,4,reconnue,Hatier
-ign,4,à prouver,
+ign,4,mis de côté,page sans propriétaire lisible
 le-livre-de-poche,4,reconnue,Le Livre de Poche
 livre-de-poche,4,reconnue,Le Livre de Poche
 microsoft,4,reconnue,Microsoft
@@ -230,21 +230,21 @@ opinel,4,reconnue,Opinel
 papermate,4,reconnue,Paper Mate
 philip-morris,4,tabac (exclu),
 Post-it,4,reconnue,Post-it
-raspberry-pi,4,à prouver,
-renova,4,à prouver,
+raspberry-pi,4,mis de côté,site refusant le vérificateur (403)
+renova,4,mis de côté,site injoignable
 rhodia,4,reconnue,Rhodia (papeterie)
 rizla,4,tabac (exclu),
 rowenta,4,reconnue,Rowenta
-schneider,4,à prouver,
+schneider,4,reconnue,Schneider (stylos)
 Silvercrest,4,reconnue,SilverCrest
 simpl,4,reconnue,Simpl
-staedtler,4,à prouver,
+staedtler,4,reconnue,Staedtler
 sundis,4,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 super-u,4,reconnue,Système U
 tech9,4,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 twido,4,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 urgo,4,reconnue,Urgo
-van-rysel,4,à prouver,
+van-rysel,4,mis de côté,site refusant le vérificateur (403)
 x-tra,4,reconnue,X-Tra
 yankee-candle,4,reconnue,Yankee Candle
 5five,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
@@ -252,19 +252,19 @@ auchan-essentiel,3,reconnue,Auchan
 Bioseptyl,3,à prouver,
 bleuforet,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 Bosque Verde,3,hors France ou société sans marque,
-buff,3,à prouver,
+buff,3,mis de côté,site refusant le vérificateur (404)
 calor,3,reconnue,Calor
 canon,3,reconnue,Canon
 Caresse,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-cinq-sur-cinq,3,à prouver,
+cinq-sur-cinq,3,mis de côté,site injoignable
 coca-cola,3,reconnue,Coca-Cola
-cooper,3,à prouver,
+cooper,3,reconnue,Cooper (laboratoire)
 creations,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-d-link,3,à prouver,
+d-link,3,reconnue,D-Link
 damart,3,marque de distributeur,Enseigne (propre marque)
 DASH,3,reconnue,Dash
 destop,3,reconnue,Destop
-diversey,3,à prouver,
+diversey,3,mis de côté,site refusant le vérificateur (530)
 e-leclerc,3,reconnue,E.Leclerc
 ea-sports,3,à prouver,
 eau-ecarlate,3,reconnue,Eau Écarlate
@@ -279,19 +279,19 @@ Formil,3,marque de distributeur,Lidl (Schwarz)
 gifi,3,reconnue,GiFi
 gillette,3,reconnue,Gillette
 giotto,3,reconnue,Giotto
-goliath,3,à prouver,
+goliath,3,mis de côté,site injoignable
 hachette,3,reconnue,Hachette (livres)
 head-shoulders,3,reconnue,Head & Shoulders
 hp,3,reconnue,HP
-hydrapak,3,à prouver,
+hydrapak,3,mis de côté,page sans propriétaire lisible
 hyperdou,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 INTERDIS,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-jacques-briochin,3,à prouver,
+jacques-briochin,3,mis de côté,page sans propriétaire lisible
 johnson-johnson,3,à prouver,
 k2r,3,reconnue,K2r
 kazidomi,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 kb,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-kodak,3,à prouver,
+kodak,3,mis de côté,marque utilisée sous licence par d'autres fabricants
 la-drogerie-ecologique,3,à prouver,
 la-malle-aux-couleurs,3,à prouver,
 lacroix,3,à prouver,
@@ -299,35 +299,35 @@ larousse,3,reconnue,Larousse
 le-trefle,3,reconnue,Le Trèfle
 lea-nature,3,reconnue,Groupe Léa Nature
 liquideo,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-livoo,3,à prouver,
+livoo,3,reconnue,Livoo
 logitech,3,reconnue,Logitech
-lonely-planet,3,à prouver,
-lyreco,3,à prouver,
-magnard,3,à prouver,
+lonely-planet,3,mis de côté,marque utilisée sous licence (éditeur Edi8)
+lyreco,3,mis de côté,page sans propriétaire lisible
+magnard,3,reconnue,Magnard
 mi,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 mylan,3,à prouver,
 naturactive,3,reconnue,Naturactive
 Nestlé,3,reconnue,Nestlé
-oppo,3,à prouver,
+oppo,3,mis de côté,page sans propriétaire lisible
 Paris 2024,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 parker,3,reconnue,Parker (stylos)
-pileje,3,à prouver,
-pny,3,à prouver,
+pileje,3,reconnue,PiLeJe (société)
+pny,3,reconnue,PNY
 points,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 pokemon,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-pranarom,3,à prouver,
+pranarom,3,mis de côté,site injoignable
 Procter & Gamble,3,reconnue,Procter & Gamble
-razer,3,à prouver,
-repos-production,3,à prouver,
-rossignol,3,à prouver,
-saint-marc,3,à prouver,
+razer,3,reconnue,Razer
+repos-production,3,mis de côté,page sans propriétaire lisible
+rossignol,3,reconnue,Rossignol
+saint-marc,3,mis de côté,site injoignable
 seita,3,tabac (exclu),
 sodastream,3,reconnue,SodaStream
 SOPALIN,3,reconnue,Sopalin
 sport-cerebral,3,à prouver,
 strepsils,3,reconnue,Strepsils
 sublimo,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-super-conquerant,3,à prouver,
+super-conquerant,3,mis de côté,site injoignable
 swiffer,3,reconnue,Swiffer
 tefal,3,reconnue,Tefal
 tena,3,reconnue,TENA
@@ -340,7 +340,7 @@ ultimate,3,non prioritaire,"mot générique, label, licence, faute de saisie ou 
 uni-vert,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 up-up,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 vania,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-vaude,3,à prouver,
+vaude,3,reconnue,Vaude
 wonday,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 xcell,3,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 Xtra,3,reconnue,Xtra
@@ -350,85 +350,85 @@ zigzag,3,tabac (exclu),
 acto,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 adeo-services,2,marque de distributeur,Leroy Merlin (Adeo)
 aera-nature,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-aftershokz,2,à prouver,
-airness,2,à prouver,
+aftershokz,2,reconnue,Shokz
+airness,2,mis de côté,site injoignable
 alcon,2,à prouver,
 alinea,2,marque de distributeur,Enseigne (propre marque)
 anios,2,reconnue,Anios
-arena,2,à prouver,
+arena,2,reconnue,Arena (natation)
 arrow,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-arthur-martin,2,à prouver,
+arthur-martin,2,mis de côté,site injoignable
 Auchan Baby Bio,2,reconnue,Auchan Baby
 Auchan Bio,2,reconnue,Auchan
 avec,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 axton,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 Balea,2,hors France ou société sans marque,
 bayer,2,à prouver,
-beaba,2,à prouver,
+beaba,2,reconnue,Béaba (société)
 beko,2,reconnue,Beko (électroménager)
 bic-kids,2,reconnue,BIC
 biocoop,2,reconnue,Biocoop (marque des magasins Biocoop)
-biogents,2,à prouver,
-Biosynex,2,à prouver,
-bioviva,2,à prouver,
-bodum,2,à prouver,
+biogents,2,mis de côté,page sans propriétaire lisible
+Biosynex,2,mis de côté,page sans propriétaire lisible
+bioviva,2,reconnue,Bioviva
+bodum,2,mis de côté,page sans propriétaire lisible
 body-nature,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-bose,2,à prouver,
+bose,2,mis de côté,société française introuvable dans l'annuaire
 bostik,2,reconnue,Bostik
 brother,2,reconnue,Brother
-btwin,2,à prouver,
+btwin,2,mis de côté,site refusant le vérificateur (403)
 c-top,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 cafec,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 calman-levy,2,reconnue,Calmann-Lévy
 Carrefour Classic,2,reconnue,Carrefour Classic
 carryboo,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-chacon,2,à prouver,
+chacon,2,mis de côté,page sans propriétaire lisible
 Cilia,2,à prouver,
 clair,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 co,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-cocktail-games,2,à prouver,
+cocktail-games,2,reconnue,Cocktail Games
 corsair,2,reconnue,Corsair
 Cristaline,2,reconnue,Cristaline
 cultura,2,marque de distributeur,Enseigne (propre marque)
-dalbe,2,à prouver,
+dalbe,2,mis de côté,siège différent dans l'annuaire
 danish-endurance,2,hors France ou société sans marque,
 delonghi,2,reconnue,De'Longhi
-delta,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
+delta,2,reconnue,Delta (Livoo)
 Dentamyl,2,à prouver,
 didier,2,reconnue,Didier (éditions)
 dieti-natura,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-domyos,2,à prouver,
-dr-beckmann,2,à prouver,
-dreame,2,à prouver,
+domyos,2,mis de côté,site refusant le vérificateur (403)
+dr-beckmann,2,reconnue,Dr. Beckmann
+dreame,2,reconnue,Dreame
 dujardin,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 dumil,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 dunlop,2,à prouver,
-dupuis,2,à prouver,
+dupuis,2,mis de côté,page sans propriétaire lisible
 dyson,2,reconnue,Dyson
 e-tasty,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 ea,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 ecolabel,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 Ecologique,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 ecover,2,reconnue,Ecover
-editions-eni,2,à prouver,
+editions-eni,2,mis de côté,page sans propriétaire lisible
 electronic-arts,2,à prouver,
-Elho,2,à prouver,
-emtec,2,à prouver,
-epson,2,à prouver,
+Elho,2,mis de côté,site refusant le vérificateur (404)
+emtec,2,mis de côté,page sans « Emtec » à côté de la société
+epson,2,mis de côté,page sans propriétaire lisible
 essentiel,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 essity,2,reconnue,Essity
 etamine-du-lys,2,reconnue,Étamine du Lys
 exel,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 fabulosa,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 fdg-group,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-fellowes,2,à prouver,
+fellowes,2,reconnue,Fellowes
 fergreen,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-fertiligene,2,à prouver,
-flammarion,2,à prouver,
-frosch,2,à prouver,
-fujifilm,2,à prouver,
+fertiligene,2,reconnue,Fertiligène
+flammarion,2,mis de côté,page sans propriétaire lisible
+frosch,2,reconnue,Frosch
+fujifilm,2,mis de côté,deux SIREN Fujifilm France dans l'annuaire
 gaillard,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-gallimard,2,à prouver,
+gallimard,2,reconnue,Gallimard
 gardenland,2,à prouver,
 garnier,2,reconnue,Garnier
 gauloises,2,tabac (exclu),
@@ -438,36 +438,36 @@ gizeh,2,tabac (exclu),
 goodhome,2,marque de distributeur,Kingfisher (Castorama)
 hamelin,2,reconnue,Hamelin
 hansgrohe,2,reconnue,Hansgrohe
-harris,2,à prouver,
+harris,2,mis de côté,page sans propriétaire lisible
 hasbro,2,reconnue,Hasbro
 hiikari,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 home,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-huawei,2,à prouver,
+huawei,2,mis de côté,page sans propriétaire lisible
 huile-41,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-ibili,2,à prouver,
-iello,2,à prouver,
+ibili,2,mis de côté,page sans propriétaire lisible
+iello,2,reconnue,Iello
 iid,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 inspire,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-jardibric,2,à prouver,
+jardibric,2,mis de côté,site injoignable
 jc-lattes,2,reconnue,JC Lattès
-jean-dubost,2,à prouver,
+jean-dubost,2,mis de côté,site injoignable
 jeux-nathan,2,à prouver,
 karcher,2,reconnue,Kärcher
 Kellogg's,2,reconnue,Kellogg's
-kidde,2,à prouver,
+kidde,2,mis de côté,page sans propriétaire lisible
 Kirkland,2,hors France ou société sans marque,
 kiwi,2,reconnue,Kiwi (cirage)
 Korrekt,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-kosmos,2,à prouver,
+kosmos,2,reconnue,Kosmos (jeux)
 l-atelier-c,2,à prouver,
 l-etudiant,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 La Redoute,2,marque de distributeur,Enseigne (propre marque)
 la-fourche,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 label,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-laboratoire-cooper,2,à prouver,
-lapierre,2,à prouver,
+laboratoire-cooper,2,reconnue,Cooper (laboratoire)
+lapierre,2,mis de côté,site refusant le vérificateur (404)
 Le bô pour tous,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-le-charbon-actif-francais,2,à prouver,
+le-charbon-actif-francais,2,mis de côté,site refusant le vérificateur (404)
 le-routard,2,reconnue,Le Routard
 leroy-merlin,2,marque de distributeur,Leroy Merlin (Adeo)
 les-bulles-du-mouchet,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
@@ -487,46 +487,46 @@ mamison,2,non prioritaire,"mot générique, label, licence, faute de saisie ou t
 marabout,2,reconnue,Marabout
 mariette-authentique,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 marque-repere-leclerc,2,reconnue,Marque Repère
-mathon,2,à prouver,
+mathon,2,mis de côté,page sans propriétaire lisible
 mattel,2,reconnue,Mattel
 MCC Trading International GmbH,2,hors France ou société sans marque,
 mega-drive,2,reconnue,MEGA (jeux de construction)
 menastyl,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 mieuxa,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-moleskin,2,à prouver,
+moleskin,2,reconnue,Moleskine
 monsieur-propre,2,reconnue,Mr Propre
 Mutandis,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 nana,2,reconnue,Nana
 nat-form,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-nhco,2,à prouver,
+nhco,2,reconnue,NHCO
 nicorette,2,reconnue,Nicorette
 nivea,2,reconnue,Nivea
-northwave,2,à prouver,
-oberthur,2,à prouver,
+northwave,2,reconnue,Northwave
+oberthur,2,reconnue,Oberthur
 onyx-bricolage,2,à prouver,
 optisana,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 orange,2,à prouver,
-osram,2,à prouver,
+osram,2,mis de côté,lampes vendues sous licence par Ledvance
 pacific-promotion-tahiti,2,hors France ou société sans marque,
 pall-mall,2,tabac (exclu),
-panini,2,à prouver,
+panini,2,mis de côté,page sans propriétaire lisible
 paper-mate,2,reconnue,Paper Mate
 paracetamol,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 parkside,2,reconnue,Parkside
 pattex,2,reconnue,Pattex
 pefc,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-persavon,2,à prouver,
-piatnik,2,à prouver,
+persavon,2,mis de côté,page sans propriétaire lisible
+piatnik,2,mis de côté,page sans propriétaire lisible
 pierre-fabre,2,reconnue,Pierre Fabre
-plastimea,2,à prouver,
+plastimea,2,reconnue,Plastimea
 pocket,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 pommette,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-pop-mart,2,à prouver,
+pop-mart,2,reconnue,Pop Mart
 powerfix,2,marque de distributeur,Lidl (Schwarz)
-primoplast,2,à prouver,
+primoplast,2,mis de côté,site injoignable
 pueblo,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-puma,2,à prouver,
-puressentiel,2,à prouver,
+puma,2,reconnue,Puma
+puressentiel,2,reconnue,Puressentiel
 purio,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 pyrel,2,reconnue,Pyrel
 quilted-northern,2,hors France ou société sans marque,
@@ -535,48 +535,48 @@ reckitt-benckiser,2,reconnue,Reckitt
 repere,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 rocket,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 rothmans,2,tabac (exclu),
-sabert,2,à prouver,
+sabert,2,mis de côté,page sans propriétaire lisible
 safer,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 saveurs-de-provence,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 scholl,2,reconnue,Scholl
 sciences-humaines,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 sensea,2,marque de distributeur,Leroy Merlin (Adeo)
 servary,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-sharp,2,à prouver,
+sharp,2,mis de côté,marque utilisée sous licence en Europe
 shelly,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-shimano,2,à prouver,
+shimano,2,mis de côté,site refusant le vérificateur (403)
 sigma,2,à prouver,
 sigma-sport,2,à prouver,
 smoke,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 smoking,2,tabac (exclu),
-sonett,2,à prouver,
+sonett,2,mis de côté,site refusant le vérificateur (404)
 sony-ericsson,2,reconnue,Sony
 Stabilo Boss,2,reconnue,STABILO
 stanley,2,reconnue,Stanley (outillage)
 stoic,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 suki,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 syphon,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-takamine,2,à prouver,
+takamine,2,mis de côté,page sans propriétaire lisible
 Tandil,2,marque de distributeur,Aldi
 terre-d-oc,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 teva,2,à prouver,
 texil,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-thomson,2,à prouver,
+thomson,2,mis de côté,site injoignable
 TikTok,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 tile,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 Top javel,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-TP Link,2,à prouver,
-tristar,2,à prouver,
+TP Link,2,reconnue,TP-Link
+tristar,2,mis de côté,page sans propriétaire lisible
 u-maison,2,marque de distributeur,Système U
-ugreen,2,à prouver,
+ugreen,2,reconnue,Ugreen
 uprint,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 vaseline,2,reconnue,Vaseline
 vileda,2,reconnue,Vileda
 vita,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 weleda,2,reconnue,Weleda (société)
-western-digital,2,à prouver,
+western-digital,2,mis de côté,rapport 10-K sans liste de marques
 winni-s,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
-wirquin,2,à prouver,
+wirquin,2,reconnue,Wirquin
 woodsun,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
 xbox,2,reconnue,Xbox
 you,2,non prioritaire,"mot générique, label, licence, faute de saisie ou très petite marque"
