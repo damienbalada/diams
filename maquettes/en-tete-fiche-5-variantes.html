@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>En-tête de fiche : 5 variantes</title>
+<style>
+  :root {
+    --fond: #f3f2fb; --carte: #fff; --carte2: #f0eefb; --bord: #e7e3f6; --bordFort: #d6d0ee;
+    --texte: #160f2e; --gris: #5c5676; --accent: #5a2de0; --alerte: #b3261e; --vig: #a85400; --vigFond: #fff3e0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9e7f3; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--texte); }
+  header.page { max-width: 1200px; margin: 0 auto; padding: 24px 16px 8px; }
+  header.page h1 { margin: 0 0 6px; font-size: 26px; }
+  header.page p { margin: 0; color: var(--gris); line-height: 1.45; max-width: 760px; }
+  .grille { max-width: 1200px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px; }
+  .col h2 { font-size: 17px; margin: 0 0 4px; }
+  .col .quoi { font-size: 13.5px; color: var(--gris); margin: 0 0 10px; line-height: 1.4; min-height: 58px; }
+  .tel { width: 340px; max-width: 100%; background: var(--fond); border-radius: 28px; border: 8px solid #1d1830; overflow: hidden; position: relative; }
+  .ecran { padding: 14px 14px 18px; display: grid; gap: 10px; }
+  .barre { font-weight: 700; font-size: 15px; padding: 2px 0 4px; color: var(--texte); }
+  .hauteur { font-size: 12.5px; color: var(--accent); font-weight: 700; margin-top: 8px; }
+  .fin { border-top: 2px dashed var(--accent); margin: 2px -14px 0; position: relative; }
+  .fin::after { content: "fin de l'en-tête"; position: absolute; right: 8px; top: -9px; background: var(--fond); color: var(--accent); font-size: 11px; padding: 0 4px; }
+  .photo { width: 72px; height: 72px; border-radius: 12px; background: #fff center/contain no-repeat; border: 1px solid var(--bord); flex: none; }
+  .logo { border-radius: 6px; background: #fff center/cover no-repeat; border: 1px solid var(--bord); flex: none; display: inline-grid; place-items: center; font-size: 12px; }
+  .l20 { width: 20px; height: 20px; } .l24 { width: 24px; height: 24px; } .l40 { width: 40px; height: 40px; border-radius: 10px; }
+  .rang { display: flex; gap: 8px; align-items: center; }
+  .nom { font-size: 22px; font-weight: 800; line-height: 1.1; }
+  .prod { font-size: 15px; font-weight: 700; }
+  .petit { font-size: 12.5px; color: var(--gris); }
+  .grp b { text-decoration: underline; }
+  .alerte { background: var(--alerte); color: #fff; border-radius: 14px; padding: 10px 12px; font-size: 13.5px; font-weight: 600; display: grid; gap: 3px; }
+  .alerte b { font-size: 15px; }
+  .vig { background: var(--vigFond); color: #6b3a00; border: 1px solid #f2c48a; border-radius: 14px; padding: 10px 12px; font-size: 13.5px; font-weight: 600; display: grid; gap: 3px; }
+  .puces { display: flex; flex-wrap: wrap; gap: 6px; }
+  .puce { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--bord); background: var(--carte); border-radius: 999px; padding: 7px 11px; font-size: 13px; font-weight: 700; }
+  .point { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .rouge { background: var(--alerte); } .orange { background: #d97a00; }
+  .chipA { background: #fde9e7; color: #8f1f19; border: 1px solid #f0c9c4; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 700; }
+  .chipV { background: var(--vigFond); color: #6b3a00; border: 1px solid #f2c48a; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 700; }
+  .compteur { display: grid; place-items: center; border-radius: 12px; padding: 6px 4px; font-size: 11.5px; font-weight: 700; text-align: center; line-height: 1.2; }
+  .compteur strong { font-size: 20px; display: block; }
+  .bandeau { height: 112px; margin: -14px -14px 0; background: #fff center/contain no-repeat; position: relative; border-bottom: 1px solid var(--bord); }
+  .bandeau .loupe { position: absolute; right: 10px; bottom: 8px; background: rgba(22,15,46,.75); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 999px; }
+  .badgeLogo { position: absolute; right: -6px; bottom: -6px; }
+  .fil { font-size: 12.5px; color: var(--gris); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .fil b { color: var(--texte); }
+  details.resume { background: var(--carte); border: 1px solid var(--bord); border-radius: 12px; padding: 8px 12px; font-size: 13.5px; }
+  details.resume summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; gap: 10px; align-items: center; }
+  details.resume summary::-webkit-details-marker { display: none; }
+  details.resume ul { margin: 8px 0 2px; padding-left: 18px; color: var(--texte); font-weight: 600; font-size: 13px; }
+  .note { max-width: 1200px; margin: 0 auto; padding: 0 16px 32px; color: var(--gris); font-size: 13.5px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>En-tête de fiche : cinq variantes</h1>
+  <p>L'<b>en-tête de fiche</b> va du haut de l'écran jusqu'aux pastilles des piliers. Même exemple partout : le pot de Nutella scanné (marque Nutella, groupe Ferrero, 2 alertes, 2 points de vigilance). La hauteur mesurée de chaque en-tête est indiquée sous le téléphone ; le trait pointillé marque l'endroit où commencent les pastilles.</p>
+</header>
+
+<div class="grille">
+
+  <!-- A -->
+  <section class="col">
+    <h2>A · Compacte (celle de l'appli aujourd'hui)</h2>
+    <p class="quoi">Photo à gauche (agrandie au toucher), nom du produit, logo et nom de la marque, logo et nom du groupe. Alertes et vigilance en deux bandeaux, comme avant.</p>
+    <div class="tel"><div class="ecran">
+      <div class="barre">‹ Fiche</div>
+      <div class="entete" data-mesure>
+        <div class="rang" style="align-items:center">
+          <div class="photo" data-img></div>
+          <div style="display:grid;gap:4px;min-width:0">
+            <div class="prod">Nutella · 400 g</div>
+            <div class="rang"><span class="logo l24" data-logo></span><span class="nom">Nutella</span></div>
+            <div class="rang petit grp"><span class="logo l20">🏢</span><span><b>Ferrero</b> · reçoit l'argent de vos achats</span></div>
+          </div>
+        </div>
+        <div class="alerte" style="margin-top:10px"><b>⚠️ 2 alertes</b><span>🐄 vend des produits issus de l'exploitation animale</span><span>🗺️ poursuit ses activités en Russie</span></div>
+        <div class="vig" style="margin-top:10px"><b>🟠 2 points de vigilance</b><span>🐄 bien-être animal : niveau 5 sur 6 (BBFAW)</span><span>🌍 émissions en baisse de 3,21 % par an seulement</span></div>
+      </div>
+      <div class="fin"></div>
+      <div class="puces"><span class="puce">🐄 Bien-être animal <i class="point rouge"></i> 2/4</span><span class="puce">🌍 Environnement <i class="point orange"></i> 5/7</span><span class="puce">🧴 Plastique 1/4</span></div>
+    </div></div>
+    <div class="hauteur" data-h></div>
+  </section>
+
+  <!-- B -->
+  <section class="col">
+    <h2>B · Photo en bandeau</h2>
+    <p class="quoi">La photo du produit occupe un bandeau en haut (agrandie au toucher). Une seule ligne d'identité avec les deux logos. Alertes et vigilance résumées en une ligne, dépliable.</p>
+    <div class="tel"><div class="ecran">
+      <div class="entete" data-mesure>
+        <div class="bandeau" data-img><span class="loupe">🔍 agrandir</span></div>
+        <div style="display:grid;gap:4px;margin-top:10px">
+          <div class="rang"><span class="logo l24" data-logo></span><span class="nom">Nutella</span><span class="petit">· pot 400 g</span></div>
+          <div class="rang petit grp"><span class="logo l20">🏢</span><span><b>Ferrero</b> · reçoit l'argent de vos achats</span></div>
+        </div>
+        <details class="resume" style="margin-top:10px">
+          <summary><span style="color:var(--alerte)">⚠️ 2 alertes</span><span style="color:var(--vig)">🟠 2 vigilances</span><span class="petit" style="margin-left:auto">voir ▼</span></summary>
+          <ul><li>vend des produits issus de l'exploitation animale</li><li>poursuit ses activités en Russie</li><li style="color:#6b3a00">bien-être animal : niveau 5 sur 6 (BBFAW)</li><li style="color:#6b3a00">émissions en baisse de 3,21 % par an seulement</li></ul>
+        </details>
+      </div>
+      <div class="fin"></div>
+      <div class="puces"><span class="puce">🐄 Bien-être animal <i class="point rouge"></i> 2/4</span><span class="puce">🌍 Environnement <i class="point orange"></i> 5/7</span><span class="puce">🧴 Plastique 1/4</span></div>
+    </div></div>
+    <div class="hauteur" data-h></div>
+  </section>
+
+  <!-- C -->
+  <section class="col">
+    <h2>C · Alertes en étiquettes</h2>
+    <p class="quoi">Photo avec le logo de la marque en médaillon. À droite, identité et groupe ; dessous, chaque alerte devient une petite étiquette colorée (le détail est dans la pastille du pilier).</p>
+    <div class="tel"><div class="ecran">
+      <div class="barre">‹ Fiche</div>
+      <div class="entete" data-mesure>
+        <div class="rang" style="align-items:center">
+          <div style="position:relative"><div class="photo" data-img></div><span class="logo l24 badgeLogo" data-logo></span></div>
+          <div style="display:grid;gap:4px;min-width:0">
+            <span class="nom">Nutella <span class="petit" style="font-weight:600">· 400 g</span></span>
+            <div class="rang petit grp"><span class="logo l20">🏢</span><span><b>Ferrero</b> · reçoit l'argent de vos achats</span></div>
+          </div>
+        </div>
+        <div class="puces" style="margin-top:10px">
+          <span class="chipA">⚠️ Exploitation animale</span><span class="chipA">⚠️ Reste en Russie</span>
+          <span class="chipV">🟠 BBFAW 5/6</span><span class="chipV">🟠 Émissions −3,21 %/an</span>
+        </div>
+      </div>
+      <div class="fin"></div>
+      <div class="puces"><span class="puce">🐄 Bien-être animal <i class="point rouge"></i> 2/4</span><span class="puce">🌍 Environnement <i class="point orange"></i> 5/7</span><span class="puce">🧴 Plastique 1/4</span></div>
+    </div></div>
+    <div class="hauteur" data-h></div>
+  </section>
+
+  <!-- D -->
+  <section class="col">
+    <h2>D · Fil de propriété</h2>
+    <p class="quoi">Une ligne « qui possède quoi » : groupe › marque › produit, chacun avec son logo ou sa photo. Puis un seul bandeau rouge qui réunit alertes et vigilance.</p>
+    <div class="tel"><div class="ecran">
+      <div class="barre">‹ Fiche</div>
+      <div class="entete" data-mesure>
+        <div class="fil"><span class="logo l20">🏢</span><b>Ferrero</b> › <span class="logo l20" data-logo></span><b>Nutella</b> › <span class="logo l20" data-img style="background-size:contain"></span>pot 400 g</div>
+        <div class="nom" style="margin-top:6px">Nutella</div>
+        <div class="petit">L'argent de vos achats va au groupe <b style="color:var(--texte)">Ferrero</b>.</div>
+        <div class="alerte" style="margin-top:10px"><b>⚠️ 2 alertes · 🟠 2 points de vigilance</b><span>Exploitation animale · Russie · BBFAW 5/6 · émissions</span></div>
+      </div>
+      <div class="fin"></div>
+      <div class="puces"><span class="puce">🐄 Bien-être animal <i class="point rouge"></i> 2/4</span><span class="puce">🌍 Environnement <i class="point orange"></i> 5/7</span><span class="puce">🧴 Plastique 1/4</span></div>
+    </div></div>
+    <div class="hauteur" data-h></div>
+  </section>
+
+  <!-- E -->
+  <section class="col">
+    <h2>E · Compteurs</h2>
+    <p class="quoi">Identité sur une ligne (photo, marque, groupe), puis trois compteurs : alertes, vigilance, informations renseignées. Toucher un compteur fait défiler jusqu'aux pastilles concernées.</p>
+    <div class="tel"><div class="ecran">
+      <div class="barre">‹ Fiche</div>
+      <div class="entete" data-mesure>
+        <div class="rang">
+          <div class="photo" data-img style="width:56px;height:56px"></div>
+          <div style="display:grid;gap:3px;min-width:0">
+            <div class="rang"><span class="logo l20" data-logo></span><span class="nom" style="font-size:20px">Nutella</span><span class="petit">· 400 g</span></div>
+            <div class="rang petit grp"><span class="logo l20">🏢</span><span><b>Ferrero</b> · reçoit l'argent de vos achats</span></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px">
+          <div class="compteur" style="background:var(--alerte);color:#fff"><strong>2</strong>alertes</div>
+          <div class="compteur" style="background:var(--vigFond);color:#6b3a00;border:1px solid #f2c48a"><strong>2</strong>vigilances</div>
+          <div class="compteur" style="background:var(--carte);border:1px solid var(--bord)"><strong>14/40</strong>renseignés</div>
+        </div>
+      </div>
+      <div class="fin"></div>
+      <div class="puces"><span class="puce">🐄 Bien-être animal <i class="point rouge"></i> 2/4</span><span class="puce">🌍 Environnement <i class="point orange"></i> 5/7</span><span class="puce">🧴 Plastique 1/4</span></div>
+    </div></div>
+    <div class="hauteur" data-h></div>
+  </section>
+
+</div>
+<p class="note">Dans toutes les variantes : la photo du produit s'agrandit au toucher ; le nom du groupe mène à sa fiche ; la mention de la base produit (Open Food Facts) est en bas de la fiche ; aucune note, seulement des faits sourcés. Le logo de Ferrero n'est pas encore dans l'Index (pictogramme 🏢 à la place).</p>
+
+<script>
+  // Images de démonstration : pot de Nutella (Open Food Facts) et logo de la marque (site de l'Index).
+  const PHOTO = "https://images.openfoodfacts.org/images/products/301/762/042/2003/front_en.879.400.jpg";
+  const LOGO = "data:image/jpeg;base64,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";
+  document.querySelectorAll("[data-img]").forEach((e) => { e.style.backgroundImage = `url(${PHOTO})`; if (!e.style.backgroundSize) e.style.backgroundSize = "contain"; });
+  document.querySelectorAll("[data-logo]").forEach((e) => { e.style.backgroundImage = `url(${LOGO})`; });
+  // Hauteur de chaque en-tête (du haut de l'écran aux pastilles), mesurée une fois les images chargées.
+  const mesurer = () => document.querySelectorAll(".col").forEach((c) => {
+    const ecran = c.querySelector(".ecran"), fin = c.querySelector(".fin");
+    const h = Math.round(fin.getBoundingClientRect().top - ecran.getBoundingClientRect().top);
+    c.querySelector("[data-h]").textContent = `Hauteur de l'en-tête : ${h} px (écran d'iPhone : environ 750 px utiles)`;
+  });
+  window.addEventListener("load", mesurer);
+  setTimeout(mesurer, 600);
+</script>
+</body>
+</html>

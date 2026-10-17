@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Logo } from '@/components/logo';
 import type { Fait, Fiche as TFiche, Pilier, ProduitLu } from '@/lib/api';
@@ -18,7 +18,57 @@ const ouvrir = (url: string) => WebBrowser.openBrowserAsync(url);
 /** Quantité affichée seulement si elle porte une unité (« 250 g », « 1,5 L ») : « 8 » seul ne dit rien. */
 const quantite = (q: string | null) => (q && /\d\s*[a-zA-Zµ]/.test(q) ? ` · ${q}` : '');
 
-/** La fiche d'une marque ou d'un groupe : produit scanné, alertes, piliers dépliables. */
+/**
+ * En-tête de fiche : photo du produit scanné (agrandie au toucher), logo et nom de la marque, logo et
+ * nom du groupe propriétaire. Compact : la base produit est citée en bas de la fiche.
+ */
+function EnTete({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) => void }) {
+  const [grand, setGrand] = useState(false);
+  const pr = fiche.produit;
+  return (
+    <View style={s.enTete}>
+      {pr ? (
+        <Pressable onPress={() => pr.image && setGrand(true)} accessibilityRole="imagebutton" accessibilityLabel={`Photo du produit ${pr.nom}, l'agrandir`} disabled={!pr.image}>
+          {pr.image ? (
+            <Image source={{ uri: pr.image }} style={s.photo} contentFit="contain" />
+          ) : (
+            <View style={[s.photo, s.centre]}><Text style={{ fontSize: 28 }}>🛒</Text></View>
+          )}
+        </Pressable>
+      ) : (
+        <Logo src={fiche.logo} taille={64} groupe={!fiche.proprietaire} />
+      )}
+      <View style={[s.flex, { gap: 4 }]}>
+        {pr && <Text style={s.produitNom} numberOfLines={2}>{pr.nom}{quantite(pr.quantite)}</Text>}
+        <View style={s.ligne}>
+          {pr && <Logo src={fiche.logo} taille={24} />}
+          <Text style={[s.titre, pr && s.titrePetit]} accessibilityRole="header" numberOfLines={2}>{fiche.nom}</Text>
+        </View>
+        {fiche.proprietaire ? (
+          <Pressable onPress={() => onMarque(fiche.proprietaire!.slug)} accessibilityRole="link" style={s.ligne}>
+            <Logo src={fiche.proprietaire.logo} taille={20} groupe />
+            <Text style={[s.proprio, s.flex]}>
+              <Text style={s.proprioNom}>{fiche.proprietaire.nom}</Text>
+              <Text style={s.petit}> · reçoit l'argent de vos achats</Text>
+            </Text>
+          </Pressable>
+        ) : (
+          <Text style={s.petit}>Groupe</Text>
+        )}
+      </View>
+      {pr?.image && (
+        <Modal visible={grand} transparent animationType="fade" onRequestClose={() => setGrand(false)}>
+          <Pressable style={s.voile} onPress={() => setGrand(false)} accessibilityRole="button" accessibilityLabel="Fermer la photo">
+            <Image source={{ uri: pr.image }} style={s.photoGrande} contentFit="contain" />
+            <Text style={s.voileTexte}>Toucher pour fermer</Text>
+          </Pressable>
+        </Modal>
+      )}
+    </View>
+  );
+}
+
+/** La fiche d'une marque ou d'un groupe : en-tête, alertes, piliers. */
 export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) => void }) {
   const [liste, setListe] = useState(false);
   useEffect(() => {
@@ -28,40 +78,7 @@ export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: str
   const vigilance = fiche.alertes.filter((a) => a.niveau === 'vigilance');
   return (
     <View style={s.pile}>
-      {fiche.produit && (
-        <View style={s.produit} accessibilityLabel={`Produit scanné : ${fiche.produit.nom}`}>
-          {fiche.produit.image ? (
-            <Image source={{ uri: fiche.produit.image }} style={s.photo} contentFit="contain" accessible={false} />
-          ) : (
-            <View style={[s.photo, s.centre]}><Text style={{ fontSize: 28 }}>🛒</Text></View>
-          )}
-          <View style={s.flex}>
-            <Text style={s.surtitre}>PRODUIT SCANNÉ</Text>
-            <Text style={s.produitNom}>{fiche.produit.nom}{quantite(fiche.produit.quantite)}</Text>
-            <Text style={s.petit}>{fiche.produit.phrase}</Text>
-            <Text style={s.lien} onPress={() => ouvrir(fiche.produit!.lien)} accessibilityRole="link">
-              D'après {fiche.produit.base}
-            </Text>
-          </View>
-        </View>
-      )}
-
-      <View style={s.entete}>
-        <Logo src={fiche.logo} taille={64} groupe={!fiche.proprietaire} />
-        <View style={s.flex}>
-          <Text style={s.surtitre}>{fiche.proprietaire ? "CARTE D'IDENTITÉ" : 'GROUPE'}</Text>
-          <Text style={s.titre} accessibilityRole="header">{fiche.nom}</Text>
-          {fiche.proprietaire && (
-            <Text style={s.proprio}>
-              Appartient à{' '}
-              <Text style={s.proprioNom} onPress={() => onMarque(fiche.proprietaire!.slug)} accessibilityRole="link">
-                {fiche.proprietaire.nom}
-              </Text>
-              , qui reçoit l'argent de vos achats
-            </Text>
-          )}
-        </View>
-      </View>
+      <EnTete fiche={fiche} onMarque={onMarque} />
 
       {alertes.length > 0 && (
         <View style={s.bandeauAlerte} accessibilityRole="summary">
@@ -93,6 +110,12 @@ export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: str
       <Text style={s.pied}>
         {fiche.renseignes} informations documentées sur {fiche.total} recherchées · aucune note, que des faits sourcés.
       </Text>
+      {fiche.produit && (
+        <Text style={s.pied}>
+          Produit : {fiche.produit.nom}{quantite(fiche.produit.quantite)}. {fiche.produit.phrase}{' '}
+          <Text style={s.lienPied} onPress={() => ouvrir(fiche.produit!.lien)} accessibilityRole="link">D'après {fiche.produit.base} ↗</Text>
+        </Text>
+      )}
 
       {fiche.estMarque && liste && (
         <>
@@ -203,7 +226,7 @@ function Pastilles({ fiche }: { fiche: TFiche }) {
               accessibilityLabel={`${x.nom} : ${x.renseignes} sur ${x.total} renseignés${sig === 'alerte' ? ', alerte' : sig === 'vigilance' ? ', point de vigilance' : ''}`}
               style={({ pressed }) => [
                 s.pastilleChip,
-                { borderColor: actif ? t : sig === 'alerte' ? C.alerte : sig === 'vigilance' ? '#d97a00' : C.bord, backgroundColor: actif ? t + '1f' : C.carte },
+                { borderColor: actif ? t : C.bord, backgroundColor: actif ? t + '1f' : C.carte },
                 vide && !actif && { opacity: 0.7 },
                 pressed && { opacity: 0.6 },
               ]}>
@@ -219,9 +242,10 @@ function Pastilles({ fiche }: { fiche: TFiche }) {
             onPress={() => setChoix(choix === 'PRODUITS' ? null : 'PRODUITS')}
             accessibilityRole="tab"
             accessibilityState={{ selected: choix === 'PRODUITS' }}
+            accessibilityLabel={`Ingrédients des produits de la marque : ${produits.length} produit${produits.length > 1 ? 's' : ''} lus`}
             style={({ pressed }) => [s.pastilleChip, { borderColor: choix === 'PRODUITS' ? '#2f7a3b' : C.bord, backgroundColor: choix === 'PRODUITS' ? '#f1f9f2' : C.carte }, pressed && { opacity: 0.6 }]}>
-            <Text style={{ fontSize: 16 }}>🛒</Text>
-            <Text style={[s.pastilleNom, { color: choix === 'PRODUITS' ? '#2f7a3b' : C.texte }]}>Produits</Text>
+            <Text style={{ fontSize: 16 }}>🧾</Text>
+            <Text style={[s.pastilleNom, { color: choix === 'PRODUITS' ? '#2f7a3b' : C.texte }]}>Ingrédients</Text>
             <Text style={s.pastilleCompte}>{produits.length}</Text>
           </Pressable>
         )}
@@ -543,6 +567,12 @@ const s = StyleSheet.create({
   bouton44: { minHeight: 44, justifyContent: 'center' },
   citationTexte: { fontSize: 14, lineHeight: 20, color: C.texte, fontStyle: 'italic', borderLeftWidth: 3, borderLeftColor: C.bordFort, paddingLeft: 10 },
   pied: { fontSize: 13, lineHeight: 18, color: C.gris },
+  lienPied: { fontSize: 13, fontWeight: '600', color: C.accent },
+  enTete: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  titrePetit: { fontSize: 22, flexShrink: 1 },
+  voile: { flex: 1, backgroundColor: 'rgba(10,6,24,0.92)', alignItems: 'center', justifyContent: 'center', padding: 16, gap: 12 },
+  photoGrande: { width: '100%', height: '80%' },
+  voileTexte: { color: '#fff', fontSize: 14, opacity: 0.8 },
   alt: { borderWidth: 1, borderStyle: 'dashed', borderRadius: 10, padding: 12, gap: 8, backgroundColor: C.carte },
   altTitre: { fontSize: 14, fontWeight: '800', color: C.texte },
   altListe: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
@@ -555,7 +585,7 @@ const s = StyleSheet.create({
   produitLuNom: { fontSize: 15, fontWeight: '700', color: C.texte },
   produitLuStatut: { fontSize: 14, fontWeight: '600' },
   pastilles: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  pastilleChip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1.5 },
+  pastilleChip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1 },
   pastilleNom: { fontSize: 14, fontWeight: '700', flexShrink: 1 },
   pastilleCompte: { fontSize: 12.5, color: C.gris, fontWeight: '600' },
   point: { width: 8, height: 8, borderRadius: 4 },
