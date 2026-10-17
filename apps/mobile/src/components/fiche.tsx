@@ -11,9 +11,9 @@ import { lire } from '@/lib/stockage';
 
 /** Réglage d'affichage de la fiche : pastilles par pilier (essai, par défaut) ou liste dépliable. */
 export const CLE_AFFICHAGE = 'index.affichage';
-/** Réglage de l'en-tête de fiche (essai) : A compacte avec bandeaux, C étiquettes d'alerte, E compteurs. */
+/** Réglage de l'en-tête de fiche (essai) : A bandeaux, B photo en bandeau, C étiquettes, E onglets. */
 export const CLE_ENTETE = 'index.entete';
-export type VarianteEnTete = 'A' | 'C' | 'E';
+export type VarianteEnTete = 'A' | 'B' | 'C' | 'E';
 
 const NIVEAU: Record<string, string> = { groupe: 'Groupe', marque: 'Marque', produit: 'Produits' };
 const dfr = (d: string) => d.split('-').reverse().join('/');
@@ -28,9 +28,39 @@ const quantite = (q: string | null) => {
  * En-tête de fiche : photo du produit scanné (agrandie au toucher), logo et nom de la marque, logo et
  * nom du groupe propriétaire. Compact : la base produit est citée en bas de la fiche.
  */
-function EnTete({ fiche, onMarque, medaillon = false }: { fiche: TFiche; onMarque: (slug: string) => void; medaillon?: boolean }) {
+function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche: TFiche; onMarque: (slug: string) => void; medaillon?: boolean; bandeau?: boolean }) {
   const [grand, setGrand] = useState(false);
   const pr = fiche.produit;
+  if (bandeau && pr?.image) {
+    return (
+      <View style={{ gap: 8 }}>
+        <Pressable onPress={() => setGrand(true)} accessibilityRole="imagebutton" accessibilityLabel={`Photo du produit ${pr.nom}, l'agrandir`} style={s.bandeauPhoto}>
+          <Image source={{ uri: pr.image }} style={StyleSheet.absoluteFill} contentFit="contain" />
+          <Text style={s.loupe}>🔍 agrandir</Text>
+        </Pressable>
+        <View style={s.ligne}>
+          <Logo src={fiche.logo} taille={24} />
+          <Text style={[s.titre, s.titrePetit]} accessibilityRole="header" numberOfLines={1}>{fiche.nom}</Text>
+          {quantite(pr.quantite) ? <Text style={s.petit}>{quantite(pr.quantite)}</Text> : null}
+        </View>
+        {fiche.proprietaire && (
+          <Pressable onPress={() => onMarque(fiche.proprietaire!.slug)} accessibilityRole="link" style={s.ligne}>
+            <Logo src={fiche.proprietaire.logo} taille={20} groupe />
+            <Text style={[s.proprio, s.flex]}>
+              <Text style={s.proprioNom}>{fiche.proprietaire.nom}</Text>
+              <Text style={s.petit}> · reçoit l'argent de vos achats</Text>
+            </Text>
+          </Pressable>
+        )}
+        <Modal visible={grand} transparent animationType="fade" onRequestClose={() => setGrand(false)}>
+          <Pressable style={s.voile} onPress={() => setGrand(false)} accessibilityRole="button" accessibilityLabel="Fermer la photo">
+            <Image source={{ uri: pr.image }} style={s.photoGrande} contentFit="contain" />
+            <Text style={s.voileTexte}>Toucher pour fermer</Text>
+          </Pressable>
+        </Modal>
+      </View>
+    );
+  }
   return (
     <View style={s.enTete}>
       {pr ? (
@@ -138,36 +168,43 @@ function EtiquettesAlertes({ alertes, ouvrirPilier }: { alertes: TFiche['alertes
   );
 }
 
-/** En-tête E : deux compteurs (alertes, vigilances) ; un toucher déplie la liste, chaque ligne ouvre son pilier. */
+/**
+ * En-têtes B et E : une ligne « ⚠️ 2 alertes · 🟠 2 vigilances ». Toucher une entrée l'ouvre comme un
+ * onglet de classeur (bordé de rouge ou d'orange) collé au panneau des motifs ; chaque motif ouvre son pilier.
+ */
 function Compteurs({ alertes, vigilance, ouvrirPilier }: { alertes: TFiche['alertes']; vigilance: TFiche['alertes']; ouvrirPilier?: (code: string) => void }) {
   const [ouvert, setOuvert] = useState<'alerte' | 'vigilance' | null>(null);
+  if (!alertes.length && !vigilance.length) return null;
   const liste = ouvert === 'alerte' ? alertes : ouvert === 'vigilance' ? vigilance : [];
-  const bouton = (cle: 'alerte' | 'vigilance', n: number) => {
+  const couleur = ouvert === 'alerte' ? C.alerte : '#d97a00';
+  const onglet = (cle: 'alerte' | 'vigilance', n: number) => {
+    if (!n) return null;
     const al = cle === 'alerte';
+    const actif = ouvert === cle;
+    const c = al ? C.alerte : '#d97a00';
     return (
       <Pressable
-        onPress={() => n > 0 && setOuvert(ouvert === cle ? null : cle)}
-        disabled={n === 0}
-        accessibilityRole="button"
-        accessibilityState={{ expanded: ouvert === cle }}
-        style={({ pressed }) => [s.compteurBloc, al ? (n ? s.compteurAlerte : s.compteurVide) : (n ? s.compteurVigilance : s.compteurVide), pressed && { opacity: 0.7 }]}>
-        <Text style={[s.compteurN, { color: al && n ? '#fff' : n ? C.vigilanceTexte : C.gris }]}>{n}</Text>
-        <Text style={[s.compteurL, { color: al && n ? '#fff' : n ? C.vigilanceTexte : C.gris }]}>
-          {al ? `alerte${n > 1 ? 's' : ''}` : `vigilance${n > 1 ? 's' : ''}`} {n ? (ouvert === cle ? '▲' : '▼') : ''}
+        onPress={() => setOuvert(actif ? null : cle)}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: actif }}
+        accessibilityLabel={`${n} ${al ? 'alerte' : 'point de vigilance'}${n > 1 ? 's' : ''}`}
+        style={({ pressed }) => [s.onglet, actif && { borderColor: c, backgroundColor: C.carte, zIndex: 2 }, pressed && { opacity: 0.7 }]}>
+        <Text style={[s.ongletTexte, { color: al ? C.alerteTexte : C.vigilance }]}>
+          {al ? '⚠️' : '🟠'} {n} {al ? `alerte${n > 1 ? 's' : ''}` : `vigilance${n > 1 ? 's' : ''}`} {actif ? '▲' : '▼'}
         </Text>
       </Pressable>
     );
   };
   return (
-    <View style={{ gap: 8 }}>
-      <View style={s.ligne}>
-        {bouton('alerte', alertes.length)}
-        {bouton('vigilance', vigilance.length)}
+    <View>
+      <View style={s.onglets} accessibilityRole="tablist">
+        {onglet('alerte', alertes.length)}
+        {onglet('vigilance', vigilance.length)}
       </View>
       {liste.length > 0 && (
-        <View style={s.listeAlertes}>
+        <View style={[s.classeur, { borderColor: couleur, borderTopLeftRadius: ouvert === 'alerte' || !alertes.length ? 0 : 12 }]}>
           {liste.map((a, i) => (
-            <Pressable key={i} onPress={() => ouvrirPilier?.(a.pilier)} accessibilityRole="button" style={({ pressed }) => [s.ligneAlerte, pressed && { opacity: 0.6 }]}>
+            <Pressable key={i} onPress={() => ouvrirPilier?.(a.pilier)} accessibilityRole="button" style={({ pressed }) => [s.ligneAlerte, i === liste.length - 1 && { borderBottomWidth: 0 }, pressed && { opacity: 0.6 }]}>
               <Text style={s.ligneAlerteTexte}>{a.icone} {a.motif}</Text>
             </Pressable>
           ))}
@@ -184,7 +221,7 @@ export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: str
   const [choix, setChoix] = useState<string | null>(null);
   useEffect(() => {
     lire(CLE_AFFICHAGE).then((v) => setListe(v === 'liste'));
-    lire(CLE_ENTETE).then((v) => setVariante(v === 'A' || v === 'E' ? v : 'C'));
+    lire(CLE_ENTETE).then((v) => setVariante(v === 'A' || v === 'B' || v === 'E' ? v : 'C'));
   }, []);
   const alertes = fiche.alertes.filter((a) => a.niveau === 'alerte');
   const vigilance = fiche.alertes.filter((a) => a.niveau === 'vigilance');
@@ -192,9 +229,9 @@ export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: str
   const ouvrirPilier = liste ? undefined : (code: string) => setChoix(code);
   return (
     <View style={s.pile}>
-      <EnTete fiche={fiche} onMarque={onMarque} medaillon={variante === 'C'} />
+      <EnTete fiche={fiche} onMarque={onMarque} medaillon={variante === 'C'} bandeau={variante === 'B'} />
       {variante === 'C' && <EtiquettesAlertes alertes={fiche.alertes} ouvrirPilier={ouvrirPilier} />}
-      {variante === 'E' && <Compteurs alertes={alertes} vigilance={vigilance} ouvrirPilier={ouvrirPilier} />}
+      {(variante === 'B' || variante === 'E') && <Compteurs alertes={alertes} vigilance={vigilance} ouvrirPilier={ouvrirPilier} />}
 
       {variante === 'A' && alertes.length > 0 && (
         <View style={s.bandeauAlerte} accessibilityRole="summary">
@@ -696,7 +733,12 @@ const s = StyleSheet.create({
   compteurVide: { backgroundColor: C.carte, borderColor: C.bord },
   compteurN: { fontSize: 22, fontWeight: '800' },
   compteurL: { fontSize: 13, fontWeight: '700' },
-  listeAlertes: { backgroundColor: C.carte, borderRadius: 12, borderWidth: 1, borderColor: C.bord },
+  onglets: { flexDirection: 'row', gap: 4, alignItems: 'flex-end', position: 'relative', zIndex: 2 },
+  onglet: { paddingHorizontal: 12, minHeight: 40, justifyContent: 'center', borderWidth: 1.5, borderColor: 'transparent', borderBottomWidth: 0, borderTopLeftRadius: 12, borderTopRightRadius: 12, marginBottom: -1.5, paddingBottom: 1.5 },
+  ongletTexte: { fontSize: 14.5, fontWeight: '800' },
+  classeur: { backgroundColor: C.carte, borderWidth: 1.5, borderRadius: 12, position: 'relative', zIndex: 1 },
+  bandeauPhoto: { height: 170, borderRadius: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: C.bord, overflow: 'hidden' },
+  loupe: { position: 'absolute', right: 8, bottom: 8, backgroundColor: 'rgba(22,15,46,0.75)', color: '#fff', fontSize: 12, fontWeight: '600', paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
   ligneAlerte: { paddingHorizontal: 12, paddingVertical: 10, minHeight: 44, borderBottomWidth: 1, borderBottomColor: C.bord },
   ligneAlerteTexte: { fontSize: 14, lineHeight: 20, color: C.texte, fontWeight: '600' },
   titrePetit: { fontSize: 22, flexShrink: 1 },

@@ -15,7 +15,7 @@ export default function EcranReglages() {
   useEffect(() => {
     lireReglages().then(setR);
     lire(CLE_AFFICHAGE).then((v) => setPastilles(v !== 'liste'));
-    lire(CLE_ENTETE).then((v) => setEntete(v === 'A' || v === 'E' ? v : 'C'));
+    lire(CLE_ENTETE).then((v) => setEntete(v === 'A' || v === 'B' || v === 'E' ? v : 'C'));
   }, []);
   if (!r) return null;
   const enregistrer = async () => {
@@ -63,6 +63,7 @@ export default function EcranReglages() {
         <View style={{ flexDirection: 'row', gap: 8 }} accessibilityRole="radiogroup">
           {([
             ['A', 'A · bandeaux'],
+            ['B', 'B · photo'],
             ['C', 'C · étiquettes'],
             ['E', 'E · compteurs'],
           ] as [VarianteEnTete, string][]).map(([v, t]) => (
@@ -79,7 +80,7 @@ export default function EcranReglages() {
             </Pressable>
           ))}
         </View>
-        <Text style={s.petit}>A : alertes en deux bandeaux. C : chaque alerte en étiquette, qui ouvre son pilier. E : deux compteurs à déplier.</Text>
+        <Text style={s.petit}>A : alertes en deux bandeaux. B : photo du produit en bandeau. C : chaque alerte en étiquette, qui ouvre son pilier. E : alertes et vigilances en onglets.</Text>
       </View>
       <Pressable
         onPress={async () => {
