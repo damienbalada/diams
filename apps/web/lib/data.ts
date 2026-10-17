@@ -67,7 +67,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v309"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v310"], { revalidate: 600 });
 
 type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
 
@@ -207,6 +207,8 @@ interface EntityRow {
   parent_id: string | null;
   sector_id: string | null;
   country: string | null;
+  /** Autres graphies (« procter-gamble », « papermate »), pour reconnaître un produit scanné. */
+  aliases?: string[] | null;
 }
 
 /**
@@ -220,7 +222,7 @@ async function loadEntityIndex() {
     rows = await selectAll<EntityRow>((from, to) =>
       supabase
         .from("entities")
-        .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id, country")
+        .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id, country, aliases")
         .order("id")
         .range(from, to),
     );
@@ -806,5 +808,5 @@ export async function getProduitParCode(code: string): Promise<ProduitScanne | n
 export async function listeNomsEntites(): Promise<{ slug: string; noms: string[]; is_brand: boolean }[]> {
   const idx = await loadEntityIndex();
   if (!idx) return [];
-  return idx.rows.map((e) => ({ slug: e.slug, noms: [e.display_name ?? "", e.legal_name ?? ""].filter(Boolean), is_brand: e.is_brand }));
+  return idx.rows.map((e) => ({ slug: e.slug, noms: [e.display_name ?? "", e.legal_name ?? "", ...(e.aliases ?? [])].filter(Boolean), is_brand: e.is_brand }));
 }

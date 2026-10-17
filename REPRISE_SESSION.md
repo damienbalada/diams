@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v309`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v310`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -372,6 +372,15 @@ Autan, Baygon, OFF!, Pyrel, Raid, Deb, Kiwi ; qualifiée (SBTi engagement, regis
 Marques U : Produits U, U de nos Régions, U Nature, U Collection, U Spécialiste, U Tout Petits.
 **Canard WC** : la page de SC Johnson dit « Duck » ; il faut une page qui écrit « Canard ». La page
 Intermarché « toutes les marques » ne cite ni Labell ni Apta.
+
+**Lots 219-220 et autres noms (17/10/2026)** : Canard WC (SC Johnson, page canardwc.fr enregistrée par
+l'éditeur) ; Corsair, Elgato (Corsair Gaming), Hansgrohe, Axor (Masco), Anios (Ecolab), Bostik (Arkema),
+Marabout, Le Routard, Grasset, Fayard, Calmann-Lévy, JC Lattès, Didier, Foucher, Bescherelle (Lagardère).
+Colonne `entities.aliases` : autres graphies pour reconnaître un code-barres (« procter-gamble »,
+« papermate », « scjohnson »…), jamais affichées. **Suivi complet** :
+`pipeline/curated/suivi_open_products_facts_france.csv` (692 marques d'Open Products Facts vendues en
+France, chacune avec son cas : reconnue 246, à prouver 189, distributeur 33, non prioritaire 186, hors
+France 20, tabac 18). Mesure avec la logique de l'appli : `scratchpad/suivi_opf.py`.
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour
