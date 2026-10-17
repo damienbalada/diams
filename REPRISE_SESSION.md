@@ -338,7 +338,12 @@ marques**, à continuer :
 3. pour les sociétés moyennes non notées (Rians, Ermitage, Juraflore, Monbana, Jacquart,
    Camus, Cellier des Dauphins, bofrost*, Toupargel…) : Egapro, HATVP, registre européen,
    B Corp, sanctions (DGCCRF, Autorité de la concurrence), rapports et plans de vigilance
-   quand ils existent ;
+   quand ils existent ; **état au 17/10/2026** : Égapro déjà importé pour les sociétés à SIREN
+   (Camus, bofrost*, UVCDR, Union laitière vittelloise, Toupargel, Triballat, Jacquart,
+   Monbana) ; aucune n'est inscrite au répertoire HATVP (copie `agora.json` du 16/10, brouillon
+   42ef682f) ni certifiée B Corp (`import_bcorp --discover`, aucun candidat). Restent : registre
+   européen (copie `eu_register.xml` disparue, à retélécharger), sanctions (pas d'outil). Le
+   même passage HATVP propose 79 inscriptions pour d'autres entités, non appliquées ;
 4. mesurer, journaliser dans `METHODOLOGY.md`, publier.
 
 **À relire par un humain** : inscription HATVP de Michelin (déposée par la filiale MFPM
