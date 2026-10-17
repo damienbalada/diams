@@ -606,3 +606,61 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .ci-depot { margin-top: 12px; border: 1px dashed var(--border-strong, var(--border)); border-radius: 8px; padding: 10px 12px; }
 .ci-depot > summary { cursor: pointer; font-weight: 700; color: var(--accent); }
 .ci-depot form { margin-top: 10px; }
+
+/* ── Fiche en trois zones (17/10/2026) ──────────────────────────────────────────────────────────
+   1. Identité et alertes, sur le fond ; 2. piliers, bandeau blanc ; 3. informations complémentaires,
+   bandeau grisé. Les bandeaux vont d'un bord à l'autre de la fenêtre, le contenu reste centré. */
+.ci-zone { margin-inline: calc(50% - 50vw); padding-inline: max(16px, calc(50vw - 50%)); }
+.ci-zone-id { padding-top: 0; padding-bottom: 22px; display: grid; gap: 14px; }
+.ci-zone-piliers { background: var(--panel); border-block: 1px solid var(--border); padding-top: 18px; padding-bottom: 24px; }
+.ci-zone-plus { background: color-mix(in srgb, var(--text) 5%, var(--bg)); padding-top: 18px; padding-bottom: 40px; display: grid; gap: 14px; }
+.ci-zone-plus > .panel + .panel { margin-top: 0; }
+.ci-zone-t { font-size: 22px; margin: 0 0 12px; }
+.ci-zone-k { font-size: 12.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.ci-zone-plus .ci-foot { margin: 0; }
+.ci-sources > summary { cursor: pointer; }
+
+/* Photo du produit scanné : bandeau blanc pleine largeur, comme la zone des piliers. */
+.ci-photo { margin: 0 calc(50% - 50vw); padding: 16px max(16px, calc(50vw - 50%)) 12px; background: var(--panel); border-bottom: 1px solid var(--border); display: grid; justify-items: center; gap: 8px; }
+.ci-photo img { max-height: 220px; max-width: 100%; object-fit: contain; }
+.ci-photo .ci-prod-vide { font-size: 48px; }
+.ci-photo figcaption { text-align: center; font-size: 15px; }
+
+/* Marque (grand logo encadré) ; groupe en dessous, avec l'infobulle ⓘ. */
+.ci-zone-id .ci-head { border-bottom: 0; padding-bottom: 0; margin: 0; }
+.ci-head-logo .ci-logo { padding: 6px; }
+.ci-zone-id .ci-head h1 { font-size: 26px; margin: 0 0 4px; }
+.ci-own { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ci-info { position: relative; display: inline-block; }
+.ci-info > summary { list-style: none; cursor: pointer; width: 24px; height: 24px; border-radius: 12px; background: var(--panel-2); color: var(--accent); display: inline-grid; place-items: center; font-weight: 700; font-size: 14px; }
+.ci-info > summary::-webkit-details-marker { display: none; }
+.ci-bulle { position: absolute; z-index: 5; left: 0; top: 30px; width: max-content; max-width: min(320px, 80vw); background: var(--text); color: #fff; border-radius: 10px; padding: 8px 12px; font-size: 13.5px; line-height: 19px; }
+
+/* Avertissement façon paquet : fermé par défaut, ouvert au clic. */
+.ci-avert { background: #111; color: #fff; border-radius: 6px; border: 3px solid #fff; outline: 2px solid #111; }
+.ci-avert > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
+.ci-avert > summary::-webkit-details-marker { display: none; }
+.ci-avert-t { font-size: 13px; font-weight: 800; letter-spacing: .08em; }
+.ci-avert-n { flex: 1; font-weight: 700; white-space: pre; }
+.ci-avert .ci-chev { color: #fff; background: transparent; }
+.ci-avert[open] .ci-chev { transform: rotate(180deg); }
+.ci-avert ul { list-style: none; margin: 0; padding: 0 14px 12px; display: grid; gap: 8px; }
+.ci-avert a { color: #fff; text-decoration: none; display: flex; gap: 8px; align-items: baseline; font-size: 14.5px; line-height: 20px; }
+.ci-avert a:hover span:last-child { text-decoration: underline; }
+
+/* Pastilles des piliers : renseignées d'abord, vides estompées ; le pilier s'ouvre sous sa ligne. */
+.ci-pasts { display: flex; flex-wrap: wrap; gap: 8px; }
+.ci-past { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+.ci-past:hover { border-color: var(--pil); }
+.ci-past:focus-visible { outline: 2px solid var(--pil); outline-offset: 2px; }
+.ci-past-actif { border-color: var(--pil); background: color-mix(in srgb, var(--pil) 12%, var(--panel)); color: var(--pil); }
+.ci-past-vide:not(.ci-past-actif) { opacity: .42; border-style: dashed; }
+.ci-past-sig { font-size: 12px; }
+.ci-past-cpt { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.ci-pasts-aide { flex-basis: 100%; margin: 4px 0 0; }
+.ci-pan { flex-basis: 100%; border: 1.5px solid var(--pil); border-radius: 16px; padding: 12px 14px 4px; background: var(--panel); }
+.ci-pan-t { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 800; letter-spacing: .04em; color: var(--pil); }
+.ci-pan-n { margin-left: auto; color: var(--muted); font-weight: 600; letter-spacing: 0; }
+@media (max-width: 480px) { .ci-past { font-size: 14px; padding: 0 12px; } }
+/* Les bandeaux pleine largeur s'appuient sur 100vw, qui compte la barre de défilement : pas de défilement horizontal. */
+body { overflow-x: clip; }

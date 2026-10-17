@@ -5,6 +5,7 @@ import { EN_SAVOIR_PLUS, REPERES, type Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
 import { DepotEtiquette } from "@/components/DepotEtiquette";
 import type { AlternativesPilier } from "@/lib/alternatives-piliers";
+import { PiliersPastilles, type PastillePilier } from "@/components/PiliersPastilles";
 
 const ICONE: Record<string, string> = { ANI: "🐄", ENV: "🌍", PLA: "🧴", WAT: "💧", LAB: "👥", SUP: "🔗", GOV: "🏛️", TAX: "💶", GEO: "🗺️", INV: "🏦" };
 function Chevron() {
@@ -48,34 +49,37 @@ function SignalFait({ s }: { s: Signal }) {
   );
 }
 
-/** Bandeau en tête de fiche : toutes les alertes, puis les points de vigilance. */
-function Bandeau({ items }: { items: { pilier: string; s: Signal }[] }) {
-  const al = items.filter((x) => x.s.niveau === "alerte");
-  const vi = items.filter((x) => x.s.niveau === "vigilance");
+type Motif = { pilier: string; s: Signal; code?: string; qui: string };
+const EMOJI = { alerte: "🔴", vigilance: "⚠️" } as const;
+
+/**
+ * Avertissement en tête de fiche, façon paquet de cigarettes : fermé par défaut (« AVERTISSEMENT 🔴 4
+ * ⚠️ 1 »), ouvert au clic. Chaque motif dit qui il vise (la marque ou son groupe) et ouvre la preuve
+ * dans son pilier.
+ */
+function Avertissement({ items }: { items: Motif[] }) {
   if (!items.length) return null;
+  const tries = [...items].sort((a, b) => (a.s.niveau === "alerte" ? 0 : 1) - (b.s.niveau === "alerte" ? 0 : 1));
+  const na = tries.filter((x) => x.s.niveau === "alerte").length;
+  const nv = tries.length - na;
   return (
-    <div className="ci-bandeaux">
-      {al.length > 0 && (
-        <div className="ci-bandeau ci-bandeau-alerte" role="note">
-          <div className="ci-bandeau-t">⚠️ {pl(al.length, "alerte", "alertes")}</div>
-          <ul>
-            {al.map((x, i) => (
-              <li key={i} title={`Seuil : ${x.s.regle}`}><span aria-hidden="true">{ICONE[x.pilier]}</span> {x.s.motif}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {vi.length > 0 && (
-        <div className="ci-bandeau ci-bandeau-vigilance" role="note">
-          <div className="ci-bandeau-t">🟠 {pl(vi.length, "point de vigilance", "points de vigilance")}</div>
-          <ul>
-            {vi.map((x, i) => (
-              <li key={i} title={`Seuil : ${x.s.regle}`}><span aria-hidden="true">{ICONE[x.pilier]}</span> {x.s.motif}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
+    <details className="ci-avert">
+      <summary aria-label={`Avertissement : ${[na ? pl(na, "alerte", "alertes") : "", nv ? pl(nv, "vigilance", "vigilances") : ""].filter(Boolean).join(", ")}`}>
+        <span className="ci-avert-t">AVERTISSEMENT</span>
+        <span className="ci-avert-n">{na > 0 && <>{EMOJI.alerte} {na}</>}{na > 0 && nv > 0 && "   "}{nv > 0 && <>{EMOJI.vigilance} {nv}</>}</span>
+        <Chevron />
+      </summary>
+      <ul>
+        {tries.map((x, i) => (
+          <li key={i}>
+            <a href={`#pilier-${x.pilier}${x.code ? `:${x.code}` : ""}`} title={`Seuil : ${x.s.regle}`}>
+              <span aria-hidden="true">{EMOJI[x.s.niveau]}</span>
+              <span><strong>{x.qui}</strong> — {x.s.motif}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 
@@ -193,7 +197,7 @@ function CarteIndicateur({ f }: { f: Fait }) {
   const savoir = f.etat === "documente" ? EN_SAVOIR_PLUS[f.code] ?? null : null;
   const aDetail = !!(p || f.note || f.signal || obligation || savoir);
   return (
-    <article className={`ci-ind ci-ind-${ton}`}>
+    <article className={`ci-ind ci-ind-${ton}`} data-indicateur={f.code}>
       <header className="ci-ind-h">
         <span className="ci-ind-ico" aria-hidden="true">{ICONE_IND[f.code] ?? "•"}</span>
         <span className="ci-ind-nom">{f.nom}</span>
@@ -373,49 +377,40 @@ function ResumeMarques({ mg, pilier }: { mg: NonNullable<MarquesGroupe>; pilier:
   );
 }
 
-function LignePilier({ p, mg, estMarque, nom, slug, vegane = false, alternatives }: { p: Pilier; mg: MarquesGroupe; estMarque: boolean; nom: string; slug: string; vegane?: boolean; alternatives?: AlternativesPilier }) {
+/** Nom de pilier raccourci pour une pastille (« Chaîne d'appro & droits humains » → « Chaîne d'appro »). */
+function nomCourt(nom: string): string {
+  return nom.replace(/\s*\(.*\)\s*$/, "").split(" & ")[0].trim();
+}
+
+/** État d'un pilier pour sa pastille : alerte, vigilance ou rien (d'après tous ses indicateurs). */
+function etatPilier(p: Pilier, mg: MarquesGroupe, estMarque: boolean): "alerte" | "vigilance" | null {
   const k = p.cle;
   // Fiche d'un groupe : sans preuve propre au groupe, le pilier animal se lit d'après ses marques.
   const r = p.code === "ANI" && !estMarque && mg ? resumeGroupe(mg.marques.map(marqueAnimale)) : null;
   const niveauGroupe = !!r && (r.exploitation > 0 || r.vegetale > 0) && k?.etat !== "documente";
-  // Exploitation animale : signalée en rouge avec ⚠️, quel que soit le classement BBFAW (décision
-  // de l'éditeur, 15/10/2026) ; présumée : ⚠️ et couleur de la présomption.
-  const exploitee = p.code === "ANI" && ((niveauGroupe && r!.exploitation > 0) || (k?.code === "ANI_EXPLOITATION" && k.etat === "documente"));
-  const presumee = p.code === "ANI" && !exploitee && k?.code === "ANI_EXPLOITATION" && k.etat === "presume";
-  const sig = niveauGroupe ? null : k?.signal ?? null;
-  const alerte = exploitee || sig?.niveau === "alerte";
-  const vigilance = !alerte && (presumee || sig?.niveau === "vigilance");
-  const etatCle = alerte ? "alerte" : vigilance && sig ? "vigilance" : niveauGroupe ? "documente" : k ? k.etat : "aucune_info";
-  const valeurCle = niveauGroupe
-    ? r!.exploitation > 0
-      ? `Produits issus de l'exploitation animale chez ${r!.exploitation} marque${r!.exploitation > 1 ? "s" : ""} sur ${r!.total}`
-      : `${r!.vegetale} marque${r!.vegetale > 1 ? "s" : ""} entièrement végétale${r!.vegetale > 1 ? "s" : ""} sur ${r!.total}`
-    : k ? (sig && k.valeur === "Documenté" ? sig.motif[0].toUpperCase() + sig.motif.slice(1) : k.valeur) : "Aucune information";
+  // Exploitation animale : alerte quel que soit le classement BBFAW (décision de l'éditeur, 15/10/2026).
+  if (p.code === "ANI" && niveauGroupe && r!.exploitation > 0) return "alerte";
+  const signaux = p.faits.filter((f) => f.signal && !(niveauGroupe && f.etat === "presume")).map((f) => f.signal!.niveau);
+  if (signaux.includes("alerte")) return "alerte";
+  if (signaux.includes("vigilance")) return "vigilance";
+  return p.faits.some((f) => f.code === "ANI_EXPLOITATION" && f.etat === "presume") && !niveauGroupe ? "vigilance" : null;
+}
+
+/** Contenu d'un pilier ouvert : niveaux groupe, marque, produits, puis alternatives. */
+function CorpsPilier({ p, mg, estMarque, nom, slug, vegane = false, alternatives }: { p: Pilier; mg: MarquesGroupe; estMarque: boolean; nom: string; slug: string; vegane?: boolean; alternatives?: AlternativesPilier }) {
+  const k = p.cle;
+  const r = p.code === "ANI" && !estMarque && mg ? resumeGroupe(mg.marques.map(marqueAnimale)) : null;
+  const niveauGroupe = !!r && (r.exploitation > 0 || r.vegetale > 0) && k?.etat !== "documente";
   const g = p.faits.filter((f) => f.niveau === "groupe");
   const m = p.faits.filter((f) => f.niveau === "marque");
   const pr = p.faits.filter((f) => f.niveau === "produit");
   return (
-    <details className="ci-row" style={{ "--pil": TEINTE[p.code] ?? "#6c3bff" } as React.CSSProperties}>
-      <summary>
-        <span className="ci-p">
-          <span className={`ci-ico${alerte ? " ci-ico-alerte" : vigilance ? " ci-ico-vigilance" : ""}`} aria-hidden="true">{ICONE[p.code]}</span>
-          {p.nom}
-        </span>
-        <span className="ci-cnt">
-          <span title="Nombre d'indicateurs renseignés sur le nombre d'indicateurs suivis dans ce pilier">{p.documentes} sur {p.total} renseignés</span>
-          <Chevron />
-        </span>
-        {/* Pilier ouvert : le résumé s'efface quand le premier indicateur, juste dessous, le dit déjà. */}
-        <span className={`ci-v-bloc${niveauGroupe ? "" : " ci-v-repli"}`}>
-          {k && !niveauGroupe && k.etat !== "aucune_info" && <span className="ci-v-nom">{k.nom}</span>}
-          <span className={`ci-v ci-${etatCle}`}>
-            {alerte ? "⚠️ " : vigilance && sig ? "🟠 " : ""}
-            {valeurCle}
-            {!niveauGroupe && k?.preuve?.reprisDe && <span className="ci-badge" title="Le groupe publie cette donnée ; la marque la reprend">{k.preuve.reprisDe.startsWith("la filiale") ? `donnée de ${k.preuve.reprisDe}` : `donnée du groupe ${k.preuve.reprisDe}`}</span>}
-          </span>
-          {k && !niveauGroupe && k.etat === "documente" && REPERES[k.code] && <span className="ci-v-rep">{REPERES[k.code]}</span>}
-        </span>
-      </summary>
+    <>
+      <div className="ci-pan-t">
+        <span aria-hidden="true">{ICONE[p.code]}</span>
+        <span>{p.nom.toUpperCase()}</span>
+        <span className="ci-pan-n">{p.documentes} sur {p.total} renseignés</span>
+      </div>
       <div className="ci-body">
         {p.solidite && <p className="ci-faint ci-small">Ce pilier repose sur des {SOLIDITE_PILIER[p.solidite]}.</p>}
         {(g.length > 0 || (p.code === "ANI" && estMarque && mg && !vegane)) && (
@@ -445,7 +440,7 @@ function LignePilier({ p, mg, estMarque, nom, slug, vegane = false, alternatives
         )}
         <EncartAlternatives a={alternatives?.[p.code]} />
       </div>
-    </details>
+    </>
   );
 }
 
@@ -482,72 +477,84 @@ export function CarteIdentite({
   const nomPilier = new Map(carte.piliers.map((p) => [p.code, p.nom]));
   // Fiche d'un groupe : l'exploitation animale se lit d'après ses marques (comme la ligne du pilier).
   const rg = !estMarque && marquesGroupe ? resumeGroupe(marquesGroupe.marques.map(marqueAnimale)) : null;
-  const signaux = carte.signaux.flatMap((f): { pilier: string; s: Signal }[] => {
+  const qui = (niveau: string) => (niveau === "groupe" && proprietaire ? proprietaire.name : carte.nom);
+  const signaux = carte.signaux.flatMap((f): Motif[] => {
     if (f.code === "ANI_EXPLOITATION" && f.etat === "presume" && rg && (rg.exploitation > 0 || rg.vegetale > 0)) return [];
-    return [{ pilier: f.pilier, s: f.signal! }];
+    return [{ pilier: f.pilier, s: f.signal!, code: f.code, qui: qui(f.niveau) }];
   });
   if (rg && rg.exploitation > 0 && !carte.signaux.some((f) => f.code === "ANI_EXPLOITATION" && f.etat === "documente")) {
-    signaux.unshift({ pilier: "ANI", s: { niveau: "alerte", motif: `produits issus de l'exploitation animale chez ${rg.exploitation} marque${rg.exploitation > 1 ? "s" : ""} sur ${rg.total}`, regle: "un seul produit d'origine animale suffit" } });
+    signaux.unshift({ pilier: "ANI", qui: carte.nom, s: { niveau: "alerte", motif: `produits issus de l'exploitation animale chez ${rg.exploitation} marque${rg.exploitation > 1 ? "s" : ""} sur ${rg.total}`, regle: "un seul produit d'origine animale suffit" } });
   }
+  const pastilles: PastillePilier[] = carte.piliers.map((p) => ({
+    code: p.code, nom: nomCourt(p.nom), icone: ICONE[p.code] ?? "•", teinte: TEINTE[p.code] ?? "#6c3bff",
+    compte: `${p.documentes}/${p.total}`, vide: p.documentes === 0, signal: etatPilier(p, marquesGroupe, estMarque),
+  }));
+  const panneaux = Object.fromEntries(carte.piliers.map((p) => [p.code,
+    <CorpsPilier key={p.code} p={p} mg={marquesGroupe} estMarque={estMarque} nom={carte.nom} slug={carte.slug} vegane={carte.vegane} alternatives={alternatives} />]));
+  const quantite = scan?.produit.quantite && /\d\s*[a-zA-Zµ]/.test(scan.produit.quantite) ? ` · ${scan.produit.quantite}` : "";
   return (
     <main className="ci">
       <a className="muted small" href="/">← rechercher une autre marque</a>
-      {scan && (
-        <section className="ci-scan" aria-label="Produit scanné">
-          {scan.produit.image ? <img src={scan.produit.image} alt="" className="ci-scan-img" /> : <span className="ci-scan-img ci-prod-vide" aria-hidden="true">🛒</span>}
-          <div className="ci-scan-t">
-            <span className="ci-k">PRODUIT SCANNÉ · CODE {scan.produit.code}</span>
-            <strong>{scan.produit.nom}{scan.produit.quantite && /\d\s*[a-zA-Zµ]/.test(scan.produit.quantite) ? ` · ${scan.produit.quantite}` : ""}</strong>
-            <span className="ci-small ci-faint">
-              {scan.phrase}
-              {" "}· d'après <a className="ci-lien" href={scan.produit.lien} target="_blank" rel="noopener noreferrer">{scan.produit.base} ↗</a>
-            </span>
-          </div>
-        </section>
-      )}
-      <section className="ci-card">
+      {/* Zone 1 : identité du produit, de la marque et de son groupe ; avertissement. */}
+      <section className="ci-zone ci-zone-id" aria-label="Identité et alertes">
+        {scan && (
+          <figure className="ci-photo">
+            {scan.produit.image ? <img src={scan.produit.image} alt={`Photo du produit ${scan.produit.nom}`} /> : <span className="ci-prod-vide" aria-hidden="true">🛒</span>}
+            <figcaption>
+              <strong>{scan.produit.nom}{quantite}</strong>
+              <span className="ci-small ci-faint"> · code {scan.produit.code} · {scan.phrase} · d'après <a className="ci-lien" href={scan.produit.lien} target="_blank" rel="noopener noreferrer">{scan.produit.base} ↗</a></span>
+            </figcaption>
+          </figure>
+        )}
         <div className="ci-head">
-          <Logo slug={carte.slug} nom={carte.nom} taille={72} groupe={estGroupe} />
+          <span className="ci-head-logo"><Logo slug={carte.slug} nom={carte.nom} taille={52} groupe={estGroupe} /></span>
           <div className="ci-head-t">
-          <div className="ci-k">{estGroupe ? "GROUPE" : "CARTE D'IDENTITÉ"}</div>
-          <h1>{carte.nom}</h1>
-          {proprietaire ? (
-            <div className="ci-own">
-              Appartient à <a className="ci-own-g" href={`/entreprise/${proprietaire.slug}`}><Logo slug={proprietaire.slug} nom={proprietaire.name} taille={22} groupe /><strong>{proprietaire.name}</strong></a>, qui reçoit l'argent de vos achats
-              {carte.chaine.length > 2 && <span className="ci-faint"> (via {carte.chaine.slice(1, -1).join(" → ")})</span>}
-            </div>
-          ) : (
-            estGroupe && marques.length > 0 && <div className="ci-own">{pl(marques.length, "marque suivie", "marques suivies")}</div>
-          )}
-          </div>
-        </div>
-        <Bandeau items={signaux} />
-        {carte.piliers.map((p) => (
-          <LignePilier key={p.code} p={p} mg={marquesGroupe} estMarque={estMarque} nom={carte.nom} slug={carte.slug} vegane={carte.vegane} alternatives={alternatives} />
-        ))}
-        <details className="ci-row">
-          <summary>
-            <span className="ci-p"><span className="ci-ico" aria-hidden="true">📜</span>Toutes les sources</span>
-            <span className="ci-cnt">{carte.chronologie.length}<Chevron /></span>
-            <span className="ci-v">Chronologie complète</span>
-          </summary>
-          <div className="ci-body">
-            {carte.chronologie.length ? (
-              <ol className="ci-tl">
-                {carte.chronologie.map((f) => (
-                  <Entree key={f.code} f={f} avecPilier nomPilier={nomPilier.get(f.pilier)} />
-                ))}
-              </ol>
+            <div className="ci-k">{estGroupe ? "GROUPE" : "MARQUE"}</div>
+            <h1>{carte.nom}</h1>
+            {proprietaire ? (
+              <div className="ci-own">
+                <a className="ci-own-g" href={`/entreprise/${proprietaire.slug}`}><Logo slug={proprietaire.slug} nom={proprietaire.name} taille={22} groupe /><strong>{proprietaire.name}</strong></a>
+                <details className="ci-info">
+                  <summary aria-label="À quoi sert ce groupe ?">ⓘ</summary>
+                  <span className="ci-bulle">
+                    {proprietaire.name} possède la marque : c'est ce groupe qui reçoit l'argent de vos achats
+                    {carte.chaine.length > 2 && <> (via {carte.chaine.slice(1, -1).join(" → ")})</>}.
+                  </span>
+                </details>
+              </div>
             ) : (
-              <p className="ci-faint">Aucune information documentée pour l'instant.</p>
+              estGroupe && marques.length > 0 && <div className="ci-own">{pl(marques.length, "marque suivie", "marques suivies")}</div>
             )}
           </div>
-        </details>
+        </div>
+        <Avertissement items={signaux} />
+      </section>
+
+      {/* Zone 2 : les piliers, en pastilles. */}
+      <section className="ci-zone ci-zone-piliers" aria-labelledby="titre-piliers">
+        <h2 id="titre-piliers" className="ci-zone-t">Pilier par pilier</h2>
+        <PiliersPastilles pastilles={pastilles} panneaux={panneaux} />
+      </section>
+
+      {/* Zone 3 : informations complémentaires. */}
+      <section className="ci-zone ci-zone-plus" aria-labelledby="titre-plus">
+        <h2 id="titre-plus" className="ci-zone-k">Informations complémentaires</h2>
         <p className="ci-foot">
           {carte.documentes} information(s) documentée(s) sur {carte.total} recherchées · aucune note, que des faits sourcés.
           La date indiquée est celle de l'événement quand elle est connue, sinon celle de notre relevé.
         </p>
-      </section>
+        <details className="panel ci-sources">
+          <summary><strong>📜 Toutes les sources</strong> <span className="muted small">— chronologie complète ({carte.chronologie.length})</span></summary>
+          {carte.chronologie.length ? (
+            <ol className="ci-tl">
+              {carte.chronologie.map((f) => (
+                <Entree key={f.code} f={f} avecPilier nomPilier={nomPilier.get(f.pilier)} />
+              ))}
+            </ol>
+          ) : (
+            <p className="ci-faint">Aucune information documentée pour l'instant.</p>
+          )}
+        </details>
 
       {estGroupe && marques.length > 0 && (
         <section className="panel ci-sec">
@@ -621,6 +628,7 @@ export function CarteIdentite({
 
       <div id="contribuer" />
       <CorrectionForm entitySlug={carte.slug} indicators={carte.piliers.flatMap((p) => p.faits.map((f) => ({ code: f.code, name: f.nom })))} />
+      </section>
     </main>
   );
 }
