@@ -198,3 +198,10 @@ test("emballages : recyclabilité, matière recyclée ou consigne, selon la preu
   assert.equal(r(23, "« dont contenus réutilisés ou recyclés 23 % 22 % »"), "23 % de matière recyclée ou réutilisée dans les emballages");
   assert.equal(r(89.7, "(part des produits en emballage consigné ou majoritairement recyclé)"), "89,7 % des produits en emballage consigné ou majoritairement recyclé");
 });
+
+test("ratio de rémunération au salaire le plus bas : libellé distinct", () => {
+  const s = valeurCourte("LAB_CEO_PAY_RATIO", "resultat", preuve("LAB_CEO_PAY_RATIO", { value_numeric: 4.05, excerpt: "« L’écart entre le plus bas et le plus haut salaire est de 2,45 … et de 4,05 avec les mandats sociaux »" }));
+  assert.equal(s, "Le plus haut salaire vaut 4,05 fois le plus bas");
+  const m = valeurCourte("LAB_CEO_PAY_RATIO", "resultat", preuve("LAB_CEO_PAY_RATIO", { value_numeric: 9.4, excerpt: "« Le ratio entre le plus haut salaire et le salaire médian est de 9,4 »" }));
+  assert.equal(m, "Le dirigeant gagne 9,4 fois le salaire médian");
+});

@@ -186,7 +186,11 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "TAX_CBCR_PUBLISHED": return "Impôts publiés pays par pays";
     case "PLA_POLLUTER": return "Parmi les plus gros pollueurs plastique";
     case "SUP_FTI_SCORE": return v === null ? "Évalué" : `${nf(v)} % des points de transparence`;
-    case "LAB_CEO_PAY_RATIO": return v === null ? "Publié" : `Le dirigeant gagne ${nf(v, 0)} fois le salaire médian`;
+    case "LAB_CEO_PAY_RATIO":
+      if (v === null) return "Publié";
+      // La Nef publie l'écart au salaire le plus bas, pas à la médiane (17/10/2026).
+      if (/plus bas|lowest[- ]paid/i.test(x)) return `Le plus haut salaire vaut ${nf(v, v < 10 ? 2 : 0)} fois le plus bas`;
+      return `Le dirigeant gagne ${nf(v, v < 20 ? 1 : 0)} fois le salaire médian`;
     case "LAB_GENDER_PAYGAP": return v === null ? "Publié" : v < 0 ? `${nf(-v)} % en faveur des femmes` : `${nf(v)} % en faveur des hommes`;
     case "LAB_EGAPRO_INDEX": return v === null ? "Publié" : `Index Égapro : ${nf(v, 0)}/100`;
     case "GOV_BCORP": return "Certifiée B Corp";
