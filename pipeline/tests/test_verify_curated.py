@@ -858,3 +858,10 @@ def test_note_imposee_par_bareme_ou_classement_entre_pairs():
     assert check_esef_quote(r, "79% of our packaging is designed to be recyclable").status == "ÉCART"
     r.normalized_value = None
     assert check_esef_quote(r, "79% of our packaging is designed to be recyclable").status == "OK"
+
+
+def test_decimale_detachee_par_l_extraction():
+    from diams.verify_curated import check_esef_quote
+    phrase = "GHG emission intensity per 1 million EUR of revenue t CO 2 e / 1 mln. EUR revenue 1 627 ,4 2 152,5 -24,4%"
+    v = check_esef_quote(esef_row("ENV_GHG_INTENSITY", 1627.4, phrase), phrase)
+    assert v.status == "OK", v.details

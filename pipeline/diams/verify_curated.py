@@ -176,7 +176,7 @@ ESEF_KEYWORDS = {
     "GOV_BOARD_GENDER": [r"femmes?|administratrices?|f[ée]minisation|f[ée]minin|wom[ae]n|female", r"conseil|board|director"],
     "GOV_BOARD_INDEP": [r"ind[ée]pendan|independen"],
     "ENV_SCOPE3_DISCLOSED": [r"scope 3"],
-    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per million (?:EUR|euros?) of revenue|/EUR\b|/€m sales|per \$\s?1\s?M\b|net sales|per €"],
+    "ENV_GHG_INTENSITY": [r"intensit", r"/\s?M€|/\s?million (?:CHF|USD|EUR|GBP|DKK|SEK)|revenu net|produit net|chiffre d.affaires|millions? d.euros|net revenue|rapportées? au revenu|per (?:1 )?million (?:EUR|euros?) of revenue|mln\.? EUR revenue|/EUR\b|/€m sales|per \$\s?1\s?M\b|net sales|per €"],
     "ENV_GHG_TREND": [r"GES|GHG|[ée]missions|CO2|CO ?₂|carbone|carbon"],
     # Avis du Jury de déontologie publicitaire (16/10/2026) : « Recommandation » (Développement durable
     # de l'ARPP) et ses verbes de conclusion.
@@ -822,6 +822,8 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         # Espaces de milliers seulement ; pas après un rapport « 137:1 » (colonnes de
         # ratios : « 137:1 126:1 » ne contient pas le nombre 1126).
         flat = re.sub(r"(?<=\d)(?<!:\d)\s(?=\d{3}(?!\d))", "", quote)
+        # Extraction de PDF : espace avant la décimale (« 1 627 ,4 », AUGA, 17/10/2026).
+        flat = re.sub(r"(\d) ([.,]\d)", r"\1\2", flat)
         target = fx_source if fx_source is not None else row.value_numeric
         variants = _value_variants(target)
         # Écart « en faveur des femmes » : publié en valeur absolue, compté négatif ;
