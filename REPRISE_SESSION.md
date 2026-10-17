@@ -241,6 +241,27 @@ Mesure : `node <brouillon>/audit_brands.mts` → nombre de marques publiables.
 - Caches : `ani_ape_cache.json`, `hatvp_open/agora.json`, `eu_register.xml`,
   `cdp_page.html`, `ca-bundle.pem`.
 
+## 9 bis. Réponses de l'éditeur au rapport de nuit (17/10/2026)
+
+Validé, à appliquer :
+- (1) Conventions judiciaires hors eau (McDonald's France, Crédit Agricole CIB, LVMH) : affichées sur la fiche à titre d'information, sans note.
+- (5) L'Oréal, écart de rémunération : traité comme non publié au périmètre groupe, avec les deux chiffres et la source.
+- (10) Mixité des circulaires américaines : calcul admis quand le sexe des autres administrateurs se lit dans la même circulaire (biographies).
+- (13) Emballages : séparer « recyclables » et « recyclés » en deux indicateurs du pilier plastique.
+- (14) Eau : séparer « prélevée » et « consommée » en deux indicateurs du pilier eau.
+- (15) Carrefour Veggie fusionné dans Carrefour Sensation.
+- (16) Haleon : total du conseil obtenu par addition admis (72,7 %).
+- (18) Piliers rendus applicables (distribution ; eau pour tech, équipement, jouet) : confirmé.
+- (19) Filiale française sans LEI : admise si l'annexe consolidée du groupe la liste (Zara France).
+- Suite : audit des citations chaque semaine ; reprendre leave-russia.org et le jugement TotalEnergies ;
+  rapports des non cotés et sites de marques comme preuves.
+
+En discussion (explications données le 17/10, réponse attendue) : 2 taux atypiques, 3 LobbyMap
+(pas de collecte automatisée déguisée en humain), 4 approbation sur copie, 6 périmètres partiels,
+7 Heura, 8 Lancelot (la page « Nos marques » d'Agrial cite Lancelot Blanche Hermine), 9 alerte des
+conventions sur l'eau, 11 plans de vigilance (et Decathlon : fournisseurs, chasse et pêche), 12 La Nef,
+17 taxonomie, lecture des ingrédients produit par produit, nouveaux indicateurs géopolitiques.
+
 ## 9. En attente
 
 **Décision de l'utilisateur demandée (Egapro)** — l'index Egapro reste attaché à la
