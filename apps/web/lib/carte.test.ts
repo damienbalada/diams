@@ -175,3 +175,8 @@ test("intensité carbone : devise du rapport conservée", () => {
   const e = valeurCourte("ENV_GHG_INTENSITY", "resultat", preuve("ENV_GHG_INTENSITY", { value_numeric: 180, excerpt: "« Intensité carbone économique (en teqCO 2 / M€ de CA) 304 255 180 »" }));
   assert.equal(e, "180 tonnes de CO₂ par million d'euros de ventes");
 });
+
+test("intensité carbone convertie en euros : libellé en euros", () => {
+  const c = valeurCourte("ENV_GHG_INTENSITY", "resultat", preuve("ENV_GHG_INTENSITY", { value_numeric: 165, excerpt: "(intensité de GES par million de dollars) (converti en tCO2e/M€) : « (tCO2e PER $1M) Market-based 146 » ; taux de change annuel moyen 2025 de la BCE (1 € = 1,13 USD) : 146 × 1,13 = 165,0" }));
+  assert.equal(c, "165 tonnes de CO₂ par million d'euros de ventes");
+});

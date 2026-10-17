@@ -213,7 +213,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "PLA_REDUCTION": return v === null ? "Publié" : v > 0 ? `Plastique neuf en hausse de ${nf(v, 2)} % par an` : `Plastique neuf en baisse de ${nf(-v, 2)} % par an`;
     case "PLA_RECYCLED": return v === null ? "Publié" : /biosourc/i.test(x) ? `${nf(v)} % de plastiques recyclés ou biosourcés dans les emballages` : `${nf(v)} % d'emballages recyclés, réutilisables ou recyclables`;
     case "ENV_TAXONOMY_CAPEX": return v === null ? "Publié" : `${nf(v)} % des investissements jugés verts par l'UE`;
-    case "ENV_GHG_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} tonnes de CO₂ par million ${/M\$|U ?S ?D|dollar/i.test(x) ? "de dollars" : "d'euros"} de ventes`;
+    case "ENV_GHG_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} tonnes de CO₂ par million ${/M\$|U ?S ?D|dollar/i.test(x) && !/taux de change annuel moyen/i.test(x) ? "de dollars" : "d'euros"} de ventes`;
     case "WAT_INTENSITY": {
       if (v === null) return "Publié";
       // Le rapport publie soit les prélèvements, soit la consommation (ESRS E3-4 § 29) : le premier terme cité l'emporte.
