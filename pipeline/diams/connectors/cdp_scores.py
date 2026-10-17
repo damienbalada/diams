@@ -1,4 +1,4 @@
-"""CDP — notes publiques 2025 de toutes les entreprises évaluées (climat, eau).
+"""CDP — notes publiques 2025 de toutes les entreprises évaluées (climat, eau, forêts).
 
 CDP publie, sur sa page « Scores and A Lists », la liste complète des notes
 publiques de l'année (plus de 30 000 entreprises) dans une visualisation
@@ -35,6 +35,7 @@ class CdpScore:
     country: str
     climate: str | None   # lettre (A, A-, …, F) ou None
     water: str | None
+    forests: str | None = None   # questionnaire forêts (déforestation : soja, bœuf, cacao, huile de palme, bois…)
 
 
 def grade(cell: str | None) -> str | None:
@@ -57,5 +58,5 @@ def parse_scores(html: str) -> list[CdpScore]:
         if not name:
             continue
         out.append(CdpScore(name, (r.get("Country / Area") or "").strip(),
-                            grade(r.get("Climate")), grade(r.get("Water"))))
+                            grade(r.get("Climate")), grade(r.get("Water")), grade(r.get("Forests"))))
     return out

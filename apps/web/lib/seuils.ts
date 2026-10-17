@@ -52,6 +52,7 @@ export const REGLES: Record<string, { alerte: string; vigilance?: string; refere
   ANI_EXPLOITATION: { alerte: "un produit issu de l'exploitation animale est documenté", vigilance: "exploitation non documentée dans un secteur où elle est la règle", reference: "choix de l'Index" },
   ANI_BBFAW_TIER: { alerte: "niveau 6 sur 6", vigilance: "niveau 5 sur 6", reference: "échelle du classement BBFAW : niveau 6, aucun signe que le bien-être animal soit à l'ordre du jour ; niveau 5, à l'ordre du jour mais peu de preuves de mise en œuvre" },
   ENV_CDP_CLIMATE: { alerte: "note F", vigilance: "note D ou D-", reference: "échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond" },
+  ENV_CDP_FORESTS: { alerte: "note F", vigilance: "note D ou D-", reference: "échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée (le CDP n'interroge que les entreprises exposées au risque de déforestation) ; D, plus bas niveau pour une entreprise qui répond" },
   WAT_CDP: { alerte: "note F", vigilance: "note D ou D-", reference: "échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond" },
   ENV_GHG_TREND: { alerte: "émissions en hausse", vigilance: "baisse de moins de 4,2 % par an", reference: "4,2 % par an : rythme minimal de baisse des objectifs alignés sur 1,5 °C de la SBTi" },
   ENV_SBTI_VALIDATED: { alerte: "—", vigilance: "engagement retiré", reference: "export de la SBTi : l'entreprise s'était engagée à fixer un objectif et ne l'a pas fait dans le délai" },
@@ -87,9 +88,9 @@ export function evaluer(f: FaitEvalue): Signal | null {
     case "ANI_BBFAW_TIER":
       if (x === null) return null;
       return x >= 6 ? a("bien-être animal : dernier niveau (6 sur 6) du classement BBFAW", ref) : x >= 5 ? v("bien-être animal : avant-dernier niveau (5 sur 6) du classement BBFAW", ref) : null;
-    case "ENV_CDP_CLIMATE": case "WAT_CDP": {
-      const n = note(/note ([A-F][+-]?)/, c);
-      const q = f.code === "WAT_CDP" ? "eau" : "climat";
+    case "ENV_CDP_CLIMATE": case "WAT_CDP": case "ENV_CDP_FORESTS": {
+      const n = note(/note ([A-F][+-]?)/, c) ?? (/Did not disclose/.test(c) ? "F" : null);
+      const q = f.code === "WAT_CDP" ? "eau" : f.code === "ENV_CDP_FORESTS" ? "forêts" : "climat";
       return n === "F" ? a(`aucune réponse au questionnaire ${q} du CDP (note F)`, ref) : n?.startsWith("D") ? v(`note ${n} au questionnaire ${q} du CDP (de A à F)`, ref) : null;
     }
     case "ENV_GHG_TREND":
@@ -180,6 +181,7 @@ export const RANG_SIGNAL: Record<NiveauSignal, number> = { alerte: 0, vigilance:
 export const REPERES: Record<string, string> = {
   ENV_CDP_CLIMATE: "Échelle du CDP : de A (meilleure note) à D-, F = l'entreprise n'a pas répondu",
   WAT_CDP: "Échelle du CDP : de A (meilleure note) à D-, F = l'entreprise n'a pas répondu",
+  ENV_CDP_FORESTS: "Échelle du CDP : de A (meilleure note) à D-, F = l'entreprise n'a pas répondu ; porte sur le soja, le bœuf et le cuir, le cacao, l'huile de palme, le café, le caoutchouc et le bois",
   ENV_GHG_TREND: "Repère : une baisse d'au moins 4,2 % par an est nécessaire pour rester sous 1,5 °C (SBTi)",
   PLA_REDUCTION: "Repère : évolution moyenne par an sur la période publiée par l'entreprise",
   SUP_LIVING_WAGE: "Échelle du Fashion Checker : de A (salaire vital versé) à E (ni versé ni promis)",

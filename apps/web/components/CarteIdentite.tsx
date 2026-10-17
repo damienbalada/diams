@@ -1,5 +1,5 @@
 import { marqueAnimale, marquesDocumentees, raisonVide, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
-import type { OwnershipProof, Produit, ProduitScanne } from "@/lib/data";
+import type { OwnershipProof, Produit, ProduitLu, ProduitScanne } from "@/lib/data";
 import { logoDe } from "@/lib/logos";
 import { EN_SAVOIR_PLUS, REPERES, type Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
@@ -158,7 +158,7 @@ const ICONE_IND: Record<string, string> = {
   ENV_CDP_CLIMATE: "📋", ENV_GHG_INTENSITY: "🏭", ENV_GHG_TREND: "📉", ENV_GREENWASHING: "🎭", ENV_MATERIAL_CHANGE: "🧵", ENV_SBTI_VALIDATED: "🎯",
   ENV_SCOPE3_DISCLOSED: "🌐", ENV_TAXONOMY_CAPEX: "🏗️",
   PLA_POLLUTER: "🗑️", PLA_RECYCLED: "♻️", PLA_RECYCLABLE: "📦", PLA_REDUCTION: "🧴",
-  WAT_CDP: "📋", WAT_CONTROVERSY: "🏜️", WAT_INTENSITY: "🚰", WAT_WITHDRAWAL_INTENSITY: "💧",
+  WAT_CDP: "📋", ENV_CDP_FORESTS: "🌳", WAT_CONTROVERSY: "🏜️", WAT_INTENSITY: "🚰", WAT_WITHDRAWAL_INTENSITY: "💧",
   LAB_CEO_PAY_RATIO: "💰", LAB_PAY_RATIO_MAXMIN: "📏", LAB_EGAPRO_INDEX: "⚖️", LAB_GENDER_PAYGAP: "👩‍💼", LAB_LITIGATION_RATE: "🧑‍⚖️", LAB_LIVING_WAGE: "🏠",
   SUP_BHRRC_ALLEG: "📣", SUP_FTI_SCORE: "🔍", SUP_KNOWTHECHAIN: "⛓️", SUP_LIVING_WAGE: "🪙", SUP_SUPPLIER_LIST: "📃", SUP_VIGILANCE_PLAN: "🛡️",
   GOV_BCORP: "✅", GOV_BOARD_GENDER: "👩", GOV_BOARD_INDEP: "🪑", GOV_SANCTIONS: "🔨", GOV_CJIP: "📜",
@@ -430,6 +430,7 @@ export function CarteIdentite({
   marquesGroupe = null,
   estMarque = false,
   produits = null,
+  produitsLus = [],
   scan = null,
 }: {
   carte: Carte;
@@ -441,6 +442,8 @@ export function CarteIdentite({
   marquesGroupe?: MarquesGroupe;
   estMarque?: boolean;
   produits?: { total: number; produits: Produit[]; lien: string } | null;
+  /** Fiches produits lues sur le site de la marque (ingrédients recopiés, statut). */
+  produitsLus?: ProduitLu[];
   /** Produit scanné (page /code/…) : il s'affiche en tête, avec la façon dont la marque a été reconnue. */
   scan?: { produit: ProduitScanne; correspondance: "exacte" | "approchee" | "proprietaire"; nomLu: string; phrase: string } | null;
 }) {
@@ -525,6 +528,7 @@ export function CarteIdentite({
       {estMarque && (
         <section className="panel ci-sec">
           <h2 className="ci-sec-t">Ses produits {produits && <span className="ci-sec-n">{produits.total}</span>}</h2>
+          {produitsLus.length > 0 && <ProduitsLus produits={produitsLus} />}
           {produits ? (
             <>
               <p className="muted small">
@@ -584,5 +588,39 @@ export function CarteIdentite({
 
       <CorrectionForm entitySlug={carte.slug} indicators={carte.piliers.flatMap((p) => p.faits.map((f) => ({ code: f.code, name: f.nom })))} />
     </main>
+  );
+}
+
+
+const STATUT_PRODUIT: Record<ProduitLu["statut"], [string, string]> = {
+  ingredient_animal: ["ci-alerte", "Ingrédient d'origine animale"],
+  aucun_ingredient_animal_declare: ["ci-aucune_info", "Aucun ingrédient animal dans la liste lue"],
+  vegetal_declare: ["ci-vegetal", "Présenté comme végétal par la marque"],
+  vegetal_certifie: ["ci-vegetal", "Végétal, label d'un tiers"],
+};
+
+/** Ingrédients lus sur les fiches produits du site de la marque, recopiés et datés. */
+function ProduitsLus({ produits }: { produits: ProduitLu[] }) {
+  const animaux = produits.filter((p) => p.statut === "ingredient_animal").length;
+  return (
+    <div className="ci-prods-lus">
+      <p className="muted small">
+        Ingrédients lus sur {pl(produits.length, "fiche produit", "fiches produits")} du site de la marque{animaux ? `, dont ${animaux} avec un ingrédient d'origine animale` : ""}.
+        Une liste sans ingrédient animal visible ne prouve pas qu'un produit est végétal : certains additifs ou arômes peuvent être d'origine animale ; seuls un label ou la marque elle-même peuvent l'affirmer.
+      </p>
+      <ul className="ci-prods-liste">
+        {produits.map((p) => {
+          const [cls, txt] = STATUT_PRODUIT[p.statut];
+          return (
+            <li key={p.url}>
+              <a className="ci-lien" href={p.url} target="_blank" rel="noopener noreferrer">{p.nom} ↗</a>{" "}
+              <span className={cls}>{txt}{p.animaux.length ? ` : ${p.animaux.join(", ")}` : ""}</span>
+              {p.preuveVegetale && <span className="ci-small"> · {p.preuveVegetale}</span>}
+              {p.ingredients && <details className="ci-small"><summary>Ingrédients (lus le {dfr(p.date)})</summary>« {p.ingredients} »{p.douteux.length ? <> — d'origine possiblement animale, non tranché : {p.douteux.join(", ")}</> : null}</details>}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

@@ -91,7 +91,7 @@ async function build() {
     "value_profiles", "profile_weights", "entities", "evidence", "political_groups",
     "civic_votes", "civic_positions", "disclosure_regimes", "indicator_regimes", "entity_regimes",
     "indicator_sectors", "sector_dimension_weights", "obligation_exemptions", "entity_ownership_sources",
-    "indicator_reviews",
+    "indicator_reviews", "products",
   ]) T[t] = await fetchAll(t);
 
   const code = (rows, field = "code") => new Map(rows.map((r) => [r.id, r[field]]));
@@ -230,6 +230,18 @@ async function build() {
       ref("entities", "slug", ent.get(r.entity_id)), ref("entities", "slug", ent.get(r.owner_id)),
       lit(r.source_url), lit(r.excerpt), lit(r.observed_on), lit(r.reviewer),
       lit(r.checked_on), lit(r.check_result), lit(r.check_detail),
+    ])));
+
+  // Tableau Postgres écrit comme littéral texte (« {"lait","beurre"} »), converti à l'insertion.
+  const arr = (a) => lit(`{${(a ?? []).map((x) => JSON.stringify(String(x))).join(",")}}`);
+  section("Produits : ingrédients lus sur les fiches des marques", upsert("products",
+    ["entity_id", "name", "source_url", "ingredients", "animal_ingredients", "doubtful_ingredients", "status", "vegetal_proof",
+     "observed_on", "reviewer", "review_status"],
+    ["entity_id", "source_url"],
+    [...T.products].sort(by((r) => `${ent.get(r.entity_id)}|${r.source_url}`)).map((r) => [
+      ref("entities", "slug", ent.get(r.entity_id)), lit(r.name), lit(r.source_url), lit(r.ingredients),
+      arr(r.animal_ingredients), arr(r.doubtful_ingredients), lit(r.status), lit(r.vegetal_proof),
+      lit(r.observed_on), lit(r.reviewer), lit(r.review_status),
     ])));
 
   section("Preuves (evidence) — clé : entité + indicateur + source + date", upsert("evidence",

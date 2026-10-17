@@ -66,7 +66,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v297"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v298"], { revalidate: 600 });
 
 type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
 
@@ -649,6 +649,25 @@ export const getProduits = unstable_cache(
  * Produit lu par son code-barres dans Open Food Facts, puis Open Beauty Facts (bases collaboratives,
  * licence ouverte). Sert à savoir de quelle marque il s'agit ; ce n'est pas une preuve.
  */
+/** Fiche produit lue sur le site de la marque (table products) : ingrédients recopiés et statut. */
+export interface ProduitLu {
+  nom: string; url: string; ingredients: string | null; animaux: string[]; douteux: string[];
+  statut: "ingredient_animal" | "aucun_ingredient_animal_declare" | "vegetal_declare" | "vegetal_certifie";
+  preuveVegetale: string | null; date: string;
+}
+export async function getProduitsLus(slug: string): Promise<ProduitLu[]> {
+  const { data: ent } = await getSupabase().from("entities").select("id").eq("slug", slug).maybeSingle();
+  if (!ent) return [];
+  const { data, error } = await getSupabase().from("products")
+    .select("name, source_url, ingredients, animal_ingredients, doubtful_ingredients, status, vegetal_proof, observed_on")
+    .eq("entity_id", (ent as any).id).eq("review_status", "approved").order("name").limit(60);
+  if (error || !data) return [];
+  return (data as any[]).map((r) => ({
+    nom: r.name, url: r.source_url, ingredients: r.ingredients, animaux: r.animal_ingredients ?? [], douteux: r.doubtful_ingredients ?? [],
+    statut: r.status, preuveVegetale: r.vegetal_proof, date: r.observed_on,
+  }));
+}
+
 export interface ProduitScanne { code: string; nom: string; image: string | null; quantite: string | null; marques: string[]; proprietaire: string | null; base: string; lien: string }
 /** Les bases n'ont pas répondu (panne, limite d'appels) : jamais mis en cache comme « inconnu ». */
 export class BasesIndisponibles extends Error {}

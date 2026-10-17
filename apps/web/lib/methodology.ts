@@ -930,10 +930,31 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.8.5\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.8.6\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.6 (17/10/2026)** — Décisions de l'éditeur en réponse au rapport de nuit.
+  *Mesures séparées* : les emballages « recyclables ou réutilisables dès la conception »
+  (PLA_RECYCLABLE) et la « part de matière recyclée » (PLA_RECYCLED) sont deux indicateurs du pilier
+  plastique ; la consommation d'eau (WAT_INTENSITY, ESRS E3-4) et les prélèvements d'eau
+  (WAT_WITHDRAWAL_INTENSITY) deux indicateurs du pilier eau. Chacun a son propre classement entre pairs.
+  *Indicateurs d'information, non notés, affichés seulement quand ils sont documentés* : conventions
+  judiciaires d'intérêt public pour fraude fiscale, corruption ou trafic d'influence (GOV_CJIP ; la
+  fiche rappelle que la validation n'emporte pas déclaration de culpabilité), vente d'articles de chasse
+  ou de pêche (ANI_HUNTING_FISHING), écart entre le plus haut et le plus bas salaire
+  (LAB_PAY_RATIO_MAXMIN, distinct du ratio à la médiane). *Déforestation* : note publique du
+  questionnaire forêts du CDP (ENV_CDP_FORESTS), pour les secteurs exposés au soja, au bœuf et au cuir,
+  au cacao, à l'huile de palme, au café, au caoutchouc et au bois, en attendant l'application du
+  règlement (UE) 2023/1115 (30/12/2026 pour les grandes et moyennes entreprises, 30/06/2027 pour les
+  petites, d'après le règlement (UE) 2025/2650). *Règles admises* : total d'un conseil obtenu par
+  addition des catégories publiées (Haleon) ; part de femmes calculée quand le sexe des autres
+  candidats se lit dans la même circulaire (Amazon) ; filiale française sans identifiant LEI rattachée
+  quand l'annexe consolidée du groupe la liste (Zara France). *Produits* : les listes d'ingrédients
+  des fiches produits des sites de marques sont recopiées et datées (table products) ; un ingrédient
+  d'origine animale (hors traces) prouve l'exploitation animale de la marque ; une liste sans
+  ingrédient animal visible ne prouve pas qu'un produit est végétal (seuls un label d'un tiers ou la
+  marque elle-même peuvent l'affirmer).
 - **0.8.5 (17/10/2026)** — Cohérence, sans changement de barème. Toutes les devises sont
   converties en euros au taux annuel moyen de la BCE avant comparaison, dollar compris (les
   intensités carbone d'AB InBev et de TotalEnergies étaient restées en dollars). Les indicateurs

@@ -4,7 +4,7 @@
  */
 import {
   getScorePayload, getOwnerGroup, getOwnershipProofs, getJournal, getMemeRayon, getMarques, getMarquesGroupe,
-  getEstMarque, getProduits, getPays, type OwnershipProof,
+  getEstMarque, getProduits, getProduitsLus, getPays, type OwnershipProof,
 } from "@/lib/data";
 import { construireCarte } from "@/lib/carte";
 
@@ -23,6 +23,8 @@ export async function chargerFiche(slug: string) {
   ]);
   const carte = construireCarte(payload as any, journal, { estMarque, ...pays });
   const estGroupe = (payload.ownership_chain ?? []).length <= 1 || marques.length > 0;
-  const produits = estMarque ? await getProduits(slug).catch(() => null) : null;
-  return { carte, estGroupe: estGroupe && !proprietaire, proprietaire, preuvesPropriete: preuves, memeRayon, marques, marquesGroupe, estMarque, produits };
+  const [produits, produitsLus] = estMarque
+    ? await Promise.all([getProduits(slug).catch(() => null), getProduitsLus(slug).catch(() => [])])
+    : [null, []];
+  return { carte, estGroupe: estGroupe && !proprietaire, proprietaire, preuvesPropriete: preuves, memeRayon, marques, marquesGroupe, estMarque, produits, produitsLus };
 }

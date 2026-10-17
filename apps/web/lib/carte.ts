@@ -198,6 +198,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "GEO_LOBBYING_SPEND": { const s = m1(/déclarés[^:]*: ([^,]+(?:€[^,]*€)?)/, x) ?? (v === null ? null : `${nf(v, 0)} €`); return s ? `${s} de lobbying déclarés par an` : "Déclaré"; }
     case "ENV_CDP_CLIMATE": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? "?"} au questionnaire climat du CDP`;
     case "WAT_CDP": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? "?"} au questionnaire eau du CDP`;
+    case "ENV_CDP_FORESTS": return `Note ${m1(/note ([A-F][+-]?)/, x) ?? (/Did not disclose/.test(x) ? "F" : "?")} au questionnaire forêts (déforestation) du CDP`;
     case "ENV_SBTI_VALIDATED": return m1(/— (objectif[^(]+\([^)]*\))/, x) ?? m1(/— ([^(]+)\(/, x) ?? "Documenté";
     case "SUP_LIVING_WAGE": return `Note ${m1(/note ([A-E])/, x) ?? "?"} sur le salaire vital des ouvriers`;
     case "SUP_VIGILANCE_PLAN": return "Plan de vigilance publié";
@@ -471,7 +472,7 @@ export function faitCle(pilier: string, fs: Fait[]): Fait | null {
 
 /** Indicateurs qui viennent d'un classement, d'un questionnaire ou d'un registre externe. */
 const EXTERNE = new Set([
-  "ENV_CDP_CLIMATE", "WAT_CDP", "ENV_SBTI_VALIDATED", "SUP_FTI_SCORE", "SUP_KNOWTHECHAIN", "SUP_LIVING_WAGE", "ANI_BBFAW_TIER",
+  "ENV_CDP_CLIMATE", "WAT_CDP", "ENV_CDP_FORESTS", "ENV_SBTI_VALIDATED", "SUP_FTI_SCORE", "SUP_KNOWTHECHAIN", "SUP_LIVING_WAGE", "ANI_BBFAW_TIER",
   "ANI_FUR_FREE", "GOV_BCORP", "GEO_RUSSIA_EXIT", "GEO_LOBBYING_ALIGN", "GEO_LOBBYING_TRANSP", "GEO_LOBBYING_SPEND",
   "INV_SOLIDARITY_LABEL", "ENV_MATERIAL_CHANGE",
 ]);

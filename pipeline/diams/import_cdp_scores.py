@@ -66,7 +66,7 @@ SKIP = {
 }
 GENERIC = {"group", "groupe", "holding", "holdings", "international", "company", "corporation"}
 
-LABEL = {"climate": "climat", "water": "sécurité de l'eau"}
+LABEL = {"climate": "climat", "water": "sécurité de l'eau", "forests": "forêts"}
 
 
 def match(slug: str, names: list[str], by_name: dict[str, list[cs.CdpScore]],
@@ -88,7 +88,7 @@ def match(slug: str, names: list[str], by_name: dict[str, list[cs.CdpScore]],
 
 def rows_for(slug: str, s: cs.CdpScore) -> list[EvidenceRow]:
     out = []
-    for field, code in (("climate", "ENV_CDP_CLIMATE"), ("water", "WAT_CDP")):
+    for field, code in (("climate", "ENV_CDP_CLIMATE"), ("water", "WAT_CDP"), ("forests", "ENV_CDP_FORESTS")):
         letter = getattr(s, field)
         if letter is None:
             continue
@@ -113,7 +113,7 @@ def _rest(c: httpx.Client, method: str, table: str, **kw) -> httpx.Response:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="CDP : notes publiques climat et eau des groupes suivis.")
+    ap = argparse.ArgumentParser(description="CDP : notes publiques climat, eau et forêts des groupes suivis.")
     ap.add_argument("--file", help="page Flourish déjà téléchargée (sinon téléchargée)")
     ap.add_argument("--apply", action="store_true", help="écrit en base (sinon dry-run)")
     args = ap.parse_args()
@@ -141,7 +141,7 @@ def main() -> None:
             if s:
                 new = rows_for(g["slug"], s)
                 rows += new
-                print(f"  ✔ {g['slug']:<18} climat {s.climate or '—':<3} eau {s.water or '—':<3} ({s.company})")
+                print(f"  ✔ {g['slug']:<18} climat {s.climate or '—':<3} eau {s.water or '—':<3} forêts {s.forests or '—':<3} ({s.company})")
         print(f"{len(rows)} notes à écrire")
         old = []
         for code in ("ENV_CDP_CLIMATE", "WAT_CDP"):
