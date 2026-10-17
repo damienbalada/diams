@@ -156,6 +156,12 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       if (/tanneries certified by the Leather Working Group/.test(x)) return "Cuir de tanneries certifiées (Leather Working Group) exigé";
       return "Objectifs de traçabilité et de certification des tanneries (Leather Working Group)";
     }
+    case "ANI_SLAUGHTER": {
+      // Barème : aucun / engagement / audité → 0 / 0,5 / 1 (premières preuves le 17/10/2026).
+      const part = m1(/étourdissement par atmosphère contrôlée : (\d+ ?%)/, x);
+      const base = Number(p.normalized_value ?? 0) >= 1 ? "Standards d'abattage et de transport audités" : "Engagement sur le bien-être à l'abattage et au transport";
+      return part ? `${base} (${part} des poulets étourdis par atmosphère contrôlée)` : base;
+    }
     case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 au classement du bien-être animal`;
     case "GEO_RUSSIA_EXIT": { const s = m1(/» — ([^;.]+)/, x) ?? m1(/— ([^;.]+)/, x); return s ? `Russie : ${s.replace(/ en Russie$/, "")}` : "Documenté"; }
     case "GOV_SANCTIONS": case "ENV_GREENWASHING": {

@@ -215,3 +215,8 @@ test("sanction en dollars australiens écrits en toutes lettres", () => {
   const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("GOV_SANCTIONS", { excerpt: "Cour fédérale d'Australie, ordonnance du 02/09/2022 : « pecuniary penalties … totalling $12.5 million » — amende civile de 12,5 M$ australiens infligée à la filiale australienne" }));
   assert.match(s, /amende de 12,5 M\$ australiens$/);
 });
+
+test("abattage : engagement avec part des poulets étourdis", () => {
+  const s = valeurCourte("ANI_SLAUGHTER", null, preuve("ANI_SLAUGHTER", { normalized_value: 0.5, excerpt: "« étourdissement par atmosphère contrôlée : 60 % ; — audit externe : 50 % »" }));
+  assert.equal(s, "Engagement sur le bien-être à l'abattage et au transport (60 % des poulets étourdis par atmosphère contrôlée)");
+});
