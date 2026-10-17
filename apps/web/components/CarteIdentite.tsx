@@ -3,6 +3,7 @@ import type { OwnershipProof, Produit, ProduitLu, ProduitScanne } from "@/lib/da
 import { logoDe } from "@/lib/logos";
 import { EN_SAVOIR_PLUS, REPERES, type Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
+import type { AlternativesPilier } from "@/lib/alternatives-piliers";
 
 const ICONE: Record<string, string> = { ANI: "🐄", ENV: "🌍", PLA: "🧴", WAT: "💧", LAB: "👥", SUP: "🔗", GOV: "🏛️", TAX: "💶", GEO: "🗺️", INV: "🏦" };
 function Chevron() {
@@ -288,12 +289,38 @@ function Faits({ faits, cacherPresume }: { faits: Fait[]; cacherPresume?: boolea
   );
 }
 
+/** Alternatives du pilier : marques du même rayon, d'un autre groupe, qui remplissent un critère affiché. */
+function EncartAlternatives({ a }: { a?: AlternativesPilier[string] }) {
+  return (
+    <section className="ci-alt">
+      <div className="ci-alt-t">🔄 Alternatives dans le même secteur</div>
+      {a ? (
+        <>
+          <p className="ci-small ci-faint">Marques d'autres groupes {a.critere}. Aucune note : c'est ce critère, et lui seul, qui les fait figurer ici.</p>
+          <div className="ci-alt-l">
+            {a.marques.map((m) => (
+              <a key={m.slug} className={`ci-alt-m${m.second ? "" : " ci-alt-fort"}`} href={`/entreprise/${m.slug}`}>
+                <Logo slug={m.slug} nom={m.nom} taille={26} />
+                <span>{m.nom}{m.groupe && <span className="ci-faint"> · {m.groupe}</span>}{m.second && <span className="ci-faint"> · produits végétaux</span>}</span>
+              </a>
+            ))}
+            {a.autres > 0 && <span className="ci-small ci-faint">et {pl(a.autres, "autre", "autres")}</span>}
+          </div>
+        </>
+      ) : (
+        <p className="ci-small ci-faint">Aucune marque du même secteur ne remplit encore le critère de ce pilier dans nos données.</p>
+      )}
+      <a className="ci-small ci-lien" href="#contribuer">Vous connaissez une meilleure alternative ? Proposez-la →</a>
+    </section>
+  );
+}
+
 /** Une section de niveau (groupe, marque, produits) dans un pilier déplié. */
 function Niveau({ icone, titre, aide, children }: { icone: string; titre: React.ReactNode; aide: string; children: React.ReactNode }) {
   return (
     <section className="ci-niv-sec">
-      <div className="ci-niv-t">
-        {icone} {titre} <span className="ci-faint ci-small">— {aide}</span>
+      <div className="ci-niv-t" title={aide}>
+        {icone} {titre}
       </div>
       {children}
     </section>
@@ -345,7 +372,7 @@ function ResumeMarques({ mg, pilier }: { mg: NonNullable<MarquesGroupe>; pilier:
   );
 }
 
-function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGroupe; estMarque: boolean; nom: string; slug: string }) {
+function LignePilier({ p, mg, estMarque, nom, slug, vegane = false, alternatives }: { p: Pilier; mg: MarquesGroupe; estMarque: boolean; nom: string; slug: string; vegane?: boolean; alternatives?: AlternativesPilier }) {
   const k = p.cle;
   // Fiche d'un groupe : sans preuve propre au groupe, le pilier animal se lit d'après ses marques.
   const r = p.code === "ANI" && !estMarque && mg ? resumeGroupe(mg.marques.map(marqueAnimale)) : null;
@@ -390,18 +417,18 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
       </summary>
       <div className="ci-body">
         {p.solidite && <p className="ci-faint ci-small">Ce pilier repose sur des {SOLIDITE_PILIER[p.solidite]}.</p>}
-        {(g.length > 0 || (p.code === "ANI" && estMarque && mg)) && (
+        {(g.length > 0 || (p.code === "ANI" && estMarque && mg && !vegane)) && (
           <Niveau
             icone="🏢"
-            titre={estMarque ? (mg ? <>Groupe · <a href={`/entreprise/${mg.groupe.slug}`}>{mg.groupe.name}</a></> : <>Groupe</>) : <>Groupe · {nom}</>}
+            titre={estMarque ? (mg ? <>Groupe <a href={`/entreprise/${mg.groupe.slug}`}>{mg.groupe.name}</a></> : <>Groupe</>) : <>Groupe {nom}</>}
             aide={estMarque ? "ce que publie le groupe ; la marque le reprend" : "ce que publie le groupe"}
           >
-            {p.code === "ANI" && estMarque && mg && <ResumeAnimal mg={mg} slug={slug} estGroupe={false} />}
+            {p.code === "ANI" && estMarque && mg && !vegane && <ResumeAnimal mg={mg} slug={slug} estGroupe={false} />}
             <Faits faits={g} cacherPresume={niveauGroupe} />
           </Niveau>
         )}
         {estMarque && m.length > 0 && (
-          <Niveau icone="🏷️" titre={<>Marque · {nom}</>} aide="ce qui est prouvé pour la marque elle-même">
+          <Niveau icone="🏷️" titre={<>Marque {nom}</>} aide="ce qui est prouvé pour la marque elle-même">
             <Faits faits={m} />
           </Niveau>
         )}
@@ -415,6 +442,7 @@ function LignePilier({ p, mg, estMarque, nom, slug }: { p: Pilier; mg: MarquesGr
             <Faits faits={pr} />
           </Niveau>
         )}
+        <EncartAlternatives a={alternatives?.[p.code]} />
       </div>
     </details>
   );
@@ -431,6 +459,7 @@ export function CarteIdentite({
   estMarque = false,
   produits = null,
   produitsLus = [],
+  alternatives = {},
   scan = null,
 }: {
   carte: Carte;
@@ -444,6 +473,8 @@ export function CarteIdentite({
   produits?: { total: number; produits: Produit[]; lien: string } | null;
   /** Fiches produits lues sur le site de la marque (ingrédients recopiés, statut). */
   produitsLus?: ProduitLu[];
+  /** Alternatives de chaque pilier (critère affiché). */
+  alternatives?: AlternativesPilier;
   /** Produit scanné (page /code/…) : il s'affiche en tête, avec la façon dont la marque a été reconnue. */
   scan?: { produit: ProduitScanne; correspondance: "exacte" | "approchee" | "proprietaire"; nomLu: string; phrase: string } | null;
 }) {
@@ -491,7 +522,7 @@ export function CarteIdentite({
         </div>
         <Bandeau items={signaux} />
         {carte.piliers.map((p) => (
-          <LignePilier key={p.code} p={p} mg={marquesGroupe} estMarque={estMarque} nom={carte.nom} slug={carte.slug} />
+          <LignePilier key={p.code} p={p} mg={marquesGroupe} estMarque={estMarque} nom={carte.nom} slug={carte.slug} vegane={carte.vegane} alternatives={alternatives} />
         ))}
         <details className="ci-row">
           <summary>
@@ -586,6 +617,7 @@ export function CarteIdentite({
         </section>
       )}
 
+      <div id="contribuer" />
       <CorrectionForm entitySlug={carte.slug} indicators={carte.piliers.flatMap((p) => p.faits.map((f) => ({ code: f.code, name: f.nom })))} />
     </main>
   );
@@ -600,8 +632,40 @@ const STATUT_PRODUIT: Record<ProduitLu["statut"], [string, string]> = {
 };
 
 /** Ingrédients lus sur les fiches produits du site de la marque, recopiés et datés. */
-function ProduitsLus({ produits }: { produits: ProduitLu[] }) {
-  const animaux = produits.filter((p) => p.statut === "ingredient_animal").length;
+const ORDRE_PRODUIT: Record<ProduitLu["statut"], number> = { vegetal_certifie: 0, vegetal_declare: 1, aucun_ingredient_animal_declare: 2, ingredient_animal: 3 };
+
+function LigneProduit({ p }: { p: ProduitLu }) {
+  const [cls, txt] = STATUT_PRODUIT[p.statut];
+  return (
+    <li>
+      <a className="ci-lien" href={p.url} target="_blank" rel="noopener noreferrer">{p.nom} ↗</a>{" "}
+      <span className={cls}>{txt}{p.animaux.length ? ` : ${p.animaux.join(", ")}` : ""}</span>
+      {p.ingredients && <details className="ci-small"><summary>Ingrédients (lus le {dfr(p.date)})</summary>« {p.ingredients} »{p.douteux.length ? <> — d'origine possiblement animale, non tranché : {p.douteux.join(", ")}</> : null}</details>}
+    </li>
+  );
+}
+
+function ProduitsLus({ produits: tous }: { produits: ProduitLu[] }) {
+  const produits = [...tous].sort((a, b) => ORDRE_PRODUIT[a.statut] - ORDRE_PRODUIT[b.statut] || a.nom.localeCompare(b.nom, "fr"));
+  const sans = produits.filter((p) => p.statut !== "ingredient_animal");
+  const avec = produits.filter((p) => p.statut === "ingredient_animal");
+  const animaux = avec.length;
+  if (sans.length && avec.length) {
+    return (
+      <div className="ci-prods-lus">
+        <p className="muted small">Ingrédients lus sur {pl(produits.length, "fiche produit", "fiches produits")} du site de la marque, dont {animaux} avec un ingrédient d'origine animale.</p>
+        <div className="ci-prods-sans">
+          <div className="ci-prods-sans-t">🌱 Chez cette marque, sans ingrédient animal</div>
+          <p className="ci-small ci-faint">« Végétal » : la marque le dit ou un label l'atteste. « Aucun ingrédient animal dans la liste lue » ne prouve pas qu'un produit est végétal : certains additifs ou arômes peuvent être d'origine animale.</p>
+          <ul className="ci-prods-liste">{sans.map((p) => <LigneProduit key={p.url} p={p} />)}</ul>
+        </div>
+        <details className="ci-small" style={{ marginTop: 8 }}>
+          <summary>{pl(avec.length, "produit", "produits")} avec un ingrédient d'origine animale</summary>
+          <ul className="ci-prods-liste">{avec.map((p) => <LigneProduit key={p.url} p={p} />)}</ul>
+        </details>
+      </div>
+    );
+  }
   return (
     <div className="ci-prods-lus">
       <p className="muted small">

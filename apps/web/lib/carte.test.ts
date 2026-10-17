@@ -259,3 +259,19 @@ test("indicateur d'information sans preuve : absent de la fiche", () => {
   const codes = carte.piliers.flatMap((p) => p.faits.map((f) => f.code));
   assert.deepEqual(codes, ["GOV_SANCTIONS"]);
 });
+
+test("marque végane d'un groupe non végan : pas d'héritage des données animales du groupe", () => {
+  const payload = {
+    entity: { slug: "m", name: "M" }, ownership_chain: ["M", "G"], dimensions: [],
+    applicableIndicators: [ind("ANI_ANIMAL_FREE", "ANI"), ind("ANI_BBFAW_TIER", "ANI"), ind("ENV_CDP_CLIMATE", "ENV")],
+    evidence: [
+      preuve("ANI_ANIMAL_FREE", { excerpt: "« 100 % végétal »" }),
+      preuve("ANI_BBFAW_TIER", { value_numeric: 5, inherited_from: "G", excerpt: "BBFAW niveau 5" }),
+      preuve("ENV_CDP_CLIMATE", { inherited_from: "G", excerpt: "note B" }),
+    ],
+  };
+  const c = construireCarte(payload as never, [], { estMarque: true });
+  const codes = c.piliers.flatMap((p) => p.faits.map((f) => f.code));
+  assert.ok(codes.includes("ANI_ANIMAL_FREE") && codes.includes("ENV_CDP_CLIMATE"));
+  assert.ok(!codes.includes("ANI_BBFAW_TIER"));
+});

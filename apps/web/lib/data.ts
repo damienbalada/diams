@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { getSupabase } from "./supabase";
 import type { JournalEntree, MarqueDuGroupe } from "./carte";
+import { alternativesParPilier, type AlternativesPilier } from "./alternatives-piliers";
 import { computeScore, type ScoreInput } from "./scoring";
 import {
   pickComparable,
@@ -649,6 +650,43 @@ export const getProduits = unstable_cache(
  * Produit lu par son code-barres dans Open Food Facts, puis Open Beauty Facts (bases collaboratives,
  * licence ouverte). Sert à savoir de quelle marque il s'agit ; ce n'est pas une preuve.
  */
+/** Critères des alternatives : indicateur, et condition sur la preuve (voir alternatives-piliers.ts). */
+const CRITERES_ALT: [string, string, (v: { value_text: string | null; value_numeric: number | null }) => boolean][] = [
+  ["ANI", "ANI_ANIMAL_FREE", () => true],
+  ["ENV", "ENV_CDP_CLIMATE", (v) => v.value_text === "A" || v.value_text === "A-"],
+  ["PLA", "PLA_REDUCTION", (v) => v.value_numeric !== null && Number(v.value_numeric) < 0],
+  ["WAT", "WAT_CDP", (v) => v.value_text === "A" || v.value_text === "A-"],
+  ["LAB", "LAB_LIVING_WAGE", () => true],
+  ["SUP", "SUP_SUPPLIER_LIST", () => true],
+  ["GOV", "GOV_BCORP", () => true],
+  ["TAX", "TAX_CBCR_PUBLISHED", () => true],
+  ["GEO", "GEO_RUSSIA_EXIT", (v) => v.value_text === "Withdrawal"],
+];
+const lireCriteresAlt = unstable_cache(async (): Promise<{ remplit: Record<string, string[]>; second: Record<string, string[]> }> => {
+  const supabase = getSupabase();
+  const codes = [...CRITERES_ALT.map((c) => c[1]), "ANI_OFFRE_VEGETALE"];
+  const jour = new Date().toISOString().slice(0, 10);
+  const rows = await selectAll<any>((from, to) =>
+    supabase.from("evidence").select("entity_id, value_text, value_numeric, indicator:indicators!inner(code)")
+      .eq("review_status", "approved").in("indicator.code", codes).or(`valid_until.is.null,valid_until.gte.${jour}`)
+      .order("id").range(from, to) as any);
+  const { data: vegetales } = await supabase.from("entities").select("id").eq("animal_free", true);
+  const remplit: Record<string, string[]> = {}, second: Record<string, string[]> = { ANI: [] };
+  for (const [pilier, code, ok] of CRITERES_ALT) remplit[pilier] = rows.filter((r) => r.indicator?.code === code && ok(r)).map((r) => r.entity_id);
+  remplit.ANI.push(...((vegetales ?? []) as any[]).map((e) => e.id));
+  second.ANI = rows.filter((r) => r.indicator?.code === "ANI_OFFRE_VEGETALE").map((r) => r.entity_id);
+  return { remplit, second };
+}, ["criteres-alternatives-v1"], { revalidate: 600 });
+
+/** Alternatives de chaque pilier : marques du même rayon, d'un autre groupe, qui remplissent un critère affiché. */
+export async function getAlternativesPiliers(slug: string): Promise<AlternativesPilier> {
+  const [idx, c] = await Promise.all([loadEntityIndex(), lireCriteresAlt()]);
+  if (!idx) return {};
+  const set = (o: Record<string, string[]>) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, new Set(v)]));
+  const rows = idx.rows.map((e) => ({ id: e.id, slug: e.slug, nom: entityName(e), is_brand: e.is_brand, parent_id: e.parent_id, sector_id: e.sector_id }));
+  return alternativesParPilier(rows, slug, set(c.remplit), set(c.second));
+}
+
 /** Fiche produit lue sur le site de la marque (table products) : ingrédients recopiés et statut. */
 export interface ProduitLu {
   nom: string; url: string; ingredients: string | null; animaux: string[]; douteux: string[];

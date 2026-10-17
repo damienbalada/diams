@@ -4,14 +4,14 @@
  */
 import {
   getScorePayload, getOwnerGroup, getOwnershipProofs, getJournal, getMemeRayon, getMarques, getMarquesGroupe,
-  getEstMarque, getProduits, getProduitsLus, getPays, type OwnershipProof,
+  getEstMarque, getProduits, getProduitsLus, getPays, getAlternativesPiliers, type OwnershipProof,
 } from "@/lib/data";
 import { construireCarte } from "@/lib/carte";
 
 export async function chargerFiche(slug: string) {
   const payload = await getScorePayload(slug);
   if (!payload) return null;
-  const [journal, proprietaire, preuves, memeRayon, marques, marquesGroupe, estMarque, pays] = await Promise.all([
+  const [journal, proprietaire, preuves, memeRayon, marques, marquesGroupe, estMarque, pays, alternatives] = await Promise.all([
     getJournal(slug).catch(() => []),
     getOwnerGroup(slug).catch(() => null),
     getOwnershipProofs(slug).catch(() => [] as OwnershipProof[]),
@@ -20,11 +20,12 @@ export async function chargerFiche(slug: string) {
     getMarquesGroupe(slug).catch(() => null),
     getEstMarque(slug).catch(() => false),
     getPays(slug).catch(() => ({ pays: null, paysGroupe: null })),
+    getAlternativesPiliers(slug).catch(() => ({})),
   ]);
   const carte = construireCarte(payload as any, journal, { estMarque, ...pays });
   const estGroupe = (payload.ownership_chain ?? []).length <= 1 || marques.length > 0;
   const [produits, produitsLus] = estMarque
     ? await Promise.all([getProduits(slug).catch(() => null), getProduitsLus(slug).catch(() => [])])
     : [null, []];
-  return { carte, estGroupe: estGroupe && !proprietaire, proprietaire, preuvesPropriete: preuves, memeRayon, marques, marquesGroupe, estMarque, produits, produitsLus };
+  return { carte, estGroupe: estGroupe && !proprietaire, proprietaire, preuvesPropriete: preuves, memeRayon, marques, marquesGroupe, estMarque, produits, produitsLus, alternatives };
 }

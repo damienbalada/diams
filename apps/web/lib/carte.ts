@@ -106,6 +106,8 @@ export interface Carte {
   signaux: Fait[];
   documentes: number;
   total: number;
+  /** Marque entièrement végétale (preuve propre) : n'hérite pas des données animales de son groupe. */
+  vegane?: boolean;
 }
 
 export const ORDRE_PILIERS = ["ANI", "ENV", "PLA", "WAT", "LAB", "SUP", "GOV", "TAX", "GEO", "INV"];
@@ -413,7 +415,13 @@ export function construireCarte(
   });
 
   const exo = new Map(payload.applicableIndicators.map((i) => [i.code, i.exemption ?? null]));
-  const faits: Fait[] = bruts.filter((f) => f.etat === "documente" || !SI_DOCUMENTE.has(f.code)).map((f) => ({
+  // Marque entièrement végétale (preuve propre) d'un groupe qui ne l'est pas : elle n'hérite pas des
+  // données animales du groupe (classement BBFAW, matières, abattage…), qui ne concernent pas ses
+  // produits (décision de l'éditeur, 17/10/2026).
+  const vegane = estMarque && bruts.some((f) => f.code === "ANI_ANIMAL_FREE" && f.etat === "documente" && !f.preuve?.reprisDe);
+  const faits: Fait[] = bruts.filter((f) => f.etat === "documente" || !SI_DOCUMENTE.has(f.code))
+    .filter((f) => !(vegane && f.pilier === "ANI" && (f.preuve?.reprisDe || f.etat === "presume")))
+    .map((f) => ({
     ...f,
     exemption: exo.get(f.code) ?? null,
     signal: evaluer({ code: f.code, etat: f.etat, valeurNum: f.preuve?.valeurNum ?? null, citation: f.preuve?.citation ?? null, nom: f.nom,
@@ -435,7 +443,7 @@ export function construireCarte(
   }
   const chronologie = faits.filter((f) => f.etat === "documente").sort((a, b) => b.preuve!.date.localeCompare(a.preuve!.date));
   return {
-    slug: payload.entity.slug, nom: payload.entity.name, chaine: payload.ownership_chain ?? [payload.entity.name], piliers,
+    slug: payload.entity.slug, nom: payload.entity.name, chaine: payload.ownership_chain ?? [payload.entity.name], piliers, vegane,
     chronologie, documentes: chronologie.length, total: faits.length,
     signaux: faits.filter((f) => f.signal).sort((a, b) => RANG_SIGNAL[a.signal!.niveau] - RANG_SIGNAL[b.signal!.niveau] || ORDRE_PILIERS.indexOf(a.pilier) - ORDRE_PILIERS.indexOf(b.pilier)),
   };

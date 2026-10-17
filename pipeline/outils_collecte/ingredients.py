@@ -6,6 +6,7 @@ l'on relit avant tout import. Une liste d'ingrédients sans matière animale vis
 produit est végétal (carmin, gélatine, vitamine D3, arômes…) : le statut dit seulement ce qui est lu.
 
 Usage : python outils_collecte/ingredients.py sortie.json "slug|https://domaine/sitemap.xml|motif d'URL produit|max" …
+        avec --navigateur : « slug|page catalogue|motif|max », pages rendues par un navigateur sans affichage
 """
 from __future__ import annotations
 
@@ -107,15 +108,68 @@ def urls_produits(c: httpx.Client, sitemap: str, motif: str, maxi: int) -> list[
     return out
 
 
+class Navigateur:
+    """Pages qui ne s'affichent qu'après exécution de leurs scripts : rendues par un navigateur sans
+    affichage (Playwright, Chromium), sous l'identité déclarée du vérificateur. Même interface que
+    httpx : get(url).text renvoie le HTML rendu."""
+
+    class _Rep:
+        def __init__(self, text: str, status: int | None):
+            self.text, self.status_code = text, status
+
+    def __init__(self) -> None:
+        from playwright.sync_api import sync_playwright
+        self._pw = sync_playwright().start()
+        self._b = self._pw.chromium.launch()
+        self._p = self._b.new_page(user_agent=UA["User-Agent"], locale="fr-FR")
+
+    def get(self, url: str) -> "Navigateur._Rep":
+        r = self._p.goto(url, wait_until="networkidle", timeout=60000)
+        self._p.wait_for_timeout(1500)
+        return self._Rep(self._p.content(), r.status if r else None)
+
+    def liens(self) -> list[str]:
+        return self._p.eval_on_selector_all("a[href]", "els => els.map(e => e.href)")
+
+    def close(self) -> None:
+        self._b.close()
+        self._pw.stop()
+
+
+def urls_catalogue(nav: Navigateur, depart: str, motif: str, maxi: int) -> list[str]:
+    """Catalogue rendu par le navigateur : on parcourt les pages sous l'adresse de départ (rubriques)
+    et on garde les liens qui ressemblent à une fiche produit."""
+    vus, a_lire, out = set(), [depart], []
+    while a_lire and len(vus) < 25 and len(out) < maxi * 4:
+        u = a_lire.pop(0)
+        if u in vus:
+            continue
+        vus.add(u)
+        try:
+            nav.get(u)
+        except Exception:
+            continue
+        for l in nav.liens():
+            l = l.split("#")[0].split("?")[0]
+            if re.search(motif, l) and l not in out:
+                out.append(l)
+            if l.startswith(depart.rstrip("/") + "/") and l not in vus:
+                a_lire.append(l)
+    return out
+
+
 def main() -> None:
     sortie, *marques = sys.argv[1:]
-    c = httpx.Client(verify=os.environ.get("SSL_CERT_FILE", True), timeout=40, follow_redirects=True, headers=UA)
+    navigateur = "--navigateur" in marques
+    marques = [m for m in marques if m != "--navigateur"]
+    nav = Navigateur() if navigateur else None
+    c = nav or httpx.Client(verify=os.environ.get("SSL_CERT_FILE", True), timeout=40, follow_redirects=True, headers=UA)
     res = []
     for arg in marques:
         slug, sitemap, reste = arg.split("|", 2)
         motif, maxi = reste.rsplit("|", 1)
         maxi = int(maxi)
-        urls = urls_produits(c, sitemap, motif, maxi)
+        urls = urls_catalogue(nav, sitemap, motif, maxi) if nav else urls_produits(c, sitemap, motif, maxi)
         print(f"## {slug} : {len(urls)} fiches candidates", flush=True)
         lus = 0
         for u in urls:
@@ -139,6 +193,8 @@ def main() -> None:
             print(f"   {a['statut']:32} {titre[:50]:50} {','.join(a['animaux'])[:60]}", flush=True)
             json.dump(res, open(sortie, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     json.dump(res, open(sortie, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    if nav:
+        nav.close()
 
 
 if __name__ == "__main__":

@@ -581,3 +581,25 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 @media (max-width: 480px) {
   .ci-card > .ci-row, .ci-card > .ci-row[open] { margin: 10px 0 0; padding: 0 12px; border-radius: 16px; }
 }
+
+/* Sous-tuiles des indicateurs (17/10/2026) : toujours les unes sous les autres, pleine largeur, sans
+   liseré de couleur, coins moins arrondis. Nom du groupe aligné sur la ligne de texte. */
+.ci-inds { grid-template-columns: 1fr; gap: 8px; }
+.ci-ind, .ci-ind-alerte, .ci-ind-vigilance, .ci-ind-signale, .ci-ind-vide { border-left: 1px solid var(--border); border-radius: 8px; }
+.ci-ind-alerte { border-color: #f0c9c4; }
+.ci-ind-vigilance { border-color: #f3dcb8; }
+.ci-own-g { display: inline; white-space: nowrap; }
+.ci-own-g .ci-logo { display: inline-grid; vertical-align: middle; margin: -3px 5px 0 2px; }
+.ci-own-g .ci-logo:is(img) { display: inline-block; }
+.ci-row .ci-niv-t { color: var(--text); }
+
+/* Encart d'alternatives dans chaque pilier (17/10/2026). */
+.ci-alt { margin: 14px 0 10px; padding: 12px 14px; border-radius: 8px; background: var(--panel); border: 1px dashed color-mix(in srgb, var(--pil, var(--accent)) 50%, var(--border)); display: grid; gap: 8px; }
+.ci-alt-t { font-size: 13.5px; font-weight: 800; }
+.ci-alt-l { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ci-alt-m { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel-2); font-size: 13px; font-weight: 600; max-width: 100%; }
+.ci-alt-m .ci-logo { border-radius: 50%; padding: 2px; }
+.ci-alt-fort { border-color: #9cc9a3; background: #f1f9f2; }
+@media (hover: hover) { .ci-alt-m:hover { border-color: var(--pil, var(--accent)); } }
+.ci-prods-sans { border: 1px solid #9cc9a3; background: #f1f9f2; border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
+.ci-prods-sans-t { font-weight: 800; color: #2f7a3b; }
