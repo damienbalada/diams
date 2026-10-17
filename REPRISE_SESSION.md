@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v323`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v324`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -450,6 +450,13 @@ Siemens AG (ne pas rattacher à Siemens électroménager, qui est BSH).
 nouvelles (Rixain : Arc France ; bilans GES de l'Ademe : Terraillon, Zara France, UPSA, Opinel, Hamelin, Arc
 France). Le connecteur CDP rattachait de nouveau « Delta Corp Ltd. » (Inde) à Delta (Livoo) : notes
 retirées et `delta-mundolsheim` ajouté à `SKIP` dans `import_cdp_scores.py`. KSE : site en panne (erreur 500).
+
+**Lots 250 et 251, fin des 800 marques d'Open Products Facts (18/10/2026)** : Efiseptyl (La Brosse et Dupont),
+Electronic Arts (autre nom « EA Sports »), Teva, Alcon, Djeco, Florame, Algoflash et Compo (Compo France), Bleuforêt
+(Tricotage des Vosges), Gault&Millau, Sublimo (ELP). Suivi : 325 reconnues, 150 mises de côté (raison notée), 35 de
+distributeur, 155 non prioritaires, 0 à prouver. **Limite** : la liste publique d'Open Products Facts s'arrête à
+10 pages (800 marques sur 2 528) ; au-delà, connexion exigée (401), y compris par catégorie. Suite : export complet
+(fichier public quotidien), à télécharger avec l'accord de l'éditeur.
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour
