@@ -265,7 +265,8 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     // Allégation reprise d'une source reconnue (rapport de l'ASPI, liste UFLPA) : « Cité par … (année) ».
     case "GEO_FORCED_LABOR": {
       const an = (p.event_date ?? p.observed_on ?? "").slice(0, 4);
-      return `Cité pour des liens allégués avec le travail forcé des Ouïghours (${p.source_name ?? "source reconnue"}, ${an})`;
+      const qui = p.source_code === "ASPI" ? "l'Australian Strategic Policy Institute" : (p.source_name ?? "une source reconnue").replace(/\s*\(.*\)\s*$/, "");
+      return `Cité par ${qui} (${an}) pour des liens allégués avec le travail forcé des Ouïghours`;
     }
     case "GEO_MYANMAR_MILITARY": {
       const an = (p.event_date ?? p.observed_on ?? "").slice(0, 4);
