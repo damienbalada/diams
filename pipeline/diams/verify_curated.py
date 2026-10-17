@@ -239,7 +239,14 @@ ESEF_KEYWORDS = {
 NORMALIZE = {
     "GOV_BOARD_GENDER": lambda v: min(1.0, v / 50),
     "GOV_BOARD_INDEP": lambda v: v / 100,
+    "ENV_TAXONOMY_CAPEX": lambda v: v / 100,
 }
+
+# Indicateurs classés entre pairs du secteur au calcul (percentile) : aucune note précalculée,
+# sinon la ligne échappe au classement et n'est plus comparable aux autres (contrôle du 17/10/2026,
+# après huit lignes « emballages » notées en part brute alors que les 26 autres étaient classées).
+PEER_RANKED = {"PLA_RECYCLED", "PLA_REDUCTION", "WAT_INTENSITY", "ENV_GHG_INTENSITY", "LAB_GENDER_PAYGAP",
+               "LAB_CEO_PAY_RATIO", "TAX_EFFECTIVE_RATE", "TAX_HAVEN_PRESENCE"}
 
 
 def _canon(s: str) -> str:
@@ -859,11 +866,15 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         details.append("indicateur oui/non : la présence de la citation suffit")
     # Note normalisée imposée par le barème de l'indicateur : recalculée.
     rule = NORMALIZE.get(row.indicator_code)
-    if rule and row.value_numeric is not None and row.normalized_value is not None:
+    if rule and row.value_numeric is not None:
         expected = rule(row.value_numeric)
-        norm_ok = abs(expected - row.normalized_value) <= 0.002
+        norm_ok = row.normalized_value is not None and abs(expected - row.normalized_value) <= 0.002
         ok &= norm_ok
         details.append(f"note normalisée {row.normalized_value} = barème {round(expected, 3)} {'✓' if norm_ok else '✗'}")
+    if row.indicator_code in PEER_RANKED and row.value_numeric is not None:
+        peer_ok = row.normalized_value is None
+        ok &= peer_ok
+        details.append(f"pas de note précalculée (classement entre pairs) {'✓' if peer_ok else '✗'}")
     return Verdict("OK" if ok else "ÉCART", details)
 
 

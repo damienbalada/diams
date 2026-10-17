@@ -21,10 +21,15 @@ $3.7 $0.9 $0.7 $1.3 $2.6 $9.2 +$1.3 B 101%
 
 
 def row(slug, value, excerpt, **kw):
-    return EvidenceRow(entity_slug=slug, indicator_code=kw.get("ind", "INV_FOSSIL_FINANCING"),
-                       source_code=kw.get("src", "BOCC"), nature="result", observed_on="2026-06-09",
-                       value_type="numeric", value_numeric=value, excerpt=excerpt,
-                       source_url=kw.get("url", "https://example.org"), reviewer="ai:test")
+    from diams.verify_curated import NORMALIZE
+    r = EvidenceRow(entity_slug=slug, indicator_code=kw.get("ind", "INV_FOSSIL_FINANCING"),
+                    source_code=kw.get("src", "BOCC"), nature="result", observed_on="2026-06-09",
+                    value_type="numeric", value_numeric=value, excerpt=excerpt,
+                    source_url=kw.get("url", "https://example.org"), reviewer="ai:test")
+    # Ligne bien formée : note du barème de l'indicateur, quand il en a un.
+    if r.indicator_code in NORMALIZE and value is not None:
+        r.normalized_value = round(NORMALIZE[r.indicator_code](value), 4)
+    return r
 
 
 def test_tableaux_bocc_lus_meme_avec_noms_coupes():
@@ -840,3 +845,16 @@ def test_part_entre_parentheses_suivie_de_pourcent():
     q2 = "Rapport : « écart de rémunération femmes-hommes board (8,0) % »"
     v2 = check_esef_quote(esef_row("GOV_BOARD_GENDER", 8.0, q2), "écart de rémunération femmes-hommes board (8,0) %")
     assert not any("valeur 8.0 présente dans la citation ✓" in d for d in v2.details)
+
+
+def test_note_imposee_par_bareme_ou_classement_entre_pairs():
+    from diams.verify_curated import check_esef_quote
+    phrase = "9 out of 13 Board of Directors were independent (69.2%) and 4 were women (30.8%)"
+    sans_note = esef_row("GOV_BOARD_GENDER", 30.8, phrase)
+    sans_note.normalized_value = None
+    assert check_esef_quote(sans_note, phrase).status == "ÉCART"
+    r = esef_row("PLA_RECYCLED", 79, "79% of our packaging is designed to be recyclable")
+    r.normalized_value = 0.79
+    assert check_esef_quote(r, "79% of our packaging is designed to be recyclable").status == "ÉCART"
+    r.normalized_value = None
+    assert check_esef_quote(r, "79% of our packaging is designed to be recyclable").status == "OK"
