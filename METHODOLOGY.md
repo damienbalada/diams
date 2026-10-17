@@ -941,7 +941,13 @@ calcul (tables de config) doit être datée et justifiée ici.
   vérificateur refuse l'un et l'autre écart. Libellés de fiche alignés sur la donnée : taux effectif
   d'impôt présenté comme une charge comptable rapportée au bénéfice avant impôt (et non comme
   l'impôt payé), eau « consommée » ou « prélevée » selon le rapport, conseil de surveillance nommé
-  comme tel, taxonomie présentée comme l'évaluation de l'entreprise.
+  comme tel, taxonomie présentée comme l'évaluation de l'entreprise. Pertinence : la distribution
+  reçoit les piliers animal, plastique et eau (ses enseignes alimentaires sont classées par la BBFAW et
+  publient emballages et eau) ; la tech, l'équipement de la maison et le jouet reçoivent le pilier eau
+  (questionnaire eau du CDP) ; l'indicateur abattage et transport s'applique aussi à l'alimentaire, à la
+  restauration, à la distribution, à la grande consommation et à l'animalerie. L'indicateur emballages
+  réunit deux mesures publiées (recyclabilité dès la conception, ou part de matière recyclée) : la fiche
+  dit laquelle.
 - **0.8.4 (15/10/2026)** — Présentation, sans effet sur les faits. Logos : icône officielle du
   site de la marque, sinon logo de Wikimedia Commons retrouvé sur Wikidata par identifiant
   officiel (LEI, SIREN) ou par le groupe propriétaire, sinon icône du site officiel ; un logo
