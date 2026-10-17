@@ -286,6 +286,9 @@ _NO_INDEP = re.compile(r"\babsence d.administrateurs? ind[ée]pendants?\b|\baucu
 
 
 _SLASH = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2})\b")
+# « nine men and seven women » / « sept femmes et neuf hommes » : part des femmes = femmes / total.
+_MEN_WOMEN = re.compile(rf"\b({_NUM})\b\s+(?:men|hommes)\s+(?:and|et)\s+\b({_NUM})\b\s+(?:women|femmes)\b", re.I)
+_WOMEN_MEN = re.compile(rf"\b({_NUM})\b\s+(?:women|femmes)\s+(?:and|et)\s+\b({_NUM})\b\s+(?:men|hommes)\b", re.I)
 
 
 def _count_ratio_matches(value: float, quote: str) -> bool:
@@ -295,6 +298,14 @@ def _count_ratio_matches(value: float, quote: str) -> bool:
         a, b = (int(x) if x.isdigit() else _NUM_WORDS.get(x.lower()) for x in m.groups())
         if a is not None and b and a <= b and abs(round(100 * a / b, 1) - value) <= 0.05:
             return True
+    for rx, women_first in ((_MEN_WOMEN, False), (_WOMEN_MEN, True)):
+        for m in rx.finditer(quote):
+            x, y = (int(v) if v.isdigit() else _NUM_WORDS.get(v.lower()) for v in m.groups())
+            if x is None or y is None or not x + y:
+                continue
+            women = x if women_first else y
+            if abs(round(100 * women / (x + y), 1) - value) <= 0.05:
+                return True
     return False
 
 

@@ -805,3 +805,10 @@ def test_taux_d_impot_sur_une_perte_refuse():
                       source_url="u", excerpt="Note sur l'impôt (produit d'impôt sur une perte avant impôt) : « Effective tax rate 16.1 % »")
     v = check_esef_quote(row, "Total Tax benefit Effective tax rate 16.1 % for the year")
     assert v.status != "OK"
+
+
+def test_effectifs_hommes_et_femmes():
+    from diams.verify_curated import _count_ratio_matches
+    assert _count_ratio_matches(43.8, "the Supervisory Board comprised nine men and seven women")
+    assert _count_ratio_matches(43.8, "sept femmes et neuf hommes")
+    assert not _count_ratio_matches(56.3, "the Supervisory Board comprised nine men and seven women")
