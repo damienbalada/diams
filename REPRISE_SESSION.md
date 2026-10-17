@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v303`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v304`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -339,9 +339,9 @@ Canson, Daler-Rowney, DAS, Tratto (FILA) ; Castorama, Brico Dépôt (Kingfisher)
 (Candy Hoover Group, Haier Europe) ; GiFi (Gigamarket). Couverture Open Products Facts France :
 184 marques sur 685, 68 % des produits. Les marques Lidl non alimentaires (Parkside, Silvercrest…)
 étaient déjà là. Refus deux fois : intermarche.com et magasins-u.com (Labell, Apta, marques U),
-kiabi.com, leroymerlin.fr. **Livres non ajoutés** : l'Index n'a pas de secteur « édition » (Hachette,
-Larousse, Hatier, Le Livre de Poche sont prouvables par le rapport ESEF 2024 de Lagardère) —
-décision de l'éditeur. **Tabac exclu** sur demande de l'éditeur.
+kiabi.com, leroymerlin.fr. **Livres (lot 212, décision de l'éditeur)** : secteur « Édition »
+créé ; Hachette, Larousse, Hatier et Le Livre de Poche ajoutés (Lagardère SA, rapport ESEF 2024).
+**Tabac exclu** sur demande de l'éditeur. Méthodologie 0.8.8.
 
 ## 10. Méthode de travail attendue
 

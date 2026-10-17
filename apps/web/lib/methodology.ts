@@ -930,10 +930,11 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v\`0.8.7\`, octobre 2026). Toute modification des paramètres de
+Document vivant (v\`0.8.8\`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.8 (17/10/2026)** — Produits non alimentaires : les codes-barres sont aussi lus dans Open Products Facts ; relevé anonyme des scans non reconnus pour choisir les marques à ajouter (lots 210 à 212). Nouveau secteur « Édition » (livres) : ni pilier animal, ni plastique, ni eau ; s'y appliquent l'évolution réelle des émissions et la note forêts du CDP (bois et papier). Tabac exclu de l'Index.
 - **0.8.7 (17/10/2026)** — Classement BBFAW affiché en trois niveaux lisibles (bien noté, niveaux 1-2 ; moyennement noté, 3-4 ; mal noté, 5-6), BBFAW cité en source et niveau exact gardé dans la citation. Seuils inchangés : niveau 6 en alerte, niveau 5 en vigilance.
 - **0.8.6 (17/10/2026)** — Décisions de l'éditeur en réponse au rapport de nuit.
   *Mesures séparées* : les emballages « recyclables ou réutilisables dès la conception »
