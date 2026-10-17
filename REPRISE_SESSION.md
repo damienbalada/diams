@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v304`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v305`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -342,6 +342,17 @@ Canson, Daler-Rowney, DAS, Tratto (FILA) ; Castorama, Brico Dépôt (Kingfisher)
 kiabi.com, leroymerlin.fr. **Livres (lot 212, décision de l'éditeur)** : secteur « Édition »
 créé ; Hachette, Larousse, Hatier et Le Livre de Poche ajoutés (Lagardère SA, rapport ESEF 2024).
 **Tabac exclu** sur demande de l'éditeur. Méthodologie 0.8.8.
+
+**Pyrex (lot 213, décision de l'éditeur : « afficher les deux »)** : rattachée à International
+Cookware (SIREN 399311315), qui l'exploite sous licence ; la preuve affichée nomme Corning
+Incorporated, propriétaire de la marque. **Qualification des sociétés des lots 210-213** : Égapro
+(6 index), SBTi (Kingfisher, VARTA, en attente), registre européen (Kingfisher), CDP (Kingfisher,
+VARTA, Lagardère). Outil `scratchpad/restreint.py slug1,slug2 module …` : lance un import en ne lui
+montrant que les entités citées (évite de réécrire toute la base).
+
+**Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
+copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour
+mot, la trace porte « :copie-editeur ».
 
 ## 10. Méthode de travail attendue
 

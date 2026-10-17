@@ -19,6 +19,8 @@ preuve d'appartenance (entity_ownership_sources). Rapport légal → reviewer
 Usage :
     python -m diams.import_brand_portfolio --file curated/marques_X.csv           # contrôle
     python -m diams.import_brand_portfolio --file curated/marques_X.csv --apply   # écriture
+    … --copie URL=FICHIER   # page enregistrée par l'éditeur (HTML ou PDF) quand le site refuse le
+                            # vérificateur : mêmes contrôles, la trace porte « :copie-editeur »
 CSV : brand_slug, brand_name, group_slug, sector_code, source_kind (legal|website),
       source_url, doc, quote, observed_on, animal_free (vide|true), display_name (facultatif :
       nom affiché quand deux marques homonymes coexistent, ex. « Lotus (papier) » ; le
@@ -98,11 +100,24 @@ def check_rows(rows: list[dict[str, str]], ents: dict[str, dict[str, Any]], sect
     return out
 
 
+def texte_copie(chemin: str) -> str:
+    """Texte d'une copie locale : page HTML enregistrée (Ctrl+S) ou PDF (Imprimer → PDF)."""
+    import html as _html
+    if chemin.lower().endswith(".pdf"):
+        import pypdf
+        return re.sub(r"\s+", " ", "\n".join((pg.extract_text() or "") for pg in pypdf.PdfReader(chemin).pages))
+    raw = open(chemin, encoding="utf-8", errors="replace").read()
+    return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", raw, flags=re.S)))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Rattachement marque → groupe, preuve citée.")
     ap.add_argument("--file", required=True)
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--copie", action="append", default=[], metavar="URL=FICHIER",
+                    help="copie d'une page enregistrée par l'éditeur quand le site refuse le vérificateur")
     args = ap.parse_args()
+    copies = dict(c.split("=", 1) for c in args.copie)
     config.require_supabase()
     rows = list(csv.DictReader(open(args.file, encoding="utf-8")))
     with httpx.Client(timeout=120) as db, httpx.Client(timeout=300) as web:
@@ -113,6 +128,9 @@ def main() -> None:
         cache: dict[str, str | None] = {}
 
         def fetch(url: str) -> str | None:
+            if url not in cache and url in copies:
+                cache[url] = texte_copie(copies[url])
+                print(f"  copie locale lue : {copies[url]}")
             if url not in cache:
                 try:
                     cache[url] = document_text(url, web)
@@ -156,6 +174,8 @@ def main() -> None:
                          headers={**_h(), "Prefer": "return=minimal"},
                          json={"parent_id": g["id"], "ownership_pct": 100}).raise_for_status()
             reviewer = REVIEWER_LEGAL if r["source_kind"] == "legal" else DELEGATED_REVIEWER
+            if r["source_url"] in copies:
+                reviewer += ":copie-editeur"
             resp = db.post(f"{config.SUPABASE_URL}/rest/v1/entity_ownership_sources",
                            params={"on_conflict": "entity_id,owner_id,source_url"},
                            headers={**_h(), "Prefer": "resolution=ignore-duplicates,return=minimal"},
