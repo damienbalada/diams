@@ -87,7 +87,7 @@ export function evaluer(f: FaitEvalue): Signal | null {
     case "ANI_EXPLOITATION": return a("vend des produits issus de l'exploitation animale", "un seul produit d'origine animale suffit");
     case "ANI_BBFAW_TIER":
       if (x === null) return null;
-      return x >= 6 ? a("bien-être animal : dernier niveau (6 sur 6) du classement BBFAW", ref) : x >= 5 ? v("bien-être animal : avant-dernier niveau (5 sur 6) du classement BBFAW", ref) : null;
+      return x >= 6 ? a("mal noté pour le bien-être des animaux d'élevage, au plus bas du classement BBFAW", ref) : x >= 5 ? v("mal noté pour le bien-être des animaux d'élevage (classement BBFAW)", ref) : null;
     case "ENV_CDP_CLIMATE": case "WAT_CDP": case "ENV_CDP_FORESTS": {
       const n = note(/note ([A-F][+-]?)/, c) ?? (/Did not disclose/.test(c) ? "F" : null);
       const q = f.code === "WAT_CDP" ? "eau" : f.code === "ENV_CDP_FORESTS" ? "forêts" : "climat";
@@ -198,7 +198,7 @@ export const REPERES: Record<string, string> = {
   GEO_POL_FINANCING: "Repère : en France, une entreprise ne peut pas financer un parti ni une campagne (loi du 11 mars 1988) ; aux États-Unis, elle le fait par un comité d'action politique déclaré à la Commission électorale fédérale",
   SUP_BHRRC_ALLEG: "Repère : articles de presse et d'ONG relayés par le Business & Human Rights Resource Centre ; ce sont des allégations, pas des faits établis",
   TAX_HAVEN_PRESENCE: "Repère : les dix premiers du classement des paradis fiscaux pour les entreprises du Tax Justice Network (décembre 2025) : îles Vierges britanniques, îles Caïmans, Suisse, Bermudes, Singapour, Hong Kong, Pays-Bas, Jersey, Irlande, Luxembourg ; le pays du siège n'est pas compté",
-  ANI_BBFAW_TIER: "Échelle du BBFAW : niveau 1 (meilleur) à 6 (aucun engagement visible)",
+  ANI_BBFAW_TIER: "Classement BBFAW des politiques de bien-être des animaux d'élevage, du niveau 1 (meilleur) au niveau 6 : bien noté = niveaux 1 et 2, moyennement noté = 3 et 4, mal noté = 5 et 6",
   ENV_TAXONOMY_CAPEX: "Part des investissements de l'année conformes à la taxonomie verte européenne",
   ENV_GHG_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",
   WAT_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",

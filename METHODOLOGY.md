@@ -118,7 +118,7 @@ tranche d'effectif de Sirene, transmet ces données à la fiche du groupe et de 
 | Indicateur | ⚠️ Alerte | 🟠 Vigilance | Référence |
 |---|---|---|---|
 | Exploitation animale | un produit issu de l'exploitation animale est documenté | exploitation non documentée dans un secteur où elle est la règle | choix de l'Index |
-| Bien-être animal (BBFAW) | niveau 6 sur 6 | niveau 5 sur 6 | échelle du classement BBFAW : niveau 6, aucun signe que le bien-être animal soit à l'ordre du jour ; niveau 5, à l'ordre du jour mais peu de preuves de mise en œuvre |
+| Bien-être animal (BBFAW) | niveau 6 sur 6 (« mal noté, au plus bas du classement ») | niveau 5 sur 6 (« mal noté ») | échelle du classement BBFAW : niveau 6, aucun signe que le bien-être animal soit à l'ordre du jour ; niveau 5, à l'ordre du jour mais peu de preuves de mise en œuvre. Affichage en trois niveaux : bien noté (1-2), moyennement noté (3-4), mal noté (5-6) ; le niveau exact reste dans la citation de la source |
 | Note climat CDP | note F | note D ou D- | échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond |
 | Note eau CDP | note F | note D ou D- | échelle du CDP : F, l'entreprise n'a pas répondu alors qu'elle y était invitée ; D, plus bas niveau pour une entreprise qui répond |
 | Évolution des émissions | émissions en hausse | baisse de moins de 4,2 % par an | 4,2 % par an : rythme minimal de baisse des objectifs alignés sur 1,5 °C de la SBTi |
@@ -928,10 +928,11 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v`0.8.6`, octobre 2026). Toute modification des paramètres de
+Document vivant (v`0.8.7`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.7 (17/10/2026)** — Classement BBFAW affiché en trois niveaux lisibles (bien noté, niveaux 1-2 ; moyennement noté, 3-4 ; mal noté, 5-6), BBFAW cité en source et niveau exact gardé dans la citation. Seuils inchangés : niveau 6 en alerte, niveau 5 en vigilance.
 - **0.8.6 (17/10/2026)** — Décisions de l'éditeur en réponse au rapport de nuit.
   *Mesures séparées* : les emballages « recyclables ou réutilisables dès la conception »
   (PLA_RECYCLABLE) et la « part de matière recyclée » (PLA_RECYCLED) sont deux indicateurs du pilier

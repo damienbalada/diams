@@ -169,7 +169,7 @@ function verdict(a: TFiche['alertes'][number]): string {
   const note = m.match(/note ([A-F][+-]?)/)?.[1];
   switch (a.code) {
     case 'ANI_EXPLOITATION': return 'Exploitation animale';
-    case 'ANI_BBFAW_TIER': return `Bien-être animal : BBFAW ${m.match(/(\d) sur 6/)?.[1] ?? '?'}/6`;
+    case 'ANI_BBFAW_TIER': return 'Bien-être animal : mal noté';
     case 'GEO_RUSSIA_EXIT': return 'Toujours en Russie';
     case 'GEO_CONFLICT_TIES': return 'Liens avec un conflit';
     case 'ENV_GHG_TREND': return /hausse/.test(m) ? 'Émissions en hausse' : 'Émissions : baisse trop lente';

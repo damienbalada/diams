@@ -120,6 +120,16 @@ const m1 = (re: RegExp, s: string) => (s.match(re)?.[1] ?? "").trim() || null;
 const num = (v: number | string | null | undefined) => (v === null || v === undefined || v === "" ? null : Number(v));
 
 /** Valeur courte d'une preuve, dans l'échelle de sa source (aucune conversion en note). */
+/**
+ * Classement BBFAW (bien-être des animaux d'élevage, niveaux 1 à 6) ramené à trois niveaux lisibles :
+ * 1-2 bien noté, 3-4 moyennement noté, 5-6 mal noté. Le niveau exact reste dans la citation de la source.
+ */
+export function niveauBbfaw(v: number): string {
+  if (v <= 2) return "Bien noté pour le bien-être des animaux d'élevage";
+  if (v <= 4) return "Moyennement noté pour le bien-être des animaux d'élevage";
+  return v >= 6 ? "Mal noté pour le bien-être des animaux d'élevage, au plus bas du classement" : "Mal noté pour le bien-être des animaux d'élevage";
+}
+
 export function valeurCourte(code: string, unit: string | null, p: PreuveEntree): string {
   const x = p.excerpt ?? "";
   const v = num(p.value_numeric);
@@ -176,7 +186,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       const base = Number(p.normalized_value ?? 0) >= 1 ? "Standards d'abattage et de transport audités" : "Engagement sur le bien-être à l'abattage et au transport";
       return part ? `${base} (${part} des poulets étourdis par atmosphère contrôlée)` : base;
     }
-    case "ANI_BBFAW_TIER": return v === null ? "Évalué" : `Niveau ${nf(v, 0)} sur 6 au classement du bien-être animal`;
+    case "ANI_BBFAW_TIER": return v === null ? "Évalué" : niveauBbfaw(v);
     case "GEO_RUSSIA_EXIT": { const s = m1(/» — ([^;.]+)/, x) ?? m1(/— ([^;.]+)/, x); return s ? `Russie : ${s.replace(/ en Russie$/, "")}` : "Documenté"; }
     case "GOV_SANCTIONS": case "ENV_GREENWASHING": {
       // « Autorité de la concurrence, décision n° 23-D-15 du 29/12/2023 : … ; amende de 0,566 M€ »
