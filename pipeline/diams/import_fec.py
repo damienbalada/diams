@@ -19,6 +19,7 @@ import argparse
 import datetime as dt
 import io
 import os
+import re
 import zipfile
 
 import httpx
@@ -32,13 +33,28 @@ CYCLE = "2026"
 
 
 # Suffixes admis après le nom du groupe : filiale américaine du groupe, forme juridique.
-SUFFIXES = {"usa", "us", "north", "america", "americas", "inc", "llc", "corp", "corporation", "company", "co", "the", "holdings"}
+SUFFIXES = {"usa", "us", "north", "america", "americas", "inc", "llc", "corp", "corporation", "company", "co", "the", "holdings",
+            "com", "services"}
+
+# Comité sans organisation rattachée déclarée : nom de l'entreprise tiré du nom du comité
+# (« KEURIG DR PEPPER INC. PAC », « YUM BRANDS INC. GOOD GOVERNMENT FUND »).
+_PAC_TAIL = re.compile(r"[,.]?\s*(?:\(.*\)|POLITICAL ACTION COMMITTEE|PAC|GOOD GOVERNMENT FUND|SEPARATE SEGREGATED FUND|FEDERAL)\s*$", re.I)
+
+
+def committee_company(cmte_name: str) -> str:
+    s = cmte_name.strip()
+    while True:
+        s2 = _PAC_TAIL.sub("", s).strip()
+        if s2 == s:
+            return s
+        s = s2
 
 
 def same_company(group_name: str, connected: str) -> bool:
     """Nom identique, ou nom du groupe suivi d'une mention géographique ou juridique seulement
     (« Pernod Ricard USA LLC »). Exclut les homonymes partiels (« Heartland Coca-Cola Bottling »)."""
-    g, k = normalize_name(group_name), normalize_name(connected)
+    # Apostrophe retirée avant normalisation : « McDonald's » = « MCDONALDS CORPORATION ».
+    g, k = (normalize_name(re.sub(r"['’]", "", x)) for x in (group_name, connected))
     if not g or not k:
         return False
     if g == k:
@@ -62,14 +78,15 @@ def main() -> None:
     cm = read_zip(os.path.join(args.dir, f"cm{CYCLE[2:]}.zip"))
     webk = {r[0]: r for r in read_zip(os.path.join(args.dir, f"webk{CYCLE[2:]}.zip"))}
     # CMTE_ID, CMTE_NM, …, ORG_TP (12), CONNECTED_ORG_NM (13)
-    corp = [r for r in cm if len(r) > 13 and r[12] == "C" and r[13].strip()]
+    corp = [r for r in cm if len(r) > 13 and r[12] == "C"]
+    rattache = {r[0]: (r[13].strip() or committee_company(r[1])) for r in corp}
     c = httpx.Client(timeout=120)
     ents = supabase_client.get_all(c, "entities", {"select": "slug,display_name,legal_name,is_brand,parent_id,country"})
     roots = [e for e in ents if not e["is_brand"] and not e["parent_id"]]
     rows = []
     for e in roots:
         noms = {e["legal_name"], e.get("display_name") or e["legal_name"]}
-        cmtes = [r for r in corp if any(same_company(n, r[13]) for n in noms)]
+        cmtes = [r for r in corp if any(same_company(n, rattache[r[0]]) for n in noms)]
         if not cmtes:
             continue
         total, details, fin = 0.0, [], ""
@@ -80,7 +97,7 @@ def main() -> None:
             montant = float(k[22] or 0)   # CONTRIB_TO_OTHER_CMTE
             total += montant
             fin = max(fin, k[26])         # CVG_END_DT (MM/DD/YYYY)
-            details.append(f"comité « {r[1].strip()} » ({r[0]}), rattaché à « {r[13].strip()} » : {montant:,.0f} $".replace(",", " "))
+            details.append(f"comité « {r[1].strip()} » ({r[0]}), rattaché à « {r[13].strip() or rattache[r[0]] + ' » (nom du comité, organisation non déclarée)'}{' »' if r[13].strip() else ''} : {montant:,.0f} $".replace(",", " "))
         if not details:
             continue
         observed = dt.datetime.strptime(fin, "%m/%d/%Y").date().isoformat() if fin else dt.date.today().isoformat()
