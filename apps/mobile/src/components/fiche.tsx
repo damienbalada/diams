@@ -4,6 +4,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { MARGE_BOUTON } from '@/components/bouton-scanner';
 import { Logo } from '@/components/logo';
 import type { Fait, Fiche as TFiche, NiveauSignal, Pilier, ProduitLu } from '@/lib/api';
 import { C, SOLIDITE, TEINTE } from '@/lib/couleurs';
@@ -356,6 +357,7 @@ export function Fiche({ fiche, onMarque, defiler }: {
   const [deplie, setDeplie] = useState<string | null>(null);
   const [feuille, setFeuille] = useState<NiveauSignal | null>(null);
   // Hauteurs mesurées pour amener le pilier ouvert à l'écran : bloc des pastilles, puis panneau dedans.
+  const yZone = useRef(0);
   const yPastilles = useRef(0);
   const yPanneau = useRef<number | null>(null);
   const aDefiler = useRef(false);
@@ -376,7 +378,7 @@ export function Fiche({ fiche, onMarque, defiler }: {
     delai.current = feuille ? 350 : 0;
     setFeuille(null);
     setDeplie(codeFait ?? null);
-    if (choix === code && yPanneau.current !== null) allerA(yPastilles.current + yPanneau.current);
+    if (choix === code && yPanneau.current !== null) allerA(yZone.current + yPastilles.current + yPanneau.current);
     else aDefiler.current = true;
     setChoix(code);
   };
@@ -384,12 +386,14 @@ export function Fiche({ fiche, onMarque, defiler }: {
     yPanneau.current = y;
     if (aDefiler.current) {
       aDefiler.current = false;
-      allerA(yPastilles.current + y);
+      allerA(yZone.current + yPastilles.current + y);
     }
   };
   const ouvrirMotif = (m: Motif) => (ouvrirPilier ? ouvrirPilier(m.pilier, m.code) : setFeuille(null));
   return (
-    <View style={s.pile}>
+    <View>
+      {/* Zone 1 : identité du produit et de son propriétaire, alertes. */}
+      <View style={s.zoneIdentite}>
       <EnTete
         fiche={fiche}
         onMarque={onMarque}
@@ -419,6 +423,10 @@ export function Fiche({ fiche, onMarque, defiler }: {
         </View>
       )}
 
+      </View>
+
+      {/* Zone 2 : les piliers, sur un bandeau blanc pleine largeur. */}
+      <View style={s.zonePiliers} onLayout={(e) => (yZone.current = e.nativeEvent.layout.y)}>
       <Text style={s.section} accessibilityRole="header">Pilier par pilier</Text>
       {liste ? (
         <View style={s.carteListe}>
@@ -431,6 +439,11 @@ export function Fiche({ fiche, onMarque, defiler }: {
           <Pastilles fiche={fiche} choix={choix} setChoix={(c) => { setDeplie(null); setChoix(c); }} deplie={deplie} surPanneau={surPanneau} />
         </View>
       )}
+      </View>
+
+      {/* Zone 3 : informations complémentaires (couverture, origine du produit, produits lus). */}
+      <View style={s.zoneComplements}>
+      <Text style={s.zoneTitre} accessibilityRole="header">Informations complémentaires</Text>
       <Text style={s.pied}>
         {fiche.renseignes} informations documentées sur {fiche.total} recherchées · aucune note, que des faits sourcés.
       </Text>
@@ -457,6 +470,7 @@ export function Fiche({ fiche, onMarque, defiler }: {
           </Pressable>
         </>
       )}
+      </View>
     </View>
   );
 }
@@ -525,8 +539,9 @@ function trierFaits(p: Pilier) {
 }
 
 /**
- * Fiche en pastilles (essai) : une pastille par pilier (icône, nom, état, nombre renseigné) ; un appui
- * déplie le contenu du pilier juste dessous, un second le replie. Les produits ont leur pastille.
+ * Fiche en pastilles : une pastille par pilier (icône, nom, état, nombre renseigné). Un appui déplie le
+ * pilier juste sous la ligne de sa pastille, avec une pointe vers elle ; un second appui le replie.
+ * Les produits ont leur pastille. Les pastilles sans information sont estompées.
  */
 function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
   fiche: TFiche; choix: string | null; setChoix: (c: string | null) => void;
@@ -535,59 +550,30 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
   /** Position du panneau ouvert dans le bloc des pastilles, pour le faire défiler à l'écran. */
   surPanneau?: (y: number) => void;
 }) {
+  // Position de chaque pastille, pour insérer le panneau après la dernière pastille de la même ligne.
+  const [places, setPlaces] = useState<Record<string, { x: number; y: number; l: number }>>({});
   const p = fiche.piliers.find((x) => x.code === choix) ?? null;
-  const teinte = p ? TEINTE[p.code] ?? C.accent : C.accent;
+  const teinte = choix === 'PRODUITS' ? '#2f7a3b' : p ? TEINTE[p.code] ?? C.accent : C.accent;
   const produits = fiche.estMarque ? fiche.produitsLus ?? [] : null;
-  return (
-    <View style={{ gap: 12 }}>
-      <View style={s.pastilles} accessibilityRole="tablist">
-        {fiche.piliers.map((x) => {
-          const t = TEINTE[x.code] ?? C.accent;
-          // Point d'alerte ou de vigilance : d'après tous les indicateurs du pilier, pas seulement le premier.
-          const sigs = x.faits.map((f) => f.signal?.niveau);
-          const sig = sigs.includes('alerte') ? 'alerte' : sigs.includes('vigilance') ? 'vigilance' : null;
-          const actif = choix === x.code;
-          const vide = x.renseignes === 0;
-          return (
-            <Pressable
-              key={x.code}
-              onPress={() => setChoix(actif ? null : x.code)}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: actif }}
-              accessibilityLabel={`${x.nom} : ${x.renseignes} sur ${x.total} renseignés${sig === 'alerte' ? ', alerte' : sig === 'vigilance' ? ', point de vigilance' : ''}`}
-              style={({ pressed }) => [
-                s.pastilleChip,
-                { borderColor: actif ? t : C.bord, backgroundColor: actif ? t + '1f' : C.carte },
-                vide && !actif && { opacity: 0.7 },
-                pressed && { opacity: 0.6 },
-              ]}>
-              <Text style={{ fontSize: 16 }}>{x.icone}</Text>
-              <Text style={[s.pastilleNom, { color: actif ? t : C.texte }]} numberOfLines={1}>{nomCourt(x.nom)}</Text>
-              {sig && <View style={[s.point, { backgroundColor: sig === 'alerte' ? C.alerte : '#d97a00' }]} />}
-              <Text style={s.pastilleCompte}>{x.renseignes}/{x.total}</Text>
-            </Pressable>
-          );
-        })}
-        {produits && (
-          <Pressable
-            onPress={() => setChoix(choix === 'PRODUITS' ? null : 'PRODUITS')}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: choix === 'PRODUITS' }}
-            accessibilityLabel={`Ingrédients des produits de la marque : ${produits.length} produit${produits.length > 1 ? 's' : ''} lus`}
-            style={({ pressed }) => [s.pastilleChip, { borderColor: choix === 'PRODUITS' ? '#2f7a3b' : C.bord, backgroundColor: choix === 'PRODUITS' ? '#f1f9f2' : C.carte }, pressed && { opacity: 0.6 }]}>
-            <Text style={{ fontSize: 16 }}>🧾</Text>
-            <Text style={[s.pastilleNom, { color: choix === 'PRODUITS' ? '#2f7a3b' : C.texte }]}>Ingrédients</Text>
-            <Text style={s.pastilleCompte}>{produits.length}</Text>
-          </Pressable>
-        )}
-      </View>
+  const codes = [...fiche.piliers.map((x) => x.code), ...(produits ? ['PRODUITS'] : [])];
+  const ici = choix ? places[choix] : undefined;
+  // Dernière pastille de la ligne de la pastille choisie (à défaut de mesure : la pastille elle-même).
+  const apres = !choix ? null : ici ? [...codes].reverse().find((c) => places[c] && Math.abs(places[c].y - ici.y) < 4) ?? choix : choix;
+  const mesurer = (code: string) => (e: { nativeEvent: { layout: { x: number; y: number; width: number } } }) => {
+    // Lignes mesurées tout replié : une fois le panneau inséré, les pastilles suivantes descendent
+    // sous lui, et ces positions-là ne disent plus quelle était la ligne d'origine.
+    if (choix) return;
+    const { x, y, width } = e.nativeEvent.layout;
+    setPlaces((m) => (m[code] && m[code].x === x && m[code].y === y && m[code].l === width ? m : { ...m, [code]: { x, y, l: width } }));
+  };
 
-      {!choix && <Text style={s.petit}>Touchez une pastille pour lire le détail du pilier.</Text>}
-
+  const panneau = () => (
+    <View key="panneau" style={s.panneauLigne} onLayout={(e) => surPanneau?.(e.nativeEvent.layout.y)}>
+      {ici && <View style={[s.pointe, { left: ici.x + ici.l / 2 - 8, borderColor: teinte }]} />}
       {p && (() => {
         const { pleins, vides, plusieursNiveaux } = trierFaits(p);
         return (
-          <View style={[s.panneau, { borderColor: teinte }]} onLayout={(e) => surPanneau?.(e.nativeEvent.layout.y)}>
+          <View style={[s.panneau, { borderColor: teinte }]}>
             <View style={[s.ligne, { paddingHorizontal: 14 }]}>
               <Text style={{ fontSize: 20 }}>{p.icone}</Text>
               <Text style={[s.pilierNom, { color: teinte }]}>{p.nom.toUpperCase()}</Text>
@@ -599,9 +585,8 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
           </View>
         );
       })()}
-
       {choix === 'PRODUITS' && (
-        <View style={[s.panneau, { borderColor: '#2f7a3b', padding: 14, gap: 12 }]}>
+        <View style={[s.panneau, { borderColor: teinte, padding: 14, gap: 12 }]}>
           {produits && produits.length > 0 ? (
             <ProduitsLus produits={produits} />
           ) : (
@@ -615,6 +600,61 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
           </Pressable>
         </View>
       )}
+    </View>
+  );
+
+  const pastilles = fiche.piliers.map((x) => {
+    const t = TEINTE[x.code] ?? C.accent;
+    // Point d'alerte ou de vigilance : d'après tous les indicateurs du pilier, pas seulement le premier.
+    const sigs = x.faits.map((f) => f.signal?.niveau);
+    const sig = sigs.includes('alerte') ? 'alerte' : sigs.includes('vigilance') ? 'vigilance' : null;
+    const actif = choix === x.code;
+    const vide = x.renseignes === 0;
+    return (
+      <Pressable
+        key={x.code}
+        onLayout={mesurer(x.code)}
+        onPress={() => setChoix(actif ? null : x.code)}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: actif }}
+        accessibilityLabel={`${x.nom} : ${x.renseignes} sur ${x.total} renseignés${sig === 'alerte' ? ', alerte' : sig === 'vigilance' ? ', point de vigilance' : ''}`}
+        style={({ pressed }) => [
+          s.pastilleChip,
+          { borderColor: actif ? t : C.bord, backgroundColor: actif ? t + '1f' : C.carte },
+          vide && !actif && s.pastilleVide,
+          pressed && { opacity: 0.6 },
+        ]}>
+        <Text style={{ fontSize: 16 }}>{x.icone}</Text>
+        <Text style={[s.pastilleNom, { color: actif ? t : C.texte }]} numberOfLines={1}>{nomCourt(x.nom)}</Text>
+        {sig && <View style={[s.point, { backgroundColor: sig === 'alerte' ? C.alerte : '#d97a00' }]} />}
+        <Text style={s.pastilleCompte}>{x.renseignes}/{x.total}</Text>
+      </Pressable>
+    );
+  });
+  if (produits) {
+    const actif = choix === 'PRODUITS';
+    pastilles.push(
+      <Pressable
+        key="PRODUITS"
+        onLayout={mesurer('PRODUITS')}
+        onPress={() => setChoix(actif ? null : 'PRODUITS')}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: actif }}
+        accessibilityLabel={`Ingrédients des produits de la marque : ${produits.length} produit${produits.length > 1 ? 's' : ''} lus`}
+        style={({ pressed }) => [s.pastilleChip, { borderColor: actif ? '#2f7a3b' : C.bord, backgroundColor: actif ? '#f1f9f2' : C.carte }, !produits.length && !actif && s.pastilleVide, pressed && { opacity: 0.6 }]}>
+        <Text style={{ fontSize: 16 }}>🧾</Text>
+        <Text style={[s.pastilleNom, { color: actif ? '#2f7a3b' : C.texte }]}>Ingrédients</Text>
+        <Text style={s.pastilleCompte}>{produits.length}</Text>
+      </Pressable>,
+    );
+  }
+  // Le panneau prend toute la largeur juste après la dernière pastille de la ligne choisie.
+  const contenu = apres ? pastilles.flatMap((el, i) => (codes[i] === apres ? [el, panneau()] : [el])) : pastilles;
+
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={s.pastilles} accessibilityRole="tablist">{contenu}</View>
+      {!choix && <Text style={s.petit}>Touchez une pastille pour lire le détail du pilier.</Text>}
     </View>
   );
 }
@@ -849,6 +889,13 @@ function SansInformation({ faits, toutVide }: { faits: Fait[]; toutVide: boolean
 
 const s = StyleSheet.create({
   pile: { gap: 14 },
+  // Trois zones : identité et alertes (sur le fond), piliers (bandeau blanc), compléments (bandeau grisé).
+  // Les bandeaux débordent de la marge de l'écran (16) pour aller d'un bord à l'autre.
+  zoneIdentite: { gap: 14, paddingBottom: 20 },
+  zonePiliers: { gap: 12, marginHorizontal: -16, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 22, backgroundColor: C.carte, borderTopWidth: 1, borderBottomWidth: 1, borderColor: C.bord },
+  // Le bandeau grisé descend jusqu'en bas de l'écran, sous la marge réservée au bouton scanner.
+  zoneComplements: { gap: 10, marginHorizontal: -16, paddingHorizontal: 16, paddingTop: 16, marginBottom: -MARGE_BOUTON, paddingBottom: MARGE_BOUTON + 16, backgroundColor: '#e9e6f3' },
+  zoneTitre: { fontSize: 12.5, fontWeight: '800', letterSpacing: 0.6, color: C.gris, textTransform: 'uppercase' },
   flex: { flex: 1, minWidth: 0 },
   centre: { alignItems: 'center', justifyContent: 'center' },
   ligne: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -974,6 +1021,10 @@ const s = StyleSheet.create({
   pastilleCompte: { fontSize: 12.5, color: C.gris, fontWeight: '600' },
   point: { width: 8, height: 8, borderRadius: 4 },
   panneau: { backgroundColor: C.carte, borderRadius: 16, borderWidth: 1.5, paddingTop: 12, overflow: 'hidden' },
+  panneauLigne: { width: '100%', paddingTop: 6 },
+  // Pointe du panneau vers sa pastille : un carré tourné, bordé sur deux côtés, posé sur le bord.
+  pointe: { position: 'absolute', top: -1, width: 16, height: 16, backgroundColor: C.carte, borderLeftWidth: 1.5, borderTopWidth: 1.5, transform: [{ rotate: '45deg' }], zIndex: 2 },
+  pastilleVide: { opacity: 0.42, borderStyle: 'dashed' },
   boutonEtiquette: { borderWidth: 1, borderStyle: 'dashed', borderColor: C.accent, borderRadius: 12, padding: 14, minHeight: 48, justifyContent: 'center' },
   boutonEtiquetteTexte: { fontSize: 15, fontWeight: '700', color: C.accent },
 });
