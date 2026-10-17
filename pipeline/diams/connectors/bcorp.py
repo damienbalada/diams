@@ -48,6 +48,8 @@ VERIFIED: dict[str, tuple[str, str]] = {
     "weleda-marque": ("weleda-a-g-group", "weleda"),
     "aesop": ("aesop", "aesop"),                          # Emeis Cosmetics (Aesop), L'Oréal
     "nespresso": ("nespresso-global", "nespresso"),       # Nespresso Global, Nestlé
+    "expanscience": ("laboratoires-expanscience", "expanscience"),  # Laboratoires Expanscience (Mustela)
+    "ecotone-france": ("wessanen", "ecotone"),            # ecotone (ex-Wessanen), fiche de groupe opérant en France
 }
 
 
