@@ -3,6 +3,7 @@ import type { OwnershipProof, Produit, ProduitLu, ProduitScanne } from "@/lib/da
 import { logoDe } from "@/lib/logos";
 import { EN_SAVOIR_PLUS, REPERES, type Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
+import { DepotEtiquette } from "@/components/DepotEtiquette";
 import type { AlternativesPilier } from "@/lib/alternatives-piliers";
 
 const ICONE: Record<string, string> = { ANI: "🐄", ENV: "🌍", PLA: "🧴", WAT: "💧", LAB: "👥", SUP: "🔗", GOV: "🏛️", TAX: "💶", GEO: "🗺️", INV: "🏦" };
@@ -560,6 +561,7 @@ export function CarteIdentite({
         <section className="panel ci-sec">
           <h2 className="ci-sec-t">Ses produits {produits && <span className="ci-sec-n">{produits.total}</span>}</h2>
           {produitsLus.length > 0 && <ProduitsLus produits={produitsLus} />}
+          <DepotEtiquette slug={carte.slug} marque={carte.nom} />
           {produits ? (
             <>
               <p className="muted small">
@@ -638,9 +640,16 @@ function LigneProduit({ p }: { p: ProduitLu }) {
   const [cls, txt] = STATUT_PRODUIT[p.statut];
   return (
     <li>
-      <a className="ci-lien" href={p.url} target="_blank" rel="noopener noreferrer">{p.nom} ↗</a>{" "}
+      {p.origine === "etiquette" ? <span>{p.nom}</span> : <a className="ci-lien" href={p.url} target="_blank" rel="noopener noreferrer">{p.nom} ↗</a>}{" "}
       <span className={cls}>{txt}{p.animaux.length ? ` : ${p.animaux.join(", ")}` : ""}</span>
-      {p.ingredients && <details className="ci-small"><summary>Ingrédients (lus le {dfr(p.date)})</summary>« {p.ingredients} »{p.douteux.length ? <> — d'origine possiblement animale, non tranché : {p.douteux.join(", ")}</> : null}</details>}
+      {p.origine === "etiquette" && (
+        <div className="ci-small ci-faint">
+          📷 <a className="ci-lien" href={p.url} target="_blank" rel="noopener noreferrer">photo de l'étiquette</a>
+          {p.achat.date || p.achat.lieu ? <> · achetée{p.achat.date ? ` le ${dfr(p.achat.date)}` : ""}{p.achat.lieu ? ` (${p.achat.lieu})` : ""}</> : null}
+          {" "}· envoyée par un lecteur, liste recopiée et relue
+        </div>
+      )}
+      {p.ingredients && <details className="ci-small"><summary>{p.origine === "etiquette" ? "Ingrédients recopiés de l'étiquette" : `Ingrédients (lus le ${dfr(p.date)})`}</summary>« {p.ingredients} »{p.douteux.length ? <> — d'origine possiblement animale, non tranché : {p.douteux.join(", ")}</> : null}</details>}
     </li>
   );
 }
@@ -653,7 +662,7 @@ function ProduitsLus({ produits: tous }: { produits: ProduitLu[] }) {
   if (sans.length && avec.length) {
     return (
       <div className="ci-prods-lus">
-        <p className="muted small">Ingrédients lus sur {pl(produits.length, "fiche produit", "fiches produits")} du site de la marque, dont {animaux} avec un ingrédient d'origine animale.</p>
+        <p className="muted small">Ingrédients lus sur {pl(produits.length, "produit", "produits")} (fiches du site de la marque ou étiquettes photographiées), dont {animaux} avec un ingrédient d'origine animale.</p>
         <div className="ci-prods-sans">
           <div className="ci-prods-sans-t">🌱 Chez cette marque, sans ingrédient animal</div>
           <p className="ci-small ci-faint">« Végétal » : la marque le dit ou un label l'atteste. « Aucun ingrédient animal dans la liste lue » ne prouve pas qu'un produit est végétal : certains additifs ou arômes peuvent être d'origine animale.</p>

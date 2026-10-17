@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v299`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v300`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -262,6 +262,14 @@ Caperlan), affiché seulement si vérifié ; table products et outils outils_col
 (lecture) et import_produits.py (relecture mot pour mot, écriture, lot ANI_EXPLOITATION) ; règlement
 déforestation : notes forêts du CDP (ENV_CDP_FORESTS, 91 notes). Crédit Agricole CIB : convention
 scannée (aucun texte lisible), non saisie.
+
+Étiquettes de la communauté (17/10) : formulaire sur la fiche de marque (components/DepotEtiquette.tsx),
+actions lib/etiquettes.ts, vérification /admin/etiquettes (recopie mot pour mot, analyse lib/ingredients.ts),
+stockage privé « etiquettes-a-verifier » puis public « etiquettes », table label_submissions, colonnes
+products.source_kind / purchase_date / purchase_place. Exige SUPABASE_SERVICE_ROLE_KEY côté serveur (comme
+les signalements). Test de bout en bout fait en local le 17/10, données de test supprimées.
+NumAlim : liquidée (juin 2023, clôture septembre 2025) ; activité reprise par 2JDB (ConsoTrust) et
+Agdatahub (lui-même liquidé fin 2024) : piste abandonnée.
 
 En discussion (explications données le 17/10, réponse attendue) : 2 taux atypiques, 3 LobbyMap
 (pas de collecte automatisée déguisée en humain), 4 approbation sur copie, 6 périmètres partiels,

@@ -603,3 +603,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 @media (hover: hover) { .ci-alt-m:hover { border-color: var(--pil, var(--accent)); } }
 .ci-prods-sans { border: 1px solid #9cc9a3; background: #f1f9f2; border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
 .ci-prods-sans-t { font-weight: 800; color: #2f7a3b; }
+.ci-depot { margin-top: 12px; border: 1px dashed var(--border-strong, var(--border)); border-radius: 8px; padding: 10px 12px; }
+.ci-depot > summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+.ci-depot form { margin-top: 10px; }

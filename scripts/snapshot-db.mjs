@@ -236,12 +236,12 @@ async function build() {
   const arr = (a) => lit(`{${(a ?? []).map((x) => JSON.stringify(String(x))).join(",")}}`);
   section("Produits : ingrédients lus sur les fiches des marques", upsert("products",
     ["entity_id", "name", "source_url", "ingredients", "animal_ingredients", "doubtful_ingredients", "status", "vegetal_proof",
-     "observed_on", "reviewer", "review_status"],
+     "observed_on", "reviewer", "review_status", "source_kind", "purchase_date", "purchase_place"],
     ["entity_id", "source_url"],
     [...T.products].sort(by((r) => `${ent.get(r.entity_id)}|${r.source_url}`)).map((r) => [
       ref("entities", "slug", ent.get(r.entity_id)), lit(r.name), lit(r.source_url), lit(r.ingredients),
       arr(r.animal_ingredients), arr(r.doubtful_ingredients), lit(r.status), lit(r.vegetal_proof),
-      lit(r.observed_on), lit(r.reviewer), lit(r.review_status),
+      lit(r.observed_on), lit(r.reviewer), lit(r.review_status), lit(r.source_kind), lit(r.purchase_date), lit(r.purchase_place),
     ])));
 
   section("Preuves (evidence) — clé : entité + indicateur + source + date", upsert("evidence",

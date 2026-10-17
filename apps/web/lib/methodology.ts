@@ -956,6 +956,11 @@ calcul (tables de config) doit être datée et justifiée ici.
   ingrédient animal visible ne prouve pas qu'un produit est végétal (seuls un label d'un tiers ou la
   marque elle-même peuvent l'affirmer). Dans la liste d'ingrédients d'un produit alimentaire, « crème »
   désigne une crème laitière par défaut (décision de l'éditeur du 17/10/2026).
+  *Étiquettes de la communauté* : un lecteur peut déposer, depuis la fiche d'une marque, la photo de
+  l'étiquette d'un produit (le document légal du produit : règlement (UE) n° 1169/2011). Rien n'est
+  publié avant qu'un éditeur ait recopié la liste d'ingrédients en la relisant contre la photo ; la
+  photo devient alors publique (licence CC BY 4.0 accordée par le contributeur) et sert de pièce
+  justificative. Aucune donnée personnelle du contributeur n'est demandée.
 - **0.8.5 (17/10/2026)** — Cohérence, sans changement de barème. Toutes les devises sont
   converties en euros au taux annuel moyen de la BCE avant comparaison, dollar compris (les
   intensités carbone d'AB InBev et de TotalEnergies étaient restées en dollars). Les indicateurs

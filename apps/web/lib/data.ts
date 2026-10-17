@@ -67,7 +67,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) =>
  * moteur par entité) prend plusieurs secondes : résultat mis en cache 10 minutes,
  * les pages restant rendues à la demande (aucun appel à la base pendant le build).
  */
-export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v299"], { revalidate: 600 });
+export const getAllScores = unstable_cache(computeAllScores, ["all-scores-v300"], { revalidate: 600 });
 
 type ScoreCore = Pick<EntityScore, "group" | "grade" | "score" | "confidence" | "publishable" | "last_observed">;
 
@@ -692,17 +692,20 @@ export interface ProduitLu {
   nom: string; url: string; ingredients: string | null; animaux: string[]; douteux: string[];
   statut: "ingredient_animal" | "aucun_ingredient_animal_declare" | "vegetal_declare" | "vegetal_certifie";
   preuveVegetale: string | null; date: string;
+  /** Origine : fiche du site de la marque, ou étiquette photographiée (photo publique, pièce justificative). */
+  origine: "fiche_marque" | "etiquette"; achat: { date: string | null; lieu: string | null };
 }
 export async function getProduitsLus(slug: string): Promise<ProduitLu[]> {
   const { data: ent } = await getSupabase().from("entities").select("id").eq("slug", slug).maybeSingle();
   if (!ent) return [];
   const { data, error } = await getSupabase().from("products")
-    .select("name, source_url, ingredients, animal_ingredients, doubtful_ingredients, status, vegetal_proof, observed_on")
+    .select("name, source_url, ingredients, animal_ingredients, doubtful_ingredients, status, vegetal_proof, observed_on, source_kind, purchase_date, purchase_place")
     .eq("entity_id", (ent as any).id).eq("review_status", "approved").order("name").limit(60);
   if (error || !data) return [];
   return (data as any[]).map((r) => ({
     nom: r.name, url: r.source_url, ingredients: r.ingredients, animaux: r.animal_ingredients ?? [], douteux: r.doubtful_ingredients ?? [],
     statut: r.status, preuveVegetale: r.vegetal_proof, date: r.observed_on,
+    origine: r.source_kind ?? "fiche_marque", achat: { date: r.purchase_date ?? null, lieu: r.purchase_place ?? null },
   }));
 }
 
