@@ -66,12 +66,20 @@ PATTERNS: dict[str, list[str]] = {
         r"virgin plastic[^.]{0,250}\d+(?:\.\d+)?\s?%",
     ],
     "PLA_RECYCLED": [
-        r"(?:plastiques?|emballages?)[^.]{0,80}(?:recycl[ée]s?|r[ée]utilisables?)[^.]{0,200}\d+(?:[,.]\d+)?\s?%",
-        r"(?:recycled content|recycled plastic|reusable)[^.]{0,200}\d+(?:\.\d+)?\s?%",
+        r"(?:plastiques?|emballages?)[^.]{0,80}recycl[ée]s?[^.]{0,200}\d+(?:[,.]\d+)?\s?%",
+        r"(?:recycled content|recycled plastic)[^.]{0,200}\d+(?:\.\d+)?\s?%",
+    ],
+    "PLA_RECYCLABLE": [
+        r"emballages?[^.]{0,80}(?:recyclables?|r[ée]utilisables?|compostables?)[^.]{0,200}\d+(?:[,.]\d+)?\s?%",
+        r"(?:recyclable|reusable|compostable)[^.]{0,200}\d+(?:\.\d+)?\s?%",
     ],
     "WAT_INTENSITY": [
-        r"(?:pr[ée]l[èe]vements?|consommation) (?:totale )?d.eau[^.]{0,250}(?:m3|m³|millions? de m)",
-        r"(?:water withdrawal|water consumption)[^.]{0,250}(?:m3|m³|megalit|million)",
+        r"consommation (?:totale )?d.eau[^.]{0,250}(?:m3|m³|millions? de m)",
+        r"water consumption[^.]{0,250}(?:m3|m³|megalit|million)",
+    ],
+    "WAT_WITHDRAWAL_INTENSITY": [
+        r"pr[ée]l[èe]vements? (?:totaux )?d.eau[^.]{0,250}(?:m3|m³|millions? de m)",
+        r"water withdrawals?[^.]{0,250}(?:m3|m³|megalit|million)",
     ],
     "LAB_LIVING_WAGE": [
         r"(?:salaire d[ée]cent|salaire vital|living wage)[^.]{0,300}",

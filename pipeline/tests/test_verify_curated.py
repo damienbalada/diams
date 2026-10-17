@@ -865,3 +865,8 @@ def test_decimale_detachee_par_l_extraction():
     phrase = "GHG emission intensity per 1 million EUR of revenue t CO 2 e / 1 mln. EUR revenue 1 627 ,4 2 152,5 -24,4%"
     v = check_esef_quote(esef_row("ENV_GHG_INTENSITY", 1627.4, phrase), phrase)
     assert v.status == "OK", v.details
+
+
+def test_valeur_milliers_et_decimale_en_anglais():
+    from diams.verify_curated import _value_variants
+    assert "1,790.6" in _value_variants(1790.6)

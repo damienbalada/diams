@@ -165,7 +165,7 @@ test("plastique recyclé ou biosourcé : libellé fidèle à la mesure publiée"
 test("intensité eau : prélèvements ou consommation selon le rapport", () => {
   const c = valeurCourte("WAT_INTENSITY", "resultat", preuve("WAT_INTENSITY", { value_numeric: 89, excerpt: "ESRS E3-4 (consommation d'eau rapportée au chiffre d'affaires) : « Water Intensity Ratio ( m 3 /M€) 89 »" }));
   assert.equal(c, "89 m³ d'eau consommés par million d'euros de ventes");
-  const p = valeurCourte("WAT_INTENSITY", "resultat", preuve("WAT_INTENSITY", { value_numeric: 2191, excerpt: "rapport de durabilité (intensité des prélèvements d'eau rapportés au chiffre d'affaires)" }));
+  const p = valeurCourte("WAT_WITHDRAWAL_INTENSITY", "resultat", preuve("WAT_WITHDRAWAL_INTENSITY", { value_numeric: 2191, excerpt: "rapport de durabilité (intensité des prélèvements d'eau rapportés au chiffre d'affaires)" }));
   assert.match(p, /^2.191 m³ d'eau prélevés par million d'euros de ventes$/);
 });
 
@@ -192,6 +192,7 @@ test("libellés : taux effectif, conseil de surveillance, taxonomie", () => {
 
 test("emballages : recyclabilité, matière recyclée ou consigne, selon la preuve", () => {
   const r = (v: number, x: string) => valeurCourte("PLA_RECYCLED", "resultat", preuve("PLA_RECYCLED", { value_numeric: v, excerpt: x }));
+  assert.equal(valeurCourte("PLA_RECYCLABLE", "resultat", preuve("PLA_RECYCLABLE", { value_numeric: 98, excerpt: "« 98 % de nos emballages sont conçus pour être recyclables ou réutilisables »" })), "98 % d'emballages recyclables ou réutilisables");
   assert.equal(r(79, "ESRS E5 (emballages conçus pour être recyclables) : « 79% of our packaging is designed to be recyclable »"), "79 % d'emballages recyclables ou réutilisables");
   assert.equal(r(11.8, "« 11.8% recycled content in our plastic packaging » — 11,8 % de matière recyclée dans les emballages plastiques"), "11,8 % de matière recyclée dans les emballages plastiques");
   assert.equal(r(49, "(matériaux recyclés dans les emballages clients en verre et en plastique)"), "49 % de matière recyclée dans les emballages");
@@ -221,9 +222,9 @@ test("abattage : engagement avec part des poulets étourdis", () => {
   assert.equal(s, "Engagement sur le bien-être à l'abattage et au transport (60 % des poulets étourdis par atmosphère contrôlée)");
 });
 
-test("intensité eau sans précision : libellé neutre", () => {
+test("intensité eau sans précision dans l'extrait : l'indicateur donne la mesure", () => {
   const n = valeurCourte("WAT_INTENSITY", "resultat", preuve("WAT_INTENSITY", { value_numeric: 89, excerpt: "ESRS E3-4 (intensité hydrique) : « Water Intensity Ratio ( m 3 /M€) 89 115 131 »" }));
-  assert.equal(n, "89 m³ d'eau par million d'euros de ventes");
+  assert.equal(n, "89 m³ d'eau consommés par million d'euros de ventes");
 });
 
 test("emballages « recyclables, réutilisables » : recyclabilité (garde contre le caractère de contrôle)", () => {
@@ -241,4 +242,20 @@ test("sanctions : date entre parenthèses, « sanction de », article devant CNM
   assert.equal(r("CNIL (Commission nationale de l'informatique et des libertés), rapport annuel 2022, chronologie de l'année (19/12/2022) : « Cookies : sanction de 60 millions d’euros »"), "Sanctionné par la CNIL (2022) : amende de 60 millions d’euros");
   assert.equal(r("Autorité de la concurrence, communiqué du 17/11/2025 (décision n° 25-D-07) : « l’Autorité de la concurrence inflige une sanction de 187,5 millions d’euros »"), "Sanctionné par l'Autorité de la concurrence (2025) : amende de 187,5 millions d’euros");
   assert.match(r("CNMC (autorité espagnole de la concurrence et des marchés), communiqué du 18/07/2023 (en anglais) : « fine »"), /^Sanctionné par la CNMC \(2023\)/);
+});
+
+test("indicateurs d'information : convention judiciaire, chasse et pêche, écart au plus bas salaire", () => {
+  const c = valeurCourte("GOV_CJIP", "controverse", preuve("GOV_CJIP", { value_numeric: 508482964, event_date: "2022-06-16", excerpt: "« … une amende d’intérêt public d’un montant total de 508 482 964 euros » — motif : fraude fiscale ; validée le 16/06/2022." }));
+  assert.equal(c, "Convention judiciaire d'intérêt public (fraude fiscale, 2022) : amende d'intérêt public de 508,5 M€, sans déclaration de culpabilité");
+  const h = valeurCourte("ANI_HUNTING_FISHING", null, preuve("ANI_HUNTING_FISHING", { excerpt: "« … » — vend des articles de chasse (Solognac) et de pêche (Caperlan)." }));
+  assert.equal(h, "Vend des articles de chasse (Solognac) et de pêche (Caperlan)");
+  const r = valeurCourte("LAB_PAY_RATIO_MAXMIN", "x", preuve("LAB_PAY_RATIO_MAXMIN", { value_numeric: 4.05, excerpt: "…" }));
+  assert.equal(r, "Le plus haut salaire vaut 4,05 fois le plus bas");
+});
+
+test("indicateur d'information sans preuve : absent de la fiche", () => {
+  const ind = (code: string) => ({ code, name: code, dimension_code: code.slice(0, 3), unit: null });
+  const carte = construireCarte({ entity: { slug: "x", name: "X" }, applicableIndicators: [ind("GOV_CJIP"), ind("GOV_SANCTIONS")], evidence: [], dimensions: [] } as never);
+  const codes = carte.piliers.flatMap((p) => p.faits.map((f) => f.code));
+  assert.deepEqual(codes, ["GOV_SANCTIONS"]);
 });

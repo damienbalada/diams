@@ -245,7 +245,7 @@ NORMALIZE = {
 # Indicateurs classés entre pairs du secteur au calcul (percentile) : aucune note précalculée,
 # sinon la ligne échappe au classement et n'est plus comparable aux autres (contrôle du 17/10/2026,
 # après huit lignes « emballages » notées en part brute alors que les 26 autres étaient classées).
-PEER_RANKED = {"PLA_RECYCLED", "PLA_REDUCTION", "WAT_INTENSITY", "ENV_GHG_INTENSITY", "LAB_GENDER_PAYGAP",
+PEER_RANKED = {"PLA_RECYCLED", "PLA_RECYCLABLE", "WAT_WITHDRAWAL_INTENSITY", "PLA_REDUCTION", "WAT_INTENSITY", "ENV_GHG_INTENSITY", "LAB_GENDER_PAYGAP",
                "LAB_CEO_PAY_RATIO", "TAX_EFFECTIVE_RATE", "TAX_HAVEN_PRESENCE"}
 
 
@@ -266,6 +266,8 @@ def _value_variants(v: float) -> list[str]:
         out |= {f"{v:.3f}", f"{v:.3f}".replace(".", ",")}
     if float(v).is_integer():
         out |= {f"{int(v)}", f"{int(v):,}"}             # 1980 et 1,980
+    elif abs(v) >= 1000:                                 # milliers et décimale en anglais : 1,790.6
+        out |= {f"{v:,.1f}", f"{v:,.2f}"}
     return list(out)
 
 

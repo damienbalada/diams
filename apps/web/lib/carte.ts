@@ -131,6 +131,18 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       return produit ? `Vend des produits issus de l'exploitation animale : ${produit}` : "Exploitation animale documentée";
     }
     case "ANI_ANIMAL_FREE": return "Marque entièrement végétale (prouvé)";
+    case "ANI_HUNTING_FISHING": {
+      const quoi = m1(/— vend des articles de ([^.]+)\.?$/, x);
+      return quoi ? `Vend des articles de ${quoi}` : "Vend des articles de chasse ou de pêche";
+    }
+    case "LAB_PAY_RATIO_MAXMIN": return v === null ? "Publié" : `Le plus haut salaire vaut ${nf(v, v < 20 ? 2 : 0)} fois le plus bas`;
+    case "GOV_CJIP": {
+      // Convention validée par un juge, sans déclaration de culpabilité (art. 41-1-2 du code de procédure pénale).
+      const an = (p.event_date ?? p.observed_on ?? "").slice(0, 4);
+      const montant = v === null ? "" : ` : amende d'intérêt public de ${v >= 1e6 ? `${nf(v / 1e6, 1)} M€` : `${nf(v, 0)} €`}`;
+      const motif = m1(/— motif : ([^;]+);/, x)?.trim() ?? "infraction pénale";
+      return `Convention judiciaire d'intérêt public (${motif}, ${an})${montant}, sans déclaration de culpabilité`;
+    }
     case "INV_SUSTAINABLE_FINANCE":
       return /Green Bond Framework|bonds framework|cadre d.émission|cadre établi/i.test(x)
         ? "Cadre structuré d'émission d'obligations vertes ou sociales" : "Émet des obligations vertes ou sociales (cadre non cité)";
@@ -223,9 +235,10 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "TAX_HAVEN_PRESENCE": return v === null ? "Publié" : v === 0 ? "Aucune filiale listée dans les dix premiers paradis fiscaux" : `Au moins ${nf(v, 0)} filiale${v > 1 ? "s" : ""} dans les dix premiers paradis fiscaux`;
     case "ENV_GHG_TREND": return v === null ? "Publié" : v > 0 ? `Émissions en hausse de ${nf(v, 2)} % par an` : `Émissions en baisse de ${nf(-v, 2)} % par an`;
     case "PLA_REDUCTION": return v === null ? "Publié" : v > 0 ? `Plastique neuf en hausse de ${nf(v, 2)} % par an` : `Plastique neuf en baisse de ${nf(-v, 2)} % par an`;
-    case "PLA_RECYCLED": {
-      // Trois mesures différentes selon le rapport : recyclabilité dès la conception, part de matière
-      // recyclée, ou emballages consignés ; le libellé reprend celle que la preuve publie (17/10/2026).
+    case "PLA_RECYCLED":
+    case "PLA_RECYCLABLE": {
+      // Deux indicateurs depuis le 17/10/2026 (recyclabilité dès la conception, part de matière recyclée) ;
+      // le libellé reprend la mesure exacte que la preuve publie (consigne, biosourcé, plastiques seuls).
       if (v === null) return "Publié";
       if (/biosourc/i.test(x)) return `${nf(v)} % de plastiques recyclés ou biosourcés dans les emballages`;
       if (/consign/i.test(x)) return `${nf(v)} % des produits en emballage consigné ou majoritairement recyclé`;
@@ -236,13 +249,10 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     }
     case "ENV_TAXONOMY_CAPEX": return v === null ? "Publié" : `${nf(v)} % des investissements conformes à la taxonomie verte de l'UE (évaluation de l'entreprise)`;
     case "ENV_GHG_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} tonnes de CO₂ par million ${/M\$|U ?S ?D|dollar/i.test(x) && !/taux de change annuel moyen/i.test(x) ? "de dollars" : "d'euros"} de ventes`;
-    case "WAT_INTENSITY": {
-      if (v === null) return "Publié";
-      // Le rapport publie soit les prélèvements, soit la consommation (ESRS E3-4 § 29) : le premier terme cité l'emporte.
-      const c = x.search(/consomm|consumption/i), pr = x.search(/pr[ée]l[èe]v|withdraw/i);
-      const quoi = c >= 0 && (pr < 0 || c < pr) ? " consommés" : pr >= 0 ? " prélevés" : "";
-      return `${nf(v, 0)} m³ d'eau${quoi} par million d'euros de ventes`;
-    }
+    case "WAT_INTENSITY":
+    case "WAT_WITHDRAWAL_INTENSITY":
+      // Consommation (ESRS E3-4 § 29) et prélèvements sont deux indicateurs depuis le 17/10/2026.
+      return v === null ? "Publié" : `${nf(v, 0)} m³ d'eau ${code === "WAT_INTENSITY" ? "consommés" : "prélevés"} par million d'euros de ventes`;
     case "SUP_KNOWTHECHAIN": return v === null ? "Évalué" : `${nf(v, 0)}/100 contre le travail forcé (KnowTheChain)`;
     case "INV_FOSSIL_FINANCING": return v === null ? "Documenté" : `${nf(v)} milliards de dollars liés aux énergies fossiles`;
     case "INV_SOLIDARITY_LABEL": return "Produits labellisés Finansol";
@@ -339,6 +349,9 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
 ];
 
 /** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */
+/** Indicateurs d'information affichés seulement quand ils sont documentés (rien sinon, décision du 17/10/2026). */
+export const SI_DOCUMENTE = new Set(["GOV_CJIP", "ANI_HUNTING_FISHING", "LAB_PAY_RATIO_MAXMIN"]);
+
 export function construireCarte(
   payload: { entity: { slug: string; name: string }; ownership_chain?: string[]; applicableIndicators: IndicateurEntree[]; evidence: PreuveEntree[]; dimensions: { code: string; name: string }[] },
   journal: JournalEntree[] = [],
@@ -399,7 +412,7 @@ export function construireCarte(
   });
 
   const exo = new Map(payload.applicableIndicators.map((i) => [i.code, i.exemption ?? null]));
-  const faits: Fait[] = bruts.map((f) => ({
+  const faits: Fait[] = bruts.filter((f) => f.etat === "documente" || !SI_DOCUMENTE.has(f.code)).map((f) => ({
     ...f,
     exemption: exo.get(f.code) ?? null,
     signal: evaluer({ code: f.code, etat: f.etat, valeurNum: f.preuve?.valeurNum ?? null, citation: f.preuve?.citation ?? null, nom: f.nom,

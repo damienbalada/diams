@@ -200,6 +200,7 @@ export const REPERES: Record<string, string> = {
   ENV_TAXONOMY_CAPEX: "Part des investissements de l'année conformes à la taxonomie verte européenne",
   ENV_GHG_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",
   WAT_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",
+  WAT_WITHDRAWAL_INTENSITY: "Dépend beaucoup du secteur : à comparer entre entreprises du même secteur",
   ENV_SBTI_VALIDATED: "La SBTi vérifie que l'objectif climat est compatible avec l'accord de Paris ; c'est un engagement, pas un résultat",
 };
 
