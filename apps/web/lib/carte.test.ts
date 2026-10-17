@@ -161,3 +161,10 @@ test("plastique recyclé ou biosourcé : libellé fidèle à la mesure publiée"
   const s = valeurCourte("PLA_RECYCLED", "resultat", preuve("PLA_RECYCLED", { value_numeric: 50, excerpt: "… « le Groupe a atteint 50 % de plastiques d’origine recyclée ou biosourcée dans les emballages en 2025 »" }));
   assert.equal(s, "50 % de plastiques recyclés ou biosourcés dans les emballages");
 });
+
+test("intensité eau : prélèvements ou consommation selon le rapport", () => {
+  const c = valeurCourte("WAT_INTENSITY", "resultat", preuve("WAT_INTENSITY", { value_numeric: 89, excerpt: "ESRS E3-4 (consommation d'eau rapportée au chiffre d'affaires) : « Water Intensity Ratio ( m 3 /M€) 89 »" }));
+  assert.equal(c, "89 m³ d'eau consommés par million d'euros de ventes");
+  const p = valeurCourte("WAT_INTENSITY", "resultat", preuve("WAT_INTENSITY", { value_numeric: 2191, excerpt: "rapport de durabilité (intensité des prélèvements d'eau rapportés au chiffre d'affaires)" }));
+  assert.match(p, /^2.191 m³ d'eau prélevés par million d'euros de ventes$/);
+});

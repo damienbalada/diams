@@ -214,7 +214,12 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "PLA_RECYCLED": return v === null ? "Publié" : /biosourc/i.test(x) ? `${nf(v)} % de plastiques recyclés ou biosourcés dans les emballages` : `${nf(v)} % d'emballages recyclés, réutilisables ou recyclables`;
     case "ENV_TAXONOMY_CAPEX": return v === null ? "Publié" : `${nf(v)} % des investissements jugés verts par l'UE`;
     case "ENV_GHG_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} tonnes de CO₂ par million d'euros de ventes`;
-    case "WAT_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} m³ d'eau prélevés par million d'euros de ventes`;
+    case "WAT_INTENSITY": {
+      if (v === null) return "Publié";
+      // Le rapport publie soit les prélèvements, soit la consommation (ESRS E3-4 § 29) : le premier terme cité l'emporte.
+      const c = x.search(/consomm|consumption/i), pr = x.search(/pr[ée]l[èe]v|withdraw/i);
+      return `${nf(v, 0)} m³ d'eau ${c >= 0 && (pr < 0 || c < pr) ? "consommés" : "prélevés"} par million d'euros de ventes`;
+    }
     case "SUP_KNOWTHECHAIN": return v === null ? "Évalué" : `${nf(v, 0)}/100 contre le travail forcé (KnowTheChain)`;
     case "INV_FOSSIL_FINANCING": return v === null ? "Documenté" : `${nf(v)} milliards de dollars liés aux énergies fossiles`;
     case "INV_SOLIDARITY_LABEL": return "Produits labellisés Finansol";
