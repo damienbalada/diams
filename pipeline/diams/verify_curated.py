@@ -228,8 +228,9 @@ ESEF_KEYWORDS = {
     "PLA_REDUCTION": [r"plasti", r"vierge|virgin"],
     # Décision officielle d'une autorité : amende, ou infraction constatée sans amende.
     "GOV_SANCTIONS": [r"fine[ds]?\b|fining|amende|sanction|penalt(?:y|ies)"],
-    # Arrêté de mise en demeure (Géorisques) portant sur l'eau ; texte reconnu par OCR, accents parfois perdus.
-    "WAT_CONTROVERSY": [r"rejet|effluent|eaux|[ée]puration|pr[ée]l[èe]vement|milieu"],
+    # Arrêté de mise en demeure (Géorisques) ou convention judiciaire d'intérêt public (ministère de la
+    # Justice) portant sur l'eau ; texte reconnu par OCR, accents parfois perdus.
+    "WAT_CONTROVERSY": [r"rejet|effluent|eaux|[ée]puration|pr[ée]l[èe]vement|milieu|d[ée]versement|rivi[èe]re|forages?"],
 }
 
 

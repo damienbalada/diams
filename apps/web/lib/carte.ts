@@ -195,6 +195,12 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "GOV_BOARD_INDEP": return v === null ? "Publié" : `${nf(v)} % d'administrateurs indépendants`;
     case "TAX_EFFECTIVE_RATE": return v === null ? "Publié" : `Impôt payé : ${nf(v)} % des bénéfices`;
     case "WAT_CONTROVERSY": {
+      // « Convention judiciaire d'intérêt public validée le 13/09/2022 … : amende d'intérêt public de 40 000 € … »
+      if (/^Convention judiciaire d.intérêt public/.test(x)) {
+        const anC = m1(/validée le \d{2}\/\d{2}\/(\d{4})/, x);
+        const montant = m1(/amende d.intérêt public de ([\d  ]+ ?(?:€|M€))/, x);
+        return `Convention judiciaire d'intérêt public pour pollution de l'eau${anC ? ` (${anC})` : ""}${montant ? ` : amende de ${montant}` : ""}`;
+      }
       // « … arrêté préfectoral de mise en demeure du 19/08/2026, site de Formerie … »
       const an = m1(/mise en demeure du \d{2}\/\d{2}\/(\d{4})/, x);
       const site = m1(/site de ([^,(]+)/, x);

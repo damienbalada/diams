@@ -151,3 +151,8 @@ test("sanction partagée entre deux filiales : le total n'est pas sous-estimé",
   const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("x", { excerpt: "Cour fédérale d'Australie, ordonnance du 26/07/2023 : « … » — amende de 10 MA$ pour chacune des deux filiales (sévérité 0,5)." }));
   assert.equal(s, "Sanctionné par la Cour fédérale d'Australie (2023) : amende de 10 M$ australiens pour chacune de deux filiales");
 });
+
+test("convention judiciaire d'intérêt public sur l'eau : année et amende", () => {
+  const s = valeurCourte("WAT_CONTROVERSY", "controverse", preuve("x", { excerpt: "Convention judiciaire d'intérêt public validée le 13/09/2022 par le président du tribunal judiciaire de Charleville-Mézières (ministère de la Justice) : « … » — amende d'intérêt public de 40 000 € (pollution de l'Aisne)." }));
+  assert.equal(s, "Convention judiciaire d'intérêt public pour pollution de l'eau (2022) : amende de 40 000 €");
+});
