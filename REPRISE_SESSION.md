@@ -146,6 +146,10 @@ Depuis `pipeline/`, avec les variables du § 3 :
 | Registre européen | `python -m diams.import_eu_register --file <brouillon>/eu_register.xml [--apply]` |
 | Notes CDP | `python -m diams.import_cdp_scores --file <brouillon>/cdp_page.html [--apply]` |
 | HATVP | open data `hatvp.fr/agora/opendata/agora_repertoire_opendata.json` (copie : `<brouillon>/hatvp_open/agora.json`) ; construire les lignes avec `<brouillon>/build_hatvp.py sortie.csv slug=SIREN …` puis `import_curated` + `verify_curated --apply` |
+| Audit des citations publiées | `python -I outils_collecte/audit_citations.py <dossier de sortie>` : relit chaque source des preuves approuvées et y cherche chaque citation (une heure ; à relancer chaque semaine). Corriger par lot de remplacement + migration de retrait |
+| Paradis fiscaux (groupes européens) | `diams/paradis_europe.py` (`compter(raw, 'FR')` sur le rapport ESEF ou le paquet AMF/DILA) ; le vérificateur refait le décompte. Jamais de zéro publié |
+| Conventions judiciaires (eau) | liste du ministère de la Justice (`justice.gouv.fr/documentation/ressources/conventions-judiciaires-dinteret-public`), source `FR_CJIP` ; documents numérisés lus par OCR (`diams/ocr.py`), citation telle que reconnue |
+| Financement politique (États-Unis) | `python -m diams.import_fec --dir <dossier cm26.zip, webk26.zip> [--apply]` |
 
 Format du CSV de marques :
 `brand_slug,brand_name,group_slug,sector_code,source_kind,source_url,doc,quote,observed_on,animal_free,display_name`
