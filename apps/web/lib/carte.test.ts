@@ -210,3 +210,8 @@ test("sanction : clémence affichée comme infraction sans amende", () => {
   const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("GOV_SANCTIONS", { excerpt: "Commission européenne, communiqué IP/25/881 du 01/04/2025 (en anglais) : « Mercedes-Benz was not fined, as it revealed the cartel to the Commission under the leniency programme »" }));
   assert.match(s, /^Infraction constatée, sans amende \(clémence\), par la Commission européenne \(2025\)/);
 });
+
+test("sanction en dollars australiens écrits en toutes lettres", () => {
+  const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("GOV_SANCTIONS", { excerpt: "Cour fédérale d'Australie, ordonnance du 02/09/2022 : « pecuniary penalties … totalling $12.5 million » — amende civile de 12,5 M$ australiens infligée à la filiale australienne" }));
+  assert.match(s, /amende de 12,5 M\$ australiens$/);
+});

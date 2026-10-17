@@ -169,7 +169,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       const quoi = clemence ? "Infraction constatée, sans amende (clémence)," : code === "GOV_SANCTIONS" ? "Sanctionné" : "Allégations écologiques trompeuses relevées";
       // Article devant le nom de l'autorité : « l'Autorité… », « la Commission… », « la CNIL ».
       const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|FTC|CMA|SEC)\b/.test(autorite) ? "la " : /^(Jury|Bureau)\b/.test(autorite) ? "le " : /^ASA\b/.test(autorite) ? "l'" : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
-      return `${quoi} par ${autorite ? art + autorite : "une autorité"}${an ? ` (${an})` : ""}${amende ? ` : amende de ${amende.replace(/MA\$$/, "M$ australiens")}${/pour chacune des deux filiales/.test(x) ? " pour chacune de deux filiales" : ""}` : ""}`;
+      return `${quoi} par ${autorite ? art + autorite : "une autorité"}${an ? ` (${an})` : ""}${amende ? ` : amende de ${amende.replace(/MA\$$/, "M$ australiens").replace(/M\$$/, /M\$ australiens|dollars australiens/.test(x) ? "M$ australiens" : "M$")}${/pour chacune des deux filiales/.test(x) ? " pour chacune de deux filiales" : ""}` : ""}`;
     }
     case "GEO_CONFLICT_TIES": return "Implication dans un conflit ou une occupation, documentée";
     case "GEO_LOBBYING_ALIGN": { const n = m1(/Climate Policy Engagement ([A-F][+-]?)/, x); return n ? `Note ${n} d'InfluenceMap sur le lobbying climat` : "Évalué par InfluenceMap"; }
@@ -258,7 +258,9 @@ const PAR_GRAVITE = new Set(["GOV_SANCTIONS"]);
  *  fiche affiche »), puis la plus récente. */
 function meilleure(ps: PreuveEntree[], code?: string): PreuveEntree | null {
   const g = (p: PreuveEntree) => (code && PAR_GRAVITE.has(code) ? Number(p.normalized_value ?? 0) : 0);
-  return [...ps].sort((a, b) => b.specificity - a.specificity || g(b) - g(a)
+  // À gravité égale, une amende effective passe avant une infraction sans amende (clémence).
+  const am = (p: PreuveEntree) => (code && PAR_GRAVITE.has(code) && /immunit|clémence|leniency|not fined|exempt from paying/i.test(p.excerpt ?? "") ? 0 : 1);
+  return [...ps].sort((a, b) => b.specificity - a.specificity || g(b) - g(a) || am(b) - am(a)
     || (b.event_date ?? b.observed_on).localeCompare(a.event_date ?? a.observed_on))[0] ?? null;
 }
 
