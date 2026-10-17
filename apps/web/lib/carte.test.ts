@@ -189,3 +189,12 @@ test("libellés : taux effectif, conseil de surveillance, taxonomie", () => {
   const a = valeurCourte("GOV_BOARD_GENDER", "resultat", preuve("GOV_BOARD_GENDER", { value_numeric: 45.5, excerpt: "« administratrices »" }));
   assert.equal(a, "45,5 % de femmes au conseil d'administration");
 });
+
+test("emballages : recyclabilité, matière recyclée ou consigne, selon la preuve", () => {
+  const r = (v: number, x: string) => valeurCourte("PLA_RECYCLED", "resultat", preuve("PLA_RECYCLED", { value_numeric: v, excerpt: x }));
+  assert.equal(r(79, "ESRS E5 (emballages conçus pour être recyclables) : « 79% of our packaging is designed to be recyclable »"), "79 % d'emballages recyclables ou réutilisables");
+  assert.equal(r(11.8, "« 11.8% recycled content in our plastic packaging » — 11,8 % de matière recyclée dans les emballages plastiques"), "11,8 % de matière recyclée dans les emballages plastiques");
+  assert.equal(r(49, "(matériaux recyclés dans les emballages clients en verre et en plastique)"), "49 % de matière recyclée dans les emballages");
+  assert.equal(r(23, "« dont contenus réutilisés ou recyclés 23 % 22 % »"), "23 % de matière recyclée ou réutilisée dans les emballages");
+  assert.equal(r(89.7, "(part des produits en emballage consigné ou majoritairement recyclé)"), "89,7 % des produits en emballage consigné ou majoritairement recyclé");
+});

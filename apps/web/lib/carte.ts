@@ -211,7 +211,17 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "TAX_HAVEN_PRESENCE": return v === null ? "Publié" : v === 0 ? "Aucune filiale listée dans les dix premiers paradis fiscaux" : `Au moins ${nf(v, 0)} filiale${v > 1 ? "s" : ""} dans les dix premiers paradis fiscaux`;
     case "ENV_GHG_TREND": return v === null ? "Publié" : v > 0 ? `Émissions en hausse de ${nf(v, 2)} % par an` : `Émissions en baisse de ${nf(-v, 2)} % par an`;
     case "PLA_REDUCTION": return v === null ? "Publié" : v > 0 ? `Plastique neuf en hausse de ${nf(v, 2)} % par an` : `Plastique neuf en baisse de ${nf(-v, 2)} % par an`;
-    case "PLA_RECYCLED": return v === null ? "Publié" : /biosourc/i.test(x) ? `${nf(v)} % de plastiques recyclés ou biosourcés dans les emballages` : `${nf(v)} % d'emballages recyclés, réutilisables ou recyclables`;
+    case "PLA_RECYCLED": {
+      // Trois mesures différentes selon le rapport : recyclabilité dès la conception, part de matière
+      // recyclée, ou emballages consignés ; le libellé reprend celle que la preuve publie (17/10/2026).
+      if (v === null) return "Publié";
+      if (/biosourc/i.test(x)) return `${nf(v)} % de plastiques recyclés ou biosourcés dans les emballages`;
+      if (/consign/i.test(x)) return `${nf(v)} % des produits en emballage consigné ou majoritairement recyclé`;
+      if (/recyclables?|conçus pour le recyclage|prêts pour le recyclage|recycle-ready|recycleerbaar|designed (?:to be recyclable|for recycling)/i.test(x))
+        return `${nf(v)} % d'emballages recyclables ou réutilisables`;
+      const matiere = /réutilisés ou recyclés|reused or recycled/i.test(x) ? "matière recyclée ou réutilisée" : "matière recyclée";
+      return `${nf(v)} % de ${matiere} dans les emballages${/plasti/i.test(x) && !/verre|glass/i.test(x) ? " plastiques" : ""}`;
+    }
     case "ENV_TAXONOMY_CAPEX": return v === null ? "Publié" : `${nf(v)} % des investissements conformes à la taxonomie verte de l'UE (évaluation de l'entreprise)`;
     case "ENV_GHG_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} tonnes de CO₂ par million ${/M\$|U ?S ?D|dollar/i.test(x) && !/taux de change annuel moyen/i.test(x) ? "de dollars" : "d'euros"} de ventes`;
     case "WAT_INTENSITY": {
