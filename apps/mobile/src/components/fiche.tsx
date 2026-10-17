@@ -19,7 +19,8 @@ export type VarianteEnTete = 'A' | 'B' | 'C' | 'E';
 const NIVEAU: Record<string, string> = { groupe: 'Groupe', marque: 'Marque', produit: 'Produits' };
 const dfr = (d: string) => d.split('-').reverse().join('/');
 const ouvrir = (url: string) => WebBrowser.openBrowserAsync(url);
-const ORANGE = '#d97a00';
+/** Signal d'un pilier ou d'un motif, en emoji : point rouge pour une alerte, attention orange pour une vigilance. */
+const EMOJI: Record<NiveauSignal, string> = { alerte: '🔴', vigilance: '⚠️' };
 const pluriel = (n: number, un: string, plusieurs: string) => `${n} ${n > 1 ? plusieurs : un}`;
 /** Quantité affichée seulement si elle porte une unité (« 250 g », « 1,5 L ») : « 8 » seul ne dit rien. */
 const quantite = (q: string | null) => {
@@ -35,37 +36,16 @@ export const titreFiche = (fiche: TFiche) =>
  * En-tête de fiche : photo du produit scanné (agrandie au toucher), logo et nom de la marque, logo et
  * nom du groupe propriétaire. Compact : la base produit est citée en bas de la fiche.
  */
-function EnTete({ fiche, onMarque, medaillon = false, bandeau = false, badges }: {
-  fiche: TFiche; onMarque: (slug: string) => void; medaillon?: boolean; bandeau?: boolean;
-  /** En-tête B : compteurs posés sur la photo ; un appui ouvre la feuille des motifs. */
-  badges?: { alertes: number; vigilances: number; ouvrir: (n: NiveauSignal) => void };
-}) {
+function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche: TFiche; onMarque: (slug: string) => void; medaillon?: boolean; bandeau?: boolean }) {
   const [grand, setGrand] = useState(false);
   const pr = fiche.produit;
   if (bandeau && pr?.image) {
     return (
       <View style={{ gap: 8 }}>
-        <View>
-          <Pressable onPress={() => setGrand(true)} accessibilityRole="imagebutton" accessibilityLabel={`Photo du produit ${pr.nom}, l'agrandir`} style={s.bandeauPhoto}>
-            <Image source={{ uri: pr.image }} style={s.bandeauImage} contentFit="contain" />
-            <Text style={s.loupe}>🔍 agrandir</Text>
-          </Pressable>
-          {/* Badges à côté du bouton de la photo, pas dedans : pas de bouton dans un bouton. */}
-          {badges && (badges.alertes > 0 || badges.vigilances > 0) && (
-            <View style={s.badges}>
-              {badges.alertes > 0 && (
-                <Pressable onPress={() => badges.ouvrir('alerte')} accessibilityRole="button" accessibilityLabel={`${pluriel(badges.alertes, 'alerte', 'alertes')}, voir les motifs`} hitSlop={6} style={({ pressed }) => [s.badge, { backgroundColor: C.alerte }, pressed && { opacity: 0.8 }]}>
-                  <Text style={s.badgeTexte}>⚠️ {badges.alertes}</Text>
-                </Pressable>
-              )}
-              {badges.vigilances > 0 && (
-                <Pressable onPress={() => badges.ouvrir('vigilance')} accessibilityRole="button" accessibilityLabel={`${pluriel(badges.vigilances, 'point de vigilance', 'points de vigilance')}, voir les motifs`} hitSlop={6} style={({ pressed }) => [s.badge, { backgroundColor: ORANGE }, pressed && { opacity: 0.8 }]}>
-                  <Text style={s.badgeTexte}>🟠 {badges.vigilances}</Text>
-                </Pressable>
-              )}
-            </View>
-          )}
-        </View>
+        <Pressable onPress={() => setGrand(true)} accessibilityRole="imagebutton" accessibilityLabel={`Photo du produit ${pr.nom}, l'agrandir`} style={s.bandeauPhoto}>
+          <Image source={{ uri: pr.image }} style={s.bandeauImage} contentFit="contain" />
+          <Text style={s.loupe}>🔍 agrandir</Text>
+        </Pressable>
         <MarqueEtGroupe fiche={fiche} onMarque={onMarque} />
         <Modal visible={grand} transparent animationType="fade" onRequestClose={() => setGrand(false)}>
           <Pressable style={s.voile} onPress={() => setGrand(false)} accessibilityRole="button" accessibilityLabel="Fermer la photo">
@@ -274,74 +254,33 @@ function motifsDe(fiche: TFiche): Motif[] {
     .sort((a, b) => (a.niveau === 'alerte' ? 0 : 1) - (b.niveau === 'alerte' ? 0 : 1));
 }
 
-/** Pilier d'un motif, en nom court (« Bien-être animal »). */
-const pilierCourt = (fiche: TFiche, code: string) => {
-  const p = fiche.piliers.find((x) => x.code === code);
-  return p ? nomCourt(p.nom) : code;
-};
-
 /**
- * En-tête B : encadré noir façon avertissement de paquet. Les deux premières alertes sont lues d'emblée
- * (« Mars — poursuit ses activités en Russie »), les autres motifs se déplient ; chaque ligne ouvre la preuve.
+ * En-tête B : encadré noir façon avertissement de paquet, fermé par défaut (« ⚠️ Avertissement · 4 alertes,
+ * 1 vigilance »). Ouvert, il lit chaque motif (« Mars — poursuit ses activités en Russie ») ; chaque ligne
+ * ouvre la preuve dans son pilier.
  */
 function Avertissement({ motifs, ouvrirMotif }: { motifs: Motif[]; ouvrirMotif: (m: Motif) => void }) {
-  const [tout, setTout] = useState(false);
+  const [ouvert, setOuvert] = useState(false);
   if (!motifs.length) return null;
-  const montres = tout ? motifs : motifs.slice(0, 2);
-  const reste = motifs.length - montres.length;
+  const na = motifs.filter((m) => m.niveau === 'alerte').length;
+  const nv = motifs.length - na;
+  const compte = [na ? pluriel(na, 'alerte', 'alertes') : '', nv ? pluriel(nv, 'vigilance', 'vigilances') : ''].filter(Boolean).join(', ');
   return (
-    <View style={s.avert} accessibilityRole="summary">
-      <Text style={s.avertTitre}>AVERTISSEMENT</Text>
-      {montres.map((m, i) => (
+    <View style={s.avert}>
+      <Pressable onPress={() => setOuvert(!ouvert)} accessibilityRole="button" accessibilityState={{ expanded: ouvert }} accessibilityLabel={`Avertissement : ${compte}`} style={({ pressed }) => [s.avertTete, pressed && { opacity: 0.7 }]}>
+        <Text style={s.avertTitre}>AVERTISSEMENT</Text>
+        <Text style={s.avertCompte}>{na ? `${EMOJI.alerte} ${na}` : ''}{na && nv ? '   ' : ''}{nv ? `${EMOJI.vigilance} ${nv}` : ''}</Text>
+        <Text style={s.avertFleche}>{ouvert ? '▲' : '▼'}</Text>
+      </Pressable>
+      {ouvert && motifs.map((m, i) => (
         <Pressable key={i} onPress={() => ouvrirMotif(m)} accessibilityRole="button" accessibilityHint="Ouvre la preuve dans le pilier" style={({ pressed }) => [s.avertLigne, pressed && { opacity: 0.6 }]}>
-          <View style={[s.avertPoint, { backgroundColor: m.niveau === 'alerte' ? C.alerte : ORANGE }]} />
+          <Text style={s.avertEmoji}>{EMOJI[m.niveau]}</Text>
           <Text style={s.avertTexte}>
             <Text style={{ fontWeight: '800' }}>{m.qui}</Text> — {m.motif}
           </Text>
         </Pressable>
       ))}
-      {motifs.length > 2 && (
-        <Pressable onPress={() => setTout(!tout)} accessibilityRole="button" accessibilityState={{ expanded: tout }} hitSlop={8} style={s.avertPlus}>
-          <Text style={s.avertPlusTexte}>{tout ? 'Réduire ▲' : `+ ${pluriel(reste, 'autre motif', 'autres motifs')} ▼`}</Text>
-        </Pressable>
-      )}
     </View>
-  );
-}
-
-/** Feuille qui monte du bas : la liste des alertes (ou des vigilances), chaque motif ouvre sa preuve. */
-function FeuilleMotifs({ niveau, motifs, fiche, fermer, ouvrirMotif }: { niveau: NiveauSignal | null; motifs: Motif[]; fiche: TFiche; fermer: () => void; ouvrirMotif: (m: Motif) => void }) {
-  // Le dernier niveau ouvert reste affiché pendant que la feuille redescend.
-  const [montre, setMontre] = useState<NiveauSignal>('alerte');
-  if (niveau && niveau !== montre) setMontre(niveau);
-  const liste = motifs.filter((m) => m.niveau === montre);
-  const al = montre === 'alerte';
-  const c = al ? C.alerte : ORANGE;
-  return (
-    <Modal visible={!!niveau} transparent animationType="slide" onRequestClose={fermer}>
-      <View style={s.feuilleVoile}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={fermer} accessibilityRole="button" accessibilityLabel="Fermer la liste" />
-        <View style={s.feuille}>
-          <View style={s.poignee} />
-          <Text style={[s.feuilleTitre, { color: c }]} accessibilityRole="header">
-            {al ? `⚠️ ${pluriel(liste.length, 'alerte', 'alertes')}` : `🟠 ${pluriel(liste.length, 'vigilance', 'vigilances')}`}
-          </Text>
-          <Text style={s.petit}>
-            {al ? 'Faits sourcés qui dépassent un seuil fixé à l’avance.' : 'Faits sourcés à surveiller, sous le seuil d’alerte.'} Touchez un motif pour lire la preuve.
-          </Text>
-          {liste.map((m, i) => (
-            <Pressable key={i} onPress={() => ouvrirMotif(m)} accessibilityRole="button" style={({ pressed }) => [s.feuilleLigne, pressed && { opacity: 0.6 }]}>
-              <View style={[s.avertPoint, { backgroundColor: c, marginTop: 7 }]} />
-              <View style={s.flex}>
-                <Text style={s.feuilleMotif}>{m.icone} {majuscule(m.motif)}</Text>
-                <Text style={s.feuilleSous}>{pilierCourt(fiche, m.pilier)} · {m.qui}</Text>
-              </View>
-              <Text style={s.chevron}>›</Text>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-    </Modal>
   );
 }
 
@@ -355,7 +294,6 @@ export function Fiche({ fiche, onMarque, defiler }: {
   const [variante, setVariante] = useState<VarianteEnTete>('B');
   const [choix, setChoix] = useState<string | null>(null);
   const [deplie, setDeplie] = useState<string | null>(null);
-  const [feuille, setFeuille] = useState<NiveauSignal | null>(null);
   // Hauteurs mesurées pour amener le pilier ouvert à l'écran : bloc des pastilles, puis panneau dedans.
   const yZone = useRef(0);
   const yPastilles = useRef(0);
@@ -370,13 +308,8 @@ export function Fiche({ fiche, onMarque, defiler }: {
   const motifs = motifsDe(fiche);
   // Depuis l'en-tête : ouvre la pastille du pilier concerné (affichage en pastilles seulement), avec
   // l'indicateur visé déplié sur sa preuve, et l'amène à l'écran.
-  // Depuis la feuille des motifs, on attend qu'elle soit redescendue : en se fermant, elle rend la main
-  // au badge, ce qui ramènerait l'écran en haut.
-  const delai = useRef(0);
-  const allerA = (y: number) => setTimeout(() => defiler?.(y), delai.current);
+  const allerA = (y: number) => defiler?.(y);
   const ouvrirPilier = liste ? undefined : (code: string, codeFait?: string) => {
-    delai.current = feuille ? 350 : 0;
-    setFeuille(null);
     setDeplie(codeFait ?? null);
     if (choix === code && yPanneau.current !== null) allerA(yZone.current + yPastilles.current + yPanneau.current);
     else aDefiler.current = true;
@@ -389,7 +322,7 @@ export function Fiche({ fiche, onMarque, defiler }: {
       allerA(yZone.current + yPastilles.current + y);
     }
   };
-  const ouvrirMotif = (m: Motif) => (ouvrirPilier ? ouvrirPilier(m.pilier, m.code) : setFeuille(null));
+  const ouvrirMotif = (m: Motif) => ouvrirPilier?.(m.pilier, m.code);
   return (
     <View>
       {/* Zone 1 : identité du produit et de son propriétaire, alertes. */}
@@ -399,12 +332,10 @@ export function Fiche({ fiche, onMarque, defiler }: {
         onMarque={onMarque}
         medaillon={variante === 'C'}
         bandeau={variante === 'B'}
-        badges={variante === 'B' ? { alertes: alertes.length, vigilances: vigilance.length, ouvrir: setFeuille } : undefined}
       />
       {variante === 'C' && <EtiquettesAlertes alertes={fiche.alertes} ouvrirPilier={ouvrirPilier} />}
-      {variante === 'B' && fiche.produit?.image && <Avertissement motifs={motifs} ouvrirMotif={ouvrirMotif} />}
-      {(variante === 'E' || (variante === 'B' && !fiche.produit?.image)) && <Compteurs alertes={alertes} vigilance={vigilance} ouvrirPilier={ouvrirPilier} />}
-      <FeuilleMotifs niveau={feuille} motifs={motifs} fiche={fiche} fermer={() => setFeuille(null)} ouvrirMotif={ouvrirMotif} />
+      {variante === 'B' && <Avertissement motifs={motifs} ouvrirMotif={ouvrirMotif} />}
+      {variante === 'E' && <Compteurs alertes={alertes} vigilance={vigilance} ouvrirPilier={ouvrirPilier} />}
 
       {variante === 'A' && alertes.length > 0 && (
         <View style={s.bandeauAlerte} accessibilityRole="summary">
@@ -540,8 +471,8 @@ function trierFaits(p: Pilier) {
 
 /**
  * Fiche en pastilles : une pastille par pilier (icône, nom, état, nombre renseigné). Un appui déplie le
- * pilier juste sous la ligne de sa pastille, avec une pointe vers elle ; un second appui le replie.
- * Les produits ont leur pastille. Les pastilles sans information sont estompées.
+ * pilier juste sous la ligne de sa pastille ; un second appui le replie. Les produits ont leur pastille.
+ * Les pastilles renseignées viennent d'abord, puis les pastilles sans information, estompées.
  */
 function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
   fiche: TFiche; choix: string | null; setChoix: (c: string | null) => void;
@@ -555,7 +486,10 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
   const p = fiche.piliers.find((x) => x.code === choix) ?? null;
   const teinte = choix === 'PRODUITS' ? '#2f7a3b' : p ? TEINTE[p.code] ?? C.accent : C.accent;
   const produits = fiche.estMarque ? fiche.produitsLus ?? [] : null;
-  const codes = [...fiche.piliers.map((x) => x.code), ...(produits ? ['PRODUITS'] : [])];
+  // Ordre d'affichage : les pastilles renseignées, puis les vides (ordre des piliers conservé dans chaque groupe).
+  const ordre = [...fiche.piliers.map((x) => ({ code: x.code, vide: x.renseignes === 0 })), ...(produits ? [{ code: 'PRODUITS', vide: !produits.length }] : [])]
+    .sort((a, b) => Number(a.vide) - Number(b.vide));
+  const codes = ordre.map((o) => o.code);
   const ici = choix ? places[choix] : undefined;
   // Dernière pastille de la ligne de la pastille choisie (à défaut de mesure : la pastille elle-même).
   const apres = !choix ? null : ici ? [...codes].reverse().find((c) => places[c] && Math.abs(places[c].y - ici.y) < 4) ?? choix : choix;
@@ -569,7 +503,6 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
 
   const panneau = () => (
     <View key="panneau" style={s.panneauLigne} onLayout={(e) => surPanneau?.(e.nativeEvent.layout.y)}>
-      {ici && <View style={[s.pointe, { left: ici.x + ici.l / 2 - 8, borderColor: teinte }]} />}
       {p && (() => {
         const { pleins, vides, plusieursNiveaux } = trierFaits(p);
         return (
@@ -626,7 +559,7 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
         ]}>
         <Text style={{ fontSize: 16 }}>{x.icone}</Text>
         <Text style={[s.pastilleNom, { color: actif ? t : C.texte }]} numberOfLines={1}>{nomCourt(x.nom)}</Text>
-        {sig && <View style={[s.point, { backgroundColor: sig === 'alerte' ? C.alerte : '#d97a00' }]} />}
+        {sig && <Text style={s.pastilleSignal}>{EMOJI[sig]}</Text>}
         <Text style={s.pastilleCompte}>{x.renseignes}/{x.total}</Text>
       </Pressable>
     );
@@ -649,7 +582,8 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
     );
   }
   // Le panneau prend toute la largeur juste après la dernière pastille de la ligne choisie.
-  const contenu = apres ? pastilles.flatMap((el, i) => (codes[i] === apres ? [el, panneau()] : [el])) : pastilles;
+  const triees = codes.map((c) => pastilles.find((el) => el.key === c)!);
+  const contenu = apres ? triees.flatMap((el) => (el.key === apres ? [el, panneau()] : [el])) : triees;
 
   return (
     <View style={{ gap: 12 }}>
@@ -785,13 +719,12 @@ function CarteFait({ f, teinte, niveau, deplie = false }: { f: Fait; teinte: str
   const [toute, setToute] = useState(false);
   const sig = f.signal?.niveau;
   const fond = sig === 'alerte' ? C.alerteFond : sig === 'vigilance' ? '#fffaf2' : C.carte;
-  const bordGauche = sig === 'alerte' ? C.alerte : sig === 'vigilance' ? '#d97a00' : teinte;
   // Avec un signal, la valeur dit déjà le repère (« il faudrait 4,2 % ») : il passe dans le détail.
   const repereVisible = f.repere && !f.signal ? f.repere : null;
   const aDetail = !!(f.preuve || f.raison || f.note || f.signal || f.enSavoirPlus || (f.repere && !repereVisible));
   const sol = f.preuve ? SOLIDITE[f.preuve.solidite] : null;
   return (
-    <View style={[s.fait, { backgroundColor: fond, borderLeftColor: bordGauche }]}>
+    <View style={[s.fait, { backgroundColor: fond }]}>
       <View style={s.ligne}>
         <Text style={[s.faitNom, s.flex]}>{f.nom}{niveau ? ` · ${niveau.toLowerCase()}` : ''}</Text>
         {f.signal && (
@@ -924,7 +857,7 @@ const s = StyleSheet.create({
   cleNom: { fontSize: 13, color: C.gris, marginTop: 2 },
   cleValeur: { fontSize: 16, lineHeight: 22, fontWeight: '700', marginTop: 2 },
   corps: { paddingHorizontal: 14, paddingBottom: 16, paddingTop: 2, gap: 12 },
-  fait: { borderRadius: 14, paddingHorizontal: 14, paddingTop: 14, paddingBottom: 4, gap: 6, borderWidth: 1, borderColor: C.bord, borderLeftWidth: 4 },
+  fait: { borderRadius: 14, paddingHorizontal: 14, paddingTop: 14, paddingBottom: 4, gap: 6, borderWidth: 1, borderColor: C.bord },
   faitNom: { fontSize: 14, fontWeight: '600', color: C.gris },
   faitValeur: { fontSize: 19, lineHeight: 25, fontWeight: '800', color: C.texte },
   repere: { fontSize: 14, lineHeight: 20, color: C.texte },
@@ -970,26 +903,17 @@ const s = StyleSheet.create({
   ongletFerme: { borderBottomLeftRadius: 12, borderBottomRightRadius: 12, marginBottom: 0, paddingBottom: 0, borderBottomWidth: 1.5 },
   ongletTexte: { fontSize: 14.5, fontWeight: '800' },
   classeur: { backgroundColor: C.carte, borderWidth: 1.5, borderRadius: 12, position: 'relative', zIndex: 1 },
-  bandeauPhoto: { height: 180, borderRadius: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: C.bord, overflow: 'hidden', padding: 14 },
+  // Photo du produit en bandeau blanc d'un bord à l'autre, collé sous la barre du haut (comme la zone des piliers).
+  bandeauPhoto: { height: 220, marginHorizontal: -16, marginTop: -16, backgroundColor: '#fff', borderBottomWidth: 1, borderColor: C.bord, padding: 16 },
   bandeauImage: { flex: 1 },
-  badges: { position: 'absolute', top: 8, left: 8, flexDirection: 'row', gap: 6 },
-  badge: { minHeight: 36, paddingHorizontal: 12, borderRadius: 999, justifyContent: 'center', shadowColor: '#160f2e', shadowOpacity: 0.25, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
-  badgeTexte: { color: '#fff', fontSize: 15, fontWeight: '800' },
   avert: { backgroundColor: '#111', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 10, gap: 6, borderWidth: 3, borderColor: '#fff', outlineColor: '#111', outlineWidth: 2, outlineStyle: 'solid' },
   avertTitre: { color: '#fff', fontSize: 12.5, fontWeight: '800', letterSpacing: 0.8 },
   avertLigne: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, paddingVertical: 3 },
-  avertPoint: { width: 9, height: 9, borderRadius: 5, marginTop: 6 },
+  avertTete: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 32 },
+  avertCompte: { flex: 1, color: '#fff', fontSize: 14, fontWeight: '700' },
+  avertFleche: { color: '#fff', fontSize: 13 },
+  avertEmoji: { fontSize: 13, lineHeight: 20 },
   avertTexte: { flex: 1, color: '#fff', fontSize: 14.5, lineHeight: 20 },
-  avertPlus: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center' },
-  avertPlusTexte: { color: '#fff', fontSize: 14, fontWeight: '700', textDecorationLine: 'underline' },
-  feuilleVoile: { flex: 1, backgroundColor: 'rgba(22,15,46,0.55)', justifyContent: 'flex-end' },
-  feuille: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 6, maxHeight: '80%' },
-  poignee: { alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: C.bord, marginBottom: 6 },
-  feuilleTitre: { fontSize: 19, fontWeight: '800' },
-  feuilleLigne: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.bord },
-  feuilleMotif: { fontSize: 15.5, lineHeight: 21, fontWeight: '700', color: C.texte },
-  feuilleSous: { fontSize: 13, color: C.gris, marginTop: 2 },
-  chevron: { fontSize: 24, color: C.gris },
   marqueGroupe: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4, paddingHorizontal: 2 },
   marqueB: { fontSize: 21, lineHeight: 26, fontWeight: '800', color: C.texte, flexShrink: 1 },
   groupeB: { fontSize: 15, fontWeight: '700', color: C.texte, textDecorationLine: 'underline', flexShrink: 1 },
@@ -1022,9 +946,8 @@ const s = StyleSheet.create({
   point: { width: 8, height: 8, borderRadius: 4 },
   panneau: { backgroundColor: C.carte, borderRadius: 16, borderWidth: 1.5, paddingTop: 12, overflow: 'hidden' },
   panneauLigne: { width: '100%', paddingTop: 6 },
-  // Pointe du panneau vers sa pastille : un carré tourné, bordé sur deux côtés, posé sur le bord.
-  pointe: { position: 'absolute', top: -1, width: 16, height: 16, backgroundColor: C.carte, borderLeftWidth: 1.5, borderTopWidth: 1.5, transform: [{ rotate: '45deg' }], zIndex: 2 },
   pastilleVide: { opacity: 0.42, borderStyle: 'dashed' },
+  pastilleSignal: { fontSize: 12 },
   boutonEtiquette: { borderWidth: 1, borderStyle: 'dashed', borderColor: C.accent, borderRadius: 12, padding: 14, minHeight: 48, justifyContent: 'center' },
   boutonEtiquetteTexte: { fontSize: 15, fontWeight: '700', color: C.accent },
 });
