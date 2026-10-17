@@ -19,7 +19,8 @@ export default function Racine() {
           headerStyle: { backgroundColor: C.fond },
           headerTintColor: C.accent,
           headerTitleStyle: { color: C.texte, fontWeight: '700' },
-          headerBackTitle: 'Retour',
+          // Flèche seule : le titre de l'écran (nom du produit) prend la place.
+          headerBackButtonDisplayMode: 'minimal',
           contentStyle: { backgroundColor: C.fond },
         }}>
         <Stack.Screen name="index" options={{ headerShown: false, title: 'Accueil' }} />

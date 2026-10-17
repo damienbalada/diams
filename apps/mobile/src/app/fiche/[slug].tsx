@@ -1,10 +1,10 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BoutonScanner, MARGE_BOUTON } from '@/components/bouton-scanner';
 import { Chargement, Erreur } from '@/components/etat';
-import { Fiche } from '@/components/fiche';
+import { Fiche, titreFiche } from '@/components/fiche';
 import { ErreurSite, ficheParSlug, type ReponseFiche } from '@/lib/api';
 import { C } from '@/lib/couleurs';
 
@@ -33,6 +33,7 @@ export default function FicheMarque() {
   if (!rep.trouve) return <Text style={s.texte}>{rep.raison}</Text>;
   return (
     <View style={{ flex: 1 }}>
+      <Stack.Screen options={{ title: titreFiche(rep.fiche) }} />
       <ScrollView contentContainerStyle={s.contenu}>
         <Fiche fiche={rep.fiche} onMarque={(x) => router.push(`/fiche/${x}`)} />
       </ScrollView>

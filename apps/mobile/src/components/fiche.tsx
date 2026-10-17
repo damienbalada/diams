@@ -24,6 +24,10 @@ const quantite = (q: string | null) => {
   return /\d\s*[a-zA-Zµ]/.test(v) ? ` · ${v}` : '';
 };
 
+/** Titre de l'écran d'une fiche : « Nutella · 400 g » pour un produit scanné, sinon le nom de la marque. */
+export const titreFiche = (fiche: TFiche) =>
+  fiche.produit ? `${fiche.produit.nom}${quantite(fiche.produit.quantite)}` : fiche.nom;
+
 /**
  * En-tête de fiche : photo du produit scanné (agrandie au toucher), logo et nom de la marque, logo et
  * nom du groupe propriétaire. Compact : la base produit est citée en bas de la fiche.
@@ -38,12 +42,7 @@ function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche
           <Image source={{ uri: pr.image }} style={s.bandeauImage} contentFit="contain" />
           <Text style={s.loupe}>🔍 agrandir</Text>
         </Pressable>
-        <Text style={s.produitNomB} numberOfLines={2}>{pr.nom}{quantite(pr.quantite)}</Text>
-        <View style={s.ligne}>
-          <Logo src={fiche.logo} taille={32} />
-          <Text style={s.marqueB} accessibilityRole="header" numberOfLines={1}>{fiche.nom}</Text>
-        </View>
-        {fiche.proprietaire && <LigneGroupe proprietaire={fiche.proprietaire} onMarque={onMarque} />}
+        <MarqueEtGroupe fiche={fiche} onMarque={onMarque} />
         <Modal visible={grand} transparent animationType="fade" onRequestClose={() => setGrand(false)}>
           <Pressable style={s.voile} onPress={() => setGrand(false)} accessibilityRole="button" accessibilityLabel="Fermer la photo">
             <Image source={{ uri: pr.image }} style={s.photoGrande} contentFit="contain" />
@@ -100,21 +99,33 @@ function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche
   );
 }
 
-/** Groupe propriétaire (logo, nom, lien vers sa fiche) ; « reçoit l'argent de vos achats » en infobulle (ⓘ). */
-function LigneGroupe({ proprietaire, onMarque }: { proprietaire: NonNullable<TFiche['proprietaire']>; onMarque: (slug: string) => void }) {
+/**
+ * Marque (grand logo avec marge) et, à sa droite sur la même ligne, le groupe propriétaire (logo, nom, lien
+ * vers sa fiche) ; « reçoit l'argent de vos achats » en infobulle (ⓘ). Passe à la ligne si les noms sont longs.
+ */
+function MarqueEtGroupe({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) => void }) {
   const [info, setInfo] = useState(false);
+  const proprietaire = fiche.proprietaire;
   return (
     <View style={{ gap: 6 }}>
-      <View style={s.ligne}>
-        <Pressable onPress={() => onMarque(proprietaire.slug)} accessibilityRole="link" accessibilityLabel={`Groupe ${proprietaire.nom}, ouvrir sa fiche`} style={[s.ligne, { flexShrink: 1 }]}>
-          <Logo src={proprietaire.logo} taille={26} groupe />
-          <Text style={s.groupeB} numberOfLines={1}>{proprietaire.nom}</Text>
-        </Pressable>
-        <Pressable onPress={() => setInfo(!info)} accessibilityRole="button" accessibilityLabel="À quoi sert ce groupe ?" accessibilityState={{ expanded: info }} hitSlop={12} style={s.info}>
-          <Text style={s.infoTexte}>ⓘ</Text>
-        </Pressable>
+      <View style={s.marqueGroupe}>
+        <View style={[s.ligne, { gap: 10, flexShrink: 1 }]}>
+          <Logo src={fiche.logo} taille={52} marge={6} />
+          <Text style={s.marqueB} accessibilityRole="header" numberOfLines={2}>{fiche.nom}</Text>
+        </View>
+        {proprietaire && (
+          <View style={[s.ligne, { flexShrink: 1 }]}>
+            <Pressable onPress={() => onMarque(proprietaire.slug)} accessibilityRole="link" accessibilityLabel={`Groupe ${proprietaire.nom}, ouvrir sa fiche`} style={[s.ligne, { flexShrink: 1 }]}>
+              <Logo src={proprietaire.logo} taille={40} marge={5} groupe />
+              <Text style={s.groupeB} numberOfLines={1}>{proprietaire.nom}</Text>
+            </Pressable>
+            <Pressable onPress={() => setInfo(!info)} accessibilityRole="button" accessibilityLabel="À quoi sert ce groupe ?" accessibilityState={{ expanded: info }} hitSlop={12} style={s.info}>
+              <Text style={s.infoTexte}>ⓘ</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
-      {info && (
+      {proprietaire && info && (
         <View style={s.bulle} accessibilityLiveRegion="polite">
           <Text style={s.bulleTexte}>{proprietaire.nom} possède la marque : c'est ce groupe qui reçoit l'argent de vos achats.</Text>
         </View>
@@ -755,7 +766,7 @@ const s = StyleSheet.create({
   classeur: { backgroundColor: C.carte, borderWidth: 1.5, borderRadius: 12, position: 'relative', zIndex: 1 },
   bandeauPhoto: { height: 180, borderRadius: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: C.bord, overflow: 'hidden', padding: 14 },
   bandeauImage: { flex: 1 },
-  produitNomB: { fontSize: 15, fontWeight: '600', color: C.gris },
+  marqueGroupe: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 20, rowGap: 10, paddingVertical: 4, paddingHorizontal: 2 },
   marqueB: { fontSize: 26, fontWeight: '800', color: C.texte, flexShrink: 1 },
   groupeB: { fontSize: 18, fontWeight: '700', color: C.texte, textDecorationLine: 'underline', flexShrink: 1 },
   info: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.carte2 },

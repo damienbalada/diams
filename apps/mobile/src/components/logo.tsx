@@ -5,8 +5,11 @@ import { StyleSheet, Text, View } from 'react-native';
 import { adresseImage, entetes } from '@/lib/api';
 import { C } from '@/lib/couleurs';
 
-/** Logo d'une marque ou d'un groupe ; à défaut, un pictogramme neutre (jamais une initiale). */
-export function Logo({ src, taille, groupe }: { src: string | null | undefined; taille: number; groupe?: boolean }) {
+/**
+ * Logo d'une marque ou d'un groupe ; à défaut, un pictogramme neutre (jamais une initiale).
+ * `marge` : le logo est posé dans un cadre blanc, à cette distance du bord (il ne touche plus le contour).
+ */
+export function Logo({ src, taille, groupe, marge }: { src: string | null | undefined; taille: number; groupe?: boolean; marge?: number }) {
   const [source, setSource] = useState<{ uri: string; headers?: Record<string, string> } | null>(null);
   useEffect(() => {
     let vivant = true;
@@ -30,10 +33,19 @@ export function Logo({ src, taille, groupe }: { src: string | null | undefined; 
       </View>
     );
   }
+  if (marge) {
+    const interieur = taille - 2 * marge - 2;
+    return (
+      <View style={[s.cadre, cadre]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        <Image source={source} style={{ width: interieur, height: interieur, borderRadius: Math.round(interieur * 0.18) }} contentFit="contain" accessibilityIgnoresInvertColors accessible={false} />
+      </View>
+    );
+  }
   return <Image source={source} style={[s.logo, cadre]} contentFit="contain" accessibilityIgnoresInvertColors accessible={false} />;
 }
 
 const s = StyleSheet.create({
   logo: { backgroundColor: '#fff', borderWidth: 1, borderColor: C.bord, padding: 4 },
+  cadre: { backgroundColor: '#fff', borderWidth: 1, borderColor: C.bord, alignItems: 'center', justifyContent: 'center' },
   vide: { backgroundColor: C.carte2, alignItems: 'center', justifyContent: 'center' },
 });

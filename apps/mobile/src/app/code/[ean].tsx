@@ -1,11 +1,11 @@
 import { Image } from 'expo-image';
-import { Link, router, useLocalSearchParams } from 'expo-router';
+import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Chargement, Erreur } from '@/components/etat';
 import { BoutonScanner, MARGE_BOUTON } from '@/components/bouton-scanner';
-import { Fiche } from '@/components/fiche';
+import { Fiche, titreFiche } from '@/components/fiche';
 import { ErreurSite, ficheParCode, noterScan, type ReponseFiche } from '@/lib/api';
 import { C } from '@/lib/couleurs';
 
@@ -74,6 +74,7 @@ export default function ProduitScanne() {
   }
   return (
     <View style={{ flex: 1 }}>
+      <Stack.Screen options={{ title: titreFiche(rep.fiche) }} />
       <ScrollView contentContainerStyle={[s.contenu, { paddingBottom: MARGE_BOUTON }]}>
         <Fiche fiche={rep.fiche} onMarque={(slug) => router.push(`/fiche/${slug}`)} />
       </ScrollView>
