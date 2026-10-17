@@ -168,3 +168,10 @@ test("intensité eau : prélèvements ou consommation selon le rapport", () => {
   const p = valeurCourte("WAT_INTENSITY", "resultat", preuve("WAT_INTENSITY", { value_numeric: 2191, excerpt: "rapport de durabilité (intensité des prélèvements d'eau rapportés au chiffre d'affaires)" }));
   assert.match(p, /^2.191 m³ d'eau prélevés par million d'euros de ventes$/);
 });
+
+test("intensité carbone : devise du rapport conservée", () => {
+  const d = valeurCourte("ENV_GHG_INTENSITY", "resultat", preuve("ENV_GHG_INTENSITY", { value_numeric: 373, excerpt: "ESRS E1-6 (t CO2e par million de dollars) : « Total GHG emissions (market-based) per net revenue ( metric tonnes CO 2 eq/million US D) 373 395 »" }));
+  assert.equal(d, "373 tonnes de CO₂ par million de dollars de ventes");
+  const e = valeurCourte("ENV_GHG_INTENSITY", "resultat", preuve("ENV_GHG_INTENSITY", { value_numeric: 180, excerpt: "« Intensité carbone économique (en teqCO 2 / M€ de CA) 304 255 180 »" }));
+  assert.equal(e, "180 tonnes de CO₂ par million d'euros de ventes");
+});
