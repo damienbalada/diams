@@ -109,21 +109,21 @@ function MarqueEtGroupe({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: s
   return (
     <View style={{ gap: 6 }}>
       <View style={s.marqueGroupe}>
-        <View style={[s.ligne, { gap: 10, flexShrink: 1 }]}>
-          <Logo src={fiche.logo} taille={52} marge={6} />
-          <Text style={s.marqueB} accessibilityRole="header" numberOfLines={2}>{fiche.nom}</Text>
+        <Logo src={fiche.logo} taille={52} marge={6} />
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={s.marqueB} accessibilityRole="header" numberOfLines={1}>{fiche.nom}</Text>
+          {proprietaire && (
+            <View style={[s.ligne, { gap: 6 }]}>
+              <Pressable onPress={() => onMarque(proprietaire.slug)} accessibilityRole="link" accessibilityLabel={`Groupe ${proprietaire.nom}, ouvrir sa fiche`} style={[s.ligne, { gap: 6, flexShrink: 1 }]}>
+                <Logo src={proprietaire.logo} taille={22} marge={2} groupe />
+                <Text style={s.groupeB} numberOfLines={1}>{proprietaire.nom}</Text>
+              </Pressable>
+              <Pressable onPress={() => setInfo(!info)} accessibilityRole="button" accessibilityLabel="À quoi sert ce groupe ?" accessibilityState={{ expanded: info }} hitSlop={12} style={s.info}>
+                <Text style={s.infoTexte}>ⓘ</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
-        {proprietaire && (
-          <View style={[s.ligne, { flexShrink: 1 }]}>
-            <Pressable onPress={() => onMarque(proprietaire.slug)} accessibilityRole="link" accessibilityLabel={`Groupe ${proprietaire.nom}, ouvrir sa fiche`} style={[s.ligne, { flexShrink: 1 }]}>
-              <Logo src={proprietaire.logo} taille={40} marge={5} groupe />
-              <Text style={s.groupeB} numberOfLines={1}>{proprietaire.nom}</Text>
-            </Pressable>
-            <Pressable onPress={() => setInfo(!info)} accessibilityRole="button" accessibilityLabel="À quoi sert ce groupe ?" accessibilityState={{ expanded: info }} hitSlop={12} style={s.info}>
-              <Text style={s.infoTexte}>ⓘ</Text>
-            </Pressable>
-          </View>
-        )}
       </View>
       {proprietaire && info && (
         <View style={s.bulle} accessibilityLiveRegion="polite">
@@ -766,11 +766,11 @@ const s = StyleSheet.create({
   classeur: { backgroundColor: C.carte, borderWidth: 1.5, borderRadius: 12, position: 'relative', zIndex: 1 },
   bandeauPhoto: { height: 180, borderRadius: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: C.bord, overflow: 'hidden', padding: 14 },
   bandeauImage: { flex: 1 },
-  marqueGroupe: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 20, rowGap: 10, paddingVertical: 4, paddingHorizontal: 2 },
-  marqueB: { fontSize: 26, fontWeight: '800', color: C.texte, flexShrink: 1 },
-  groupeB: { fontSize: 18, fontWeight: '700', color: C.texte, textDecorationLine: 'underline', flexShrink: 1 },
-  info: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.carte2 },
-  infoTexte: { fontSize: 15, color: C.accent, fontWeight: '700' },
+  marqueGroupe: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4, paddingHorizontal: 2 },
+  marqueB: { fontSize: 21, lineHeight: 26, fontWeight: '800', color: C.texte, flexShrink: 1 },
+  groupeB: { fontSize: 15, fontWeight: '700', color: C.texte, textDecorationLine: 'underline', flexShrink: 1 },
+  info: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: C.carte2 },
+  infoTexte: { fontSize: 14, color: C.accent, fontWeight: '700' },
   bulle: { alignSelf: 'flex-start', backgroundColor: C.texte, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, maxWidth: '100%' },
   bulleTexte: { color: '#fff', fontSize: 13.5, lineHeight: 19 },
   loupe: { position: 'absolute', right: 8, bottom: 8, backgroundColor: 'rgba(22,15,46,0.75)', color: '#fff', fontSize: 12, fontWeight: '600', paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
