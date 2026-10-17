@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BoutonScanner, MARGE_BOUTON } from '@/components/bouton-scanner';
 import { historique, type Scan } from '@/lib/api';
 import { C } from '@/lib/couleurs';
 
@@ -30,18 +31,6 @@ export default function Accueil() {
           </Link>
         </View>
         <Text style={s.sousTitre}>Qui fabrique ce que vous achetez, et ce que disent les sources officielles.</Text>
-
-        <Link href="/scanner" asChild>
-          <Pressable accessibilityRole="button" accessibilityLabel="Scanner un code-barres" style={s.scanner}>
-            <View style={s.codeBarres} accessible={false} importantForAccessibility="no-hide-descendants">
-              {[4, 2, 6, 2, 3, 7, 2, 4, 2, 6, 3, 2, 5, 2, 4].map((l, i) => (
-                <View key={i} style={{ width: l, height: 44, backgroundColor: '#fff', borderRadius: 1 }} />
-              ))}
-            </View>
-            <Text style={s.scannerTitre}>Scanner un code-barres</Text>
-            <Text style={s.scannerTexte}>Pointez l'appareil photo vers le code du produit</Text>
-          </Pressable>
-        </Link>
 
         <Link href="/recherche" asChild>
           <Pressable accessibilityRole="search" style={s.recherche}>
@@ -89,21 +78,18 @@ export default function Accueil() {
           </View>
         )}
       </ScrollView>
+      <BoutonScanner />
     </SafeAreaView>
   );
 }
 
 const s = StyleSheet.create({
   ecran: { flex: 1, backgroundColor: C.fond },
-  contenu: { padding: 20, gap: 16, paddingBottom: 40 },
+  contenu: { padding: 20, gap: 16, paddingBottom: MARGE_BOUTON },
   haut: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   titre: { fontSize: 32, fontWeight: '800', color: C.texte, flex: 1 },
   rond: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.carte2, alignItems: 'center', justifyContent: 'center' },
   sousTitre: { fontSize: 16, lineHeight: 22, color: C.gris },
-  scanner: { backgroundColor: C.accent, borderRadius: 22, padding: 22, gap: 8, minHeight: 170, justifyContent: 'flex-end' },
-  codeBarres: { flexDirection: 'row', gap: 3, alignItems: 'flex-end', marginBottom: 6 },
-  scannerTitre: { color: '#fff', fontSize: 24, fontWeight: '800' },
-  scannerTexte: { color: '#ece6ff', fontSize: 15 },
   recherche: { backgroundColor: C.carte, borderRadius: 14, borderWidth: 1, borderColor: C.bordFort, minHeight: 52, justifyContent: 'center', paddingHorizontal: 16 },
   rechercheTexte: { fontSize: 16, color: C.gris },
   saisie: { gap: 6 },

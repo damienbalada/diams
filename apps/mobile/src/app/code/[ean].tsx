@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Chargement, Erreur } from '@/components/etat';
+import { BoutonScanner, MARGE_BOUTON } from '@/components/bouton-scanner';
 import { Fiche } from '@/components/fiche';
 import { ErreurSite, ficheParCode, noterScan, type ReponseFiche } from '@/lib/api';
 import { C } from '@/lib/couleurs';
@@ -72,12 +73,12 @@ export default function ProduitScanne() {
     );
   }
   return (
-    <ScrollView contentContainerStyle={s.contenu}>
-      <Fiche fiche={rep.fiche} onMarque={(slug) => router.push(`/fiche/${slug}`)} />
-      <Pressable onPress={() => router.replace('/scanner')} accessibilityRole="button" style={s.bouton}>
-        <Text style={s.boutonTexte}>Scanner un autre produit</Text>
-      </Pressable>
-    </ScrollView>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={[s.contenu, { paddingBottom: MARGE_BOUTON }]}>
+        <Fiche fiche={rep.fiche} onMarque={(slug) => router.push(`/fiche/${slug}`)} />
+      </ScrollView>
+      <BoutonScanner />
+    </View>
   );
 }
 

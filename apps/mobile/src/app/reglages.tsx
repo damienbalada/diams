@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 import { effacerHistorique, enregistrerReglages, lireReglages, SITE_PAR_DEFAUT, type Reglages } from '@/lib/api';
+import { CLE_AFFICHAGE } from '@/components/fiche';
 import { C } from '@/lib/couleurs';
+import { ecrire, lire } from '@/lib/stockage';
 
 /** Adresse du site et mot de passe (tant que le site est privé), gardés dans le coffre du téléphone. */
 export default function EcranReglages() {
   const [r, setR] = useState<Reglages | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [pastilles, setPastilles] = useState(true);
   useEffect(() => {
     lireReglages().then(setR);
+    lire(CLE_AFFICHAGE).then((v) => setPastilles(v !== 'liste'));
   }, []);
   if (!r) return null;
   const enregistrer = async () => {
@@ -38,6 +42,20 @@ export default function EcranReglages() {
         <Text style={s.boutonTexte}>Enregistrer</Text>
       </Pressable>
       {message && <Text style={s.message} accessibilityLiveRegion="polite">{message}</Text>}
+      <View style={s.option}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={s.label}>Fiche en pastilles (essai)</Text>
+          <Text style={s.petit}>Une pastille par pilier : le détail s'ouvre quand on la touche. Désactivé : tous les piliers en liste dépliable.</Text>
+        </View>
+        <Switch
+          value={pastilles}
+          onValueChange={async (v) => {
+            setPastilles(v);
+            await ecrire(CLE_AFFICHAGE, v ? null : 'liste');
+          }}
+          accessibilityLabel="Fiche en pastilles"
+        />
+      </View>
       <Pressable
         onPress={async () => {
           await effacerHistorique();
@@ -67,4 +85,5 @@ const s = StyleSheet.create({
   secondaireTexte: { color: C.texte, fontSize: 16, fontWeight: '600' },
   message: { fontSize: 15, color: C.accent, fontWeight: '600' },
   petit: { fontSize: 13, lineHeight: 19, color: C.gris },
+  option: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: C.carte, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: C.bordFort },
 });

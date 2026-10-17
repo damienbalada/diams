@@ -1,7 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { BoutonScanner, MARGE_BOUTON } from '@/components/bouton-scanner';
 import { Chargement, Erreur } from '@/components/etat';
 import { Fiche } from '@/components/fiche';
 import { ErreurSite, ficheParSlug, type ReponseFiche } from '@/lib/api';
@@ -31,13 +32,16 @@ export default function FicheMarque() {
   if (!rep) return <Chargement texte="Chargement de la fiche…" />;
   if (!rep.trouve) return <Text style={s.texte}>{rep.raison}</Text>;
   return (
-    <ScrollView contentContainerStyle={s.contenu}>
-      <Fiche fiche={rep.fiche} onMarque={(x) => router.push(`/fiche/${x}`)} />
-    </ScrollView>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={s.contenu}>
+        <Fiche fiche={rep.fiche} onMarque={(x) => router.push(`/fiche/${x}`)} />
+      </ScrollView>
+      <BoutonScanner />
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  contenu: { padding: 16, gap: 16, paddingBottom: 48 },
+  contenu: { padding: 16, gap: 16, paddingBottom: MARGE_BOUTON },
   texte: { padding: 20, fontSize: 16, color: C.texte },
 });

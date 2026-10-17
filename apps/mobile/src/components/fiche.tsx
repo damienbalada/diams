@@ -1,12 +1,16 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Logo } from '@/components/logo';
 import type { Fait, Fiche as TFiche, Pilier, ProduitLu } from '@/lib/api';
 import { C, SOLIDITE, TEINTE } from '@/lib/couleurs';
+import { lire } from '@/lib/stockage';
+
+/** Réglage d'affichage de la fiche : pastilles par pilier (essai, par défaut) ou liste dépliable. */
+export const CLE_AFFICHAGE = 'index.affichage';
 
 const NIVEAU: Record<string, string> = { groupe: 'Groupe', marque: 'Marque', produit: 'Produits' };
 const dfr = (d: string) => d.split('-').reverse().join('/');
@@ -16,6 +20,10 @@ const quantite = (q: string | null) => (q && /\d\s*[a-zA-Zµ]/.test(q) ? ` · ${
 
 /** La fiche d'une marque ou d'un groupe : produit scanné, alertes, piliers dépliables. */
 export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) => void }) {
+  const [liste, setListe] = useState(false);
+  useEffect(() => {
+    lire(CLE_AFFICHAGE).then((v) => setListe(v === 'liste'));
+  }, []);
   const alertes = fiche.alertes.filter((a) => a.niveau === 'alerte');
   const vigilance = fiche.alertes.filter((a) => a.niveau === 'vigilance');
   return (
@@ -73,16 +81,20 @@ export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: str
       )}
 
       <Text style={s.section} accessibilityRole="header">Pilier par pilier</Text>
-      <View style={s.carteListe}>
-        {fiche.piliers.map((p, i) => (
-          <LignePilier key={p.code} p={p} dernier={i === fiche.piliers.length - 1} />
-        ))}
-      </View>
+      {liste ? (
+        <View style={s.carteListe}>
+          {fiche.piliers.map((p, i) => (
+            <LignePilier key={p.code} p={p} dernier={i === fiche.piliers.length - 1} />
+          ))}
+        </View>
+      ) : (
+        <Pastilles fiche={fiche} />
+      )}
       <Text style={s.pied}>
         {fiche.renseignes} informations documentées sur {fiche.total} recherchées · aucune note, que des faits sourcés.
       </Text>
 
-      {fiche.estMarque && (
+      {fiche.estMarque && liste && (
         <>
           <Text style={s.section} accessibilityRole="header">Ses produits</Text>
           {fiche.produitsLus && fiche.produitsLus.length > 0 ? (
@@ -139,18 +151,124 @@ function LignePilier({ p, dernier }: { p: Pilier; dernier: boolean }) {
           )}
         </View>
       </Pressable>
-      {ouvert && (
-        <View style={s.corps}>
-          {pleins.map((f) => <CarteFait key={f.code} f={f} teinte={teinte} niveau={plusieursNiveaux ? NIVEAU[f.niveau] : null} />)}
-          {vides.length > 0 && <SansInformation faits={vides} toutVide={!pleins.length} />}
-          <Alternatives p={p} teinte={teinte} />
+      {ouvert && <CorpsPilier p={p} teinte={teinte} pleins={pleins} vides={vides} plusieursNiveaux={plusieursNiveaux} />}
+    </View>
+  );
+}
+
+const majuscule = (t: string) => t[0].toUpperCase() + t.slice(1);
+
+/** Ce qu'on lit en dépliant un pilier : faits documentés, indicateurs sans information, alternatives. */
+function CorpsPilier({ p, teinte, pleins, vides, plusieursNiveaux }: { p: Pilier; teinte: string; pleins: Fait[]; vides: Fait[]; plusieursNiveaux: boolean }) {
+  return (
+    <View style={s.corps}>
+      {pleins.map((f) => <CarteFait key={f.code} f={f} teinte={teinte} niveau={plusieursNiveaux ? NIVEAU[f.niveau] : null} />)}
+      {vides.length > 0 && <SansInformation faits={vides} toutVide={!pleins.length} />}
+      <Alternatives p={p} teinte={teinte} />
+    </View>
+  );
+}
+
+/** Faits d'un pilier, triés comme dans la liste : alertes, vigilance, puis le reste ; vides à part. */
+function trierFaits(p: Pilier) {
+  const rang = (f: Fait) => (f.signal?.niveau === 'alerte' ? 0 : f.signal?.niveau === 'vigilance' ? 1 : 2);
+  const pleins = p.faits.filter((f) => f.etat !== 'aucune_info').sort((a, b) => rang(a) - rang(b));
+  const vides = p.faits.filter((f) => f.etat === 'aucune_info');
+  return { pleins, vides, plusieursNiveaux: new Set(pleins.map((f) => f.niveau)).size > 1 };
+}
+
+/**
+ * Fiche en pastilles (essai) : une pastille par pilier (icône, nom, état, nombre renseigné) ; un appui
+ * déplie le contenu du pilier juste dessous, un second le replie. Les produits ont leur pastille.
+ */
+function Pastilles({ fiche }: { fiche: TFiche }) {
+  const [choix, setChoix] = useState<string | null>(null);
+  const p = fiche.piliers.find((x) => x.code === choix) ?? null;
+  const teinte = p ? TEINTE[p.code] ?? C.accent : C.accent;
+  const produits = fiche.estMarque ? fiche.produitsLus ?? [] : null;
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={s.pastilles} accessibilityRole="tablist">
+        {fiche.piliers.map((x) => {
+          const t = TEINTE[x.code] ?? C.accent;
+          const sig = x.cle?.signal;
+          const actif = choix === x.code;
+          const vide = x.renseignes === 0;
+          return (
+            <Pressable
+              key={x.code}
+              onPress={() => setChoix(actif ? null : x.code)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: actif }}
+              accessibilityLabel={`${x.nom} : ${x.renseignes} sur ${x.total} renseignés${sig === 'alerte' ? ', alerte' : sig === 'vigilance' ? ', point de vigilance' : ''}`}
+              style={({ pressed }) => [
+                s.pastilleChip,
+                { borderColor: actif ? t : sig === 'alerte' ? C.alerte : sig === 'vigilance' ? '#d97a00' : C.bord, backgroundColor: actif ? t + '1f' : C.carte },
+                vide && !actif && { opacity: 0.7 },
+                pressed && { opacity: 0.6 },
+              ]}>
+              <Text style={{ fontSize: 16 }}>{x.icone}</Text>
+              <Text style={[s.pastilleNom, { color: actif ? t : C.texte }]} numberOfLines={1}>{nomCourt(x.nom)}</Text>
+              {sig && <View style={[s.point, { backgroundColor: sig === 'alerte' ? C.alerte : '#d97a00' }]} />}
+              <Text style={s.pastilleCompte}>{x.renseignes}/{x.total}</Text>
+            </Pressable>
+          );
+        })}
+        {produits && (
+          <Pressable
+            onPress={() => setChoix(choix === 'PRODUITS' ? null : 'PRODUITS')}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: choix === 'PRODUITS' }}
+            style={({ pressed }) => [s.pastilleChip, { borderColor: choix === 'PRODUITS' ? '#2f7a3b' : C.bord, backgroundColor: choix === 'PRODUITS' ? '#f1f9f2' : C.carte }, pressed && { opacity: 0.6 }]}>
+            <Text style={{ fontSize: 16 }}>🛒</Text>
+            <Text style={[s.pastilleNom, { color: choix === 'PRODUITS' ? '#2f7a3b' : C.texte }]}>Produits</Text>
+            <Text style={s.pastilleCompte}>{produits.length}</Text>
+          </Pressable>
+        )}
+      </View>
+
+      {!choix && <Text style={s.petit}>Touchez une pastille pour lire le détail du pilier.</Text>}
+
+      {p && (() => {
+        const { pleins, vides, plusieursNiveaux } = trierFaits(p);
+        return (
+          <View style={[s.panneau, { borderColor: teinte }]}>
+            <View style={[s.ligne, { paddingHorizontal: 14 }]}>
+              <Text style={{ fontSize: 20 }}>{p.icone}</Text>
+              <Text style={[s.pilierNom, { color: teinte }]}>{p.nom.toUpperCase()}</Text>
+              <Pressable onPress={() => setChoix(null)} accessibilityRole="button" accessibilityLabel="Replier le pilier" hitSlop={10} style={s.bouton44}>
+                <Text style={s.lienPetit}>Replier ▲</Text>
+              </Pressable>
+            </View>
+            <CorpsPilier p={p} teinte={teinte} pleins={pleins} vides={vides} plusieursNiveaux={plusieursNiveaux} />
+          </View>
+        );
+      })()}
+
+      {choix === 'PRODUITS' && (
+        <View style={[s.panneau, { borderColor: '#2f7a3b', padding: 14, gap: 12 }]}>
+          {produits && produits.length > 0 ? (
+            <ProduitsLus produits={produits} />
+          ) : (
+            <Text style={s.petit}>Aucun produit lu pour l'instant : ni fiche du site de la marque, ni étiquette envoyée.</Text>
+          )}
+          <Pressable
+            onPress={() => router.push({ pathname: '/etiquette/[slug]', params: { slug: fiche.slug, nom: fiche.nom } })}
+            accessibilityRole="button"
+            style={({ pressed }) => [s.boutonEtiquette, pressed && { opacity: 0.7 }]}>
+            <Text style={s.boutonEtiquetteTexte}>📷 Ajouter l'étiquette d'un produit {fiche.nom}</Text>
+          </Pressable>
         </View>
       )}
     </View>
   );
 }
 
-const majuscule = (t: string) => t[0].toUpperCase() + t.slice(1);
+/** Nom de pilier raccourci pour une pastille (« Chaîne d'appro & droits humains » → « Chaîne d'appro »). */
+function nomCourt(nom: string): string {
+  const court = nom.replace(/\s*\(.*\)\s*/, '').split(/ & | et /)[0];
+  return court.length > 22 ? court.slice(0, 21) + '…' : court;
+}
 
 /** Alternatives du pilier : marques du même secteur, d'un autre groupe, qui remplissent un critère affiché. */
 function Alternatives({ p, teinte }: { p: Pilier; teinte: string }) {
@@ -436,6 +554,12 @@ const s = StyleSheet.create({
   produitLu: { borderTopWidth: 1, borderTopColor: C.bord, paddingTop: 8, gap: 2 },
   produitLuNom: { fontSize: 15, fontWeight: '700', color: C.texte },
   produitLuStatut: { fontSize: 14, fontWeight: '600' },
+  pastilles: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  pastilleChip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1.5 },
+  pastilleNom: { fontSize: 14, fontWeight: '700', flexShrink: 1 },
+  pastilleCompte: { fontSize: 12.5, color: C.gris, fontWeight: '600' },
+  point: { width: 8, height: 8, borderRadius: 4 },
+  panneau: { backgroundColor: C.carte, borderRadius: 16, borderWidth: 1.5, paddingTop: 12, overflow: 'hidden' },
   boutonEtiquette: { borderWidth: 1, borderStyle: 'dashed', borderColor: C.accent, borderRadius: 12, padding: 14, minHeight: 48, justifyContent: 'center' },
   boutonEtiquetteTexte: { fontSize: 15, fontWeight: '700', color: C.accent },
 });
