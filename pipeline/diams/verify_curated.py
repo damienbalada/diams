@@ -186,7 +186,7 @@ ESEF_KEYWORDS = {
     # lus dans le plan lui-même (C. com. L225-102-4 : cinq mesures).
     "SUP_VIGILANCE_PLAN": [r"vigilance", r"cartographie|analyse des risques|identifie les risques|risques d.atteintes graves", r"suivi|contr[ôo]le du respect|compte rendu"],
     # Taxonomie verte UE (art. 8) : part des CapEx ALIGNÉS (pas seulement éligibles).
-    "ENV_TAXONOMY_CAPEX": [r"taxonom", r"capex|capital expenditure", r"align"],
+    "ENV_TAXONOMY_CAPEX": [r"taxonom", r"capex|capital expenditure", r"align|afgestemd|allineat"],
     # Audit de marques Break Free From Plastic : classement des pollueurs.
     "PLA_POLLUTER": [r"polluter|pollueur"],
     # Recours à des matières animales (plafond du pilier animal).
