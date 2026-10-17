@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v306`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v307`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -357,6 +357,13 @@ montrant que les entités citées (évite de réécrire toute la base).
 France : 196 marques sur 685, 69 % des produits. Sans page lisible : Decathlon (marques propres),
 Rossignol, Gigamic, Goliath, Le Creuset, Tupperware (propriétaire incertain depuis la faillite de
 2024), Siemens électroménager (la page de BSH ne cite pas la marque), Motorola (lenovo.com : 403).
+
+**Lot 216 (17/10/2026)** : Monin (Georges Monin SAS, SIREN 573721370), d'après la copie des mentions
+légales transmise par l'éditeur (`pipeline/curated/copies/`). Copies des mentions légales d'Intermarché
+(ITM Alimentaire International) et de magasins-u.com (Coopérative U) reçues : elles nomment l'éditeur du
+site mais aucune marque propre (Labell, Apta, U Maison…) ; il faut leurs pages « nos marques ». SC
+Johnson : capture d'écran seulement (texte illisible par OCR, et la page dit « Duck », pas « Canard ») ;
+il faut la page enregistrée (Ctrl+S) et une page qui nomme Canard.
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour
