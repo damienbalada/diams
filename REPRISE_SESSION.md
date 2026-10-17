@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v319`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v320`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -419,6 +419,16 @@ Opella : page des marques illisible. **Produit scanné inconnu** : écran d'envo
 (`produit-inconnu/[ean]`), API `/api/produits-inconnus`, table `product_submissions`, espace privé
 `produits-a-verifier`, page `/admin/produits-inconnus` (traiter : ajouter la marque par un lot ; refuser :
 photos supprimées). Suivi : 314 reconnues, 85 mises de côté, 49 à prouver, 33 de distributeur.
+
+**Lots 230 et 231, marques du rapport ASPI (17/10/2026)** : 12 marques citées par « Uyghurs for sale »
+et absentes de l'Index (Calvin Klein, Tommy Hilfiger, Polo Ralph Lauren, Abercrombie & Fitch, Hollister,
+Dell, Alienware, Zegna, Jaguar, Land Rover, BYD, Skechers) ; propriétaires prouvés par le 10-K ou le 20-F
+(SEC) ou le site officiel ; preuve GEO_FORCED_LABOR (lot 231, même modèle que le lot 227) sur ces marques
+et sur HP et Sharp. **Retrait** : la ligne « Fila » du lot 227 visait la marque de sport et avait été
+rattachée à F.I.L.A., groupe de papeterie (homonyme). De côté : Lacoste (403), Victoria's Secret et ZTE
+(injoignables), Fila, Bestway, Jack & Jones, Huawei, Oppo, Haier, MG (pas de propriétaire sur la page),
+Toshiba, Hitachi, Nokia (licences), Gap, Carter's, L.L.Bean, Vivo, Li-Ning (peu ou pas vendues en France),
+Siemens AG (ne pas rattacher à Siemens électroménager, qui est BSH).
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour
