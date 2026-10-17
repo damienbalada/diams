@@ -127,7 +127,7 @@ export function evaluer(f: FaitEvalue): Signal | null {
       return x >= 300 ? a(`patron payé ${nf(x, 0)} fois le salaire médian de ses salariés`, ref) : x >= 100 ? v(`patron payé ${nf(x, 0)} fois le salaire médian de ses salariés`, ref) : null;
     case "GOV_SANCTIONS":
       // Clémence : infraction constatée, amende levée parce que l'entreprise l'a dénoncée (17/10/2026).
-      if (/immunit|clémence|leniency|not fined|exempt from paying/i.test(c)) return v("infraction constatée par une autorité, sans amende (clémence)", ref);
+      if (/sans amende|pas d.amende|immunité d.amende/i.test(c)) return v("infraction constatée par une autorité, sans amende (clémence)", ref);
       return a("sanctionné par une autorité (amende ou condamnation)", ref);
     case "GOV_EXEC_GENDER":
       if (x === null) return null;

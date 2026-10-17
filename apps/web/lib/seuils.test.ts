@@ -81,6 +81,6 @@ test("indépendants au conseil : le code Afep-Medef est dit français pour une e
 });
 
 test("sanction avec clémence : vigilance, pas alerte", () => {
-  assert.equal(doc("GOV_SANCTIONS", null, "« Mercedes-Benz was not fined, as it revealed the cartel to the Commission under the leniency programme »")?.niveau, "vigilance");
+  assert.equal(doc("GOV_SANCTIONS", null, "« Mercedes-Benz was not fined » — infraction constatée sans amende")?.niveau, "vigilance");
   assert.equal(doc("GOV_SANCTIONS", null, "« has fined Google €2.95 billion »")?.niveau, "alerte");
 });

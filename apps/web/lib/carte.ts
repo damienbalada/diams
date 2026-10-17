@@ -167,14 +167,14 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "GOV_SANCTIONS": case "ENV_GREENWASHING": {
       // « Autorité de la concurrence, décision n° 23-D-15 du 29/12/2023 : … ; amende de 0,566 M€ »
       const autorite = (x.split(/[,:(]/)[0] ?? "").trim();
-      const an = m1(/du \d{2}\/\d{2}\/(\d{4})/, x);
-      const amende = m1(/amendes? (?:civiles? )?(?:de(?: plus de)?|d’un montant de) ([\d  ,.]+ ?(?:M€|Md€|M£|MA\$|M\$|Md\$|€|millions? d[’']euros|milliards? d[’']euros|euros))/, x)
+      const an = m1(/du \d{2}\/\d{2}\/(\d{4})/, x) ?? m1(/\(\d{2}\/\d{2}\/(\d{4})\)/, x);
+      const amende = m1(/(?:amendes?|sanctions?) (?:civiles? |pécuniaires? )?(?:de(?: plus de)?|d’un montant de) ([\d  ,.]+ ?(?:M€|Md€|M£|MA\$|M\$|Md\$|€|millions? d[’']euros|milliards? d[’']euros|euros))/, x)
         ?? m1(/fine of ([\d.,]+ (?:million|billion)? ?euros)/i, x);
       // Clémence : l'infraction est constatée mais l'entreprise qui l'a dénoncée ne paie pas d'amende (17/10/2026).
-      const clemence = code === "GOV_SANCTIONS" && /immunit|clémence|leniency|not fined|exempt from paying/i.test(x);
+      const clemence = code === "GOV_SANCTIONS" && !amende && /sans amende|pas d.amende|immunité d.amende/i.test(x);
       const quoi = clemence ? "Infraction constatée, sans amende (clémence)," : code === "GOV_SANCTIONS" ? "Sanctionné" : "Allégations écologiques trompeuses relevées";
       // Article devant le nom de l'autorité : « l'Autorité… », « la Commission… », « la CNIL ».
-      const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|FTC|CMA|SEC)\b/.test(autorite) ? "la " : /^(Jury|Bureau)\b/.test(autorite) ? "le " : /^ASA\b/.test(autorite) ? "l'" : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
+      const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|CNMC|FTC|CMA|SEC)\b/.test(autorite) ? "la " : /^(Jury|Bureau)\b/.test(autorite) ? "le " : /^ASA\b/.test(autorite) ? "l'" : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
       return `${quoi} par ${autorite ? art + autorite : "une autorité"}${an ? ` (${an})` : ""}${amende ? ` : amende de ${amende.replace(/MA\$$/, "M$ australiens").replace(/M\$$/, /M\$ australiens|dollars australiens/.test(x) ? "M$ australiens" : "M$")}${/pour chacune des deux filiales/.test(x) ? " pour chacune de deux filiales" : ""}` : ""}`;
     }
     case "GEO_CONFLICT_TIES": return "Implication dans un conflit ou une occupation, documentée";
@@ -266,7 +266,7 @@ const PAR_GRAVITE = new Set(["GOV_SANCTIONS"]);
 function meilleure(ps: PreuveEntree[], code?: string): PreuveEntree | null {
   const g = (p: PreuveEntree) => (code && PAR_GRAVITE.has(code) ? Number(p.normalized_value ?? 0) : 0);
   // À gravité égale, une amende effective passe avant une infraction sans amende (clémence).
-  const am = (p: PreuveEntree) => (code && PAR_GRAVITE.has(code) && /immunit|clémence|leniency|not fined|exempt from paying/i.test(p.excerpt ?? "") ? 0 : 1);
+  const am = (p: PreuveEntree) => (code && PAR_GRAVITE.has(code) && /sans amende|pas d.amende|immunité d.amende/i.test(p.excerpt ?? "") ? 0 : 1);
   return [...ps].sort((a, b) => b.specificity - a.specificity || g(b) - g(a) || am(b) - am(a)
     || (b.event_date ?? b.observed_on).localeCompare(a.event_date ?? a.observed_on))[0] ?? null;
 }

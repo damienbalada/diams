@@ -207,7 +207,7 @@ test("ratio de rémunération au salaire le plus bas : libellé distinct", () =>
 });
 
 test("sanction : clémence affichée comme infraction sans amende", () => {
-  const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("GOV_SANCTIONS", { excerpt: "Commission européenne, communiqué IP/25/881 du 01/04/2025 (en anglais) : « Mercedes-Benz was not fined, as it revealed the cartel to the Commission under the leniency programme »" }));
+  const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("GOV_SANCTIONS", { excerpt: "Commission européenne, communiqué IP/25/881 du 01/04/2025 (en anglais) : « Mercedes-Benz was not fined, as it revealed the cartel to the Commission under the leniency programme » — pas d'amende (programme de clémence)" }));
   assert.match(s, /^Infraction constatée, sans amende \(clémence\), par la Commission européenne \(2025\)/);
 });
 
@@ -229,4 +229,16 @@ test("intensité eau sans précision : libellé neutre", () => {
 test("emballages « recyclables, réutilisables » : recyclabilité (garde contre le caractère de contrôle)", () => {
   const s = valeurCourte("PLA_RECYCLED", "resultat", preuve("PLA_RECYCLED", { value_numeric: 67, excerpt: "(emballages des produits à marque Carrefour recyclables, réutilisables ou réemployables)" }));
   assert.equal(s, "67 % d'emballages recyclables ou réutilisables");
+});
+
+test("clémence d'une autre entreprise citée dans l'extrait : reste une sanction", () => {
+  const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("GOV_SANCTIONS", { excerpt: "CMA (Competition and Markets Authority, Royaume-Uni), communiqué du 01/04/2025 (en anglais) : « except for Mercedes-Benz (which has been granted immunity from penalties) » — amende de 5,2 M£ (Peugeot Citroën)" }));
+  assert.match(s, /^Sanctionné par la CMA \(2025\) : amende de 5,2 M£/);
+});
+
+test("sanctions : date entre parenthèses, « sanction de », article devant CNMC", () => {
+  const r = (x: string) => valeurCourte("GOV_SANCTIONS", "controverse", preuve("GOV_SANCTIONS", { excerpt: x }));
+  assert.equal(r("CNIL (Commission nationale de l'informatique et des libertés), rapport annuel 2022, chronologie de l'année (19/12/2022) : « Cookies : sanction de 60 millions d’euros »"), "Sanctionné par la CNIL (2022) : amende de 60 millions d’euros");
+  assert.equal(r("Autorité de la concurrence, communiqué du 17/11/2025 (décision n° 25-D-07) : « l’Autorité de la concurrence inflige une sanction de 187,5 millions d’euros »"), "Sanctionné par l'Autorité de la concurrence (2025) : amende de 187,5 millions d’euros");
+  assert.match(r("CNMC (autorité espagnole de la concurrence et des marchés), communiqué du 18/07/2023 (en anglais) : « fine »"), /^Sanctionné par la CNMC \(2023\)/);
 });
