@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v322`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v323`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -328,7 +328,13 @@ marques**, à continuer :
    bloqués : les adresses viennent des pages de recherche enregistrées par l'éditeur. Pièges
    écartés : « tissu enduit », « imprimé cachemire » (motif), « polaire duveteuse ». Décision
    de l'éditeur (17/10/2026) : quelques fiches par marque suffisent, on ne lit pas tout le
-   catalogue ; ne demander des copies qu'aux sites qui refusent le vérificateur ;
+   catalogue ; ne demander des copies qu'aux sites qui refusent le vérificateur.
+   **Montres et bijoux** (lot 242, lecture directe) : Cartier (bracelet en veau, en alligator,
+   nacre) et Piaget (« Matière du bracelet Alligator », nacre), passages relevés par motifs
+   (`releve_motifs.py` du brouillon) puis revérifiés mot pour mot. Refusent : Bulgari, Fred,
+   Hublot, IWC, Jaeger-LeCoultre, Tiffany, Van Cleef & Arpels, Zenith, TAG Heuer (fiches).
+   Matière seulement dans le nom : Chaumet, Repossi (écartés). Vhernier : fiches en italien
+   seulement (« Madreperla ») ;
 3. pour les sociétés moyennes non notées (Rians, Ermitage, Juraflore, Monbana, Jacquart,
    Camus, Cellier des Dauphins, bofrost*, Toupargel…) : Egapro, HATVP, registre européen,
    B Corp, sanctions (DGCCRF, Autorité de la concurrence), rapports et plans de vigilance
