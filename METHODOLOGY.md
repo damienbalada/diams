@@ -890,6 +890,7 @@ pas du nombre de marques. Trois garde-fous invariants :
 | SEC, Bureau de la concurrence du Canada | ENV, GOV | sanctions pour déclarations ou allégations trompeuses (ex. recyclabilité) | communiqués officiels | groupe |
 | Cour fédérale d'Australie | GOV | amendes civiles obtenues par l'ACCC, en dollars australiens convertis au taux de la BCE | jugements de la Cour | groupe |
 | Conventions judiciaires d'intérêt public | WAT | infraction au droit de l'eau (pollution, forages ou travaux sans autorisation, zones humides) réglée par une convention avec le procureur, validée par le président du tribunal (amende d'intérêt public ; sévérité 0,5, comme une mise en demeure) ; la validation n'emporte pas déclaration de culpabilité | ministère de la Justice | société signataire (ou groupe, filiale nommée) |
+| Commission électorale fédérale (FEC) | GEO | contributions versées par le comité d'action politique d'une entreprise (cycle 2025-2026), contexte sans note ; comité rattaché par l'organisation déclarée, ou à défaut par le nom du comité (« Keurig Dr Pepper Inc. PAC »), nom du groupe suivi seulement d'une mention juridique ou géographique | fichiers publics de la FEC | groupe |
 
 **Présence dans les paradis fiscaux** (top 10 de l'indice du Tax Justice Network, édition du
 2 décembre 2025) : pour un groupe américain, lignes de l'annexe 21 de son rapport 10-K ; pour un
