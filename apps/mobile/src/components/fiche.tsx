@@ -287,7 +287,8 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
   const [places, setPlaces] = useState<Record<string, { x: number; y: number; l: number }>>({});
   const p = fiche.piliers.find((x) => x.code === choix) ?? null;
   const teinte = choix === 'PRODUITS' ? '#2f7a3b' : p ? TEINTE[p.code] ?? C.accent : C.accent;
-  const produits = fiche.estMarque ? fiche.produitsLus ?? [] : null;
+  // Aussi pour un groupe qui vend sous son propre nom et dont des fiches ont été lues (Decathlon).
+  const produits = fiche.estMarque || fiche.produitsLus?.length ? fiche.produitsLus ?? [] : null;
   // Ordre d'affichage : les pastilles renseignées, puis les vides (ordre des piliers conservé dans chaque groupe).
   const ordre = [...fiche.piliers.map((x) => ({ code: x.code, vide: x.renseignes === 0 })), ...(produits ? [{ code: 'PRODUITS', vide: !produits.length }] : [])]
     .sort((a, b) => Number(a.vide) - Number(b.vide));

@@ -715,12 +715,14 @@ function ProduitsLus({ produits: tous }: { produits: ProduitLu[] }) {
       </div>
     );
   }
+  // Une seule ligne de résumé qui s'ouvre au clic (décision de l'éditeur, 17/10/2026) : l'avertissement
+  // en tête de fiche dit déjà l'exploitation animale, la liste n'en est que le détail.
   return (
-    <div className="ci-prods-lus">
-      <p className="muted small">
-        {m.Lus} sur {pl(produits.length, "fiche produit", "fiches produits")} du site de la marque{animaux ? `, dont ${animaux} avec ${m.un}` : ""}.
-        {m.liste}
-      </p>
+    <details className="ci-prods-lus">
+      <summary className="muted small">
+        {m.Lus} : {pl(produits.length, "fiche", "fiches")} du site de la marque, {animaux ? `${animaux} avec ${m.un}` : `aucune avec ${m.un}`}
+      </summary>
+      <p className="muted small">{m.liste}</p>
       <ul className="ci-prods-liste">
         {produits.map((p) => {
           const [cls, txt] = statutDe(p);
@@ -734,6 +736,6 @@ function ProduitsLus({ produits: tous }: { produits: ProduitLu[] }) {
           );
         })}
       </ul>
-    </div>
+    </details>
   );
 }
