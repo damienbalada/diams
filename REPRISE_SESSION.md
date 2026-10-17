@@ -199,6 +199,20 @@ Mesure : `node <brouillon>/audit_brands.mts` → nombre de marques publiables.
 - La réponse REST de Supabase est limitée à 1 000 lignes : toujours paginer
   (`supabase_client.get_all`, en-tête `Range`).
 
+- **17/10/2026 (méthode 0.8.5)** : toutes les devises converties en euros au taux annuel moyen de la
+  BCE, dollar compris. Indicateurs **classés entre pairs** (emballages, eau, intensité carbone, écart
+  et ratio de rémunération, taux effectif, paradis fiscaux, plastique vierge) : jamais de note
+  précalculée ; indicateurs à **barème fixe** (mixité min(1, part/50), indépendance part/100,
+  taxonomie part/100) : note toujours présente — le vérificateur refuse l'un et l'autre écart.
+  Pertinence : la distribution a les piliers animal, plastique et eau ; la tech, l'équipement de la
+  maison et le jouet ont le pilier eau ; l'abattage s'applique à l'alimentaire et à la distribution.
+  La taxonomie reste réservée à l'énergie et à l'automobile (valeurs des autres secteurs en base,
+  non affichées ; décision 17 du rapport de nuit). Une hausse des émissions compte dès un an, une
+  baisse à partir de deux.
+- **Piège de saisie** : dans un script Python passé par un « heredoc » bash, `` devient le
+  caractère de contrôle 0x08 ; construire les expressions avec `chr(92)` et contrôler
+  `grep -c $''` après chaque modification de `carte.ts` ou `verify_curated.py`.
+
 ## 7. État au 14/10/2026
 
 - **2 145 marques en base, 968 publiables** (964 sur 1 671 avant le lot 82).
