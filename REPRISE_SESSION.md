@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v305`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v306`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -349,6 +349,14 @@ Incorporated, propriétaire de la marque. **Qualification des sociétés des lot
 (6 index), SBTi (Kingfisher, VARTA, en attente), registre européen (Kingfisher), CDP (Kingfisher,
 VARTA, Lagardère). Outil `scratchpad/restreint.py slug1,slug2 module …` : lance un import en ne lui
 montrant que les entités citées (évite de réécrire toute la base).
+
+**Lots 214-215 (17/10/2026)** : Salomon, Atomic, Wilson, Arc'teryx, Peak Performance (Amer Sports,
+20-F) ; Charmin, Puffs (P&G, 10-K) ; Cottonelle, Poise, Andrex, Intimus, WypAll (Kimberly-Clark,
+10-K) ; Legrand, Bticino (Legrand, ESEF) ; Whirlpool rattachée à Beko Europe, licenciée pour l'Europe
+(10-K de Whirlpool, même règle que Pyrex) ; Terraillon ; Durance. Couverture Open Products Facts
+France : 196 marques sur 685, 69 % des produits. Sans page lisible : Decathlon (marques propres),
+Rossignol, Gigamic, Goliath, Le Creuset, Tupperware (propriétaire incertain depuis la faillite de
+2024), Siemens électroménager (la page de BSH ne cite pas la marque), Motorola (lenovo.com : 403).
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour
