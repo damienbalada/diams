@@ -211,7 +211,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "TAX_HAVEN_PRESENCE": return v === null ? "Publié" : v === 0 ? "Aucune filiale listée dans les dix premiers paradis fiscaux" : `Au moins ${nf(v, 0)} filiale${v > 1 ? "s" : ""} dans les dix premiers paradis fiscaux`;
     case "ENV_GHG_TREND": return v === null ? "Publié" : v > 0 ? `Émissions en hausse de ${nf(v, 2)} % par an` : `Émissions en baisse de ${nf(-v, 2)} % par an`;
     case "PLA_REDUCTION": return v === null ? "Publié" : v > 0 ? `Plastique neuf en hausse de ${nf(v, 2)} % par an` : `Plastique neuf en baisse de ${nf(-v, 2)} % par an`;
-    case "PLA_RECYCLED": return v === null ? "Publié" : `${nf(v)} % d'emballages recyclés, réutilisables ou recyclables`;
+    case "PLA_RECYCLED": return v === null ? "Publié" : /biosourc/i.test(x) ? `${nf(v)} % de plastiques recyclés ou biosourcés dans les emballages` : `${nf(v)} % d'emballages recyclés, réutilisables ou recyclables`;
     case "ENV_TAXONOMY_CAPEX": return v === null ? "Publié" : `${nf(v)} % des investissements jugés verts par l'UE`;
     case "ENV_GHG_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} tonnes de CO₂ par million d'euros de ventes`;
     case "WAT_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} m³ d'eau prélevés par million d'euros de ventes`;

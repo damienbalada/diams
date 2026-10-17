@@ -156,3 +156,8 @@ test("convention judiciaire d'intérêt public sur l'eau : année et amende", ()
   const s = valeurCourte("WAT_CONTROVERSY", "controverse", preuve("x", { excerpt: "Convention judiciaire d'intérêt public validée le 13/09/2022 par le président du tribunal judiciaire de Charleville-Mézières (ministère de la Justice) : « … » — amende d'intérêt public de 40 000 € (pollution de l'Aisne)." }));
   assert.equal(s, "Convention judiciaire d'intérêt public pour infraction au droit de l'eau (2022) : amende de 40 000 €");
 });
+
+test("plastique recyclé ou biosourcé : libellé fidèle à la mesure publiée", () => {
+  const s = valeurCourte("PLA_RECYCLED", "resultat", preuve("PLA_RECYCLED", { value_numeric: 50, excerpt: "… « le Groupe a atteint 50 % de plastiques d’origine recyclée ou biosourcée dans les emballages en 2025 »" }));
+  assert.equal(s, "50 % de plastiques recyclés ou biosourcés dans les emballages");
+});
