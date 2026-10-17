@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v321`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v322`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -434,6 +434,11 @@ rattachée à F.I.L.A., groupe de papeterie (homonyme). De côté : Lacoste (403
 (injoignables), Fila, Bestway, Jack & Jones, Huawei, Oppo, Haier, MG (pas de propriétaire sur la page),
 Toshiba, Hitachi, Nokia (licences), Gap, Carter's, L.L.Bean, Vivo, Li-Ning (peu ou pas vendues en France),
 Siemens AG (ne pas rattacher à Siemens électroménager, qui est BSH).
+
+**Qualification des sociétés du 16-17/10/2026** : connecteurs relancés sur elles (`restreint.py`) : 9 preuves
+nouvelles (Rixain : Arc France ; bilans GES de l'Ademe : Terraillon, Zara France, UPSA, Opinel, Hamelin, Arc
+France). Le connecteur CDP rattachait de nouveau « Delta Corp Ltd. » (Inde) à Delta (Livoo) : notes
+retirées et `delta-mundolsheim` ajouté à `SKIP` dans `import_cdp_scores.py`. KSE : site en panne (erreur 500).
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour

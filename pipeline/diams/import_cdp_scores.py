@@ -63,6 +63,7 @@ ALIASES = {
 SKIP = {
     "ab-inbev",                         # « Anheuser Busch InBev » enregistré aux États-Unis : entité incertaine
     "credit-mutuel-alliance-federale",  # BFCM, holding, pas le groupe
+    "delta-mundolsheim",                # « Delta Corp Ltd. » (Inde) : homonyme de Delta, éditrice de Livoo
 }
 GENERIC = {"group", "groupe", "holding", "holdings", "international", "company", "corporation"}
 
