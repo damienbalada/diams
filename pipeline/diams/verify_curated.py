@@ -778,6 +778,11 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
     ok = found
     for kw in ([] if ignore_keywords else ESEF_KEYWORDS.get(row.indicator_code, [])):
         hit = re.search(kw, quote, re.I) is not None
+        # Liste d'ingrédients d'un produit alimentaire : « crème » est une crème laitière par défaut
+        # (décision de l'éditeur, 17/10/2026) ; hors de ce cadre, le mot peut désigner un cosmétique.
+        if (not hit and row.indicator_code == "ANI_EXPLOITATION" and "liste des ingrédients" in (row.excerpt or "")
+                and re.search(r"\bcr[èe]me\b(?! (?:de |d.)(?:coco|riz|soja|marrons?|amandes?|avoine|cajou))", quote, re.I)):
+            hit = True
         ok &= hit
         details.append(f"la citation porte sur l'indicateur (« {kw} ») {'✓' if hit else '✗'}")
     # Valeur convertie d'une autre devise : la conversion est contrôlée, puis c'est

@@ -870,3 +870,11 @@ def test_decimale_detachee_par_l_extraction():
 def test_valeur_milliers_et_decimale_en_anglais():
     from diams.verify_curated import _value_variants
     assert "1,790.6" in _value_variants(1790.6)
+
+
+def test_creme_dans_une_liste_d_ingredients_est_laitiere():
+    import re as _re
+    from diams import verify_curated as vc
+    src = vc.ESEF_KEYWORDS["ANI_EXPLOITATION"][0]
+    assert _re.search(src, "CREME 19,1%", _re.I) is None   # le mot seul n'est pas dans la liste générale
+    assert "liste des ingrédients" in "fiche produit, liste des ingrédients, consultée"

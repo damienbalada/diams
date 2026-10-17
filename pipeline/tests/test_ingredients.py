@@ -37,3 +37,10 @@ def test_liste_en_minuscule_acceptee_presentation_ecartee():
 def test_description_sans_ingredient_ecartee():
     t = "Ingrédients Des belles airelles cueillies au bon moment, choisies avec soin et triées à la main, à déguster"
     assert I.bloc_ingredients(t) is None
+
+
+def test_titre_allergenes_et_doublons():
+    b = I.bloc_ingredients("Ingrédients et allergènes : Farine de blé 27%, beurre (lait) 4,3%, oeufs, œuf en poudre, sel.")
+    assert b.startswith("Farine")
+    a = I.analyse(b)["animaux"]
+    assert len([x for x in a if "uf" in x]) == 1

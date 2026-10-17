@@ -952,7 +952,8 @@ calcul (tables de config) doit être datée et justifiée ici.
   des fiches produits des sites de marques sont recopiées et datées (table products) ; un ingrédient
   d'origine animale (hors traces) prouve l'exploitation animale de la marque ; une liste sans
   ingrédient animal visible ne prouve pas qu'un produit est végétal (seuls un label d'un tiers ou la
-  marque elle-même peuvent l'affirmer).
+  marque elle-même peuvent l'affirmer). Dans la liste d'ingrédients d'un produit alimentaire, « crème »
+  désigne une crème laitière par défaut (décision de l'éditeur du 17/10/2026).
 - **0.8.5 (17/10/2026)** — Cohérence, sans changement de barème. Toutes les devises sont
   converties en euros au taux annuel moyen de la BCE avant comparaison, dollar compris (les
   intensités carbone d'AB InBev et de TotalEnergies étaient restées en dollars). Les indicateurs

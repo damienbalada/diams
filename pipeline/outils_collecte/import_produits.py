@@ -68,9 +68,12 @@ def main() -> None:
     ents = {e["slug"]: e for e in supabase_client.get_all(db, "entities", {"select": "id,slug,display_name"})}
     lignes, preuves, vues = [], {}, set()
     for r in lus:
-        if r["slug"] not in ents or r["url"] in vues:
+        # Même produit publié à deux adresses (« Boisson végétale amande 1L ») : une seule fiche.
+        cle = (r["slug"], norm(r["produit"]))
+        if r["slug"] not in ents or r["url"] in vues or cle in vues:
             continue
         vues.add(r["url"])
+        vues.add(cle)
         try:
             page = I.texte(c.get(r["url"]).text)
             time.sleep(0.4)
@@ -119,6 +122,15 @@ def main() -> None:
                headers={**supabase_client._headers(), "Prefer": "resolution=merge-duplicates,return=minimal"}, json=lignes)
     r.raise_for_status()
     print(f"{len(lignes)} fiches écrites dans products")
+    # Les fiches de ces marques qui ne sont plus retenues (doublon d'adresse) sont retirées.
+    for eid in {l["entity_id"] for l in lignes}:
+        garder = {l["source_url"] for l in lignes if l["entity_id"] == eid}
+        anciens = supabase_client.get_all(db, "products", {"select": "id,source_url", "entity_id": f"eq.{eid}"})
+        retirer = [x["id"] for x in anciens if x["source_url"] not in garder]
+        if retirer:
+            db.delete(f"{config.SUPABASE_URL}/rest/v1/products", params={"id": f"in.({','.join(retirer)})"},
+                      headers=supabase_client._headers()).raise_for_status()
+            print(f"   {len(retirer)} fiche(s) en double retirée(s)")
 
 
 if __name__ == "__main__":

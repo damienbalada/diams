@@ -15,6 +15,7 @@ import os
 import re
 import sys
 import time
+import unicodedata
 
 import httpx
 
@@ -68,12 +69,18 @@ def bloc_ingredients(t: str) -> str | None:
 
 # Fin de la liste : rubrique suivante en capitales (« UTILISATION ») ou bloc de page (recettes, liens).
 _FIN = re.compile(r"(?<=\.)\s+(?=[A-ZÉÈ]{5,}\b)|\s(?:UTILISATION|CONSERVATION|Pour continuer|D[ée]couvr|Rejoignez|Des questions|Recettes?|Voir (?:le|la|les|aussi)|Ajouter au panier)\b")
-_BLOC = re.compile(r"Ingr[ée]dients?\s*:?\s*(.{20,1500}?)(?=\s(?:Valeurs? nutritionnelles?|Informations? nutritionnelles?|Conservation|Conseils?|Allerg[èe]nes|Poids net|Nutri-?Score|Origine|Mode d.emploi|Pr[ée]paration|Fabriqu[ée] (?:en|par)|Pour 100 ?g)|$)", re.I)
+_BLOC = re.compile(r"Ingr[ée]dients?(?:\s+et\s+allerg[èe]nes)?\s*:?\s*(.{20,1500}?)(?=\s(?:Valeurs? nutritionnelles?|Informations? nutritionnelles?|Conservation|Conseils?|Allerg[èe]nes|Poids net|Nutri-?Score|Origine|Mode d.emploi|Pr[ée]paration|Fabriqu[ée] (?:en|par)|Pour 100 ?g)|$)", re.I)
 
 
 def analyse(ingr: str) -> dict:
     sans_traces = SANS_RE.sub(" ", TRACES_RE.sub(" ", ingr))
-    animaux = sorted({m.group(0).lower() for m in ANIMAL_RE.finditer(sans_traces)})
+    # Une seule forme par ingrédient (« oeuf » et « œufs », « creme » et « crème » ne font qu'un).
+    formes: dict[str, str] = {}
+    for m in ANIMAL_RE.finditer(sans_traces):
+        f = m.group(0).lower()
+        cle = unicodedata.normalize("NFKD", f.replace("œ", "oe")).encode("ascii", "ignore").decode().rstrip("sx")
+        formes.setdefault(cle, f)
+    animaux = sorted(formes.values())
     douteux = sorted({m.group(0).lower() for m in DOUTEUX_RE.finditer(sans_traces)})
     statut = "ingredient_animal" if animaux else "aucun_ingredient_animal_declare"
     return {"animaux": animaux, "douteux": douteux, "statut": statut}
