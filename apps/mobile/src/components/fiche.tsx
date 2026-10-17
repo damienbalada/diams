@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Modal, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { MARGE_BOUTON } from '@/components/bouton-scanner';
 import { Logo } from '@/components/logo';
@@ -33,6 +33,52 @@ export const titreFiche = (fiche: TFiche) =>
   fiche.produit ? `${fiche.produit.nom}${quantite(fiche.produit.quantite)}` : fiche.nom;
 
 /**
+ * Photo du produit en grand. Elle se ferme d'un balayage vers le haut ou vers le bas (la photo suit le
+ * doigt et le fond s'éclaircit), par le bouton retour d'Android ou, au lecteur d'écran, par le geste
+ * d'échappement.
+ */
+function PhotoGrande({ uri, visible, fermer }: { uri: string; visible: boolean; fermer: () => void }) {
+  const [dy] = useState(() => new Animated.Value(0));
+  // Balayage assez long ou assez vif : la photo part et se ferme ; sinon elle revient en place.
+  const conclure = (d: number, v: number) => {
+    if (Math.abs(d) > 90 || Math.abs(v) > 0.8) {
+      Animated.timing(dy, { toValue: d > 0 ? 800 : -800, duration: 160, useNativeDriver: false }).start(() => {
+        fermer();
+        dy.setValue(0);
+      });
+    } else {
+      Animated.spring(dy, { toValue: 0, useNativeDriver: false }).start();
+    }
+  };
+  const [geste] = useState(() =>
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 6,
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event([null, { dy }], { useNativeDriver: false }),
+      // Le geste garde la main jusqu'au bout ; s'il est malgré tout interrompu, on conclut de la même façon.
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderRelease: (_e, g) => conclure(g.dy, g.vy),
+      onPanResponderTerminate: (_e, g) => conclure(g.dy, g.vy),
+    }),
+  );
+  const fond = dy.interpolate({ inputRange: [-400, 0, 400], outputRange: [0.25, 0.92, 0.25], extrapolate: 'clamp' });
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={fermer}>
+      <Animated.View
+        style={[s.voile, { backgroundColor: fond.interpolate({ inputRange: [0, 1], outputRange: ['rgba(10,6,24,0)', 'rgba(10,6,24,1)'] }) }]}
+        accessibilityViewIsModal
+        accessibilityLabel="Photo du produit en grand ; balayez vers le haut ou le bas pour la fermer"
+        onAccessibilityEscape={fermer}
+        {...geste.panHandlers}>
+        <Animated.View style={[s.photoGrande, { transform: [{ translateY: dy }] }]}>
+          <Image source={{ uri }} style={{ flex: 1 }} contentFit="contain" />
+        </Animated.View>
+      </Animated.View>
+    </Modal>
+  );
+}
+
+/**
  * En-tête de fiche : photo du produit scanné (agrandie au toucher), logo et nom de la marque, logo et
  * nom du groupe propriétaire. Compact : la base produit est citée en bas de la fiche.
  */
@@ -47,12 +93,7 @@ function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche
           <Text style={s.loupe}>🔍 agrandir</Text>
         </Pressable>
         <MarqueEtGroupe fiche={fiche} onMarque={onMarque} />
-        <Modal visible={grand} transparent animationType="fade" onRequestClose={() => setGrand(false)}>
-          <Pressable style={s.voile} onPress={() => setGrand(false)} accessibilityRole="button" accessibilityLabel="Fermer la photo">
-            <Image source={{ uri: pr.image }} style={s.photoGrande} contentFit="contain" />
-            <Text style={s.voileTexte}>Toucher pour fermer</Text>
-          </Pressable>
-        </Modal>
+        <PhotoGrande uri={pr.image} visible={grand} fermer={() => setGrand(false)} />
       </View>
     );
   }
@@ -92,12 +133,7 @@ function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche
         )}
       </View>
       {pr?.image && (
-        <Modal visible={grand} transparent animationType="fade" onRequestClose={() => setGrand(false)}>
-          <Pressable style={s.voile} onPress={() => setGrand(false)} accessibilityRole="button" accessibilityLabel="Fermer la photo">
-            <Image source={{ uri: pr.image }} style={s.photoGrande} contentFit="contain" />
-            <Text style={s.voileTexte}>Toucher pour fermer</Text>
-          </Pressable>
-        </Modal>
+        <PhotoGrande uri={pr.image} visible={grand} fermer={() => setGrand(false)} />
       )}
     </View>
   );
@@ -510,9 +546,6 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
             <View style={[s.ligne, { paddingHorizontal: 14 }]}>
               <Text style={{ fontSize: 20 }}>{p.icone}</Text>
               <Text style={[s.pilierNom, { color: teinte }]}>{p.nom.toUpperCase()}</Text>
-              <Pressable onPress={() => setChoix(null)} accessibilityRole="button" accessibilityLabel="Replier le pilier" hitSlop={10} style={s.bouton44}>
-                <Text style={s.lienPetit}>Replier ▲</Text>
-              </Pressable>
             </View>
             <CorpsPilier p={p} teinte={teinte} pleins={pleins} vides={vides} plusieursNiveaux={plusieursNiveaux} deplie={deplie} />
           </View>
@@ -925,9 +958,8 @@ const s = StyleSheet.create({
   ligneAlerte: { paddingHorizontal: 12, paddingVertical: 10, minHeight: 44, borderBottomWidth: 1, borderBottomColor: C.bord },
   ligneAlerteTexte: { fontSize: 14, lineHeight: 20, color: C.texte, fontWeight: '600' },
   titrePetit: { fontSize: 22, flexShrink: 1 },
-  voile: { flex: 1, backgroundColor: 'rgba(10,6,24,0.92)', alignItems: 'center', justifyContent: 'center', padding: 16, gap: 12 },
+  voile: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
   photoGrande: { width: '100%', height: '80%' },
-  voileTexte: { color: '#fff', fontSize: 14, opacity: 0.8 },
   alt: { borderWidth: 1, borderStyle: 'dashed', borderRadius: 10, padding: 12, gap: 8, backgroundColor: C.carte },
   altTitre: { fontSize: 14, fontWeight: '800', color: C.texte },
   altListe: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
