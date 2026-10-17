@@ -262,6 +262,16 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       const site = m1(/site de ([^,(]+)/, x);
       return `Mise en demeure de la préfecture portant sur l'eau${site ? ` (site de ${site.trim()}` : ""}${an ? `${site ? ", " : " ("}${an})` : site ? ")" : ""}`;
     }
+    // Allégation reprise d'une source reconnue (rapport de l'ASPI, liste UFLPA) : « Cité par … (année) ».
+    case "GEO_FORCED_LABOR": {
+      const an = (p.event_date ?? p.observed_on ?? "").slice(0, 4);
+      return `Cité pour des liens allégués avec le travail forcé des Ouïghours (${p.source_name ?? "source reconnue"}, ${an})`;
+    }
+    case "GEO_MYANMAR_MILITARY": {
+      const an = (p.event_date ?? p.observed_on ?? "").slice(0, 4);
+      const retrait = /retrait annoncé|a annoncé son retrait|withdraw/i.test(x) ? " ; retrait annoncé depuis" : "";
+      return `Liens économiques avec l'armée birmane relevés par une mission de l'ONU (${an})${retrait}`;
+    }
     case "GEO_SANCTIONS_BREACH": {
       const an = (p.event_date ?? p.observed_on ?? "").slice(0, 4);
       const montant = v === null ? "" : ` : ${v >= 1e6 ? `${nf(v / 1e6, 1)} M$` : `${nf(v, 0)} $`}`;
@@ -389,7 +399,7 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
 
 /** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */
 /** Indicateurs d'information affichés seulement quand ils sont documentés (rien sinon, décision du 17/10/2026). */
-export const SI_DOCUMENTE = new Set(["GOV_CJIP", "ANI_HUNTING_FISHING", "LAB_PAY_RATIO_MAXMIN", "ENV_TAXONOMY_CAPEX", "GEO_SANCTIONS_BREACH"]);
+export const SI_DOCUMENTE = new Set(["GOV_CJIP", "ANI_HUNTING_FISHING", "LAB_PAY_RATIO_MAXMIN", "ENV_TAXONOMY_CAPEX", "GEO_SANCTIONS_BREACH", "GEO_FORCED_LABOR", "GEO_MYANMAR_MILITARY"]);
 
 export function construireCarte(
   payload: { entity: { slug: string; name: string }; ownership_chain?: string[]; applicableIndicators: IndicateurEntree[]; evidence: PreuveEntree[]; dimensions: { code: string; name: string }[] },

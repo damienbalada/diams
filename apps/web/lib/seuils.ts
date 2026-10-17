@@ -76,6 +76,8 @@ export const REGLES: Record<string, { alerte: string; vigilance?: string; refere
   WAT_CONTROVERSY: { alerte: "convention judiciaire d'intérêt public pour une infraction au droit de l'eau", vigilance: "mise en demeure de la préfecture", reference: "conventions judiciaires validées par un juge (sans déclaration de culpabilité) ; arrêtés préfectoraux de mise en demeure des installations classées" },
   GEO_RUSSIA_EXIT: { alerte: "activité poursuivie en Russie", vigilance: "activité réduite ou investissements gelés", reference: "statuts de la base Leave Russia (KSE Institute)" },
   GEO_CONFLICT_TIES: { alerte: "implication documentée", reference: "choix de l'Index : toute implication documentée par une source publique" },
+  GEO_FORCED_LABOR: { alerte: "—", vigilance: "nommé par une source reconnue (allégation)", reference: "rapport « Uyghurs for Sale » de l'ASPI (2020) ou liste UFLPA du département de la Sécurité intérieure des États-Unis ; allégations, présentées avec la réponse de l'entreprise" },
+  GEO_MYANMAR_MILITARY: { alerte: "liens économiques relevés par l'ONU", vigilance: "retrait annoncé depuis", reference: "rapport A/HRC/42/CRP.3 de la Mission d'établissement des faits de l'ONU sur le Myanmar (2019)" },
   GEO_SANCTIONS_BREACH: { alerte: "règlement avec l'OFAC pour violation de sanctions internationales", reference: "avis d'exécution publiés par l'OFAC (Trésor des États-Unis) : l'entreprise règle sa responsabilité civile potentielle, sans reconnaître de faute" },
 };
 
@@ -175,6 +177,11 @@ export function evaluer(f: FaitEvalue): Signal | null {
       if (/investissements gelés/.test(c)) return v("toujours présent en Russie, investissements gelés", ref);
       return /activité réduite/.test(c) ? v("toujours présent en Russie, activité réduite", ref) : null;
     case "GEO_CONFLICT_TIES": return a("liens documentés avec un conflit armé ou une occupation", ref);
+    case "GEO_FORCED_LABOR": return v("liens allégués avec le travail forcé des Ouïghours (source reconnue, allégation)", ref);
+    case "GEO_MYANMAR_MILITARY":
+      return /retrait annoncé|a annoncé son retrait|withdraw/i.test(c)
+        ? v("liens économiques passés avec l'armée birmane (ONU), retrait annoncé depuis", ref)
+        : a("liens économiques avec l'armée birmane relevés par une mission de l'ONU", ref);
     case "GEO_SANCTIONS_BREACH": {
       const prog = c.match(/programme de sanctions : ([^;]+);/)?.[1]?.trim();
       return a(`a payé pour régler des violations de sanctions internationales${prog ? ` (${prog})` : ""} auprès du Trésor des États-Unis`, ref);
