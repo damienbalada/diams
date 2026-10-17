@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v316`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v317`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -406,6 +406,14 @@ CDP). **Retrait** d'une note CDP rattachée par homonymie (« Delta Corp Ltd. »
 éditrice de Livoo) : contrôler le pays après `import_cdp_scores` pour un nom court. **Suivi** : 300
 reconnues, 88 mises de côté (raison notée : refus du site, site injoignable, page sans propriétaire,
 licence), 49 encore à prouver (petites marques), 33 de distributeur.
+
+**Lots 224 et 229, produits inconnus (17/10/2026)** : secteur « Tabac » et 14 marques (Philip Morris,
+BAT, Imperial Brands, Republic Technologies), groupes qualifiés ; Japan Tobacco en attente (site : 403).
+Licences : Osram (Ledvance), Lonely Planet (Edi8), Sharp (Sharp Electronics Europe) ; Kodak de côté ;
+Opella : page des marques illisible. **Produit scanné inconnu** : écran d'envoi de photos dans l'appli
+(`produit-inconnu/[ean]`), API `/api/produits-inconnus`, table `product_submissions`, espace privé
+`produits-a-verifier`, page `/admin/produits-inconnus` (traiter : ajouter la marque par un lot ; refuser :
+photos supprimées). Suivi : 314 reconnues, 85 mises de côté, 49 à prouver, 33 de distributeur.
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour
