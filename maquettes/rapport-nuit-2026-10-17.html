@@ -1,0 +1,204 @@
+<title>Rapport de nuit du 17 octobre</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : une colonne de lecture type « note de rédaction », tableaux de registre en pleine largeur. */
+:root {
+  --papier: #f6f7f4; --encre: #1d2321; --gris: #5d6862; --filet: #d5dbd6; --vert: #2f6b4f; --vert-clair: #e4efe8;
+  --ambre: #8a5a12; --ambre-clair: #f6ecd9; --rouge: #9b2f2f; --rouge-clair: #f5e2e0; --surface: #ffffff;
+  --titre: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --texte: "IBM Plex Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --chiffre: "IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --papier: #141816; --encre: #e6ebe7; --gris: #a2aea7; --filet: #2e3632; --vert: #7fc4a0; --vert-clair: #1d2c25;
+  --ambre: #e0b36a; --ambre-clair: #2e2516; --rouge: #e59a92; --rouge-clair: #321c1b; --surface: #1b201d; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --papier: #141816; --encre: #e6ebe7; --gris: #a2aea7; --filet: #2e3632; --vert: #7fc4a0; --vert-clair: #1d2c25;
+  --ambre: #e0b36a; --ambre-clair: #2e2516; --rouge: #e59a92; --rouge-clair: #321c1b; --surface: #1b201d; color-scheme: dark }
+body { background: var(--papier); color: var(--encre); font: 15px/1.6 var(--texte); }
+.page { max-width: 880px; margin: 0 auto; padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: grid; gap: 6px; border-bottom: 2px solid var(--encre); padding-bottom: 18px; }
+.surtitre { font: 500 12px/1.3 var(--texte); letter-spacing: .08em; text-transform: uppercase; color: var(--gris); }
+h1 { font: 700 clamp(28px, 5vw, 40px)/1.12 var(--titre); margin: 0; text-wrap: balance; }
+.chapeau { font: 400 17px/1.55 var(--titre); color: var(--encre); max-width: 66ch; margin: 6px 0 0; }
+h2 { font: 600 23px/1.25 var(--titre); margin: 44px 0 10px; text-wrap: balance; }
+h3 { font: 600 16px/1.35 var(--texte); margin: 26px 0 6px; }
+p, li { max-width: 70ch; }
+ul { padding-left: 1.2em; margin: 6px 0; display: grid; gap: 5px; }
+.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 22px 0 0; }
+.chiffre { background: var(--surface); border: 1px solid var(--filet); border-radius: 6px; padding: 12px 14px; display: grid; gap: 2px; }
+.chiffre b { font: 600 26px/1.1 var(--chiffre); font-variant-numeric: tabular-nums; }
+.chiffre span { font-size: 13px; color: var(--gris); }
+.tableau { overflow-x: auto; margin: 10px 0; border: 1px solid var(--filet); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--filet); vertical-align: top; }
+th { font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--gris); background: var(--papier); }
+td.n { font-family: var(--chiffre); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.plus { color: var(--vert); font-weight: 600; }
+.moins { color: var(--rouge); font-weight: 600; }
+.code { font-family: var(--chiffre); font-size: 12.5px; color: var(--gris); }
+.pastille { display: inline-block; font: 500 11.5px/1.5 var(--texte); padding: 0 7px; border-radius: 10px; margin-right: 4px; white-space: nowrap; }
+.p-ok { background: var(--vert-clair); color: var(--vert); }
+.p-att { background: var(--ambre-clair); color: var(--ambre); }
+.p-ret { background: var(--rouge-clair); color: var(--rouge); }
+.question { background: var(--surface); border: 1px solid var(--filet); border-left: 3px solid var(--ambre); border-radius: 4px; padding: 10px 14px; margin: 10px 0; }
+.question b { display: block; margin-bottom: 2px; }
+.question p { margin: 4px 0; }
+.note { color: var(--gris); font-size: 13.5px; }
+footer { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--filet); color: var(--gris); font-size: 13px; }
+a { color: var(--vert); }
+:focus-visible { outline: 2px solid var(--vert); outline-offset: 2px; }
+</style>
+
+<div class="page">
+<header>
+  <div class="surtitre">Index général des marques · nuit du 16 au 17 octobre 2026 · de 22 h 30 à 9 h</div>
+  <h1>Blindage des indicateurs : ce qui a été fait cette nuit</h1>
+  <p class="chapeau">La nuit a servi à deux choses : ajouter des faits prouvés là où les piliers étaient maigres, et contrôler ce qui était déjà publié. Toutes les preuves ajoutées ont été vérifiées mot pour mot dans leur source ; chaque lot a été enregistré, publié et déployé.</p>
+  <div class="chiffres">
+    <div class="chiffre"><b id="n-lots">31</b><span>lots de preuves (140 à 170)</span></div>
+    <div class="chiffre"><b id="n-commits">57</b><span>enregistrements publiés, tous déployés</span></div>
+    <div class="chiffre"><b>1 297</b><span>citations publiées relues contre 677 sources</span></div>
+    <div class="chiffre"><b>3</b><span>nouvelles sources officielles</span></div>
+  </div>
+</header>
+
+<h2>Où en est-on, en une minute</h2>
+<ul>
+  <li><b>Les données publiées tiennent.</b> L'audit complet de cette nuit a relu chaque source citée : 662 sources sur 677 contiennent encore toutes leurs citations. Quatre ne les contenaient plus (pages réécrites, une note LobbyMap changée) ; elles ont été corrigées ou retirées. Les onze sources injoignables sont des refus déjà connus (Cour fédérale d'Australie, DGCCRF, Système U) ou une page disparue.</li>
+  <li><b>Plusieurs erreurs de rattachement ont été trouvées et retirées</b> avant que quiconque ne les cite : 10 faux rattachements au registre des lobbyistes (HATVP), 13 « exploitations animales » fausses (Sojasun, Materne, spiruline…), une note de transparence textile d'une autre entreprise sur le fromage blanc Jockey, un objectif climat d'un homonyme sur H&amp;M, deux taux d'imposition calculés sur une perte.</li>
+  <li><b>Les piliers les plus maigres ont progressé</b> : matières animales de la mode (de 2-4 à 4-8 groupes par indicateur), listes de fournisseurs (4 → 7), B Corp (13 → 18), financement politique américain (19 → 27), présence dans les paradis fiscaux (37 → 48), déclaration fiscale pays par pays (7 → 14), controverses sur l'eau (18 → 23, avec une nouvelle source judiciaire).</li>
+  <li><b>Certains indicateurs plafonnent pour de bonnes raisons</b> : les circulaires américaines de 2026 ne publient presque plus la mixité des conseils ; la déclaration fiscale pays par pays européenne n'est due qu'à fin 2026 ; plusieurs sites refusent le vérificateur. Le détail est plus bas.</li>
+  <li><b>Onze décisions vous attendent</b>, regroupées à la fin. Aucune n'empêche le site de fonctionner ; elles portent sur la méthode.</li>
+</ul>
+
+<h2>Couverture par indicateur</h2>
+<p class="note">Nombre d'entités (groupes, sociétés ou marques) ayant au moins une preuve approuvée et en cours de validité. Seuls les indicateurs qui ont bougé sont listés. Référence : le décompte consigné à 0 h 10. Avant cela, de 22 h 30 à 23 h 40, les lots 140 à 147 avaient déjà ajouté les listes d'huileries de palme (0 → 4 groupes), la déclaration fiscale pays par pays (7 → 14), les matières animales de LVMH, Hermès et Kering, et l'annuaire Leaping Bunny (0 → 10 marques).</p>
+<div class="tableau"><table>
+<thead><tr><th>Pilier</th><th>Indicateur</th><th class="n">0 h 10</th><th class="n">Ce matin</th><th>Commentaire</th></tr></thead>
+<tbody id="couverture">
+<tr><td>Animal</td><td>Plumage à vif, duvet <span class="code">ANI_DOWN_RDS</span></td><td class="n">2</td><td class="n plus">6</td><td>H&amp;M, Fast Retailing, Uniqlo, Nike (après LVMH et Hermès)</td></tr>
+<tr><td>Animal</td><td>Laine sans mulesing <span class="code">ANI_WOOL_MULESING</span></td><td class="n">2</td><td class="n plus">6</td><td>politique ou certification exigée</td></tr>
+<tr><td>Animal</td><td>Angora et mohair <span class="code">ANI_ANGORA_MOHAIR</span></td><td class="n">1</td><td class="n plus">4</td><td></td></tr>
+<tr><td>Animal</td><td>Peaux exotiques <span class="code">ANI_EXOTIC_SKINS</span></td><td class="n">4</td><td class="n plus">8</td><td></td></tr>
+<tr><td>Animal</td><td>Traçabilité du cuir <span class="code">ANI_LEATHER_TRACE</span></td><td class="n">4</td><td class="n plus">5</td><td></td></tr>
+<tr><td>Animal</td><td>Exploitation animale <span class="code">ANI_EXPLOITATION</span></td><td class="n">557</td><td class="n moins">543</td><td><span class="moins">13 preuves fausses retirées</span>, 1 source disparue</td></tr>
+<tr><td>Climat</td><td>Scope 3 publié <span class="code">ENV_SCOPE3_DISCLOSED</span></td><td class="n">143</td><td class="n plus">150</td><td>Microsoft, Apple, Amazon, Google, Meta, Netflix, Toyota, Nike</td></tr>
+<tr><td>Climat</td><td>Écoblanchiment sanctionné <span class="code">ENV_GREENWASHING</span></td><td class="n">28</td><td class="n plus">29</td><td>Keurig Dr Pepper (SEC, Canada)</td></tr>
+<tr><td>Eau</td><td>Controverses sur l'eau <span class="code">WAT_CONTROVERSY</span></td><td class="n">18</td><td class="n plus">23</td><td>nouvelle source : conventions judiciaires d'intérêt public</td></tr>
+<tr><td>Eau</td><td>Intensité en eau <span class="code">WAT_INTENSITY</span></td><td class="n">18</td><td class="n plus">19</td><td>Pernod Ricard</td></tr>
+<tr><td>Plastique</td><td>Plastique recyclé <span class="code">PLA_RECYCLED</span></td><td class="n">25</td><td class="n plus">26</td><td>L'Oréal</td></tr>
+<tr><td>Fournisseurs</td><td>Liste des fournisseurs <span class="code">SUP_SUPPLIER_LIST</span></td><td class="n">4</td><td class="n plus">7</td><td>Apple, Fast Retailing, H&amp;M (après les huileries de palme)</td></tr>
+<tr><td>Gouvernance</td><td>Sanctions <span class="code">GOV_SANCTIONS</span></td><td class="n">45</td><td class="n plus">46</td><td>Samsung ; Google, Mercedes-Benz et Meta avaient déjà d'autres sanctions</td></tr>
+<tr><td>Gouvernance</td><td>Certification B Corp <span class="code">GOV_BCORP</span></td><td class="n">13</td><td class="n plus">18</td><td>Nespresso, Ben &amp; Jerry's, Weleda (société et marque), Aesop</td></tr>
+<tr><td>Gouvernance</td><td>Mixité du conseil <span class="code">GOV_BOARD_GENDER</span></td><td class="n">85</td><td class="n plus">89</td><td>Haleon, Interparfums, Toyota, Henkel</td></tr>
+<tr><td>Social</td><td>Ratio de rémunération <span class="code">LAB_CEO_PAY_RATIO</span></td><td class="n">80</td><td class="n ">80</td><td>+2 (Keurig Dr Pepper, Kraft Heinz), −2 périmètres France seule</td></tr>
+<tr><td>Fiscalité</td><td>Paradis fiscaux <span class="code">TAX_HAVEN_PRESENCE</span></td><td class="n">37</td><td class="n plus">48</td><td>11 groupes européens, nouvel outil de décompte</td></tr>
+<tr><td>Géopolitique</td><td>Financement politique (États-Unis) <span class="code">GEO_POL_FINANCING</span></td><td class="n">19</td><td class="n plus">27</td><td>connecteur FEC corrigé</td></tr>
+<tr><td>Géopolitique</td><td>Registre des lobbyistes <span class="code">GEO_LOBBYING_TRANSP</span></td><td class="n">166</td><td class="n moins">156</td><td><span class="moins">10 faux rattachements retirés</span></td></tr>
+<tr><td>Géopolitique</td><td>Lobbying climat (LobbyMap) <span class="code">GEO_LOBBYING_ALIGN</span></td><td class="n">2</td><td class="n moins">1</td><td>TotalEnergies retirée : note passée de C- à D+</td></tr>
+<tr><td>Investissement</td><td>Politique responsable <span class="code">INV_RESPONSIBLE_POLICY</span></td><td class="n">5</td><td class="n plus">9</td><td>AXA, Société Générale, Crédit Mutuel, Arkéa</td></tr>
+<tr><td>Investissement</td><td>Finance durable <span class="code">INV_SUSTAINABLE_FINANCE</span></td><td class="n">5</td><td class="n plus">7</td><td></td></tr>
+</tbody></table></div>
+<p class="note">Égapro passe de 315 à 308 dans les décomptes : ce n'est pas une perte de cette nuit, le chiffre de la veille comptait sept déclarations déjà expirées (validité de cinq ans).</p>
+
+<h2>Ce qui a été ajouté, pilier par pilier</h2>
+
+<h3>Animal</h3>
+<ul>
+  <li>Politiques matières des groupes de mode et de luxe (duvet, laine, angora et mohair, peaux exotiques, cuir) lues dans leurs propres documents : LVMH, Hermès, Kering, H&amp;M, Fast Retailing et Uniqlo, Nike. Chaque fiche dit ce qui est interdit, exigé, ou seulement visé.</li>
+  <li>Nouvelle source : l'annuaire Leaping Bunny (marques certifiées sans tests sur les animaux), 9 marques et la politique de L'Oréal ; 40 absences consignées.</li>
+  <li>Un défaut corrigé : les indicateurs animaux n'étaient « applicables » qu'à la mode et à la beauté, si bien que les preuves de LVMH, Kering, Hermès ou Garnier étaient invisibles.</li>
+</ul>
+
+<h3>Climat, eau, plastique</h3>
+<ul>
+  <li>Scope 3 publié par les géants du numérique (Microsoft, Apple, Amazon, Google, Meta, Netflix), Toyota et Nike, plus la tendance des émissions de Toyota (−0,38 % par an, 2022-2024, recalculée par le vérificateur).</li>
+  <li><b>Nouvelle source officielle</b> : les conventions judiciaires d'intérêt public publiées par le ministère de la Justice. Cinq infractions au droit de l'eau, toutes validées par un juge : Nestlé Waters (neuf forages sans autorisation à Vittel et Contrexéville, 2 M€, 2024), Engie (zones humides asséchées par une centrale solaire en Corrèze, 135 000 €, 2025), Lactalis (fromagerie de Vercel, 100 000 €, 2023), Nestlé France (pollution de l'Aisne, 40 000 €, 2022), Bel (eaux souterraines à Dole, 20 463 €, 2023). Les documents numérisés ont été lus par reconnaissance de caractères et cités tels quels.</li>
+  <li>Intensité en eau de Pernod Ricard (1 085 m³ par million d'euros) ; 50 % de plastiques recyclés ou biosourcés chez L'Oréal.</li>
+</ul>
+
+<h3>Fournisseurs</h3>
+<ul>
+  <li>Listes nominatives publiées : huileries de palme (Ferrero, P&amp;G, Mondelez, Colgate), fournisseurs d'Apple, usines de Fast Retailing et de H&amp;M.</li>
+</ul>
+
+<h3>Gouvernance et social</h3>
+<ul>
+  <li>Sanctions de la Cour fédérale d'Australie (droit de la consommation) : Google (60 M$ australiens), Samsung (14), Mercedes-Benz (12,5), Meta (10 par filiale).</li>
+  <li>B Corp : Nespresso, Ben &amp; Jerry's, Weleda, Aesop, après lecture de leur fiche B Lab.</li>
+  <li>Mixité des conseils : Haleon (64 %), Interparfums (50 %), Henkel (43,8 %), Toyota (20 %).</li>
+  <li>Ratio de rémunération dirigeant / salarié médian : Keurig Dr Pepper (127 pour 1), Kraft Heinz (170 pour 1).</li>
+</ul>
+
+<h3>Fiscalité</h3>
+<ul>
+  <li>Déclaration pays par pays : 7 groupes de plus. Présence dans les dix premiers paradis fiscaux (classement du Tax Justice Network) : 11 groupes européens comptés dans leurs tableaux de sociétés consolidées (TotalEnergies 96 filiales, BNP Paribas 63, LVMH 57…), avec un outil qui refait le décompte.</li>
+  <li>Taux effectifs de Savencia (35,7 %) et Henkel (24,6 %).</li>
+</ul>
+
+<h3>Géopolitique et investissement</h3>
+<ul>
+  <li>Financement politique américain : le connecteur ignorait les comités dont l'entreprise n'est pas déclarée et ratait McDonald's à cause de l'apostrophe ; corrigé, six groupes ajoutés (Amazon 1,56 M$ sur le cycle 2025-2026, McDonald's 506 000 $…).</li>
+  <li>Politiques d'investissement responsable et finance durable : AXA, Société Générale, Crédit Mutuel Alliance Fédérale, Crédit Mutuel Arkéa (sortie du charbon fin 2027, du pétrole et du gaz fin 2030).</li>
+</ul>
+
+<h2>Contrôles et corrections</h2>
+<div class="tableau"><table>
+<thead><tr><th>Contrôle</th><th>Résultat</th></tr></thead>
+<tbody>
+<tr><td>Relecture de toutes les citations publiées (1 297, 677 sources)</td><td><span class="pastille p-ok">662 conformes</span><span class="pastille p-att">11 injoignables</span><span class="pastille p-ret">4 corrigées ou retirées</span></td></tr>
+<tr><td>Rattachements par le nom (registres HATVP, SBTi, transparence textile)</td><td>12 faux rattachements retirés ; le rapprochement des noms a été durci (sigles H&amp;M, B&amp;S, lettres isolées) et testé</td></tr>
+<tr><td>Exploitation animale déduite des produits</td><td>13 preuves fausses retirées (marques végétales, compotes, spiruline) ; garde-fous ajoutés à l'outil</td></tr>
+<tr><td>Taux d'imposition</td><td>2 taux calculés sur une perte retirés (Stellantis, Ubisoft) ; règle ajoutée au vérificateur</td></tr>
+<tr><td>Périmètres</td><td>chiffres limités à la France retirés pour LDC (deux) et Rémy Cointreau</td></tr>
+<tr><td>Doublons</td><td>TENA (deux fiches) et Lancelot supprimés</td></tr>
+<tr><td>Cohérence de la base</td><td>aucune valeur hors bornes, aucun SIREN ou LEI mal formé ni en double, aucune contradiction à la même date</td></tr>
+<tr><td>Liens</td><td>1 274 adresses contrôlées ; leave-russia.org toujours en panne partielle (70 fiches sur 122)</td></tr>
+</tbody></table></div>
+
+<h2>Outils améliorés</h2>
+<ul>
+  <li>Vérificateur : dollar australien, copie locale d'une page refusée (approbation tracée « copie »), recomptage des paradis fiscaux européens, refus d'un taux sur perte, effectifs « neuf hommes et sept femmes », mots-clés de l'eau, fiches B Corp au nouveau format.</li>
+  <li>Nouveaux outils : décompte des paradis fiscaux européens, audit groupé des citations (relance possible à tout moment).</li>
+  <li>Fiches : libellés plus exacts (amendes en dollars australiens, « pour chacune de deux filiales », conventions judiciaires, plastique recyclé ou biosourcé, matières animales).</li>
+  <li>Tests : 237 côté collecte, 81 côté site, tous verts.</li>
+</ul>
+
+<h2>Pistes écartées et pourquoi</h2>
+<ul>
+  <li><b>Sites qui refusent le vérificateur</b> (identité déclarée, une seule nouvelle tentative) : Unilever, Starbucks, Sony, Tesla, Mercedes-Benz, Hasbro, ACCC, DGCCRF, 3M ; Nestlé (contrôle du navigateur) ; Kraft Heinz (erreur serveur).</li>
+  <li><b>Données qui n'existent pas encore</b> : déclaration pays par pays européenne (due fin 2026) ; mixité des conseils dans les circulaires américaines 2026 (22 groupes n'en publient plus).</li>
+  <li><b>Données publiées sous une forme non comparable</b> : L'Oréal (écart de rémunération en deux populations, ratio par zone), TotalEnergies, SEB et Rémy Cointreau (ratio France seulement), AB InBev (eau en milliers de m³ par million de dollars), Campari (mixité par catégorie d'administrateurs), Lotus (indépendants listés sans pourcentage).</li>
+  <li><b>Sources sans entité suivie</b> : base de l'ONU sur les entreprises liées aux colonies (158 sociétés), Sodexo et Société des eaux minérales de Challes.</li>
+  <li><b>À reprendre quand le site reviendra</b> : jugement du tribunal judiciaire de Paris contre TotalEnergies (écoblanchiment, 23/10/2025), site « en maintenance » aux trois tentatives ; leave-russia.org.</li>
+</ul>
+
+<h2>Décisions à prendre</h2>
+<div id="questions">
+<div class="question"><b>1. Conventions judiciaires hors eau</b><p>McDonald's France (fraude fiscale, 508,5 M€ d'amende d'intérêt public pour trois sociétés, 2022), Crédit Agricole CIB (fraude fiscale aggravée, 88,2 M€, 2025) et LVMH (trafic d'influence, 10 M€, 2021) ont signé des conventions validées par un juge. Elles n'entrent dans aucun indicateur actuel. Les ajouter aux sanctions ?</p></div>
+<div class="question"><b>2. Taux d'imposition atypiques</b><p>« Plus le taux est haut, mieux c'est » place General Mills (102,2 %, dépréciation non déductible) et Greenyard (146,8 %, résultat très faible) en tête, et Pommery (−1,46 %, cession exonérée) en queue. Exclure du classement les taux au-delà de 60 % ou négatifs, comme les exercices en perte ?</p></div>
+<div class="question"><b>3. LobbyMap</b><p>Son fichier robots.txt interdit les robots d'intelligence artificielle. La note de TotalEnergies y est passée de C- à D+ ; la preuve a été retirée. Collecter quand même (lecture humaine, une page par groupe) ou renoncer à l'indicateur ?</p></div>
+<div class="question"><b>4. Approbation sur copie</b><p>Google, Samsung, Mercedes-Benz et Meta (Cour fédérale d'Australie) ont été approuvés sur une copie obtenue sous la même identité, le site refusant le vérificateur. Garder ce mode d'approbation ?</p></div>
+<div class="question"><b>5. Écart de rémunération de L'Oréal</b><p>Publié en deux populations (2,5 % hors conseillères de beauté, −1,6 % pour elles), sans chiffre groupe. Le traiter comme non publié, comme H&amp;M ?</p></div>
+<div class="question"><b>6. Périmètres partiels</b><p>Pernod Ricard (ratio sur 60,8 % des salariés) et Renault (sept pays) : « l'essentiel du groupe » ou un sous-périmètre choisi ?</p></div>
+<div class="question"><b>7. Heura</b><p>Deux fiches (Foods for Tomorrow en Espagne, Heura Foods France), lien capitalistique non prouvé. Fusionner ?</p></div>
+<div class="question"><b>8. Brasserie Lancelot</b><p>Reste un groupe indépendant faute de preuve officielle de son appartenance à Agrial (la presse l'affirme depuis 2021).</p></div>
+<div class="question"><b>9. Sévérité des conventions sur l'eau</b><p>Fixée à 0,5, comme une mise en demeure de la préfecture, quel que soit le montant (de 20 463 € à 2 M€). Graduer selon le montant ?</p></div>
+<div class="question"><b>10. Mixité dans les circulaires américaines</b><p>Amazon écrit seulement « quatre femmes parmi les neuf candidats indépendants ». Accepter un calcul qui suppose le sexe des deux autres administrateurs, ou laisser vide ?</p></div>
+<div class="question"><b>11. Plans de vigilance introuvables</b><p>E.Leclerc, Decathlon, Tereos, Avril, Sodiaal, Cooperl : aucun plan publié trouvé. Le signaler sur les fiches comme « non trouvé » (fait daté) ?</p></div>
+</div>
+
+<h2>Suite proposée</h2>
+<ul>
+  <li>Relancer chaque semaine l'audit groupé des citations : il prend une heure et détecte les pages réécrites.</li>
+  <li>Reprendre leave-russia.org et le jugement TotalEnergies dès que les sites reviennent.</li>
+  <li>Selon vos réponses : ajouter les conventions fiscales et anticorruption, et la règle des taux atypiques.</li>
+</ul>
+
+<footer>Rapport établi à partir du journal de la nuit et de la base de production. Chaque chiffre de ce rapport est tiré de la base ou des journaux de vérification ; rien n'est estimé. Pensez à réactiver Avast.</footer>
+</div>
