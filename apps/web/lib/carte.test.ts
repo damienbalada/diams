@@ -154,5 +154,5 @@ test("sanction partagée entre deux filiales : le total n'est pas sous-estimé",
 
 test("convention judiciaire d'intérêt public sur l'eau : année et amende", () => {
   const s = valeurCourte("WAT_CONTROVERSY", "controverse", preuve("x", { excerpt: "Convention judiciaire d'intérêt public validée le 13/09/2022 par le président du tribunal judiciaire de Charleville-Mézières (ministère de la Justice) : « … » — amende d'intérêt public de 40 000 € (pollution de l'Aisne)." }));
-  assert.equal(s, "Convention judiciaire d'intérêt public pour pollution de l'eau (2022) : amende de 40 000 €");
+  assert.equal(s, "Convention judiciaire d'intérêt public pour infraction au droit de l'eau (2022) : amende de 40 000 €");
 });

@@ -891,7 +891,7 @@ pas du nombre de marques. Trois garde-fous invariants :
 | Politiques matières des marques de mode | ANI | duvet, laine, angora et mohair, peaux exotiques, cuir : interdiction ou certification exigée (1), politique ou objectif (0,5) | rapports annuels, politiques publiées par l'entreprise | groupe et marque |
 | SEC, Bureau de la concurrence du Canada | ENV, GOV | sanctions pour déclarations ou allégations trompeuses (ex. recyclabilité) | communiqués officiels | groupe |
 | Cour fédérale d'Australie | GOV | amendes civiles obtenues par l'ACCC, en dollars australiens convertis au taux de la BCE | jugements de la Cour | groupe |
-| Conventions judiciaires d'intérêt public | WAT | pollution de l'eau réglée par une convention avec le procureur, validée par le président du tribunal (amende d'intérêt public ; sévérité 0,5, comme une mise en demeure) ; la validation n'emporte pas déclaration de culpabilité | ministère de la Justice | société signataire (ou groupe, filiale nommée) |
+| Conventions judiciaires d'intérêt public | WAT | infraction au droit de l'eau (pollution, forages ou travaux sans autorisation, zones humides) réglée par une convention avec le procureur, validée par le président du tribunal (amende d'intérêt public ; sévérité 0,5, comme une mise en demeure) ; la validation n'emporte pas déclaration de culpabilité | ministère de la Justice | société signataire (ou groupe, filiale nommée) |
 
 **Présence dans les paradis fiscaux** (top 10 de l'indice du Tax Justice Network, édition du
 2 décembre 2025) : pour un groupe américain, lignes de l'annexe 21 de son rapport 10-K ; pour un

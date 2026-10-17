@@ -199,7 +199,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       if (/^Convention judiciaire d.intérêt public/.test(x)) {
         const anC = m1(/validée le \d{2}\/\d{2}\/(\d{4})/, x);
         const montant = m1(/amende d.intérêt public de ([\d  ]+ ?(?:€|M€))/, x);
-        return `Convention judiciaire d'intérêt public pour pollution de l'eau${anC ? ` (${anC})` : ""}${montant ? ` : amende de ${montant}` : ""}`;
+        return `Convention judiciaire d'intérêt public pour infraction au droit de l'eau${anC ? ` (${anC})` : ""}${montant ? ` : amende de ${montant}` : ""}`;
       }
       // « … arrêté préfectoral de mise en demeure du 19/08/2026, site de Formerie … »
       const an = m1(/mise en demeure du \d{2}\/\d{2}\/(\d{4})/, x);
