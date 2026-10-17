@@ -647,7 +647,7 @@ export const getProduits = unstable_cache(
 );
 
 /**
- * Produit lu par son code-barres dans Open Food Facts, puis Open Beauty Facts (bases collaboratives,
+ * Produit lu par son code-barres dans Open Food Facts, Open Beauty Facts puis Open Products Facts (bases collaboratives,
  * licence ouverte). Sert à savoir de quelle marque il s'agit ; ce n'est pas une preuve.
  */
 /** Critères des alternatives : indicateur, et condition sur la preuve (voir alternatives-piliers.ts). */
@@ -717,6 +717,8 @@ const lireProduit = unstable_cache(
     const bases = [
       { nom: "Open Food Facts", hote: "https://world.openfoodfacts.org", fiche: "https://fr.openfoodfacts.org/produit/" },
       { nom: "Open Beauty Facts", hote: "https://world.openbeautyfacts.org", fiche: "https://fr.openbeautyfacts.org/produit/" },
+      // Produits non alimentaires (papeterie, piles, entretien, bricolage…).
+      { nom: "Open Products Facts", hote: "https://world.openproductsfacts.org", fiche: "https://fr.openproductsfacts.org/produit/" },
     ];
     let panne = false;
     for (const b of bases) {
@@ -770,7 +772,7 @@ const lireProduit = unstable_cache(
     if (panne) throw new BasesIndisponibles("Open Food Facts ne répond pas pour l'instant.");
     return null;
   },
-  ["produit-par-code-v3"],
+  ["produit-par-code-v4"],
   { revalidate: 86400 },
 );
 export async function getProduitParCode(code: string): Promise<ProduitScanne | null> {

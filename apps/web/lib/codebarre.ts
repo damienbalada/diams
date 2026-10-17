@@ -1,7 +1,7 @@
 /**
  * Code-barres → marque de l'Index (logique pure).
  *
- * Le produit est lu dans Open Food Facts (ou Open Beauty Facts) : base collaborative, sous licence
+ * Le produit est lu dans Open Food Facts (ou Open Beauty Facts, Open Products Facts) : base collaborative, sous licence
  * ouverte, qui donne le NOM DE MARQUE ÉCRIT SUR LE PRODUIT, tel que saisi par les contributeurs
  * (« President », « Nutella, Ferrero », « COCA-COLA SERVICES SA/NV »). Ce n'est pas une preuve :
  * seulement le moyen de savoir de quelle marque il s'agit. Deux rapprochements :

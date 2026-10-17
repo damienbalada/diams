@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { noterScanNonReconnu } from "@/lib/scans";
 import { getProduitParCode, listeNomsEntites, type ProduitScanne } from "@/lib/data";
 import { phraseRapprochement } from "@/lib/codebarre-texte";
 import { avecGenre, codeValide, rapprocher } from "@/lib/codebarre";
@@ -22,11 +23,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ ean: st
     return NextResponse.json({ trouve: false, code: ean, indisponible: true, raison: "Open Food Facts ne répond pas pour l'instant. Réessayez dans quelques minutes." }, { status: 503 });
   }
   if (!produit) {
-    return NextResponse.json({ trouve: false, code: ean, raison: "Ce code n'est pas encore dans Open Food Facts ni Open Beauty Facts : nous ne savons pas quelle marque le vend." });
+    after(() => noterScanNonReconnu(ean, "code_inconnu", null));
+    return NextResponse.json({ trouve: false, code: ean, raison: "Ce code n'est pas encore dans Open Food Facts, Open Beauty Facts ni Open Products Facts : nous ne savons pas quelle marque le vend." });
   }
   const entites = await listeNomsEntites();
   const r = avecGenre(rapprocher(produit.marques, entites, { nomProduit: produit.nom, proprietaire: produit.proprietaire }), entites);
   if (!r) {
+    const p = produit;
+    after(() => noterScanNonReconnu(ean, p.marques.length ? "marque_absente" : "marque_non_renseignee", p));
     return NextResponse.json({
       trouve: false, code: ean, produit,
       raison: produit.marques.length

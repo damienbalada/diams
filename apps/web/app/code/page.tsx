@@ -8,7 +8,7 @@ export default function CodePage() {
       <section className="panel">
         <h1 style={{ margin: "0 0 6px" }}>Chercher par code-barres</h1>
         <p className="muted small" style={{ margin: 0 }}>
-          Les chiffres sous le code-barres du produit (8 à 13 chiffres). La marque est lue dans Open Food Facts ou Open Beauty Facts,
+          Les chiffres sous le code-barres du produit (8 à 13 chiffres). La marque est lue dans Open Food Facts, Open Beauty Facts ou Open Products Facts,
           bases collaboratives, puis rapprochée des marques de l'Index.
         </p>
         <form className="code-form" action="/code/aller" method="get">

@@ -1,4 +1,6 @@
+import { after } from "next/server";
 import { redirect } from "next/navigation";
+import { noterScanNonReconnu } from "@/lib/scans";
 import { getProduitParCode, listeNomsEntites, type ProduitScanne } from "@/lib/data";
 import { phraseRapprochement } from "@/lib/codebarre-texte";
 import { avecGenre, codeValide, rapprocher } from "@/lib/codebarre";
@@ -25,10 +27,15 @@ export default async function CodeProduitPage({ params, searchParams }: { params
   } catch {
     return <Inconnu code={ean} raison="Open Food Facts ne répond pas pour l'instant. Réessayez dans quelques minutes." />;
   }
-  if (!produit) return <Inconnu code={ean} raison="Ce code n'est pas encore dans Open Food Facts ni Open Beauty Facts : nous ne savons pas quelle marque le vend." />;
+  if (!produit) {
+    after(() => noterScanNonReconnu(ean, "code_inconnu", null));
+    return <Inconnu code={ean} raison="Ce code n'est pas encore dans Open Food Facts, Open Beauty Facts ni Open Products Facts : nous ne savons pas quelle marque le vend." />;
+  }
   const entites = await listeNomsEntites();
   const r = avecGenre(rapprocher(produit.marques, entites, { nomProduit: produit.nom, proprietaire: produit.proprietaire }), entites);
   if (!r) {
+    const p = produit;
+    after(() => noterScanNonReconnu(ean, p.marques.length ? "marque_absente" : "marque_non_renseignee", p));
     return (
       <Inconnu
         code={ean}

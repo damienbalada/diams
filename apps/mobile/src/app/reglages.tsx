@@ -93,7 +93,7 @@ export default function EcranReglages() {
       </Pressable>
       <Text style={s.petit}>
         Les fiches viennent de l'Index général des marques : des faits publiés, datés et vérifiés mot pour mot dans leurs sources.
-        Les noms et photos de produits viennent d'Open Food Facts et d'Open Beauty Facts, bases collaboratives sous licence ouverte.
+        Les noms et photos de produits viennent d'Open Food Facts, d'Open Beauty Facts et d'Open Products Facts, bases collaboratives sous licence ouverte.
       </Text>
     </ScrollView>
   );

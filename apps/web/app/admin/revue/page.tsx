@@ -42,7 +42,8 @@ export default async function ReviewQueuePage() {
         <h1>File de revue</h1>
         <span className="row" style={{ gap: 10 }}>
           <a className="muted small" href="/admin/corrections">signalements des lecteurs →</a>
-          <a className="muted small" href="/admin/etiquettes">étiquettes à vérifier →</a>
+          <a className="muted small" href="/admin/etiquettes">étiquettes à vérifier →</a>{" "}
+          <a className="muted small" href="/admin/scans">scans non reconnus →</a>
           <span className="badge">{pending.length} en attente</span>
         </span>
       </div>
