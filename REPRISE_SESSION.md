@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v320`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v321`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -322,8 +322,13 @@ marques**, à continuer :
    Saint Laurent (7) et Hermès (2). Sans rubrique « Composition », la matière est relevée à la
    lecture (champ `releve` du fichier de lecture) et n'est retenue que si elle figure mot pour
    mot dans la copie : descriptif chez Louis Vuitton, ligne des matières en capitales avant
-   « STYLE ID » chez Saint Laurent, phrase de description chez Hermès. Reste possible pour
-   Uniqlo, Zara, H&M ;
+   « STYLE ID » chez Saint Laurent, phrase de description chez Hermès. Lot 241 (même voie) :
+   Uniqlo (8 : cachemire, mérinos, soie, duvet), Zara (7 : cachemire, laine, soie) et H&M
+   (5 : cuir de vache, de porc, de mouton, laine). Les plans du site de ces trois marques sont
+   bloqués : les adresses viennent des pages de recherche enregistrées par l'éditeur. Pièges
+   écartés : « tissu enduit », « imprimé cachemire » (motif), « polaire duveteuse ». Décision
+   de l'éditeur (17/10/2026) : quelques fiches par marque suffisent, on ne lit pas tout le
+   catalogue ; ne demander des copies qu'aux sites qui refusent le vérificateur ;
 3. pour les sociétés moyennes non notées (Rians, Ermitage, Juraflore, Monbana, Jacquart,
    Camus, Cellier des Dauphins, bofrost*, Toupargel…) : Egapro, HATVP, registre européen,
    B Corp, sanctions (DGCCRF, Autorité de la concurrence), rapports et plans de vigilance

@@ -1082,7 +1082,8 @@ def main() -> None:
 
     ok_rows, delegated_rows, counts, reports = [], [], {}, {}
     raws: dict = {}
-    copies = dict(c.split("=", 1) for c in args.copie)
+    # Au dernier « = » : l'adresse elle-même peut en contenir (« ?colorDisplayCode=07 », Uniqlo).
+    copies = dict(c.rsplit("=", 1) for c in args.copie)
     with httpx.Client(timeout=300) as client:
         for r, note in zip(rows, notes):
             if r.source_code == "BOCC" and tables:
