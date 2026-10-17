@@ -1,5 +1,5 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BoutonScanner, MARGE_BOUTON } from '@/components/bouton-scanner';
@@ -11,6 +11,7 @@ import { C } from '@/lib/couleurs';
 /** Fiche d'une marque ou d'un groupe (depuis la recherche ou le lien « Appartient à »). */
 export default function FicheMarque() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
+  const defile = useRef<ScrollView>(null);
   const [rep, setRep] = useState<ReponseFiche | null>(null);
   const [erreur, setErreur] = useState<ErreurSite | null>(null);
   const [tentative, setTentative] = useState(0);
@@ -34,8 +35,8 @@ export default function FicheMarque() {
   return (
     <View style={{ flex: 1 }}>
       <Stack.Screen options={{ title: titreFiche(rep.fiche) }} />
-      <ScrollView contentContainerStyle={s.contenu}>
-        <Fiche fiche={rep.fiche} onMarque={(x) => router.push(`/fiche/${x}`)} />
+      <ScrollView ref={defile} contentContainerStyle={s.contenu}>
+        <Fiche fiche={rep.fiche} onMarque={(x) => router.push(`/fiche/${x}`)} defiler={(y) => defile.current?.scrollTo({ y: y + 8, animated: true })} />
       </ScrollView>
       <BoutonScanner />
     </View>

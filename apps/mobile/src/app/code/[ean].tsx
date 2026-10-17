@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Chargement, Erreur } from '@/components/etat';
@@ -12,6 +12,7 @@ import { C } from '@/lib/couleurs';
 /** Produit scanné : code → produit → marque → fiche. */
 export default function ProduitScanne() {
   const { ean } = useLocalSearchParams<{ ean: string }>();
+  const defile = useRef<ScrollView>(null);
   const [rep, setRep] = useState<ReponseFiche | null>(null);
   const [erreur, setErreur] = useState<ErreurSite | null>(null);
 
@@ -75,8 +76,8 @@ export default function ProduitScanne() {
   return (
     <View style={{ flex: 1 }}>
       <Stack.Screen options={{ title: titreFiche(rep.fiche) }} />
-      <ScrollView contentContainerStyle={[s.contenu, { paddingBottom: MARGE_BOUTON }]}>
-        <Fiche fiche={rep.fiche} onMarque={(slug) => router.push(`/fiche/${slug}`)} />
+      <ScrollView ref={defile} contentContainerStyle={[s.contenu, { paddingBottom: MARGE_BOUTON }]}>
+        <Fiche fiche={rep.fiche} onMarque={(slug) => router.push(`/fiche/${slug}`)} defiler={(y) => defile.current?.scrollTo({ y: y + 8, animated: true })} />
       </ScrollView>
       <BoutonScanner />
     </View>
