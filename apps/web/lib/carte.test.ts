@@ -205,3 +205,8 @@ test("ratio de rémunération au salaire le plus bas : libellé distinct", () =>
   const m = valeurCourte("LAB_CEO_PAY_RATIO", "resultat", preuve("LAB_CEO_PAY_RATIO", { value_numeric: 9.4, excerpt: "« Le ratio entre le plus haut salaire et le salaire médian est de 9,4 »" }));
   assert.equal(m, "Le dirigeant gagne 9,4 fois le salaire médian");
 });
+
+test("sanction : clémence affichée comme infraction sans amende", () => {
+  const s = valeurCourte("GOV_SANCTIONS", "controverse", preuve("GOV_SANCTIONS", { excerpt: "Commission européenne, communiqué IP/25/881 du 01/04/2025 (en anglais) : « Mercedes-Benz was not fined, as it revealed the cartel to the Commission under the leniency programme »" }));
+  assert.match(s, /^Infraction constatée, sans amende \(clémence\), par la Commission européenne \(2025\)/);
+});

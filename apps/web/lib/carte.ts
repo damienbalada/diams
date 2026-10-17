@@ -164,7 +164,9 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       const an = m1(/du \d{2}\/\d{2}\/(\d{4})/, x);
       const amende = m1(/amendes? (?:civiles? )?(?:de(?: plus de)?|d’un montant de) ([\d  ,.]+ ?(?:M€|Md€|M£|MA\$|M\$|Md\$|€|millions? d[’']euros|milliards? d[’']euros|euros))/, x)
         ?? m1(/fine of ([\d.,]+ (?:million|billion)? ?euros)/i, x);
-      const quoi = code === "GOV_SANCTIONS" ? "Sanctionné" : "Allégations écologiques trompeuses relevées";
+      // Clémence : l'infraction est constatée mais l'entreprise qui l'a dénoncée ne paie pas d'amende (17/10/2026).
+      const clemence = code === "GOV_SANCTIONS" && /immunit|clémence|leniency|not fined|exempt from paying/i.test(x);
+      const quoi = clemence ? "Infraction constatée, sans amende (clémence)," : code === "GOV_SANCTIONS" ? "Sanctionné" : "Allégations écologiques trompeuses relevées";
       // Article devant le nom de l'autorité : « l'Autorité… », « la Commission… », « la CNIL ».
       const art = !autorite ? "" : /^(Commission|Cour|DGCCRF|CNIL|FTC|CMA|SEC)\b/.test(autorite) ? "la " : /^(Jury|Bureau)\b/.test(autorite) ? "le " : /^ASA\b/.test(autorite) ? "l'" : /^[AEÉIOU][a-zé]/.test(autorite) ? "l'" : "";
       return `${quoi} par ${autorite ? art + autorite : "une autorité"}${an ? ` (${an})` : ""}${amende ? ` : amende de ${amende.replace(/MA\$$/, "M$ australiens")}${/pour chacune des deux filiales/.test(x) ? " pour chacune de deux filiales" : ""}` : ""}`;
