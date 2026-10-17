@@ -36,5 +36,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ ean: st
   }
   const f = await chargerFiche(r.slug);
   if (!f) return NextResponse.json({ trouve: false, code: ean, produit, raison: "La fiche de cette marque n'a pas pu être chargée." });
-  return NextResponse.json({ trouve: true, fiche: ficheEnJson(r.slug, f.carte, f.proprietaire, { produit, correspondance: r.correspondance, nomLu: r.nomLu, phrase: phraseRapprochement(r, produit.base) }) });
+  return NextResponse.json({ trouve: true, fiche: ficheEnJson(r.slug, f.carte, f.proprietaire, { produit, correspondance: r.correspondance, nomLu: r.nomLu, phrase: phraseRapprochement(r, produit.base) }, { estMarque: f.estMarque, produitsLus: f.produitsLus, alternatives: f.alternatives }) });
 }

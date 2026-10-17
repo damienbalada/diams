@@ -10,5 +10,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const { slug } = await params;
   const f = await chargerFiche(slug);
   if (!f) return NextResponse.json({ trouve: false, raison: "Fiche introuvable." }, { status: 404 });
-  return NextResponse.json({ trouve: true, fiche: ficheEnJson(slug, f.carte, f.proprietaire, null) });
+  return NextResponse.json({ trouve: true, fiche: ficheEnJson(slug, f.carte, f.proprietaire, null, { estMarque: f.estMarque, produitsLus: f.produitsLus, alternatives: f.alternatives }) });
 }

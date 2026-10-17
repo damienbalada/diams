@@ -1,10 +1,11 @@
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Logo } from '@/components/logo';
-import type { Fait, Fiche as TFiche, Pilier } from '@/lib/api';
+import type { Fait, Fiche as TFiche, Pilier, ProduitLu } from '@/lib/api';
 import { C, SOLIDITE, TEINTE } from '@/lib/couleurs';
 
 const NIVEAU: Record<string, string> = { groupe: 'Groupe', marque: 'Marque', produit: 'Produits' };
@@ -80,6 +81,23 @@ export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: str
       <Text style={s.pied}>
         {fiche.renseignes} informations documentées sur {fiche.total} recherchées · aucune note, que des faits sourcés.
       </Text>
+
+      {fiche.estMarque && (
+        <>
+          <Text style={s.section} accessibilityRole="header">Ses produits</Text>
+          {fiche.produitsLus && fiche.produitsLus.length > 0 ? (
+            <ProduitsLus produits={fiche.produitsLus} />
+          ) : (
+            <Text style={s.petit}>Aucun produit lu pour l'instant : ni fiche du site de la marque, ni étiquette envoyée.</Text>
+          )}
+          <Pressable
+            onPress={() => router.push({ pathname: '/etiquette/[slug]', params: { slug: fiche.slug, nom: fiche.nom } })}
+            accessibilityRole="button"
+            style={({ pressed }) => [s.boutonEtiquette, pressed && { opacity: 0.7 }]}>
+            <Text style={s.boutonEtiquetteTexte}>📷 Ajouter l'étiquette d'un produit {fiche.nom}</Text>
+          </Pressable>
+        </>
+      )}
     </View>
   );
 }
@@ -125,6 +143,7 @@ function LignePilier({ p, dernier }: { p: Pilier; dernier: boolean }) {
         <View style={s.corps}>
           {pleins.map((f) => <CarteFait key={f.code} f={f} teinte={teinte} niveau={plusieursNiveaux ? NIVEAU[f.niveau] : null} />)}
           {vides.length > 0 && <SansInformation faits={vides} toutVide={!pleins.length} />}
+          <Alternatives p={p} teinte={teinte} />
         </View>
       )}
     </View>
@@ -132,6 +151,111 @@ function LignePilier({ p, dernier }: { p: Pilier; dernier: boolean }) {
 }
 
 const majuscule = (t: string) => t[0].toUpperCase() + t.slice(1);
+
+/** Alternatives du pilier : marques du même secteur, d'un autre groupe, qui remplissent un critère affiché. */
+function Alternatives({ p, teinte }: { p: Pilier; teinte: string }) {
+  const a = p.alternatives;
+  return (
+    <View style={[s.alt, { borderColor: teinte + '66' }]}>
+      <Text style={s.altTitre}>🔄 Alternatives dans le même secteur</Text>
+      {a ? (
+        <>
+          <Text style={s.petit}>Marques d'autres groupes {a.critere}. Aucune note : c'est ce critère, et lui seul, qui les fait figurer ici.</Text>
+          <View style={s.altListe}>
+            {a.marques.map((m) => (
+              <Pressable
+                key={m.slug}
+                onPress={() => router.push(`/fiche/${m.slug}`)}
+                accessibilityRole="link"
+                style={({ pressed }) => [s.altMarque, !m.second && s.altFort, pressed && { opacity: 0.6 }]}>
+                <Logo src={m.logo} taille={26} />
+                <Text style={s.altNom} numberOfLines={1}>
+                  {m.nom}
+                  {m.groupe ? <Text style={s.petit}> · {m.groupe}</Text> : null}
+                  {m.second ? <Text style={s.petit}> · produits végétaux</Text> : null}
+                </Text>
+              </Pressable>
+            ))}
+            {a.autres > 0 && <Text style={s.petit}>et {a.autres} autre{a.autres > 1 ? 's' : ''}</Text>}
+          </View>
+        </>
+      ) : (
+        <Text style={s.petit}>Aucune marque du même secteur ne remplit encore le critère de ce pilier dans nos données.</Text>
+      )}
+    </View>
+  );
+}
+
+const STATUT_PRODUIT: Record<ProduitLu['statut'], { texte: string; couleur: string }> = {
+  ingredient_animal: { texte: "Ingrédient d'origine animale", couleur: C.alerteTexte },
+  aucun_ingredient_animal_declare: { texte: 'Aucun ingrédient animal dans la liste lue', couleur: C.gris },
+  vegetal_declare: { texte: 'Présenté comme végétal par la marque', couleur: '#2f7a3b' },
+  vegetal_certifie: { texte: "Végétal, label d'un tiers", couleur: '#2f7a3b' },
+};
+const ORDRE: Record<ProduitLu['statut'], number> = { vegetal_certifie: 0, vegetal_declare: 1, aucun_ingredient_animal_declare: 2, ingredient_animal: 3 };
+
+/** Produits lus (fiches du site de la marque, étiquettes photographiées) : ceux sans ingrédient animal d'abord. */
+function ProduitsLus({ produits }: { produits: ProduitLu[] }) {
+  const [voirAnimaux, setVoirAnimaux] = useState(false);
+  const tries = [...produits].sort((a, b) => ORDRE[a.statut] - ORDRE[b.statut] || a.nom.localeCompare(b.nom, 'fr'));
+  const sans = tries.filter((x) => x.statut !== 'ingredient_animal');
+  const avec = tries.filter((x) => x.statut === 'ingredient_animal');
+  return (
+    <View style={{ gap: 10 }}>
+      <Text style={s.petit}>
+        Ingrédients lus sur {produits.length} produit{produits.length > 1 ? 's' : ''} (fiches du site de la marque ou étiquettes photographiées), dont {avec.length} avec un ingrédient d'origine animale.
+      </Text>
+      {sans.length > 0 && (
+        <View style={s.sans}>
+          <Text style={s.sansTitre}>🌱 Chez cette marque, sans ingrédient animal</Text>
+          <Text style={s.petit}>« Végétal » : la marque le dit ou un label l'atteste. « Aucun ingrédient animal dans la liste lue » ne prouve pas qu'un produit est végétal.</Text>
+          {sans.map((x) => <LigneProduit key={x.url} p={x} />)}
+        </View>
+      )}
+      {avec.length > 0 && (
+        <View style={s.vides}>
+          <Pressable onPress={() => setVoirAnimaux(!voirAnimaux)} accessibilityRole="button" accessibilityState={{ expanded: voirAnimaux }} style={({ pressed }) => [s.videsTete, pressed && { opacity: 0.6 }]}>
+            <Text style={[s.videsTitre, s.flex]}>{avec.length} produit{avec.length > 1 ? 's' : ''} avec un ingrédient d'origine animale</Text>
+            <Text style={s.lienPetit}>{voirAnimaux ? 'Masquer ▲' : 'Voir ▼'}</Text>
+          </Pressable>
+          {voirAnimaux && avec.map((x) => <LigneProduit key={x.url} p={x} />)}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function LigneProduit({ p }: { p: ProduitLu }) {
+  const [ingr, setIngr] = useState(false);
+  const st = STATUT_PRODUIT[p.statut];
+  return (
+    <View style={s.produitLu}>
+      <Text style={s.produitLuNom}>{p.nom}</Text>
+      <Text style={[s.produitLuStatut, { color: st.couleur }]}>{st.texte}{p.animaux.length ? ` : ${p.animaux.join(', ')}` : ''}</Text>
+      {p.origine === 'etiquette' && (
+        <Text style={s.petit}>
+          📷 Étiquette envoyée par un lecteur, liste recopiée et relue
+          {p.achat.date ? ` · achetée le ${dfr(p.achat.date)}` : ''}{p.achat.lieu ? ` (${p.achat.lieu})` : ''}
+        </Text>
+      )}
+      <View style={s.ligne}>
+        {p.ingredients && (
+          <Pressable onPress={() => setIngr(!ingr)} accessibilityRole="button" accessibilityState={{ expanded: ingr }} hitSlop={8} style={s.bouton44}>
+            <Text style={s.lienPetit}>{ingr ? 'Masquer les ingrédients ▲' : 'Ingrédients ▼'}</Text>
+          </Pressable>
+        )}
+        <Pressable onPress={() => ouvrir(p.url)} accessibilityRole="link" hitSlop={8} style={s.bouton44}>
+          <Text style={s.lienPetit}>{p.origine === 'etiquette' ? 'Photo ↗' : 'Fiche ↗'}</Text>
+        </Pressable>
+      </View>
+      {ingr && p.ingredients && (
+        <Text style={s.citationTexte}>
+          « {p.ingredients} »{p.douteux.length ? ` — d'origine possiblement animale, non tranché : ${p.douteux.join(', ')}` : ''}
+        </Text>
+      )}
+    </View>
+  );
+}
 
 /**
  * Un indicateur documenté, en deux temps : d'abord le fait (nom, valeur, repère), puis, sur demande,
@@ -301,4 +425,17 @@ const s = StyleSheet.create({
   bouton44: { minHeight: 44, justifyContent: 'center' },
   citationTexte: { fontSize: 14, lineHeight: 20, color: C.texte, fontStyle: 'italic', borderLeftWidth: 3, borderLeftColor: C.bordFort, paddingLeft: 10 },
   pied: { fontSize: 13, lineHeight: 18, color: C.gris },
+  alt: { borderWidth: 1, borderStyle: 'dashed', borderRadius: 10, padding: 12, gap: 8, backgroundColor: C.carte },
+  altTitre: { fontSize: 14, fontWeight: '800', color: C.texte },
+  altListe: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
+  altMarque: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, paddingLeft: 4, paddingRight: 10, borderRadius: 999, borderWidth: 1, borderColor: C.bord, backgroundColor: C.carte2, maxWidth: '100%', minHeight: 36 },
+  altFort: { borderColor: '#9cc9a3', backgroundColor: '#f1f9f2' },
+  altNom: { fontSize: 13.5, fontWeight: '600', color: C.texte, flexShrink: 1 },
+  sans: { borderWidth: 1, borderColor: '#9cc9a3', backgroundColor: '#f1f9f2', borderRadius: 12, padding: 12, gap: 8 },
+  sansTitre: { fontSize: 15, fontWeight: '800', color: '#2f7a3b' },
+  produitLu: { borderTopWidth: 1, borderTopColor: C.bord, paddingTop: 8, gap: 2 },
+  produitLuNom: { fontSize: 15, fontWeight: '700', color: C.texte },
+  produitLuStatut: { fontSize: 14, fontWeight: '600' },
+  boutonEtiquette: { borderWidth: 1, borderStyle: 'dashed', borderColor: C.accent, borderRadius: 12, padding: 14, minHeight: 48, justifyContent: 'center' },
+  boutonEtiquetteTexte: { fontSize: 15, fontWeight: '700', color: C.accent },
 });

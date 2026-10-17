@@ -14,6 +14,16 @@ sa marque s'affiche, avec les mêmes faits que le site (alertes, piliers, source
 Écrans : accueil (scanner, recherche, saisie du code, derniers scans), scanner, fiche du produit
 scanné, fiche d'une marque, recherche, réglages.
 
+## Produits, alternatives et étiquettes
+
+- **Ses produits** (fiche d'une marque) : ingrédients lus sur les fiches du site de la marque ou sur des
+  étiquettes envoyées par des lecteurs ; les produits sans ingrédient animal sont mis en avant.
+- **Alternatives** (dans chaque pilier déplié) : marques du même secteur, d'un autre groupe, qui
+  remplissent un critère affiché (aucune note).
+- **Ajouter l'étiquette d'un produit** (bas de la fiche) : photo de la liste d'ingrédients (appareil
+  photo ou galerie), réduite sur le téléphone, envoyée à `/api/etiquettes`. Rien n'est publié avant
+  qu'un éditeur ait recopié et relu la liste dans `/admin/etiquettes` du site.
+
 ## Réglages
 
 Tant que le site est privé, l'appli a besoin de son mot de passe (écran Réglages). Il est gardé dans

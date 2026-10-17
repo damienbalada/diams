@@ -108,6 +108,14 @@ export interface Pilier {
   total: number;
   cle: { nom: string; valeur: string; etat: string; signal: NiveauSignal | null } | null;
   faits: Fait[];
+  /** Marques du même secteur, d'un autre groupe, qui remplissent le critère affiché (aucune note). */
+  alternatives?: { critere: string; marques: { slug: string; nom: string; groupe: string | null; second?: boolean; logo: string | null }[]; autres: number } | null;
+}
+export type StatutProduit = 'ingredient_animal' | 'aucun_ingredient_animal_declare' | 'vegetal_declare' | 'vegetal_certifie';
+/** Produit lu : fiche du site de la marque ou étiquette photographiée, ingrédients recopiés. */
+export interface ProduitLu {
+  nom: string; url: string; statut: StatutProduit; animaux: string[]; douteux: string[]; ingredients: string | null;
+  preuveVegetale: string | null; date: string; origine: 'fiche_marque' | 'etiquette'; achat: { date: string | null; lieu: string | null };
 }
 export interface Produit {
   code: string; nom: string; image: string | null; quantite: string | null; marques: string[]; base: string; lien: string;
@@ -123,6 +131,8 @@ export interface Fiche {
   piliers: Pilier[];
   renseignes: number;
   total: number;
+  estMarque?: boolean;
+  produitsLus?: ProduitLu[];
 }
 export type ReponseFiche = { trouve: true; fiche: Fiche } | { trouve: false; raison: string; indisponible?: boolean; produit?: Omit<Produit, 'correspondance' | 'nomLu' | 'phrase'> };
 export interface Resultat { slug: string; nom: string; marque: boolean; groupe: string | null; logo: string | null }
@@ -130,6 +140,35 @@ export interface Resultat { slug: string; nom: string; marque: boolean; groupe: 
 export const ficheParCode = (code: string) => appeler<ReponseFiche>(`/api/code/${encodeURIComponent(code)}`);
 export const ficheParSlug = (slug: string) => appeler<ReponseFiche>(`/api/fiche/${encodeURIComponent(slug)}`);
 export const rechercher = (q: string) => appeler<{ q: string; resultats: Resultat[] }>(`/api/recherche?q=${encodeURIComponent(q)}`);
+
+/**
+ * Dépôt de la photo de l'étiquette d'un produit (formulaire multipart). La photo est déjà réduite ;
+ * rien n'est publié avant qu'un éditeur ait recopié et relu la liste d'ingrédients.
+ */
+export async function deposerEtiquette(d: {
+  slug: string; produit: string; dateAchat: string; lieuAchat: string; photo: { uri: string; type: string; nom: string };
+}): Promise<{ status: 'ok' | 'error'; message?: string }> {
+  const r = await lireReglages();
+  const fd = new FormData();
+  fd.append('entity_slug', d.slug);
+  fd.append('product_name', d.produit);
+  if (d.dateAchat) fd.append('purchase_date', d.dateAchat);
+  if (d.lieuAchat) fd.append('purchase_place', d.lieuAchat);
+  fd.append('consent', 'on');
+  // Sur le téléphone, FormData accepte un fichier décrit par son adresse locale ; sur le web, il faut le contenu.
+  if (typeof document !== 'undefined') fd.append('photo', await (await fetch(d.photo.uri)).blob(), d.photo.nom);
+  else fd.append('photo', { uri: d.photo.uri, type: d.photo.type, name: d.photo.nom } as unknown as Blob);
+  const h = await entetes();
+  delete h.Accept;
+  let rep: Response;
+  try {
+    rep = await fetch(r.site + '/api/etiquettes', { method: 'POST', headers: { ...h, Accept: 'application/json' }, body: fd });
+  } catch {
+    return { status: 'error', message: 'Pas de connexion au site. Vérifiez votre réseau, puis réessayez.' };
+  }
+  if (rep.status === 401) return { status: 'error', message: 'Le site est encore privé : saisissez son mot de passe dans les Réglages.' };
+  return (await rep.json().catch(() => null)) ?? { status: 'error', message: `Réponse illisible du site (code ${rep.status}).` };
+}
 
 // Historique des scans (sur le téléphone seulement : rien n'est envoyé)
 export interface Scan { code: string; produit: string; marque: string; alertes: number; date: string }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useState, startTransition } from "react";
-import { deposerEtiquette, type DepotState } from "@/lib/etiquettes";
+import { deposerEtiquette } from "@/lib/etiquettes";
+import type { DepotState } from "@/lib/etiquettes-depot";
 
 const INITIAL: DepotState = { status: "idle" };
 

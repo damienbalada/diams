@@ -17,8 +17,8 @@ const nextConfig = {
         source: "/api/:chemin*",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET, OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Authorization, Accept" },
+          { key: "Access-Control-Allow-Methods", value: "GET, POST, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Authorization, Accept, Content-Type" },
         ],
       },
     ];

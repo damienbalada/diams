@@ -5,7 +5,8 @@
 import { raisonVide, type Carte } from "@/lib/carte";
 import { EN_SAVOIR_PLUS, REPERES } from "@/lib/seuils";
 import { logoDe } from "@/lib/logos";
-import type { ProduitScanne } from "@/lib/data";
+import type { ProduitLu, ProduitScanne } from "@/lib/data";
+import type { AlternativesPilier } from "@/lib/alternatives-piliers";
 
 export const ICONES_PILIERS: Record<string, string> = { ANI: "🐄", ENV: "🌍", PLA: "🧴", WAT: "💧", LAB: "👥", SUP: "🔗", GOV: "🏛️", TAX: "💶", GEO: "🗺️", INV: "🏦" };
 
@@ -14,6 +15,7 @@ export function ficheEnJson(
   carte: Carte,
   proprietaire: { slug: string; name: string } | null,
   scan: { produit: ProduitScanne; correspondance: string; nomLu: string; phrase: string } | null,
+  extras: { estMarque?: boolean; produitsLus?: ProduitLu[]; alternatives?: AlternativesPilier } = {},
 ) {
   const logo = logoDe(slug);
   return {
@@ -30,6 +32,10 @@ export function ficheEnJson(
       renseignes: p.documentes,
       total: p.total,
       cle: p.cle ? { nom: p.cle.nom, valeur: p.cle.valeur, etat: p.cle.etat, signal: p.cle.signal?.niveau ?? null } : null,
+      // Alternatives : marques du même secteur, d'un autre groupe, qui remplissent le critère affiché.
+      alternatives: extras.alternatives?.[p.code]
+        ? { ...extras.alternatives[p.code], marques: extras.alternatives[p.code].marques.map((m) => ({ ...m, logo: logoDe(m.slug)?.src ?? null })) }
+        : null,
       faits: p.faits.map((f) => ({
         code: f.code,
         nom: f.nom,
@@ -48,5 +54,11 @@ export function ficheEnJson(
     })),
     renseignes: carte.documentes,
     total: carte.total,
+    estMarque: !!extras.estMarque,
+    // Produits lus (fiches du site de la marque ou étiquettes photographiées), ingrédients recopiés.
+    produitsLus: (extras.produitsLus ?? []).map((x) => ({
+      nom: x.nom, url: x.url, statut: x.statut, animaux: x.animaux, douteux: x.douteux, ingredients: x.ingredients,
+      preuveVegetale: x.preuveVegetale, date: x.date, origine: x.origine, achat: x.achat,
+    })),
   };
 }

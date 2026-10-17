@@ -46,10 +46,18 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "L'appareil photo sert à lire le code-barres d'un produit. Aucune photo n'est gardée : seul le numéro du code est envoyé pour trouver la marque.",
+          "cameraPermission": "L'appareil photo sert à lire le code-barres d'un produit (seul le numéro est envoyé) et, si vous le choisissez, à photographier l'étiquette d'un produit pour l'envoyer à l'Index.",
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "L'accès aux photos sert seulement à choisir la photo de l'étiquette d'un produit que vous voulez envoyer à l'Index.",
+          "cameraPermission": "L'appareil photo sert à photographier l'étiquette d'un produit que vous voulez envoyer à l'Index.",
+          "microphonePermission": false
         }
       ],
       "expo-secure-store",
