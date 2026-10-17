@@ -220,3 +220,13 @@ test("abattage : engagement avec part des poulets étourdis", () => {
   const s = valeurCourte("ANI_SLAUGHTER", null, preuve("ANI_SLAUGHTER", { normalized_value: 0.5, excerpt: "« étourdissement par atmosphère contrôlée : 60 % ; — audit externe : 50 % »" }));
   assert.equal(s, "Engagement sur le bien-être à l'abattage et au transport (60 % des poulets étourdis par atmosphère contrôlée)");
 });
+
+test("intensité eau sans précision : libellé neutre", () => {
+  const n = valeurCourte("WAT_INTENSITY", "resultat", preuve("WAT_INTENSITY", { value_numeric: 89, excerpt: "ESRS E3-4 (intensité hydrique) : « Water Intensity Ratio ( m 3 /M€) 89 115 131 »" }));
+  assert.equal(n, "89 m³ d'eau par million d'euros de ventes");
+});
+
+test("emballages « recyclables, réutilisables » : recyclabilité (garde contre le caractère de contrôle)", () => {
+  const s = valeurCourte("PLA_RECYCLED", "resultat", preuve("PLA_RECYCLED", { value_numeric: 67, excerpt: "(emballages des produits à marque Carrefour recyclables, réutilisables ou réemployables)" }));
+  assert.equal(s, "67 % d'emballages recyclables ou réutilisables");
+});

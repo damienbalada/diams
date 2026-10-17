@@ -229,7 +229,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       if (v === null) return "Publié";
       if (/biosourc/i.test(x)) return `${nf(v)} % de plastiques recyclés ou biosourcés dans les emballages`;
       if (/consign/i.test(x)) return `${nf(v)} % des produits en emballage consigné ou majoritairement recyclé`;
-      if (/recyclables?|conçus pour le recyclage|prêts pour le recyclage|recycle-ready|recycleerbaar|designed (?:to be recyclable|for recycling)/i.test(x))
+      if (/recyclables?\b|conçus pour le recyclage|prêts pour le recyclage|recycle-ready|recycleerbaar|designed (?:to be recyclable|for recycling)/i.test(x))
         return `${nf(v)} % d'emballages recyclables ou réutilisables`;
       const matiere = /réutilisés ou recyclés|reused or recycled/i.test(x) ? "matière recyclée ou réutilisée" : "matière recyclée";
       return `${nf(v)} % de ${matiere} dans les emballages${/plasti/i.test(x) && !/verre|glass/i.test(x) ? " plastiques" : ""}`;
@@ -240,7 +240,8 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       if (v === null) return "Publié";
       // Le rapport publie soit les prélèvements, soit la consommation (ESRS E3-4 § 29) : le premier terme cité l'emporte.
       const c = x.search(/consomm|consumption/i), pr = x.search(/pr[ée]l[èe]v|withdraw/i);
-      return `${nf(v, 0)} m³ d'eau ${c >= 0 && (pr < 0 || c < pr) ? "consommés" : "prélevés"} par million d'euros de ventes`;
+      const quoi = c >= 0 && (pr < 0 || c < pr) ? " consommés" : pr >= 0 ? " prélevés" : "";
+      return `${nf(v, 0)} m³ d'eau${quoi} par million d'euros de ventes`;
     }
     case "SUP_KNOWTHECHAIN": return v === null ? "Évalué" : `${nf(v, 0)}/100 contre le travail forcé (KnowTheChain)`;
     case "INV_FOSSIL_FINANCING": return v === null ? "Documenté" : `${nf(v)} milliards de dollars liés aux énergies fossiles`;
