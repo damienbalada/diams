@@ -435,88 +435,26 @@ function Alternatives({ p, teinte }: { p: Pilier; teinte: string }) {
   );
 }
 
-const STATUT_PRODUIT: Record<ProduitLu['statut'], { texte: string; couleur: string }> = {
-  ingredient_animal: { texte: "Ingrédient d'origine animale", couleur: C.alerteTexte },
-  aucun_ingredient_animal_declare: { texte: 'Aucun ingrédient animal dans la liste lue', couleur: C.gris },
-  vegetal_declare: { texte: 'Présenté comme végétal par la marque', couleur: '#2f7a3b' },
-  vegetal_certifie: { texte: "Végétal, label d'un tiers", couleur: '#2f7a3b' },
-};
-/** Mêmes statuts pour la composition d'un vêtement : on parle de matières. */
-const STATUT_MATIERE: Record<ProduitLu['statut'], { texte: string; couleur: string }> = {
-  ingredient_animal: { texte: "Matière d'origine animale", couleur: C.alerteTexte },
-  aucun_ingredient_animal_declare: { texte: 'Aucune matière animale dans la composition lue', couleur: C.gris },
-  vegetal_declare: { texte: 'Présenté comme sans matière animale par la marque', couleur: '#2f7a3b' },
-  vegetal_certifie: { texte: "Sans matière animale, label d'un tiers", couleur: '#2f7a3b' },
-};
-const statutDe = (p: ProduitLu) => (p.nature === 'composition' ? STATUT_MATIERE : STATUT_PRODUIT)[p.statut];
-const ORDRE: Record<ProduitLu['statut'], number> = { vegetal_certifie: 0, vegetal_declare: 1, aucun_ingredient_animal_declare: 2, ingredient_animal: 3 };
-
-/** Produits lus (fiches du site de la marque, étiquettes photographiées) : ceux sans ingrédient animal d'abord. */
+/**
+ * Produits lus sur le site de la marque (ou étiquettes photographiées) : une ligne repliée qui ouvre de
+ * simples liens (décision de l'éditeur, 17/10/2026). Ni matière ni ingrédient ici : l'avertissement et
+ * le pilier « Bien-être animal » disent déjà l'exploitation animale.
+ */
 function ProduitsLus({ produits }: { produits: ProduitLu[] }) {
-  const [voirAnimaux, setVoirAnimaux] = useState(false);
-  const tries = [...produits].sort((a, b) => ORDRE[a.statut] - ORDRE[b.statut] || a.nom.localeCompare(b.nom, 'fr'));
-  const sans = tries.filter((x) => x.statut !== 'ingredient_animal');
-  const avec = tries.filter((x) => x.statut === 'ingredient_animal');
-  const textile = produits.every((x) => x.nature === 'composition');
-  const un = textile ? "une matière d'origine animale" : "un ingrédient d'origine animale";
+  const [voir, setVoir] = useState(false);
+  const tries = [...produits].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  const n = tries.length;
   return (
-    <View style={{ gap: 10 }}>
-      <Text style={s.petit}>
-        {textile ? 'Compositions lues' : 'Ingrédients lus'} sur {produits.length} produit{produits.length > 1 ? 's' : ''} (fiches du site de la marque ou étiquettes photographiées), dont {avec.length} avec {un}.
-      </Text>
-      {sans.length > 0 && (
-        <View style={s.sans}>
-          <Text style={s.sansTitre}>🌱 Chez cette marque, {textile ? 'sans matière animale' : 'sans ingrédient animal'}</Text>
-          <Text style={s.petit}>
-            {textile
-              ? '« Aucune matière animale dans la composition lue » ne vaut que pour les pièces lues : la marque peut en utiliser ailleurs.'
-              : "« Végétal » : la marque le dit ou un label l'atteste. « Aucun ingrédient animal dans la liste lue » ne prouve pas qu'un produit est végétal."}
-          </Text>
-          {sans.map((x) => <LigneProduit key={x.url} p={x} />)}
-        </View>
-      )}
-      {avec.length > 0 && (
-        <View style={s.vides}>
-          <Pressable onPress={() => setVoirAnimaux(!voirAnimaux)} accessibilityRole="button" accessibilityState={{ expanded: voirAnimaux }} style={({ pressed }) => [s.videsTete, pressed && { opacity: 0.6 }]}>
-            <Text style={[s.videsTitre, s.flex]}>{avec.length} produit{avec.length > 1 ? 's' : ''} avec {un}</Text>
-            <Text style={s.lienPetit}>{voirAnimaux ? 'Masquer ▲' : 'Voir ▼'}</Text>
-          </Pressable>
-          {voirAnimaux && avec.map((x) => <LigneProduit key={x.url} p={x} />)}
-        </View>
-      )}
-    </View>
-  );
-}
-
-function LigneProduit({ p }: { p: ProduitLu }) {
-  const [ingr, setIngr] = useState(false);
-  const st = statutDe(p);
-  const mot = p.nature === 'composition' ? 'composition' : 'ingrédients';
-  return (
-    <View style={s.produitLu}>
-      <Text style={s.produitLuNom}>{p.nom}</Text>
-      <Text style={[s.produitLuStatut, { color: st.couleur }]}>{st.texte}{p.animaux.length ? ` : ${p.animaux.join(', ')}` : ''}</Text>
-      {p.origine === 'etiquette' && (
-        <Text style={s.petit}>
-          📷 Étiquette envoyée par un lecteur, liste recopiée et relue
-          {p.achat.date ? ` · achetée le ${dfr(p.achat.date)}` : ''}{p.achat.lieu ? ` (${p.achat.lieu})` : ''}
-        </Text>
-      )}
-      <View style={s.ligne}>
-        {p.ingredients && (
-          <Pressable onPress={() => setIngr(!ingr)} accessibilityRole="button" accessibilityState={{ expanded: ingr }} hitSlop={8} style={s.bouton44}>
-            <Text style={s.lienPetit}>{ingr ? `Masquer la ${mot === 'composition' ? 'composition' : 'liste des ingrédients'} ▲` : `${mot === 'composition' ? 'Composition' : 'Ingrédients'} ▼`}</Text>
-          </Pressable>
-        )}
-        <Pressable onPress={() => ouvrir(p.url)} accessibilityRole="link" hitSlop={8} style={s.bouton44}>
-          <Text style={s.lienPetit}>{p.origine === 'etiquette' ? 'Photo ↗' : 'Fiche ↗'}</Text>
+    <View style={s.vides}>
+      <Pressable onPress={() => setVoir(!voir)} accessibilityRole="button" accessibilityState={{ expanded: voir }} style={({ pressed }) => [s.videsTete, pressed && { opacity: 0.6 }]}>
+        <Text style={[s.videsTitre, s.flex]}>{n} produit{n > 1 ? 's' : ''} lu{n > 1 ? 's' : ''} sur le site de la marque</Text>
+        <Text style={s.lienPetit}>{voir ? 'Masquer ▲' : 'Voir ▼'}</Text>
+      </Pressable>
+      {voir && tries.map((p) => (
+        <Pressable key={p.url} onPress={() => ouvrir(p.url)} accessibilityRole="link" hitSlop={8} style={s.bouton44}>
+          <Text style={s.lienPetit}>{p.nom} ↗{p.origine === 'etiquette' ? ' · photo de l’étiquette envoyée par un lecteur' : ''}</Text>
         </Pressable>
-      </View>
-      {ingr && p.ingredients && (
-        <Text style={s.citationTexte}>
-          « {p.ingredients} »{p.douteux.length ? ` — d'origine possiblement animale, non tranché : ${p.douteux.join(', ')}` : ''}
-        </Text>
-      )}
+      ))}
     </View>
   );
 }
