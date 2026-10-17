@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v314`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v315`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -313,7 +313,12 @@ marques**, à continuer :
    Performance (après quelques pages ; preuve du lot 225 en attente). Sans réponse : Uniqlo,
    Carrefour, Gucci, Fendi, Loro Piana, Emilio Pucci, Rustler. Composition rendue par les
    scripts ou absente : Loewe, Marmot, Wilson (cuir cité dans la description seulement),
-   Atomic (fiches en allemand). Auchan : In Extenso absent du plan du site ;
+   Atomic (fiches en allemand). Auchan : In Extenso absent du plan du site.
+   **Site qui refuse : pages enregistrées par l'éditeur** (lot 226, Decathlon : 10 fiches,
+   laine, duvet, cuir, soie) : copies dans `pipeline/curated/copies/` (en-tête « saved from
+   url=… »), puis `import_produits.py lecture.json lot.csv --matieres --copies curated/copies`
+   et `verify_curated --delegue --apply --copie URL=FICHIER`. Même voie possible pour Louis
+   Vuitton, Hermès, Saint Laurent, Uniqlo, Zara, H&M ;
 3. pour les sociétés moyennes non notées (Rians, Ermitage, Juraflore, Monbana, Jacquart,
    Camus, Cellier des Dauphins, bofrost*, Toupargel…) : Egapro, HATVP, registre européen,
    B Corp, sanctions (DGCCRF, Autorité de la concurrence), rapports et plans de vigilance

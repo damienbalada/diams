@@ -9,7 +9,10 @@
 Avec --matieres : fiches lues par compositions.py (vêtements, chaussures) ; la composition remplace la liste
 d'ingrédients et les matières animales (laine, cuir, soie, duvet…) les ingrédients animaux.
 
-Usage : python outils_collecte/import_produits.py lecture.json lot.csv [--apply] [--matieres]
+Avec --copies DOSSIER : pages enregistrées par l'éditeur depuis son navigateur (« saved from url=… »), lues
+à la place du site quand celui-ci refuse le vérificateur ; la fiche et la preuve le disent.
+
+Usage : python outils_collecte/import_produits.py lecture.json lot.csv [--apply] [--matieres] [--copies DOSSIER]
 """
 from __future__ import annotations
 
@@ -89,6 +92,14 @@ def main() -> None:
     lecture, sortie, *opts = sys.argv[1:]
     appliquer = "--apply" in opts
     matieres = "--matieres" in opts
+    copies = {}
+    if "--copies" in opts:
+        dossier = opts[opts.index("--copies") + 1]
+        for nom in sorted(os.listdir(dossier)):
+            if nom.endswith((".html", ".htm")):
+                chemin = os.path.join(dossier, nom)
+                if m := re.search(r"saved from url=\(\d+\)(\S+)", open(chemin, encoding="utf-8", errors="replace").read(4000)):
+                    copies[m.group(1)] = chemin
     M = C if matieres else I
     config.require_supabase()
     lus = json.load(open(lecture, encoding="utf-8"))
@@ -104,14 +115,19 @@ def main() -> None:
             continue
         vues.add(r["url"])
         vues.add(cle)
+        copie = copies.get(r["url"])
         try:
-            rep = c.get(r["url"])
-            time.sleep(0.4)
-            if rep.status_code in (401, 403, 429):
-                # Refus du site : on n'insiste pas, la fiche n'est pas importée.
-                print("   refus", rep.status_code, r["url"])
-                continue
-            page = I.texte(rep.text)
+            if copie:
+                page = I.texte(open(copie, encoding="utf-8", errors="replace").read())
+                print("   copie lue :", os.path.basename(copie))
+            else:
+                rep = c.get(r["url"])
+                time.sleep(0.4)
+                if rep.status_code in (401, 403, 429):
+                    # Refus du site : on n'insiste pas, la fiche n'est pas importée.
+                    print("   refus", rep.status_code, r["url"])
+                    continue
+                page = I.texte(rep.text)
         except Exception as e:
             print("   injoignable", r["url"], type(e).__name__)
             continue
@@ -127,7 +143,7 @@ def main() -> None:
             "ingredients": ingr, "animal_ingredients": a["animaux"], "doubtful_ingredients": a["douteux"],
             "status": statut, "vegetal_proof": preuve_veg, "observed_on": JOUR,
             "nature": "composition" if matieres else "ingredients",
-            "reviewer": ("auto:composition-mot-pour-mot" if matieres else "auto:ingredients-mot-pour-mot") if mot_pour_mot else None,
+            "reviewer": (("auto:composition-mot-pour-mot" if matieres else "auto:ingredients-mot-pour-mot") + (":copie" if copie else "")) if mot_pour_mot else None,
             "review_status": "approved" if mot_pour_mot else "pending",
         })
         print(f"   {'✓' if mot_pour_mot else '…'} {statut:32} {r['slug']:16} {r['produit'][:50]}")
@@ -142,7 +158,7 @@ def main() -> None:
                     "value_boolean": "", "value_text": ", ".join(a["animaux"][:4]), "normalized_value": "0",
                     "confidence": "0.85", "source_url": r["url"],
                     "excerpt": (f"Site officiel de la marque ({dom}), fiche produit « {r['produit']} », {'composition' if matieres else 'liste des ingrédients'}, "
-                                f"consultée le 17/10/2026 : « {q} » — recours à l'exploitation animale ({', '.join(a['animaux'][:4])})."),
+                                f"consultée le 17/10/2026{' (copie de la page enregistrée par l’éditeur, le site refusant le vérificateur)' if copie else ''} : « {q} » — recours à l'exploitation animale ({', '.join(a['animaux'][:4])})."),
                     "review_note": "", "_rang": rang,
                 }
     print(f"{len(lignes)} fiches, dont {sum(l['review_status'] == 'approved' for l in lignes)} relues mot pour mot ; "

@@ -58,3 +58,10 @@ def test_rubrique_composition_dans_une_presentation():
     page = ("Isolation en duvet : Offrant plus d’isolation par once que toute autre matière, le duvet est le meilleur des "
             "isolants. Composition : Corps: 100% Polyamide; Rembourrage: 90% Duvet d’oie, 10% Plume d’oie Entretien")
     assert C.bloc_composition(page) == "Corps: 100% Polyamide; Rembourrage: 90% Duvet d’oie, 10% Plume d’oie"
+
+
+def test_rubrique_composition_decathlon():
+    # Decathlon : la liste des caractéristiques (« matière principale cuir… ») précède la rubrique, close par « Fabricant ».
+    page = ("matière principale cuir largeur de pied standard état neuf Composition Extérieur en: 100.0% Cuir de bovin "
+            "Semelle en: 100.0% Caoutchouc synthétique Fabricant Ce contact assure le suivi de la sécurité")
+    assert C.bloc_composition(page) == "Extérieur en: 100.0% Cuir de bovin Semelle en: 100.0% Caoutchouc synthétique"

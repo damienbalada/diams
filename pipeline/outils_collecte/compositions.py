@@ -47,7 +47,7 @@ VEGETAL_RE = re.compile(r"\b(?:100 ?% v[ée]g[ée]tal\w*|v[ée]gan\w*|vegan|PETA
 _BLOC = re.compile(
     r"(?:Composition(?:\s+et\s+entretien)?|Mati[èe]res?(?:\s+principales?)?|Tissu principal|Mati[èe]re ext[ée]rieure|Ext[ée]rieur|Dessus)\s*:?\s*"
     r"(.{8,600}?)(?=\s(?:\d{2}\s?°C|Instructions|Qualit[ée]s? et caract[ée]ristiques|Fiche produit|Caract[ée]ristiques|Entretien|Conseils? d.entretien|Lavage|Lavable|Ne pas|Origine|Fabriqu[ée] (?:en|au)|Pays de fabrication|R[ée]f[ée]rence|"
-    r"Ajouter au panier|Livraison|Guide des tailles|Taille|Hauteur du talon|Code mod[èe]le|Coupe|Description|Avis|Retours?|Couleur)\b|$)",
+    r"Ajouter au panier|Livraison|Guide des tailles|Taille|Hauteur du talon|Code mod[èe]le|Fabricant|Coupe|Description|Avis|Retours?|Couleur)\b|$)",
     re.I,
 )
 # Une composition liste des pourcentages de fibres (« 80 % laine, 20 % polyamide ») ou nomme une matière.
@@ -62,9 +62,10 @@ def bloc_composition(t: str) -> str | None:
     # « Composition du manteau court : 80 % laine… » (Chloé) : le nom de la pièce part avec l'intitulé.
     tete = re.compile(r"^(?:(?:et entretien|Composition|Mati[èe]res\b|(?:du|de la|de l’|des)\s[^:%]{3,40}?\s:)\s*:?\s*)+", re.I)
     blocs = [tete.sub("", m.group(1).strip(" :-–")) for m in _BLOC.finditer(t)]
-    # Bloc ouvert sur une phrase de présentation (« la meilleure matière… ») qui contient plus loin la
-    # rubrique « Composition : » (Salomon) : seule la rubrique est gardée.
-    blocs = [b[m.end():].strip() if (m := re.search(r"\bComposition\s*:\s*", b)) and m.start() > 0 else b for b in blocs]
+    # Bloc ouvert sur une phrase de présentation (« la meilleure matière… », Salomon) ou sur la liste des
+    # caractéristiques (« matière principale cuir… », Decathlon) qui contient plus loin la rubrique
+    # « Composition » : seule la rubrique est gardée.
+    blocs = [b[m.end():].strip() if (m := re.search(r"\bComposition\b\s*:?\s*(?=[A-ZÉ\d])", b)) and m.start() > 0 else b for b in blocs]
     def note(b: str) -> int:
         return 3 * len(re.findall(r"\d{1,3}\s?%", b)) + len(FIBRES.findall(b))
     blocs = [b for b in blocs if re.search(r"\d{1,3}\s?%", b) and note(b) >= 4]

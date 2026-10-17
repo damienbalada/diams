@@ -24,8 +24,10 @@ export async function chargerFiche(slug: string) {
   ]);
   const carte = construireCarte(payload as any, journal, { estMarque, ...pays });
   const estGroupe = (payload.ownership_chain ?? []).length <= 1 || marques.length > 0;
-  const [produits, produitsLus] = estMarque
-    ? await Promise.all([getProduits(slug).catch(() => null), getProduitsLus(slug).catch(() => [])])
-    : [null, []];
+  // Fiches lues sur le site : aussi pour un groupe qui vend sous son propre nom (Decathlon, 17/10/2026).
+  const [produits, produitsLus] = await Promise.all([
+    estMarque ? getProduits(slug).catch(() => null) : null,
+    getProduitsLus(slug).catch(() => []),
+  ]);
   return { carte, estGroupe: estGroupe && !proprietaire, proprietaire, preuvesPropriete: preuves, memeRayon, marques, marquesGroupe, estMarque, produits, produitsLus, alternatives };
 }

@@ -570,6 +570,14 @@ export function CarteIdentite({
         </section>
       )}
 
+      {!estMarque && produitsLus.length > 0 && (
+        // Groupe qui vend sous son propre nom (Decathlon) : les fiches lues sur son site, sans les bases ouvertes.
+        <section className="panel ci-sec">
+          <h2 className="ci-sec-t">Ses produits</h2>
+          <ProduitsLus produits={produitsLus} />
+        </section>
+      )}
+
       {estMarque && (
         <section className="panel ci-sec">
           <h2 className="ci-sec-t">Ses produits {produits && <span className="ci-sec-n">{produits.total}</span>}</h2>
