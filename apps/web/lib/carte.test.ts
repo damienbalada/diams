@@ -180,3 +180,12 @@ test("intensité carbone convertie en euros : libellé en euros", () => {
   const c = valeurCourte("ENV_GHG_INTENSITY", "resultat", preuve("ENV_GHG_INTENSITY", { value_numeric: 165, excerpt: "(intensité de GES par million de dollars) (converti en tCO2e/M€) : « (tCO2e PER $1M) Market-based 146 » ; taux de change annuel moyen 2025 de la BCE (1 € = 1,13 USD) : 146 × 1,13 = 165,0" }));
   assert.equal(c, "165 tonnes de CO₂ par million d'euros de ventes");
 });
+
+test("libellés : taux effectif, conseil de surveillance, taxonomie", () => {
+  const t = valeurCourte("TAX_EFFECTIVE_RATE", "resultat", preuve("TAX_EFFECTIVE_RATE", { value_numeric: 33.1, excerpt: "« soit un taux effectif d’impôt de 33,1 % »" }));
+  assert.equal(t, "Taux effectif d'impôt : 33,1 % du bénéfice avant impôt (charge comptable)");
+  const s = valeurCourte("GOV_BOARD_GENDER", "resultat", preuve("GOV_BOARD_GENDER", { value_numeric: 40, excerpt: "« membres du conseil de surveillance de BPCE »" }));
+  assert.equal(s, "40 % de femmes au conseil de surveillance");
+  const a = valeurCourte("GOV_BOARD_GENDER", "resultat", preuve("GOV_BOARD_GENDER", { value_numeric: 45.5, excerpt: "« administratrices »" }));
+  assert.equal(a, "45,5 % de femmes au conseil d'administration");
+});

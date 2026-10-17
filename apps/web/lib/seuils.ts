@@ -150,7 +150,7 @@ export function evaluer(f: FaitEvalue): Signal | null {
             (UE.has(f.pays!) ? " ; dans l'Union européenne, une directive de 2022 fixe aux sociétés cotées un objectif de 40 % des administrateurs non exécutifs, ou 33 % de l'ensemble du conseil, d'ici juin 2026" : "")
           : ref;
         const precision = hors ? ` (repère : 40 %, minimum légal en France, qui ne s'applique pas à ${hors})` : " (repère : 40 %, minimum légal en France)";
-        return x < 20 ? a(`seulement ${nf(x)} % de femmes au conseil d'administration${precision}`, regle) : x < 40 ? v(`seulement ${nf(x)} % de femmes au conseil d'administration${precision}`, regle) : null;
+        return x < 20 ? a(`seulement ${nf(x)} % de femmes au conseil${precision}`, regle) : x < 40 ? v(`seulement ${nf(x)} % de femmes au conseil${precision}`, regle) : null;
       }
     case "GOV_BOARD_INDEP": {
       if (x === null || x >= 33) return null;

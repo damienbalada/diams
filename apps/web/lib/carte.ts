@@ -190,10 +190,10 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "LAB_GENDER_PAYGAP": return v === null ? "Publié" : v < 0 ? `${nf(-v)} % en faveur des femmes` : `${nf(v)} % en faveur des hommes`;
     case "LAB_EGAPRO_INDEX": return v === null ? "Publié" : `Index Égapro : ${nf(v, 0)}/100`;
     case "GOV_BCORP": return "Certifiée B Corp";
-    case "GOV_BOARD_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes au conseil d'administration`;
+    case "GOV_BOARD_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes au conseil ${/conseil de surveillance|supervisory board/i.test(x) ? "de surveillance" : "d'administration"}`;
     case "GOV_EXEC_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes dans les instances dirigeantes (comité de direction)`;
     case "GOV_BOARD_INDEP": return v === null ? "Publié" : `${nf(v)} % d'administrateurs indépendants`;
-    case "TAX_EFFECTIVE_RATE": return v === null ? "Publié" : `Impôt payé : ${nf(v)} % des bénéfices`;
+    case "TAX_EFFECTIVE_RATE": return v === null ? "Publié" : `Taux effectif d'impôt : ${nf(v)} % du bénéfice avant impôt (charge comptable)`;
     case "WAT_CONTROVERSY": {
       // « Convention judiciaire d'intérêt public validée le 13/09/2022 … : amende d'intérêt public de 40 000 € … »
       if (/^Convention judiciaire d.intérêt public/.test(x)) {
@@ -212,7 +212,7 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
     case "ENV_GHG_TREND": return v === null ? "Publié" : v > 0 ? `Émissions en hausse de ${nf(v, 2)} % par an` : `Émissions en baisse de ${nf(-v, 2)} % par an`;
     case "PLA_REDUCTION": return v === null ? "Publié" : v > 0 ? `Plastique neuf en hausse de ${nf(v, 2)} % par an` : `Plastique neuf en baisse de ${nf(-v, 2)} % par an`;
     case "PLA_RECYCLED": return v === null ? "Publié" : /biosourc/i.test(x) ? `${nf(v)} % de plastiques recyclés ou biosourcés dans les emballages` : `${nf(v)} % d'emballages recyclés, réutilisables ou recyclables`;
-    case "ENV_TAXONOMY_CAPEX": return v === null ? "Publié" : `${nf(v)} % des investissements jugés verts par l'UE`;
+    case "ENV_TAXONOMY_CAPEX": return v === null ? "Publié" : `${nf(v)} % des investissements conformes à la taxonomie verte de l'UE (évaluation de l'entreprise)`;
     case "ENV_GHG_INTENSITY": return v === null ? "Publié" : `${nf(v, 0)} tonnes de CO₂ par million ${/M\$|U ?S ?D|dollar/i.test(x) && !/taux de change annuel moyen/i.test(x) ? "de dollars" : "d'euros"} de ventes`;
     case "WAT_INTENSITY": {
       if (v === null) return "Publié";
