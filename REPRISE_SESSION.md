@@ -209,9 +209,9 @@ Mesure : `node <brouillon>/audit_brands.mts` → nombre de marques publiables.
   La taxonomie reste réservée à l'énergie et à l'automobile (valeurs des autres secteurs en base,
   non affichées ; décision 17 du rapport de nuit). Une hausse des émissions compte dès un an, une
   baisse à partir de deux.
-- **Piège de saisie** : dans un script Python passé par un « heredoc » bash, `` devient le
+- **Piège de saisie** : dans un script Python passé par un « heredoc » bash, `\b` devient le
   caractère de contrôle 0x08 ; construire les expressions avec `chr(92)` et contrôler
-  `grep -c $''` après chaque modification de `carte.ts` ou `verify_curated.py`.
+  `grep -c $'\x08'` après chaque modification de `carte.ts` ou `verify_curated.py`.
 
 ## 7. État au 14/10/2026
 
