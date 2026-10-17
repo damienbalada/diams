@@ -60,8 +60,8 @@ a { color: var(--vert); }
   <h1>Blindage des indicateurs : ce qui a été fait cette nuit</h1>
   <p class="chapeau">La nuit a servi à deux choses : ajouter des faits prouvés là où les piliers étaient maigres, et contrôler ce qui était déjà publié. Toutes les preuves ajoutées ont été vérifiées mot pour mot dans leur source ; chaque lot a été enregistré, publié et déployé.</p>
   <div class="chiffres">
-    <div class="chiffre"><b id="n-lots">31</b><span>lots de preuves (140 à 170)</span></div>
-    <div class="chiffre"><b id="n-commits">57</b><span>enregistrements publiés, tous déployés</span></div>
+    <div class="chiffre"><b id="n-lots">37</b><span>lots de preuves (140 à 176)</span></div>
+    <div class="chiffre"><b id="n-commits">68</b><span>enregistrements publiés, tous déployés</span></div>
     <div class="chiffre"><b>1 297</b><span>citations publiées relues contre 677 sources</span></div>
     <div class="chiffre"><b>3</b><span>nouvelles sources officielles</span></div>
   </div>
@@ -71,7 +71,7 @@ a { color: var(--vert); }
 <ul>
   <li><b>Les données publiées tiennent.</b> L'audit complet de cette nuit a relu chaque source citée : 662 sources sur 677 contiennent encore toutes leurs citations. Quatre ne les contenaient plus (pages réécrites, une note LobbyMap changée) ; elles ont été corrigées ou retirées. Les onze sources injoignables sont des refus déjà connus (Cour fédérale d'Australie, DGCCRF, Système U) ou une page disparue.</li>
   <li><b>Plusieurs erreurs de rattachement ont été trouvées et retirées</b> avant que quiconque ne les cite : 10 faux rattachements au registre des lobbyistes (HATVP), 13 « exploitations animales » fausses (Sojasun, Materne, spiruline…), une note de transparence textile d'une autre entreprise sur le fromage blanc Jockey, un objectif climat d'un homonyme sur H&amp;M, deux taux d'imposition calculés sur une perte.</li>
-  <li><b>Les piliers les plus maigres ont progressé</b> : matières animales de la mode (de 2-4 à 4-8 groupes par indicateur), listes de fournisseurs (4 → 7), B Corp (13 → 18), financement politique américain (19 → 27), présence dans les paradis fiscaux (37 → 48), déclaration fiscale pays par pays (7 → 14), controverses sur l'eau (18 → 23, avec une nouvelle source judiciaire).</li>
+  <li><b>Les piliers les plus maigres ont progressé</b> : matières animales de la mode (de 2-4 à 4-8 groupes par indicateur), listes de fournisseurs (4 → 7), B Corp (13 → 18), financement politique américain (19 → 27), présence dans les paradis fiscaux (37 → 49), salaire décent des salariés (18 → 28), déclaration fiscale pays par pays (7 → 14), controverses sur l'eau (18 → 23, avec une nouvelle source judiciaire).</li>
   <li><b>Certains indicateurs plafonnent pour de bonnes raisons</b> : les circulaires américaines de 2026 ne publient presque plus la mixité des conseils ; la déclaration fiscale pays par pays européenne n'est due qu'à fin 2026 ; plusieurs sites refusent le vérificateur. Le détail est plus bas.</li>
   <li><b>Onze décisions vous attendent</b>, regroupées à la fin. Aucune n'empêche le site de fonctionner ; elles portent sur la méthode.</li>
 </ul>
@@ -86,18 +86,21 @@ a { color: var(--vert); }
 <tr><td>Animal</td><td>Angora et mohair <span class="code">ANI_ANGORA_MOHAIR</span></td><td class="n">1</td><td class="n plus">4</td><td></td></tr>
 <tr><td>Animal</td><td>Peaux exotiques <span class="code">ANI_EXOTIC_SKINS</span></td><td class="n">4</td><td class="n plus">8</td><td></td></tr>
 <tr><td>Animal</td><td>Traçabilité du cuir <span class="code">ANI_LEATHER_TRACE</span></td><td class="n">4</td><td class="n plus">5</td><td></td></tr>
-<tr><td>Animal</td><td>Exploitation animale <span class="code">ANI_EXPLOITATION</span></td><td class="n">557</td><td class="n moins">543</td><td><span class="moins">13 preuves fausses retirées</span>, 1 source disparue</td></tr>
-<tr><td>Climat</td><td>Scope 3 publié <span class="code">ENV_SCOPE3_DISCLOSED</span></td><td class="n">143</td><td class="n plus">150</td><td>Microsoft, Apple, Amazon, Google, Meta, Netflix, Toyota, Nike</td></tr>
+<tr><td>Animal</td><td>Exploitation animale <span class="code">ANI_EXPLOITATION</span></td><td class="n">557</td><td class="n moins">545</td><td><span class="moins">13 preuves fausses retirées</span>, 1 source disparue ; Savencia et General Mills documentés</td></tr>
+<tr><td>Animal</td><td>Offre 100 % végétale <span class="code">ANI_OFFRE_VEGETALE</span></td><td class="n">24</td><td class="n plus">26</td><td>Danone, Carrefour</td></tr>
+<tr><td>Climat</td><td>Scope 3 publié <span class="code">ENV_SCOPE3_DISCLOSED</span></td><td class="n">143</td><td class="n plus">151</td><td>Microsoft, Apple, Amazon, Google, Meta, Netflix, Toyota, Nike, Henkel</td></tr>
+<tr><td>Climat</td><td>Intensité carbone <span class="code">ENV_GHG_INTENSITY</span></td><td class="n">39</td><td class="n plus">41</td><td>Henkel, Maison Pommery</td></tr>
 <tr><td>Climat</td><td>Écoblanchiment sanctionné <span class="code">ENV_GREENWASHING</span></td><td class="n">28</td><td class="n plus">29</td><td>Keurig Dr Pepper (SEC, Canada)</td></tr>
 <tr><td>Eau</td><td>Controverses sur l'eau <span class="code">WAT_CONTROVERSY</span></td><td class="n">18</td><td class="n plus">23</td><td>nouvelle source : conventions judiciaires d'intérêt public</td></tr>
-<tr><td>Eau</td><td>Intensité en eau <span class="code">WAT_INTENSITY</span></td><td class="n">18</td><td class="n plus">19</td><td>Pernod Ricard</td></tr>
+<tr><td>Eau</td><td>Intensité en eau <span class="code">WAT_INTENSITY</span></td><td class="n">18</td><td class="n plus">21</td><td>Pernod Ricard, Danone, LVMH</td></tr>
 <tr><td>Plastique</td><td>Plastique recyclé <span class="code">PLA_RECYCLED</span></td><td class="n">25</td><td class="n plus">26</td><td>L'Oréal</td></tr>
-<tr><td>Fournisseurs</td><td>Liste des fournisseurs <span class="code">SUP_SUPPLIER_LIST</span></td><td class="n">4</td><td class="n plus">7</td><td>Apple, Fast Retailing, H&amp;M (après les huileries de palme)</td></tr>
+<tr><td>Fournisseurs</td><td>Liste des fournisseurs <span class="code">SUP_SUPPLIER_LIST</span></td><td class="n">4</td><td class="n plus">8</td><td>Apple, Fast Retailing, H&amp;M, Henkel (après les huileries de palme)</td></tr>
+<tr><td>Social</td><td>Salaire décent des salariés <span class="code">LAB_LIVING_WAGE</span></td><td class="n">18</td><td class="n plus">28</td><td>LVMH, Carrefour, Heineken, Carlsberg, AB InBev, Arla, Crédit Agricole, La Banque Postale, Renault, SEB</td></tr>
+<tr><td>Social</td><td>Ratio de rémunération <span class="code">LAB_CEO_PAY_RATIO</span></td><td class="n">80</td><td class="n ">80</td><td>+2 (Keurig Dr Pepper, Kraft Heinz), −2 périmètres France seule</td></tr>
 <tr><td>Gouvernance</td><td>Sanctions <span class="code">GOV_SANCTIONS</span></td><td class="n">45</td><td class="n plus">46</td><td>Samsung ; Google, Mercedes-Benz et Meta avaient déjà d'autres sanctions</td></tr>
 <tr><td>Gouvernance</td><td>Certification B Corp <span class="code">GOV_BCORP</span></td><td class="n">13</td><td class="n plus">18</td><td>Nespresso, Ben &amp; Jerry's, Weleda (société et marque), Aesop</td></tr>
 <tr><td>Gouvernance</td><td>Mixité du conseil <span class="code">GOV_BOARD_GENDER</span></td><td class="n">85</td><td class="n plus">89</td><td>Haleon, Interparfums, Toyota, Henkel</td></tr>
-<tr><td>Social</td><td>Ratio de rémunération <span class="code">LAB_CEO_PAY_RATIO</span></td><td class="n">80</td><td class="n ">80</td><td>+2 (Keurig Dr Pepper, Kraft Heinz), −2 périmètres France seule</td></tr>
-<tr><td>Fiscalité</td><td>Paradis fiscaux <span class="code">TAX_HAVEN_PRESENCE</span></td><td class="n">37</td><td class="n plus">48</td><td>11 groupes européens, nouvel outil de décompte</td></tr>
+<tr><td>Fiscalité</td><td>Paradis fiscaux <span class="code">TAX_HAVEN_PRESENCE</span></td><td class="n">37</td><td class="n plus">49</td><td>12 groupes européens, nouvel outil de décompte</td></tr>
 <tr><td>Géopolitique</td><td>Financement politique (États-Unis) <span class="code">GEO_POL_FINANCING</span></td><td class="n">19</td><td class="n plus">27</td><td>connecteur FEC corrigé</td></tr>
 <tr><td>Géopolitique</td><td>Registre des lobbyistes <span class="code">GEO_LOBBYING_TRANSP</span></td><td class="n">166</td><td class="n moins">156</td><td><span class="moins">10 faux rattachements retirés</span></td></tr>
 <tr><td>Géopolitique</td><td>Lobbying climat (LobbyMap) <span class="code">GEO_LOBBYING_ALIGN</span></td><td class="n">2</td><td class="n moins">1</td><td>TotalEnergies retirée : note passée de C- à D+</td></tr>
@@ -112,6 +115,7 @@ a { color: var(--vert); }
 <ul>
   <li>Politiques matières des groupes de mode et de luxe (duvet, laine, angora et mohair, peaux exotiques, cuir) lues dans leurs propres documents : LVMH, Hermès, Kering, H&amp;M, Fast Retailing et Uniqlo, Nike. Chaque fiche dit ce qui est interdit, exigé, ou seulement visé.</li>
   <li>Nouvelle source : l'annuaire Leaping Bunny (marques certifiées sans tests sur les animaux), 9 marques et la politique de L'Oréal ; 40 absences consignées.</li>
+  <li>Exploitation animale enfin documentée au niveau du groupe pour Savencia (fromages) et General Mills (viande) ; offre 100 % végétale documentée pour Danone et Carrefour.</li>
   <li>Un défaut corrigé : les indicateurs animaux n'étaient « applicables » qu'à la mode et à la beauté, si bien que les preuves de LVMH, Kering, Hermès ou Garnier étaient invisibles.</li>
 </ul>
 
@@ -119,12 +123,13 @@ a { color: var(--vert); }
 <ul>
   <li>Scope 3 publié par les géants du numérique (Microsoft, Apple, Amazon, Google, Meta, Netflix), Toyota et Nike, plus la tendance des émissions de Toyota (−0,38 % par an, 2022-2024, recalculée par le vérificateur).</li>
   <li><b>Nouvelle source officielle</b> : les conventions judiciaires d'intérêt public publiées par le ministère de la Justice. Cinq infractions au droit de l'eau, toutes validées par un juge : Nestlé Waters (neuf forages sans autorisation à Vittel et Contrexéville, 2 M€, 2024), Engie (zones humides asséchées par une centrale solaire en Corrèze, 135 000 €, 2025), Lactalis (fromagerie de Vercel, 100 000 €, 2023), Nestlé France (pollution de l'Aisne, 40 000 €, 2022), Bel (eaux souterraines à Dole, 20 463 €, 2023). Les documents numérisés ont été lus par reconnaissance de caractères et cités tels quels.</li>
-  <li>Intensité en eau de Pernod Ricard (1 085 m³ par million d'euros) ; 50 % de plastiques recyclés ou biosourcés chez L'Oréal.</li>
+  <li>Scope 3 et intensité carbone de Henkel (33,5 Mt CO2e ; 1 652 t par million d'euros), intensité carbone de Maison Pommery (141 t).</li>
+  <li>Intensité en eau de Pernod Ricard (1 085 m³ par million d'euros), Danone (2 191 m³ prélevés) et LVMH (58 m³ consommés) ; 50 % de plastiques recyclés ou biosourcés chez L'Oréal.</li>
 </ul>
 
 <h3>Fournisseurs</h3>
 <ul>
-  <li>Listes nominatives publiées : huileries de palme (Ferrero, P&amp;G, Mondelez, Colgate), fournisseurs d'Apple, usines de Fast Retailing et de H&amp;M.</li>
+  <li>Listes nominatives publiées : huileries de palme (Ferrero, P&amp;G, Mondelez, Colgate, Henkel), fournisseurs d'Apple, usines de Fast Retailing et de H&amp;M.</li>
 </ul>
 
 <h3>Gouvernance et social</h3>
@@ -133,12 +138,13 @@ a { color: var(--vert); }
   <li>B Corp : Nespresso, Ben &amp; Jerry's, Weleda, Aesop, après lecture de leur fiche B Lab.</li>
   <li>Mixité des conseils : Haleon (64 %), Interparfums (50 %), Henkel (43,8 %), Toyota (20 %).</li>
   <li>Ratio de rémunération dirigeant / salarié médian : Keurig Dr Pepper (127 pour 1), Kraft Heinz (170 pour 1).</li>
+  <li>Salaire décent des salariés (ESRS S1-10) : dix groupes de plus (LVMH, Carrefour, Heineken, Carlsberg, AB InBev, Arla, Crédit Agricole, La Banque Postale, Renault, SEB), tous notés 0,5 car aucun n'est certifié par un tiers ; SEB n'atteint que 97,5 % hors d'Europe.</li>
 </ul>
 
 <h3>Fiscalité</h3>
 <ul>
   <li>Déclaration pays par pays : 7 groupes de plus. Présence dans les dix premiers paradis fiscaux (classement du Tax Justice Network) : 11 groupes européens comptés dans leurs tableaux de sociétés consolidées (TotalEnergies 96 filiales, BNP Paribas 63, LVMH 57…), avec un outil qui refait le décompte.</li>
-  <li>Taux effectifs de Savencia (35,7 %) et Henkel (24,6 %).</li>
+  <li>Taux effectifs de Savencia (35,7 %) et Henkel (24,6 %) ; Savencia compte 9 filiales dans les dix premiers paradis fiscaux (dont 5 aux Pays-Bas).</li>
 </ul>
 
 <h3>Géopolitique et investissement</h3>
@@ -158,6 +164,7 @@ a { color: var(--vert); }
 <tr><td>Périmètres</td><td>chiffres limités à la France retirés pour LDC (deux) et Rémy Cointreau</td></tr>
 <tr><td>Doublons</td><td>TENA (deux fiches) et Lancelot supprimés</td></tr>
 <tr><td>Cohérence de la base</td><td>aucune valeur hors bornes, aucun SIREN ou LEI mal formé ni en double, aucune contradiction à la même date</td></tr>
+<tr><td>Journal de relecture</td><td>57 constats consignés : publication sous une autre forme (L'Oréal, TotalEnergies, Savencia, Campari…), sources refusées, données non publiées (21 circulaires américaines sans mixité, plans de vigilance introuvables)</td></tr>
 <tr><td>Liens</td><td>1 274 adresses contrôlées ; leave-russia.org toujours en panne partielle (70 fiches sur 122)</td></tr>
 </tbody></table></div>
 
