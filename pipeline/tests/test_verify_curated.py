@@ -812,3 +812,9 @@ def test_effectifs_hommes_et_femmes():
     assert _count_ratio_matches(43.8, "the Supervisory Board comprised nine men and seven women")
     assert _count_ratio_matches(43.8, "sept femmes et neuf hommes")
     assert not _count_ratio_matches(56.3, "the Supervisory Board comprised nine men and seven women")
+
+
+def test_effectif_dont_externes():
+    from diams.verify_curated import _count_ratio_matches
+    assert _count_ratio_matches(54.5, "Number of Directors 11, including 6 external directors")
+    assert not _count_ratio_matches(60.0, "Number of Directors 11, including 6 external directors")

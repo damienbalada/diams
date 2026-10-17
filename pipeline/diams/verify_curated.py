@@ -289,6 +289,8 @@ _SLASH = re.compile(r"\b(\d{1,2})\s*/\s*(\d{1,2})\b")
 # « nine men and seven women » / « sept femmes et neuf hommes » : part des femmes = femmes / total.
 _MEN_WOMEN = re.compile(rf"\b({_NUM})\b\s+(?:men|hommes)\s+(?:and|et)\s+\b({_NUM})\b\s+(?:women|femmes)\b", re.I)
 _WOMEN_MEN = re.compile(rf"\b({_NUM})\b\s+(?:women|femmes)\s+(?:and|et)\s+\b({_NUM})\b\s+(?:men|hommes)\b", re.I)
+# « Number of Directors 11, including 6 external directors » : part = 6 / 11.
+_INCLUDING = re.compile(rf"\b({_NUM})\b,?\s+(?:including|dont)\s+\b({_NUM})\b\s+(?:external|independent|outside|ind[ée]pendants?|externes?)\b", re.I)
 
 
 def _count_ratio_matches(value: float, quote: str) -> bool:
@@ -296,6 +298,10 @@ def _count_ratio_matches(value: float, quote: str) -> bool:
     « 4 /10 women » : le pourcentage déclaré doit être le rapport des effectifs cités."""
     for m in list(_COUNT.finditer(quote)) + list(_SLASH.finditer(quote)):
         a, b = (int(x) if x.isdigit() else _NUM_WORDS.get(x.lower()) for x in m.groups())
+        if a is not None and b and a <= b and abs(round(100 * a / b, 1) - value) <= 0.05:
+            return True
+    for m in _INCLUDING.finditer(quote):
+        b, a = (int(v) if v.isdigit() else _NUM_WORDS.get(v.lower()) for v in m.groups())
         if a is not None and b and a <= b and abs(round(100 * a / b, 1) - value) <= 0.05:
             return True
     for rx, women_first in ((_MEN_WOMEN, False), (_WOMEN_MEN, True)):
