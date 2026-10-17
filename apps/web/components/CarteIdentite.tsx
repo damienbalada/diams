@@ -1,5 +1,5 @@
 import { marqueAnimale, marquesDocumentees, raisonVide, resumeGroupe, type Carte, type Fait, type MarqueAnimale, type MarqueDuGroupe, type Pilier, type Solidite } from "@/lib/carte";
-import type { OwnershipProof, Produit, ProduitLu, ProduitScanne } from "@/lib/data";
+import type { ListeProduits, OwnershipProof, ProduitLu, ProduitScanne } from "@/lib/data";
 import { logoDe } from "@/lib/logos";
 import { EN_SAVOIR_PLUS, REPERES, type Signal } from "@/lib/seuils";
 import { CorrectionForm } from "@/components/CorrectionForm";
@@ -466,7 +466,7 @@ export function CarteIdentite({
   marques: { slug: string; name: string }[];
   marquesGroupe?: MarquesGroupe;
   estMarque?: boolean;
-  produits?: { total: number; produits: Produit[]; lien: string } | null;
+  produits?: ListeProduits | null;
   /** Fiches produits lues sur le site de la marque (ingrédients recopiés, statut). */
   produitsLus?: ProduitLu[];
   /** Alternatives de chaque pilier (critère affiché). */
@@ -504,6 +504,11 @@ export function CarteIdentite({
               <strong>{scan.produit.nom}{quantite}</strong>
               <span className="ci-small ci-faint"> · code {scan.produit.code} · {scan.phrase} · d'après <a className="ci-lien" href={scan.produit.lien} target="_blank" rel="noopener noreferrer">{scan.produit.base} ↗</a></span>
             </figcaption>
+          </figure>
+        )}
+        {!scan && logoDe(carte.slug) && (
+          <figure className="ci-photo ci-photo-logo">
+            <img src={logoDe(carte.slug)!.src} alt={`Logo ${carte.nom}`} title={`Logo : ${logoDe(carte.slug)!.origine}`} />
           </figure>
         )}
         <div className="ci-head">
@@ -572,11 +577,15 @@ export function CarteIdentite({
           {produits ? (
             <>
               <p className="muted small">
-                Les produits les plus scannés en France, d'après <a className="ci-lien" href={produits.lien} target="_blank" rel="noopener noreferrer">Open Food Facts ↗</a> (base collaborative sous licence ouverte). Ils aident à reconnaître la marque en magasin ; ce ne sont pas des preuves.
+                Les produits les plus scannés en France, d'après{" "}
+                {produits.bases.map((b, i) => (
+                  <span key={b.nom}>{i > 0 && (i === produits.bases.length - 1 ? " et " : ", ")}<a className="ci-lien" href={b.lien} target="_blank" rel="noopener noreferrer">{b.nom} ↗</a></span>
+                ))}{" "}
+                (bases collaboratives sous licence ouverte). Ils aident à reconnaître la marque en magasin ; ce ne sont pas des preuves.
               </p>
               <div className="ci-prods">
                 {produits.produits.map((x) => (
-                  <a key={x.code} className="ci-prod" href={`https://fr.openfoodfacts.org/produit/${x.code}`} target="_blank" rel="noopener noreferrer">
+                  <a key={x.code} className="ci-prod" href={x.lien} target="_blank" rel="noopener noreferrer">
                     {x.image ? <img src={x.image} alt="" loading="lazy" /> : <span className="ci-prod-vide" aria-hidden="true">🛒</span>}
                     <span>{x.nom}</span>
                   </a>
@@ -584,7 +593,7 @@ export function CarteIdentite({
               </div>
             </>
           ) : (
-            <p className="muted small">Pas encore de liste de produits pour cette marque : elle n'existe pour l'instant que pour l'alimentation et les boissons, d'après Open Food Facts.</p>
+            <p className="muted small">Aucun produit de cette marque n'est encore recensé en France dans les bases ouvertes (Open Food Facts, Open Beauty Facts, Open Products Facts, Open Pet Food Facts). Les vêtements, par exemple, n'y figurent presque pas.</p>
           )}
         </section>
       )}

@@ -99,6 +99,17 @@ function PhotoGrande({ uri, visible, fermer }: { uri: string; visible: boolean; 
 function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche: TFiche; onMarque: (slug: string) => void; medaillon?: boolean; bandeau?: boolean }) {
   const [grand, setGrand] = useState(false);
   const pr = fiche.produit;
+  // Fiche d'une marque ou d'un groupe (sans produit scanné) : son logo en bandeau, à la place de la photo.
+  if (bandeau && !pr && fiche.logo) {
+    return (
+      <View style={{ gap: 8 }}>
+        <View style={[s.bandeauPhoto, s.centre]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Logo src={fiche.logo} taille={140} marge={10} groupe={!fiche.proprietaire} />
+        </View>
+        <MarqueEtGroupe fiche={fiche} onMarque={onMarque} />
+      </View>
+    );
+  }
   if (bandeau && pr?.image) {
     return (
       <View style={{ gap: 8 }}>

@@ -664,3 +664,4 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 @media (max-width: 480px) { .ci-past { font-size: 14px; padding: 0 12px; } }
 /* Les bandeaux pleine largeur s'appuient sur 100vw, qui compte la barre de défilement : pas de défilement horizontal. */
 body { overflow-x: clip; }
+.ci-photo-logo img { height: 120px; width: auto; max-width: min(320px, 80%); object-fit: contain; }

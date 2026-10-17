@@ -613,36 +613,56 @@ export async function getVitrines(slugs: string[]): Promise<Vitrine[]> {
  * sont pas des preuves, et la fiche le dit. Filtre exact sur l'étiquette de marque et la France,
  * produits les plus scannés d'abord.
  */
-export interface Produit { code: string; nom: string; image: string | null }
-const SECTEURS_PRODUITS = new Set(["food", "beverages", "wines_spirits"]);
+export interface Produit { code: string; nom: string; image: string | null; lien: string }
+export interface ListeProduits { total: number; produits: Produit[]; bases: { nom: string; lien: string }[] }
 const etiquetteOff = (n: string) =>
   n.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/['’]/g, "-").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const UA_VERIF = { "User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)" };
+/** Les quatre bases ouvertes d'Open Food Facts : alimentation, beauté, autres produits, animaux. */
+const BASES_PRODUITS = [
+  { nom: "Open Food Facts", hote: "openfoodfacts" },
+  { nom: "Open Beauty Facts", hote: "openbeautyfacts" },
+  { nom: "Open Products Facts", hote: "openproductsfacts" },
+  { nom: "Open Pet Food Facts", hote: "openpetfoodfacts" },
+];
 export const getProduits = unstable_cache(
-  async (slug: string): Promise<{ total: number; produits: Produit[]; lien: string } | null> => {
+  async (slug: string): Promise<ListeProduits | null> => {
     const idx = await loadEntityIndex();
     const self = idx?.bySlug.get(slug);
-    if (!self || !self.is_brand || !self.sector_id) return null;
-    const { data: sec } = await getSupabase().from("sectors").select("code").eq("id", self.sector_id).maybeSingle();
-    if (!sec || !SECTEURS_PRODUITS.has((sec as any).code)) return null;
+    if (!self || !self.is_brand) return null;
     const tag = etiquetteOff(entityName(self));
     if (!tag) return null;
-    const q = encodeURIComponent(`brands_tags:"${tag}" AND countries_tags:"en:france"`);
-    try {
-      const r = await fetch(
-        `https://search.openfoodfacts.org/search?q=${q}&sort_by=-unique_scans_n&page_size=12&fields=code,product_name,product_name_fr,image_small_url`,
-        { headers: { "User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)" }, signal: AbortSignal.timeout(6000) },
-      );
-      if (!r.ok) return null;
-      const d = (await r.json()) as { count?: number; hits?: any[] };
-      const produits = (d.hits ?? [])
-        .map((h) => ({ code: String(h.code), nom: String(h.product_name_fr || h.product_name || "").trim(), image: h.image_small_url ?? null }))
-        .filter((p) => p.nom);
-      return produits.length ? { total: d.count ?? produits.length, produits, lien: `https://fr.openfoodfacts.org/marque/${tag}` } : null;
-    } catch {
-      return null;
-    }
+    // Les quatre bases interrogées en même temps ; chacune peut manquer sans gêner les autres.
+    const lus = await Promise.allSettled(BASES_PRODUITS.map(async (b) => {
+      const fiche = `https://fr.${b.hote}.org/produit/`;
+      if (b.hote === "openfoodfacts") {
+        // Alimentation : l'index de recherche, plus rapide et plus complet que l'interface classique.
+        const q = encodeURIComponent(`brands_tags:"${tag}" AND countries_tags:"en:france"`);
+        const r = await fetch(`https://search.openfoodfacts.org/search?q=${q}&sort_by=-unique_scans_n&page_size=12&fields=code,product_name,product_name_fr,image_small_url,unique_scans_n`, { headers: UA_VERIF, signal: AbortSignal.timeout(6000) });
+        if (!r.ok) throw new Error(String(r.status));
+        const d = (await r.json()) as { count?: number; hits?: any[] };
+        return { b, total: d.count ?? 0, items: (d.hits ?? []).map((h) => ({ h, lien: fiche + h.code })) };
+      }
+      const r = await fetch(`https://world.${b.hote}.org/api/v2/search?brands_tags=${encodeURIComponent(tag)}&countries_tags=en:france&sort_by=unique_scans_n&page_size=12&fields=code,product_name,product_name_fr,image_small_url,unique_scans_n`, { headers: UA_VERIF, signal: AbortSignal.timeout(6000) });
+      if (!r.ok) throw new Error(String(r.status));
+      const d = (await r.json()) as { count?: number; products?: any[] };
+      return { b, total: d.count ?? 0, items: (d.products ?? []).map((h) => ({ h, lien: fiche + h.code })) };
+    }));
+    const ok = lus.flatMap((x) => (x.status === "fulfilled" && x.value.total > 0 ? [x.value] : []));
+    const produits = ok
+      .flatMap((x) => x.items.map(({ h, lien }) => ({ code: String(h.code), nom: String(h.product_name_fr || h.product_name || "").trim(), image: h.image_small_url ?? null, lien, scans: Number(h.unique_scans_n ?? 0) })))
+      .filter((p) => p.nom)
+      .sort((a, b) => b.scans - a.scans)
+      .slice(0, 12)
+      .map(({ scans: _s, ...p }) => p);
+    if (!produits.length) return null;
+    return {
+      total: ok.reduce((n, x) => n + x.total, 0),
+      produits,
+      bases: ok.map((x) => ({ nom: x.b.nom, lien: `https://fr.${x.b.hote}.org/marque/${tag}` })),
+    };
   },
-  ["produits-off-v1"],
+  ["produits-bases-v2"],
   { revalidate: 86400 },
 );
 
