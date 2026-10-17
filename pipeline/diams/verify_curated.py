@@ -845,9 +845,12 @@ def check_esef_quote(row, report_text: str, ignore_keywords: bool = False,
         # « Absence d’administrateurs indépendants » : 0 %.
         aucun = (not hit and not col and not cnt and not tous and row.indicator_code == "GOV_BOARD_INDEP"
                  and row.value_numeric == 0 and _NO_INDEP.search(quote) is not None)
-        ok &= hit or col or cnt or tous or aucun
+        # Valeur nulle écrite en toutes lettres (« l’alignement … reste nul en 2025 », Michelin, 17/10/2026).
+        nul = (not hit and not col and not cnt and not tous and not aucun and row.value_numeric == 0
+               and re.search(r"\bnul(?:le)?s?\b|\bz[ée]ro\b|\bnil\b", quote, re.I) is not None)
+        ok &= hit or col or cnt or tous or aucun or nul
         details.append(f"valeur {target} présente dans la citation "
-                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✓ (tous les membres déclarés indépendants)' if tous else '✓ (aucun membre indépendant déclaré)' if aucun else '✗'}")
+                       f"{'✓' if hit else '✓ (colonne isolée)' if col else '✓ (rapport des effectifs cités)' if cnt else '✓ (tous les membres déclarés indépendants)' if tous else '✓ (aucun membre indépendant déclaré)' if aucun else '✓ (valeur nulle écrite en toutes lettres)' if nul else '✗'}")
     elif row.value_boolean is not None:
         details.append("indicateur oui/non : la présence de la citation suffit")
     # Note normalisée imposée par le barème de l'indicateur : recalculée.

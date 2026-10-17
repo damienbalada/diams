@@ -818,3 +818,13 @@ def test_effectif_dont_externes():
     from diams.verify_curated import _count_ratio_matches
     assert _count_ratio_matches(54.5, "Number of Directors 11, including 6 external directors")
     assert not _count_ratio_matches(60.0, "Number of Directors 11, including 6 external directors")
+
+
+def test_valeur_nulle_ecrite_en_lettres():
+    from diams.verify_curated import check_esef_quote
+    q = "Rapport : « Ne pouvant satisfaire le critère DNSH, l’alignement des activités CCM & CCA 3.6 et CE 5.1 reste nul en 2025 » ; « Total CapEx taxonomie align »"
+    rapport = "Ne pouvant satisfaire le critère DNSH, l’alignement des activités CCM & CCA 3.6 et CE 5.1 reste nul en 2025. Total CapEx taxonomie align"
+    v = check_esef_quote(esef_row("ENV_TAXONOMY_CAPEX", 0, q), rapport)
+    assert any("valeur nulle" in d for d in v.details)
+    v2 = check_esef_quote(esef_row("ENV_TAXONOMY_CAPEX", 2, q), rapport)
+    assert not any("valeur nulle" in d for d in v2.details)
