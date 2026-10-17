@@ -48,3 +48,6 @@ npm-debug.log*
 pipeline/*.csv
 pipeline/*.xlsx
 pipeline/.cache/
+
+# Pages enregistrées par l'éditeur (copies archivées dans pipeline/curated/copies/)
+maquettes/pages-sources/

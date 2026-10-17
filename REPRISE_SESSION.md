@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v308`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v309`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -364,6 +364,14 @@ légales transmise par l'éditeur (`pipeline/curated/copies/`). Copies des menti
 site mais aucune marque propre (Labell, Apta, U Maison…) ; il faut leurs pages « nos marques ». SC
 Johnson : capture d'écran seulement (texte illisible par OCR, et la page dit « Duck », pas « Canard ») ;
 il faut la page enregistrée (Ctrl+S) et une page qui nomme Canard.
+
+**Lot 218 (17/10/2026)** : pages enregistrées par l'éditeur (archivées dans `pipeline/curated/copies/`).
+SC Johnson (S.C. Johnson & Son, Inc., sans LEI) : Glade, Oust, Duck, Drano, Fantastik, Mr Muscle,
+Pledge, Scrubbing Bubbles, Shout, Windex, Ziploc, Saran, Babyganics, Ecover, Method, Mrs. Meyers,
+Autan, Baygon, OFF!, Pyrel, Raid, Deb, Kiwi ; qualifiée (SBTi engagement, registre européen, CDP B/B-/C).
+Marques U : Produits U, U de nos Régions, U Nature, U Collection, U Spécialiste, U Tout Petits.
+**Canard WC** : la page de SC Johnson dit « Duck » ; il faut une page qui écrit « Canard ». La page
+Intermarché « toutes les marques » ne cite ni Labell ni Apta.
 
 **Pages que le site refuse au vérificateur** : `import_brand_portfolio --copie URL=FICHIER` lit une
 copie enregistrée par l'éditeur (page HTML par Ctrl+S, ou PDF par Imprimer) ; mêmes contrôles mot pour
