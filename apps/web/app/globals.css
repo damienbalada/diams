@@ -562,3 +562,22 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .ci-savoir { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--panel-2); font-size: 13.5px; line-height: 1.55; color: var(--text); }
 .ci-ind > * { min-width: 0; }
 .ci-det > summary > * { min-width: 0; }
+
+/* Piliers en tuiles (17/10/2026) : chaque pilier est une carte à part entière, teintée de sa couleur. */
+.ci-card > .ci-row {
+  margin: 10px 0 0; padding: 0 14px; border: 1.5px solid color-mix(in srgb, var(--pil, var(--border)) 35%, var(--border));
+  border-radius: 18px; background: color-mix(in srgb, var(--pil, var(--accent)) 3%, var(--panel)); box-shadow: none;
+}
+.ci-card > .ci-row > summary { padding: 13px 0; }
+.ci-card > .ci-row[open] {
+  margin: 10px 0 0; padding: 0 14px 6px; border-color: var(--pil, var(--accent));
+  background: color-mix(in srgb, var(--pil, var(--accent)) 6%, var(--panel)); box-shadow: inset 5px 0 0 var(--pil, var(--accent));
+}
+@media (hover: hover) {
+  .ci-card > .ci-row:hover { box-shadow: none; border-color: var(--pil, var(--accent)); }
+  .ci-card > .ci-row[open]:hover { box-shadow: inset 5px 0 0 var(--pil, var(--accent)); }
+  .ci-card > .ci-row:not([open]) > summary:hover { background: transparent; }
+}
+@media (max-width: 480px) {
+  .ci-card > .ci-row, .ci-card > .ci-row[open] { margin: 10px 0 0; padding: 0 12px; border-radius: 16px; }
+}
