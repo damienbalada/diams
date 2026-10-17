@@ -650,11 +650,24 @@ const STATUT_PRODUIT: Record<ProduitLu["statut"], [string, string]> = {
   vegetal_certifie: ["ci-vegetal", "Végétal, label d'un tiers"],
 };
 
-/** Ingrédients lus sur les fiches produits du site de la marque, recopiés et datés. */
+/** Mêmes statuts pour une composition de vêtement : on parle de matières, pas d'ingrédients. */
+const STATUT_MATIERE: Record<ProduitLu["statut"], [string, string]> = {
+  ingredient_animal: ["ci-alerte", "Matière d'origine animale"],
+  aucun_ingredient_animal_declare: ["ci-aucune_info", "Aucune matière animale dans la composition lue"],
+  vegetal_declare: ["ci-vegetal", "Présenté comme sans matière animale par la marque"],
+  vegetal_certifie: ["ci-vegetal", "Sans matière animale, label d'un tiers"],
+};
+const statutDe = (p: ProduitLu) => (p.nature === "composition" ? STATUT_MATIERE : STATUT_PRODUIT)[p.statut];
+/** Vocabulaire selon la nature des fiches : ingrédients (alimentation, cosmétique) ou matières (vêtements). */
+const mots = (textile: boolean) => textile
+  ? { Lus: "Compositions lues", un: "une matière d'origine animale", sans: "sans matière animale", liste: "« Aucune matière animale dans la composition lue » ne vaut que pour les pièces lues : la marque peut en utiliser ailleurs (laine, cuir, soie, duvet…)." }
+  : { Lus: "Ingrédients lus", un: "un ingrédient d'origine animale", sans: "sans ingrédient animal", liste: "« Aucun ingrédient animal dans la liste lue » ne prouve pas qu'un produit est végétal : certains additifs ou arômes peuvent être d'origine animale." };
+
+/** Ingrédients (ou compositions) lus sur les fiches produits du site de la marque, recopiés et datés. */
 const ORDRE_PRODUIT: Record<ProduitLu["statut"], number> = { vegetal_certifie: 0, vegetal_declare: 1, aucun_ingredient_animal_declare: 2, ingredient_animal: 3 };
 
 function LigneProduit({ p }: { p: ProduitLu }) {
-  const [cls, txt] = STATUT_PRODUIT[p.statut];
+  const [cls, txt] = statutDe(p);
   return (
     <li>
       {p.origine === "etiquette" ? <span>{p.nom}</span> : <a className="ci-lien" href={p.url} target="_blank" rel="noopener noreferrer">{p.nom} ↗</a>}{" "}
@@ -666,7 +679,7 @@ function LigneProduit({ p }: { p: ProduitLu }) {
           {" "}· envoyée par un lecteur, liste recopiée et relue
         </div>
       )}
-      {p.ingredients && <details className="ci-small"><summary>{p.origine === "etiquette" ? "Ingrédients recopiés de l'étiquette" : `Ingrédients (lus le ${dfr(p.date)})`}</summary>« {p.ingredients} »{p.douteux.length ? <> — d'origine possiblement animale, non tranché : {p.douteux.join(", ")}</> : null}</details>}
+      {p.ingredients && <details className="ci-small"><summary>{p.origine === "etiquette" ? "Ingrédients recopiés de l'étiquette" : p.nature === "composition" ? `Composition (lue le ${dfr(p.date)})` : `Ingrédients (lus le ${dfr(p.date)})`}</summary>« {p.ingredients} »{p.douteux.length ? <> — d'origine possiblement animale, non tranché : {p.douteux.join(", ")}</> : null}</details>}
     </li>
   );
 }
@@ -676,17 +689,18 @@ function ProduitsLus({ produits: tous }: { produits: ProduitLu[] }) {
   const sans = produits.filter((p) => p.statut !== "ingredient_animal");
   const avec = produits.filter((p) => p.statut === "ingredient_animal");
   const animaux = avec.length;
+  const m = mots(produits.every((p) => p.nature === "composition"));
   if (sans.length && avec.length) {
     return (
       <div className="ci-prods-lus">
-        <p className="muted small">Ingrédients lus sur {pl(produits.length, "produit", "produits")} (fiches du site de la marque ou étiquettes photographiées), dont {animaux} avec un ingrédient d'origine animale.</p>
+        <p className="muted small">{m.Lus} sur {pl(produits.length, "produit", "produits")} (fiches du site de la marque ou étiquettes photographiées), dont {animaux} avec {m.un}.</p>
         <div className="ci-prods-sans">
-          <div className="ci-prods-sans-t">🌱 Chez cette marque, sans ingrédient animal</div>
-          <p className="ci-small ci-faint">« Végétal » : la marque le dit ou un label l'atteste. « Aucun ingrédient animal dans la liste lue » ne prouve pas qu'un produit est végétal : certains additifs ou arômes peuvent être d'origine animale.</p>
+          <div className="ci-prods-sans-t">🌱 Chez cette marque, {m.sans}</div>
+          <p className="ci-small ci-faint">« Végétal » : la marque le dit ou un label l'atteste. {m.liste}</p>
           <ul className="ci-prods-liste">{sans.map((p) => <LigneProduit key={p.url} p={p} />)}</ul>
         </div>
         <details className="ci-small" style={{ marginTop: 8 }}>
-          <summary>{pl(avec.length, "produit", "produits")} avec un ingrédient d'origine animale</summary>
+          <summary>{pl(avec.length, "produit", "produits")} avec {m.un}</summary>
           <ul className="ci-prods-liste">{avec.map((p) => <LigneProduit key={p.url} p={p} />)}</ul>
         </details>
       </div>
@@ -695,18 +709,18 @@ function ProduitsLus({ produits: tous }: { produits: ProduitLu[] }) {
   return (
     <div className="ci-prods-lus">
       <p className="muted small">
-        Ingrédients lus sur {pl(produits.length, "fiche produit", "fiches produits")} du site de la marque{animaux ? `, dont ${animaux} avec un ingrédient d'origine animale` : ""}.
-        Une liste sans ingrédient animal visible ne prouve pas qu'un produit est végétal : certains additifs ou arômes peuvent être d'origine animale ; seuls un label ou la marque elle-même peuvent l'affirmer.
+        {m.Lus} sur {pl(produits.length, "fiche produit", "fiches produits")} du site de la marque{animaux ? `, dont ${animaux} avec ${m.un}` : ""}.
+        {m.liste}
       </p>
       <ul className="ci-prods-liste">
         {produits.map((p) => {
-          const [cls, txt] = STATUT_PRODUIT[p.statut];
+          const [cls, txt] = statutDe(p);
           return (
             <li key={p.url}>
               <a className="ci-lien" href={p.url} target="_blank" rel="noopener noreferrer">{p.nom} ↗</a>{" "}
               <span className={cls}>{txt}{p.animaux.length ? ` : ${p.animaux.join(", ")}` : ""}</span>
               {p.preuveVegetale && <span className="ci-small"> · {p.preuveVegetale}</span>}
-              {p.ingredients && <details className="ci-small"><summary>Ingrédients (lus le {dfr(p.date)})</summary>« {p.ingredients} »{p.douteux.length ? <> — d'origine possiblement animale, non tranché : {p.douteux.join(", ")}</> : null}</details>}
+              {p.ingredients && <details className="ci-small"><summary>{p.nature === "composition" ? "Composition" : "Ingrédients"} (lu{p.nature === "composition" ? "e" : "s"} le {dfr(p.date)})</summary>« {p.ingredients} »{p.douteux.length ? <> — d'origine possiblement animale, non tranché : {p.douteux.join(", ")}</> : null}</details>}
             </li>
           );
         })}

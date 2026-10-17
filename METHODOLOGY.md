@@ -928,10 +928,11 @@ reviennent à mesure que la collecte élargit le secteur.
 
 ## 8. Statut
 
-Document vivant (v`0.8.8`, octobre 2026). Toute modification des paramètres de
+Document vivant (v`0.8.9`, octobre 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 
 **Journal :**
+- **0.8.9 (17/10/2026)** — Compositions des vêtements : les fiches produits des sites des marques de mode sont lues comme les listes d'ingrédients (outil compositions.py, relecture mot pour mot). Une matière d'origine animale (laine, mérinos, cachemire, soie, cuir, daim, fourrure, duvet, plumes…) suffit à documenter le recours à l'exploitation animale ; les imitations (similicuir, fausse fourrure, laine polaire, peau de pêche…) sont écartées. « Aucune matière animale dans la composition lue » ne vaut que pour les pièces lues. Les sites qui refusent le vérificateur ne sont pas contournés (Zara, H&M, Primark refusent). Les produits d'une marque sont aussi cherchés dans Open Beauty Facts, Open Products Facts et Open Pet Food Facts (repères, pas preuves).
 - **0.8.8 (17/10/2026)** — Produits non alimentaires : les codes-barres sont aussi lus dans Open Products Facts ; relevé anonyme des scans non reconnus pour choisir les marques à ajouter (lots 210 à 212). Nouveau secteur « Édition » (livres) : ni pilier animal, ni plastique, ni eau ; s'y appliquent l'évolution réelle des émissions et la note forêts du CDP (bois et papier). Tabac exclu de l'Index.
 - **0.8.7 (17/10/2026)** — Classement BBFAW affiché en trois niveaux lisibles (bien noté, niveaux 1-2 ; moyennement noté, 3-4 ; mal noté, 5-6), BBFAW cité en source et niveau exact gardé dans la citation. Seuils inchangés : niveau 6 en alerte, niveau 5 en vigilance.
 - **0.8.6 (17/10/2026)** — Décisions de l'éditeur en réponse au rapport de nuit.

@@ -59,7 +59,7 @@ export function ficheEnJson(
     // Produits lus (fiches du site de la marque ou étiquettes photographiées), ingrédients recopiés.
     produitsLus: (extras.produitsLus ?? []).map((x) => ({
       nom: x.nom, url: x.url, statut: x.statut, animaux: x.animaux, douteux: x.douteux, ingredients: x.ingredients,
-      preuveVegetale: x.preuveVegetale, date: x.date, origine: x.origine, achat: x.achat,
+      preuveVegetale: x.preuveVegetale, date: x.date, origine: x.origine, achat: x.achat, nature: x.nature,
     })),
   };
 }

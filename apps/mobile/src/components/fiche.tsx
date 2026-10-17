@@ -624,6 +624,8 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
   });
   if (produits) {
     const actif = choix === 'PRODUITS';
+    // Marque de vêtements : ses fiches donnent des compositions (laine, cuir, soie, duvet…), pas des ingrédients.
+    const textile = produits.length > 0 && produits.every((x) => x.nature === 'composition');
     pastilles.push(
       <Pressable
         key="PRODUITS"
@@ -631,10 +633,10 @@ function Pastilles({ fiche, choix, setChoix, deplie, surPanneau }: {
         onPress={() => setChoix(actif ? null : 'PRODUITS')}
         accessibilityRole="tab"
         accessibilityState={{ selected: actif }}
-        accessibilityLabel={`Ingrédients des produits de la marque : ${produits.length} produit${produits.length > 1 ? 's' : ''} lus`}
+        accessibilityLabel={`${textile ? 'Matières' : 'Ingrédients'} des produits de la marque : ${produits.length} produit${produits.length > 1 ? 's' : ''} lus`}
         style={({ pressed }) => [s.pastilleChip, { borderColor: actif ? '#2f7a3b' : C.bord, backgroundColor: actif ? '#f1f9f2' : C.carte }, !produits.length && !actif && s.pastilleVide, pressed && { opacity: 0.6 }]}>
-        <Text style={{ fontSize: 16 }}>🧾</Text>
-        <Text style={[s.pastilleNom, { color: actif ? '#2f7a3b' : C.texte }]}>Ingrédients</Text>
+        <Text style={{ fontSize: 16 }}>{textile ? '🧵' : '🧾'}</Text>
+        <Text style={[s.pastilleNom, { color: actif ? '#2f7a3b' : C.texte }]}>{textile ? 'Matières' : 'Ingrédients'}</Text>
         <Text style={s.pastilleCompte}>{produits.length}</Text>
       </Pressable>,
     );
@@ -697,6 +699,14 @@ const STATUT_PRODUIT: Record<ProduitLu['statut'], { texte: string; couleur: stri
   vegetal_declare: { texte: 'Présenté comme végétal par la marque', couleur: '#2f7a3b' },
   vegetal_certifie: { texte: "Végétal, label d'un tiers", couleur: '#2f7a3b' },
 };
+/** Mêmes statuts pour la composition d'un vêtement : on parle de matières. */
+const STATUT_MATIERE: Record<ProduitLu['statut'], { texte: string; couleur: string }> = {
+  ingredient_animal: { texte: "Matière d'origine animale", couleur: C.alerteTexte },
+  aucun_ingredient_animal_declare: { texte: 'Aucune matière animale dans la composition lue', couleur: C.gris },
+  vegetal_declare: { texte: 'Présenté comme sans matière animale par la marque', couleur: '#2f7a3b' },
+  vegetal_certifie: { texte: "Sans matière animale, label d'un tiers", couleur: '#2f7a3b' },
+};
+const statutDe = (p: ProduitLu) => (p.nature === 'composition' ? STATUT_MATIERE : STATUT_PRODUIT)[p.statut];
 const ORDRE: Record<ProduitLu['statut'], number> = { vegetal_certifie: 0, vegetal_declare: 1, aucun_ingredient_animal_declare: 2, ingredient_animal: 3 };
 
 /** Produits lus (fiches du site de la marque, étiquettes photographiées) : ceux sans ingrédient animal d'abord. */
@@ -705,22 +715,28 @@ function ProduitsLus({ produits }: { produits: ProduitLu[] }) {
   const tries = [...produits].sort((a, b) => ORDRE[a.statut] - ORDRE[b.statut] || a.nom.localeCompare(b.nom, 'fr'));
   const sans = tries.filter((x) => x.statut !== 'ingredient_animal');
   const avec = tries.filter((x) => x.statut === 'ingredient_animal');
+  const textile = produits.every((x) => x.nature === 'composition');
+  const un = textile ? "une matière d'origine animale" : "un ingrédient d'origine animale";
   return (
     <View style={{ gap: 10 }}>
       <Text style={s.petit}>
-        Ingrédients lus sur {produits.length} produit{produits.length > 1 ? 's' : ''} (fiches du site de la marque ou étiquettes photographiées), dont {avec.length} avec un ingrédient d'origine animale.
+        {textile ? 'Compositions lues' : 'Ingrédients lus'} sur {produits.length} produit{produits.length > 1 ? 's' : ''} (fiches du site de la marque ou étiquettes photographiées), dont {avec.length} avec {un}.
       </Text>
       {sans.length > 0 && (
         <View style={s.sans}>
-          <Text style={s.sansTitre}>🌱 Chez cette marque, sans ingrédient animal</Text>
-          <Text style={s.petit}>« Végétal » : la marque le dit ou un label l'atteste. « Aucun ingrédient animal dans la liste lue » ne prouve pas qu'un produit est végétal.</Text>
+          <Text style={s.sansTitre}>🌱 Chez cette marque, {textile ? 'sans matière animale' : 'sans ingrédient animal'}</Text>
+          <Text style={s.petit}>
+            {textile
+              ? '« Aucune matière animale dans la composition lue » ne vaut que pour les pièces lues : la marque peut en utiliser ailleurs.'
+              : "« Végétal » : la marque le dit ou un label l'atteste. « Aucun ingrédient animal dans la liste lue » ne prouve pas qu'un produit est végétal."}
+          </Text>
           {sans.map((x) => <LigneProduit key={x.url} p={x} />)}
         </View>
       )}
       {avec.length > 0 && (
         <View style={s.vides}>
           <Pressable onPress={() => setVoirAnimaux(!voirAnimaux)} accessibilityRole="button" accessibilityState={{ expanded: voirAnimaux }} style={({ pressed }) => [s.videsTete, pressed && { opacity: 0.6 }]}>
-            <Text style={[s.videsTitre, s.flex]}>{avec.length} produit{avec.length > 1 ? 's' : ''} avec un ingrédient d'origine animale</Text>
+            <Text style={[s.videsTitre, s.flex]}>{avec.length} produit{avec.length > 1 ? 's' : ''} avec {un}</Text>
             <Text style={s.lienPetit}>{voirAnimaux ? 'Masquer ▲' : 'Voir ▼'}</Text>
           </Pressable>
           {voirAnimaux && avec.map((x) => <LigneProduit key={x.url} p={x} />)}
@@ -732,7 +748,8 @@ function ProduitsLus({ produits }: { produits: ProduitLu[] }) {
 
 function LigneProduit({ p }: { p: ProduitLu }) {
   const [ingr, setIngr] = useState(false);
-  const st = STATUT_PRODUIT[p.statut];
+  const st = statutDe(p);
+  const mot = p.nature === 'composition' ? 'composition' : 'ingrédients';
   return (
     <View style={s.produitLu}>
       <Text style={s.produitLuNom}>{p.nom}</Text>
@@ -746,7 +763,7 @@ function LigneProduit({ p }: { p: ProduitLu }) {
       <View style={s.ligne}>
         {p.ingredients && (
           <Pressable onPress={() => setIngr(!ingr)} accessibilityRole="button" accessibilityState={{ expanded: ingr }} hitSlop={8} style={s.bouton44}>
-            <Text style={s.lienPetit}>{ingr ? 'Masquer les ingrédients ▲' : 'Ingrédients ▼'}</Text>
+            <Text style={s.lienPetit}>{ingr ? `Masquer la ${mot === 'composition' ? 'composition' : 'liste des ingrédients'} ▲` : `${mot === 'composition' ? 'Composition' : 'Ingrédients'} ▼`}</Text>
           </Pressable>
         )}
         <Pressable onPress={() => ouvrir(p.url)} accessibilityRole="link" hitSlop={8} style={s.bouton44}>

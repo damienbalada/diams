@@ -6,7 +6,10 @@
 3. Pour chaque marque, un produit à ingrédient animal donne une ligne de preuve ANI_EXPLOITATION au
    format des lots (CSV), à importer puis vérifier avec import_curated / verify_curated.
 
-Usage : python outils_collecte/import_produits.py lecture.json lot.csv [--apply]
+Avec --matieres : fiches lues par compositions.py (vêtements, chaussures) ; la composition remplace la liste
+d'ingrédients et les matières animales (laine, cuir, soie, duvet…) les ingrédients animaux.
+
+Usage : python outils_collecte/import_produits.py lecture.json lot.csv [--apply] [--matieres]
 """
 from __future__ import annotations
 
@@ -27,6 +30,7 @@ from dotenv import load_dotenv  # noqa: E402
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"), override=True)
 sys.path.insert(0, os.path.dirname(__file__))
 from diams import config, supabase_client  # noqa: E402
+import compositions as C  # noqa: E402
 import ingredients as I  # noqa: E402
 
 JOUR = "2026-10-17"
@@ -57,9 +61,26 @@ def extrait(ingr: str) -> str | None:
     return min(items)[3] if items else None
 
 
+def extrait_matiere(compo: str) -> str | None:
+    """Le plus court passage de la composition qui nomme une matière animale, recopié tel quel : coupé aux
+    séparateurs de la page (virgule, tiret, nouvelle rubrique « Doublure : »)."""
+    propre = C.IMITATION_RE.sub(lambda m: " " * len(m.group(0)), compo)
+    coupes = [0] + [m.end() for m in re.finditer(r",\s|\s-\s|\s(?=[A-ZÉ][\w’' ]{2,30}\s?:\s)", compo)] + [len(compo)]
+    items = []
+    for m in C.ANIMAL_RE.finditer(propre):
+        debut = max(x for x in coupes if x <= m.start())
+        fin = min(x for x in coupes if x >= m.end())
+        q = compo[debut:fin].strip(" ,.-")
+        if 3 <= len(q) <= 160:
+            items.append((0 if re.search(r"\d\s?%", q) else 1, len(q), q))
+    return min(items)[2] if items else None
+
+
 def main() -> None:
     lecture, sortie, *opts = sys.argv[1:]
     appliquer = "--apply" in opts
+    matieres = "--matieres" in opts
+    M = C if matieres else I
     config.require_supabase()
     lus = json.load(open(lecture, encoding="utf-8"))
     c = httpx.Client(verify=os.environ.get("SSL_CERT_FILE", True), timeout=40, follow_redirects=True, headers=I.UA)
@@ -75,29 +96,35 @@ def main() -> None:
         vues.add(r["url"])
         vues.add(cle)
         try:
-            page = I.texte(c.get(r["url"]).text)
+            rep = c.get(r["url"])
             time.sleep(0.4)
+            if rep.status_code in (401, 403, 429):
+                # Refus du site : on n'insiste pas, la fiche n'est pas importée.
+                print("   refus", rep.status_code, r["url"])
+                continue
+            page = I.texte(rep.text)
         except Exception as e:
             print("   injoignable", r["url"], type(e).__name__)
             continue
-        ingr = I.bloc_ingredients(page)
+        ingr = C.bloc_composition(page) if matieres else I.bloc_ingredients(page)
         mot_pour_mot = bool(ingr) and norm(ingr) in norm(page)
-        a = I.analyse(ingr) if ingr else {"animaux": [], "douteux": [], "statut": "aucun_ingredient_animal_declare"}
+        a = M.analyse(ingr) if ingr else {"animaux": [], "douteux": [], "statut": "aucun_ingredient_animal_declare"}
         statut, preuve_veg = a["statut"], None
         # Produit présenté comme végétal par son nom (« Boisson végétale », « vegan ») : déclaré, non certifié.
-        if statut != "ingredient_animal" and re.search(r"v[ée]g[ée]tal|vegan|v[ée]gan", r["produit"], re.I):
+        if not matieres and statut != "ingredient_animal" and re.search(r"v[ée]g[ée]tal|vegan|v[ée]gan", r["produit"], re.I):
             statut, preuve_veg = "vegetal_declare", f"Nom du produit sur le site de la marque : « {r['produit']} »"
         lignes.append({
             "entity_id": ents[r["slug"]]["id"], "name": r["produit"][:200] or r["url"], "source_url": r["url"],
             "ingredients": ingr, "animal_ingredients": a["animaux"], "doubtful_ingredients": a["douteux"],
             "status": statut, "vegetal_proof": preuve_veg, "observed_on": JOUR,
-            "reviewer": "auto:ingredients-mot-pour-mot" if mot_pour_mot else None,
+            "nature": "composition" if matieres else "ingredients",
+            "reviewer": ("auto:composition-mot-pour-mot" if matieres else "auto:ingredients-mot-pour-mot") if mot_pour_mot else None,
             "review_status": "approved" if mot_pour_mot else "pending",
         })
         print(f"   {'✓' if mot_pour_mot else '…'} {statut:32} {r['slug']:16} {r['produit'][:50]}")
         if mot_pour_mot and statut == "ingredient_animal":
-            q = extrait(ingr)
-            rang = (0 if q and ALLERGENE.search(q) else 1, 0 if len(q or "") >= 12 else 1, len(q or ""))
+            q = extrait_matiere(ingr) if matieres else extrait(ingr)
+            rang = (0 if q and (matieres or ALLERGENE.search(q)) else 1, 0 if len(q or "") >= 12 else 1, len(q or ""))
             if q and (r["slug"] not in preuves or rang < preuves[r["slug"]]["_rang"]):
                 dom = urlparse(r["url"]).netloc.removeprefix("www.")
                 preuves[r["slug"]] = {
@@ -105,7 +132,7 @@ def main() -> None:
                     "nature": "result", "observed_on": JOUR, "value_type": "category", "value_numeric": "",
                     "value_boolean": "", "value_text": ", ".join(a["animaux"][:4]), "normalized_value": "0",
                     "confidence": "0.85", "source_url": r["url"],
-                    "excerpt": (f"Site officiel de la marque ({dom}), fiche produit « {r['produit']} », liste des ingrédients, "
+                    "excerpt": (f"Site officiel de la marque ({dom}), fiche produit « {r['produit']} », {'composition' if matieres else 'liste des ingrédients'}, "
                                 f"consultée le 17/10/2026 : « {q} » — recours à l'exploitation animale ({', '.join(a['animaux'][:4])})."),
                     "review_note": "", "_rang": rang,
                 }

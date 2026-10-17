@@ -116,6 +116,8 @@ export type StatutProduit = 'ingredient_animal' | 'aucun_ingredient_animal_decla
 export interface ProduitLu {
   nom: string; url: string; statut: StatutProduit; animaux: string[]; douteux: string[]; ingredients: string | null;
   preuveVegetale: string | null; date: string; origine: 'fiche_marque' | 'etiquette'; achat: { date: string | null; lieu: string | null };
+  /** Liste d'ingrédients ou composition d'un vêtement (laine, cuir, soie, duvet…). */
+  nature?: 'ingredients' | 'composition';
 }
 export interface Produit {
   code: string; nom: string; image: string | null; quantite: string | null; marques: string[]; base: string; lien: string;
