@@ -33,44 +33,58 @@ export const titreFiche = (fiche: TFiche) =>
   fiche.produit ? `${fiche.produit.nom}${quantite(fiche.produit.quantite)}` : fiche.nom;
 
 /**
- * Photo du produit en grand. Elle se ferme d'un balayage vers le haut ou vers le bas (la photo suit le
- * doigt et le fond s'éclaircit), par le bouton retour d'Android ou, au lecteur d'écran, par le geste
- * d'échappement.
+ * Photo du produit en grand. Elle se ferme d'un balayage dans n'importe quelle direction (la photo suit
+ * le doigt et le fond s'éclaircit avec la distance), par le bouton retour d'Android ou, au lecteur
+ * d'écran, par le geste d'échappement.
  */
 function PhotoGrande({ uri, visible, fermer }: { uri: string; visible: boolean; fermer: () => void }) {
-  const [dy] = useState(() => new Animated.Value(0));
-  // Balayage assez long ou assez vif : la photo part et se ferme ; sinon elle revient en place.
-  const conclure = (d: number, v: number) => {
-    if (Math.abs(d) > 90 || Math.abs(v) > 0.8) {
-      Animated.timing(dy, { toValue: d > 0 ? 800 : -800, duration: 160, useNativeDriver: false }).start(() => {
+  const [pos] = useState(() => new Animated.ValueXY({ x: 0, y: 0 }));
+  // Distance au point de départ, quelle que soit la direction : elle règle l'opacité du fond.
+  const [ecart] = useState(() => new Animated.Value(0));
+  // Balayage assez long ou assez vif : la photo part dans la direction du geste et se ferme ; sinon elle revient.
+  const conclure = (dx: number, dy: number, vx: number, vy: number) => {
+    const d = Math.hypot(dx, dy);
+    if (d > 90 || Math.hypot(vx, vy) > 0.8) {
+      const k = 900 / Math.max(d, 1);
+      Animated.parallel([
+        Animated.timing(pos, { toValue: { x: dx * k, y: dy * k }, duration: 160, useNativeDriver: false }),
+        Animated.timing(ecart, { toValue: 400, duration: 160, useNativeDriver: false }),
+      ]).start(() => {
         fermer();
-        dy.setValue(0);
+        pos.setValue({ x: 0, y: 0 });
+        ecart.setValue(0);
       });
     } else {
-      Animated.spring(dy, { toValue: 0, useNativeDriver: false }).start();
+      Animated.parallel([
+        Animated.spring(pos, { toValue: { x: 0, y: 0 }, useNativeDriver: false }),
+        Animated.spring(ecart, { toValue: 0, useNativeDriver: false }),
+      ]).start();
     }
   };
   const [geste] = useState(() =>
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 6,
+      onMoveShouldSetPanResponder: (_e, g) => Math.hypot(g.dx, g.dy) > 6,
       onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, { dy }], { useNativeDriver: false }),
+      onPanResponderMove: (_e, g) => {
+        pos.setValue({ x: g.dx, y: g.dy });
+        ecart.setValue(Math.hypot(g.dx, g.dy));
+      },
       // Le geste garde la main jusqu'au bout ; s'il est malgré tout interrompu, on conclut de la même façon.
       onPanResponderTerminationRequest: () => false,
-      onPanResponderRelease: (_e, g) => conclure(g.dy, g.vy),
-      onPanResponderTerminate: (_e, g) => conclure(g.dy, g.vy),
+      onPanResponderRelease: (_e, g) => conclure(g.dx, g.dy, g.vx, g.vy),
+      onPanResponderTerminate: (_e, g) => conclure(g.dx, g.dy, g.vx, g.vy),
     }),
   );
-  const fond = dy.interpolate({ inputRange: [-400, 0, 400], outputRange: [0.25, 0.92, 0.25], extrapolate: 'clamp' });
+  const fond = ecart.interpolate({ inputRange: [0, 400], outputRange: ['rgba(10,6,24,0.92)', 'rgba(10,6,24,0.25)'], extrapolate: 'clamp' });
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={fermer}>
       <Animated.View
-        style={[s.voile, { backgroundColor: fond.interpolate({ inputRange: [0, 1], outputRange: ['rgba(10,6,24,0)', 'rgba(10,6,24,1)'] }) }]}
+        style={[s.voile, { backgroundColor: fond }]}
         accessibilityViewIsModal
-        accessibilityLabel="Photo du produit en grand ; balayez vers le haut ou le bas pour la fermer"
+        accessibilityLabel="Photo du produit en grand ; balayez dans n'importe quelle direction pour la fermer"
         onAccessibilityEscape={fermer}
         {...geste.panHandlers}>
-        <Animated.View style={[s.photoGrande, { transform: [{ translateY: dy }] }]}>
+        <Animated.View style={[s.photoGrande, { transform: pos.getTranslateTransform() }]}>
           <Image source={{ uri }} style={{ flex: 1 }} contentFit="contain" />
         </Animated.View>
       </Animated.View>
