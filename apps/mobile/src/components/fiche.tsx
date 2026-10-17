@@ -35,23 +35,15 @@ function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche
     return (
       <View style={{ gap: 8 }}>
         <Pressable onPress={() => setGrand(true)} accessibilityRole="imagebutton" accessibilityLabel={`Photo du produit ${pr.nom}, l'agrandir`} style={s.bandeauPhoto}>
-          <Image source={{ uri: pr.image }} style={StyleSheet.absoluteFill} contentFit="contain" />
+          <Image source={{ uri: pr.image }} style={s.bandeauImage} contentFit="contain" />
           <Text style={s.loupe}>🔍 agrandir</Text>
         </Pressable>
+        <Text style={s.produitNomB} numberOfLines={2}>{pr.nom}{quantite(pr.quantite)}</Text>
         <View style={s.ligne}>
-          <Logo src={fiche.logo} taille={24} />
-          <Text style={[s.titre, s.titrePetit]} accessibilityRole="header" numberOfLines={1}>{fiche.nom}</Text>
-          {quantite(pr.quantite) ? <Text style={s.petit}>{quantite(pr.quantite)}</Text> : null}
+          <Logo src={fiche.logo} taille={32} />
+          <Text style={s.marqueB} accessibilityRole="header" numberOfLines={1}>{fiche.nom}</Text>
         </View>
-        {fiche.proprietaire && (
-          <Pressable onPress={() => onMarque(fiche.proprietaire!.slug)} accessibilityRole="link" style={s.ligne}>
-            <Logo src={fiche.proprietaire.logo} taille={20} groupe />
-            <Text style={[s.proprio, s.flex]}>
-              <Text style={s.proprioNom}>{fiche.proprietaire.nom}</Text>
-              <Text style={s.petit}> · reçoit l'argent de vos achats</Text>
-            </Text>
-          </Pressable>
-        )}
+        {fiche.proprietaire && <LigneGroupe proprietaire={fiche.proprietaire} onMarque={onMarque} />}
         <Modal visible={grand} transparent animationType="fade" onRequestClose={() => setGrand(false)}>
           <Pressable style={s.voile} onPress={() => setGrand(false)} accessibilityRole="button" accessibilityLabel="Fermer la photo">
             <Image source={{ uri: pr.image }} style={s.photoGrande} contentFit="contain" />
@@ -103,6 +95,29 @@ function EnTete({ fiche, onMarque, medaillon = false, bandeau = false }: { fiche
             <Text style={s.voileTexte}>Toucher pour fermer</Text>
           </Pressable>
         </Modal>
+      )}
+    </View>
+  );
+}
+
+/** Groupe propriétaire (logo, nom, lien vers sa fiche) ; « reçoit l'argent de vos achats » en infobulle (ⓘ). */
+function LigneGroupe({ proprietaire, onMarque }: { proprietaire: NonNullable<TFiche['proprietaire']>; onMarque: (slug: string) => void }) {
+  const [info, setInfo] = useState(false);
+  return (
+    <View style={{ gap: 6 }}>
+      <View style={s.ligne}>
+        <Pressable onPress={() => onMarque(proprietaire.slug)} accessibilityRole="link" accessibilityLabel={`Groupe ${proprietaire.nom}, ouvrir sa fiche`} style={[s.ligne, { flexShrink: 1 }]}>
+          <Logo src={proprietaire.logo} taille={26} groupe />
+          <Text style={s.groupeB} numberOfLines={1}>{proprietaire.nom}</Text>
+        </Pressable>
+        <Pressable onPress={() => setInfo(!info)} accessibilityRole="button" accessibilityLabel="À quoi sert ce groupe ?" accessibilityState={{ expanded: info }} hitSlop={12} style={s.info}>
+          <Text style={s.infoTexte}>ⓘ</Text>
+        </Pressable>
+      </View>
+      {info && (
+        <View style={s.bulle} accessibilityLiveRegion="polite">
+          <Text style={s.bulleTexte}>{proprietaire.nom} possède la marque : c'est ce groupe qui reçoit l'argent de vos achats.</Text>
+        </View>
       )}
     </View>
   );
@@ -188,8 +203,8 @@ function Compteurs({ alertes, vigilance, ouvrirPilier }: { alertes: TFiche['aler
         accessibilityRole="tab"
         accessibilityState={{ selected: actif }}
         accessibilityLabel={`${n} ${al ? 'alerte' : 'point de vigilance'}${n > 1 ? 's' : ''}`}
-        style={({ pressed }) => [s.onglet, actif && { borderColor: c, backgroundColor: C.carte, zIndex: 2 }, pressed && { opacity: 0.7 }]}>
-        <Text style={[s.ongletTexte, { color: al ? C.alerteTexte : C.vigilance }]}>
+        style={({ pressed }) => [s.onglet, { backgroundColor: c, borderColor: c }, !actif && s.ongletFerme, pressed && { opacity: 0.8 }]}>
+        <Text style={[s.ongletTexte, { color: '#fff' }]}>
           {al ? '⚠️' : '🟠'} {n} {al ? `alerte${n > 1 ? 's' : ''}` : `vigilance${n > 1 ? 's' : ''}`} {actif ? '▲' : '▼'}
         </Text>
       </Pressable>
@@ -217,11 +232,11 @@ function Compteurs({ alertes, vigilance, ouvrirPilier }: { alertes: TFiche['aler
 /** La fiche d'une marque ou d'un groupe : en-tête, alertes, piliers. */
 export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) => void }) {
   const [liste, setListe] = useState(false);
-  const [variante, setVariante] = useState<VarianteEnTete>('C');
+  const [variante, setVariante] = useState<VarianteEnTete>('B');
   const [choix, setChoix] = useState<string | null>(null);
   useEffect(() => {
     lire(CLE_AFFICHAGE).then((v) => setListe(v === 'liste'));
-    lire(CLE_ENTETE).then((v) => setVariante(v === 'A' || v === 'B' || v === 'E' ? v : 'C'));
+    lire(CLE_ENTETE).then((v) => setVariante(v === 'A' || v === 'C' || v === 'E' ? v : 'B'));
   }, []);
   const alertes = fiche.alertes.filter((a) => a.niveau === 'alerte');
   const vigilance = fiche.alertes.filter((a) => a.niveau === 'vigilance');
@@ -733,11 +748,20 @@ const s = StyleSheet.create({
   compteurVide: { backgroundColor: C.carte, borderColor: C.bord },
   compteurN: { fontSize: 22, fontWeight: '800' },
   compteurL: { fontSize: 13, fontWeight: '700' },
-  onglets: { flexDirection: 'row', gap: 4, alignItems: 'flex-end', position: 'relative', zIndex: 2 },
-  onglet: { paddingHorizontal: 12, minHeight: 40, justifyContent: 'center', borderWidth: 1.5, borderColor: 'transparent', borderBottomWidth: 0, borderTopLeftRadius: 12, borderTopRightRadius: 12, marginBottom: -1.5, paddingBottom: 1.5 },
+  onglets: { flexDirection: 'row', gap: 6, alignItems: 'flex-end', position: 'relative', zIndex: 2 },
+  onglet: { paddingHorizontal: 12, minHeight: 40, justifyContent: 'center', borderWidth: 1.5, borderBottomWidth: 0, borderTopLeftRadius: 12, borderTopRightRadius: 12, marginBottom: -1.5, paddingBottom: 1.5 },
+  ongletFerme: { borderBottomLeftRadius: 12, borderBottomRightRadius: 12, marginBottom: 0, paddingBottom: 0, borderBottomWidth: 1.5 },
   ongletTexte: { fontSize: 14.5, fontWeight: '800' },
   classeur: { backgroundColor: C.carte, borderWidth: 1.5, borderRadius: 12, position: 'relative', zIndex: 1 },
-  bandeauPhoto: { height: 170, borderRadius: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: C.bord, overflow: 'hidden' },
+  bandeauPhoto: { height: 180, borderRadius: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: C.bord, overflow: 'hidden', padding: 14 },
+  bandeauImage: { flex: 1 },
+  produitNomB: { fontSize: 15, fontWeight: '600', color: C.gris },
+  marqueB: { fontSize: 26, fontWeight: '800', color: C.texte, flexShrink: 1 },
+  groupeB: { fontSize: 18, fontWeight: '700', color: C.texte, textDecorationLine: 'underline', flexShrink: 1 },
+  info: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.carte2 },
+  infoTexte: { fontSize: 15, color: C.accent, fontWeight: '700' },
+  bulle: { alignSelf: 'flex-start', backgroundColor: C.texte, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, maxWidth: '100%' },
+  bulleTexte: { color: '#fff', fontSize: 13.5, lineHeight: 19 },
   loupe: { position: 'absolute', right: 8, bottom: 8, backgroundColor: 'rgba(22,15,46,0.75)', color: '#fff', fontSize: 12, fontWeight: '600', paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
   ligneAlerte: { paddingHorizontal: 12, paddingVertical: 10, minHeight: 44, borderBottomWidth: 1, borderBottomColor: C.bord },
   ligneAlerteTexte: { fontSize: 14, lineHeight: 20, color: C.texte, fontWeight: '600' },

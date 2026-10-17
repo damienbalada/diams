@@ -11,11 +11,11 @@ export default function EcranReglages() {
   const [r, setR] = useState<Reglages | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pastilles, setPastilles] = useState(true);
-  const [entete, setEntete] = useState<VarianteEnTete>('C');
+  const [entete, setEntete] = useState<VarianteEnTete>('B');
   useEffect(() => {
     lireReglages().then(setR);
     lire(CLE_AFFICHAGE).then((v) => setPastilles(v !== 'liste'));
-    lire(CLE_ENTETE).then((v) => setEntete(v === 'A' || v === 'B' || v === 'E' ? v : 'C'));
+    lire(CLE_ENTETE).then((v) => setEntete(v === 'A' || v === 'C' || v === 'E' ? v : 'B'));
   }, []);
   if (!r) return null;
   const enregistrer = async () => {
@@ -71,7 +71,7 @@ export default function EcranReglages() {
               key={v}
               onPress={async () => {
                 setEntete(v);
-                await ecrire(CLE_ENTETE, v === 'C' ? null : v);
+                await ecrire(CLE_ENTETE, v === 'B' ? null : v);
               }}
               accessibilityRole="radio"
               accessibilityState={{ selected: entete === v }}
