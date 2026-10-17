@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v302`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v303`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -332,6 +332,16 @@ Staedtler, Faber-Castell, Duralex, Le Parfait, O-Cedar, Briochin, Baranne, Chant
 introuvables). **Pyrex : décision de l'éditeur** — la marque appartient à Corning Incorporated et
 est exploitée sous licence par International Cookware (Châteauroux, RCS 399 311 315), qui vend
 les produits en Europe.
+
+**Lot 211 (17/10/2026)** : Pouce, Better Life et Auchan Baby (Auchan) ; Carolin (Bolton
+Solitaire, sans lien GLEIF avec le groupe Bolton) ; Étamine du Lys (Comptoir des Lys) ; Giotto, Lyra,
+Canson, Daler-Rowney, DAS, Tratto (FILA) ; Castorama, Brico Dépôt (Kingfisher) ; Candy, Hoover
+(Candy Hoover Group, Haier Europe) ; GiFi (Gigamarket). Couverture Open Products Facts France :
+184 marques sur 685, 68 % des produits. Les marques Lidl non alimentaires (Parkside, Silvercrest…)
+étaient déjà là. Refus deux fois : intermarche.com et magasins-u.com (Labell, Apta, marques U),
+kiabi.com, leroymerlin.fr. **Livres non ajoutés** : l'Index n'a pas de secteur « édition » (Hachette,
+Larousse, Hatier, Le Livre de Poche sont prouvables par le rapport ESEF 2024 de Lagardère) —
+décision de l'éditeur. **Tabac exclu** sur demande de l'éditeur.
 
 ## 10. Méthode de travail attendue
 
