@@ -46,3 +46,15 @@ def test_fin_de_bloc_dim():
 def test_intitules_retires():
     page = "Composition et entretien Matières Matière principale : 84 % polyester, 16 % élasthanne Instructions de lavage"
     assert C.bloc_composition(page) == "Matière principale : 84 % polyester, 16 % élasthanne"
+
+
+def test_shearling():
+    a = C.analyse("Col : 100 % shearling Bouton arrière : 100 % corne de buffle d’eau")
+    assert a["animaux"] == ["corne", "shearling"]
+
+
+def test_rubrique_composition_dans_une_presentation():
+    # Salomon : la présentation (« la meilleure matière… ») précède la rubrique « Composition : ».
+    page = ("Isolation en duvet : Offrant plus d’isolation par once que toute autre matière, le duvet est le meilleur des "
+            "isolants. Composition : Corps: 100% Polyamide; Rembourrage: 90% Duvet d’oie, 10% Plume d’oie Entretien")
+    assert C.bloc_composition(page) == "Corps: 100% Polyamide; Rembourrage: 90% Duvet d’oie, 10% Plume d’oie"

@@ -10,6 +10,7 @@ Usage : python outils_collecte/ingredients.py sortie.json "slug|https://domaine/
 """
 from __future__ import annotations
 
+import gzip
 import html
 import json
 import os
@@ -20,6 +21,7 @@ import unicodedata
 
 import httpx
 
+GZIP = bytes((0x1F, 0x8B))  # signature d'un fichier compressé
 UA = {"User-Agent": "Mozilla/5.0 (compatible; DIAMS verifier; +https://awareness-score.vercel.app)"}
 
 # Ingrédients d'origine animale certaine (français). Les mentions de traces sont retirées avant.
@@ -98,7 +100,9 @@ def urls_produits(c: httpx.Client, sitemap: str, motif: str, maxi: int) -> list[
             r = c.get(u)
         except Exception:
             continue
-        for loc in re.findall(r"<loc>([^<]+)</loc>", r.text):
+        # Plan du site compressé (« product_sitemap.xml.gz », Lidl) : décompressé avant lecture.
+        corps = gzip.decompress(r.content).decode("utf-8", "replace") if r.content.startswith(GZIP) else r.text
+        for loc in re.findall(r"<loc>([^<]+)</loc>", corps):
             loc = html.unescape(loc.strip())
             if re.search(r"sitemap[^/]*\.xml", loc) and len(vus) < 30:
                 if re.search(r"product|produit|recette|recipe", loc, re.I) or "sitemap_index" in u or len(a_lire) < 5:

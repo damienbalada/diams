@@ -28,7 +28,7 @@ ANIMAL = [
     r"laine", r"m[ée]rinos", r"cachemire", r"mohair", r"angora", r"alpaga", r"lama", r"yacks?", r"yaks?", r"vigogne",
     r"chameau", r"poils? de \w+", r"soie", r"cuir", r"daim", r"nubuck", r"cro[ûu]te de cuir", r"peau(?:x)?(?: lain[ée]e| d.agneau| de mouton| de ch[èe]vre| de veau| de vache)?",
     r"fourrure", r"duvet", r"plumes?", r"lapin", r"vison", r"renard", r"crocodile", r"python", r"autruche", r"l[ée]zard", r"galuchat",
-    r"\bcorne\b", r"nacre",
+    r"\bcorne\b", r"nacre", r"shearling",
     r"wool", r"merino", r"cashmere", r"silk", r"leather", r"suede", r"\bdown\b", r"feathers?", r"\bfur\b",
 ]
 ANIMAL_RE = re.compile(r"\b(?:" + "|".join(ANIMAL) + r")\b", re.I)
@@ -47,7 +47,7 @@ VEGETAL_RE = re.compile(r"\b(?:100 ?% v[ée]g[ée]tal\w*|v[ée]gan\w*|vegan|PETA
 _BLOC = re.compile(
     r"(?:Composition(?:\s+et\s+entretien)?|Mati[èe]res?(?:\s+principales?)?|Tissu principal|Mati[èe]re ext[ée]rieure|Ext[ée]rieur|Dessus)\s*:?\s*"
     r"(.{8,600}?)(?=\s(?:\d{2}\s?°C|Instructions|Qualit[ée]s? et caract[ée]ristiques|Fiche produit|Caract[ée]ristiques|Entretien|Conseils? d.entretien|Lavage|Lavable|Ne pas|Origine|Fabriqu[ée] (?:en|au)|Pays de fabrication|R[ée]f[ée]rence|"
-    r"Ajouter au panier|Livraison|Guide des tailles|Taille|Coupe|Description|Avis|Retours?|Couleur)\b|$)",
+    r"Ajouter au panier|Livraison|Guide des tailles|Taille|Hauteur du talon|Code mod[èe]le|Coupe|Description|Avis|Retours?|Couleur)\b|$)",
     re.I,
 )
 # Une composition liste des pourcentages de fibres (« 80 % laine, 20 % polyamide ») ou nomme une matière.
@@ -59,8 +59,12 @@ def bloc_composition(t: str) -> str | None:
     """Le bloc de composition le plus fourni (pourcentages et fibres) de la page, ou rien. Les titres de
     menu (« Matières » dans la navigation) et les phrases de présentation sont écartés."""
     # Sans les intitulés de rubrique restés en tête (« et entretien Matières », « Composition »).
-    tete = re.compile(r"^(?:(?:et entretien|Composition|Mati[èe]res\b)\s*:?\s*)+", re.I)
+    # « Composition du manteau court : 80 % laine… » (Chloé) : le nom de la pièce part avec l'intitulé.
+    tete = re.compile(r"^(?:(?:et entretien|Composition|Mati[èe]res\b|(?:du|de la|de l’|des)\s[^:%]{3,40}?\s:)\s*:?\s*)+", re.I)
     blocs = [tete.sub("", m.group(1).strip(" :-–")) for m in _BLOC.finditer(t)]
+    # Bloc ouvert sur une phrase de présentation (« la meilleure matière… ») qui contient plus loin la
+    # rubrique « Composition : » (Salomon) : seule la rubrique est gardée.
+    blocs = [b[m.end():].strip() if (m := re.search(r"\bComposition\s*:\s*", b)) and m.start() > 0 else b for b in blocs]
     def note(b: str) -> int:
         return 3 * len(re.findall(r"\d{1,3}\s?%", b)) + len(FIBRES.findall(b))
     blocs = [b for b in blocs if re.search(r"\d{1,3}\s?%", b) and note(b) >= 4]

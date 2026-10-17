@@ -191,7 +191,7 @@ ESEF_KEYWORDS = {
     "PLA_POLLUTER": [r"polluter|pollueur"],
     # Recours à des matières animales (plafond du pilier animal).
     # Matières (mode, luxe), ingrédients (alimentation), tests (cosmétique).
-    "ANI_EXPLOITATION": [r"cuirs?|maroquinerie|peaux?|fourrures?|crocodil|leather|skins?|fur\b|\blaine|\bwool|cachemire|cashmere"
+    "ANI_EXPLOITATION": [r"cuirs?|maroquinerie|peaux?|shearling|fourrures?|crocodil|leather|skins?|fur\b|\blaine|\bwool|cachemire|cashmere"
                          r"|duvet|\bsoie\b|\bsilk\b|\blait|laiti|\bmilk|dairy|viande|\bmeat|\bbeef|b[œo]euf|\bporc\b|pork"
                          r"|poulet|chicken|volaille|poultry|(?:œ|oe)ufs?\b|\beggs?\b|\bmiel\b|honey|g[ée]latine|gelatin"
                          # Alimentation (règle de l'éditeur du 14/10/2026 : fromagerie, biscuits au

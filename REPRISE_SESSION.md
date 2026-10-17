@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v310`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v311`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -303,6 +303,17 @@ marques**, à continuer :
 2. compositions sur les sites des marques sans preuve animale (fromages, charcuterie,
    biscuits au beurre…), relues à la main, puis `import_curated` + `verify_curated
    --apply --delegue` ;
+   **vêtements (17/10/2026, lots 217 et 225)** : `outils_collecte/compositions.py` puis
+   `import_produits.py --matieres` ; fiches lues pour Dim, Arc'teryx, Alexander McQueen, Chloé,
+   Salomon, Nike, Peak Performance, Gianvito Rossi et les marques Lidl (Esmara, Livergy,
+   Crivit, Lupilu, Pepperts). Sites qui refusent le vérificateur (403 ou abandon après une
+   nouvelle tentative) : Zara, H&M, Primark, Helly Hansen, Musto, Berluti, Givenchy, Kenzo,
+   Rimowa, Chanel, Lee, Wrangler, Dior, Celine, Adidas, Decathlon (fiches), Louis Vuitton
+   (fiches), Saint Laurent (fiches), Hermès (fiches), Bottega Veneta (navigateur), Peak
+   Performance (après quelques pages ; preuve du lot 225 en attente). Sans réponse : Uniqlo,
+   Carrefour, Gucci, Fendi, Loro Piana, Emilio Pucci, Rustler. Composition rendue par les
+   scripts ou absente : Loewe, Marmot, Wilson (cuir cité dans la description seulement),
+   Atomic (fiches en allemand). Auchan : In Extenso absent du plan du site ;
 3. pour les sociétés moyennes non notées (Rians, Ermitage, Juraflore, Monbana, Jacquart,
    Camus, Cellier des Dauphins, bofrost*, Toupargel…) : Egapro, HATVP, registre européen,
    B Corp, sanctions (DGCCRF, Autorité de la concurrence), rapports et plans de vigilance

@@ -62,18 +62,27 @@ def extrait(ingr: str) -> str | None:
 
 
 def extrait_matiere(compo: str) -> str | None:
-    """Le plus court passage de la composition qui nomme une matière animale, recopié tel quel : coupé aux
-    séparateurs de la page (virgule, tiret, nouvelle rubrique « Doublure : »)."""
+    """La composition entière quand elle est courte ; sinon le plus court passage qui nomme une matière
+    animale, recopié tel quel : coupé aux séparateurs de la page (virgule, tiret, nouvelle rubrique
+    « Doublure : » ou « Rembourrage 90 % »). Un sigle (« version APA : ») n'ouvre pas de rubrique."""
     propre = C.IMITATION_RE.sub(lambda m: " " * len(m.group(0)), compo)
-    coupes = [0] + [m.end() for m in re.finditer(r",\s|\s-\s|\s(?=[A-ZÉ][\w’' ]{2,30}\s?:\s)", compo)] + [len(compo)]
-    items = []
-    for m in C.ANIMAL_RE.finditer(propre):
-        debut = max(x for x in coupes if x <= m.start())
-        fin = min(x for x in coupes if x >= m.end())
-        q = compo[debut:fin].strip(" ,.-")
-        if 3 <= len(q) <= 160:
-            items.append((0 if re.search(r"\d\s?%", q) else 1, len(q), q))
-    return min(items)[2] if items else None
+    if len(compo) <= 160 and C.ANIMAL_RE.search(propre):
+        return compo.strip(" ,.-")
+    rubrique = r"\s(?=[A-ZÉ][a-zà-ÿ][\w’' ]{1,30}\s?:\s|(?:Ext[ée]rieur|Rembourrage|Garnissage|Doublure|Poches?|Coquille \d|Capuche|Col|Empi[èe]cements?)\s\d)"
+    # Rubrique entière d'abord (« Garnissage du buste: 90% Duvet d’oie, 10% Plume d’oie ») ; les virgules
+    # ne coupent qu'à défaut, pour ne pas citer « 10% Plume d’oie » seul.
+    for sep in (r";\s|\s-\s|" + rubrique, r",\s|;\s|\s-\s|" + rubrique):
+        coupes = [0] + [m.end() for m in re.finditer(sep, compo)] + [len(compo)]
+        items = []
+        for m in C.ANIMAL_RE.finditer(propre):
+            debut = max(x for x in coupes if x <= m.start())
+            fin = min(x for x in coupes if x >= m.end())
+            q = compo[debut:fin].strip(" ,.;-")
+            if 3 <= len(q) <= 160:
+                items.append((0 if re.search(r"\d\s?%", q) else 1, len(q), q))
+        if items:
+            return min(items)[2]
+    return None
 
 
 def main() -> None:
