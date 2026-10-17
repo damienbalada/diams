@@ -127,7 +127,7 @@ export interface Fiche {
   logo: string | null;
   proprietaire: { slug: string; nom: string; logo: string | null } | null;
   produit: Produit | null;
-  alertes: { pilier: string; icone: string; niveau: NiveauSignal; motif: string; regle: string }[];
+  alertes: { pilier: string; icone: string; niveau: NiveauSignal; motif: string; regle: string; nom?: string; code?: string }[];
   piliers: Pilier[];
   renseignes: number;
   total: number;

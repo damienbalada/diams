@@ -24,7 +24,8 @@ export function ficheEnJson(
     logo: logo?.src ?? null,
     proprietaire: proprietaire ? { slug: proprietaire.slug, nom: proprietaire.name, logo: logoDe(proprietaire.slug)?.src ?? null } : null,
     produit: scan ? { ...scan.produit, correspondance: scan.correspondance, nomLu: scan.nomLu, phrase: scan.phrase } : null,
-    alertes: carte.signaux.map((f) => ({ pilier: f.pilier, icone: ICONES_PILIERS[f.pilier] ?? "", niveau: f.signal!.niveau, motif: f.signal!.motif, regle: f.signal!.regle })),
+    // nom : intitulé de l'indicateur, assez court pour une étiquette d'alerte dans l'en-tête de l'appli.
+    alertes: carte.signaux.map((f) => ({ pilier: f.pilier, icone: ICONES_PILIERS[f.pilier] ?? "", niveau: f.signal!.niveau, motif: f.signal!.motif, regle: f.signal!.regle, nom: f.nom, code: f.code })),
     piliers: carte.piliers.map((p) => ({
       code: p.code,
       nom: p.nom,

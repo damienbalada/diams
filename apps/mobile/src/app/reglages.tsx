@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 import { effacerHistorique, enregistrerReglages, lireReglages, SITE_PAR_DEFAUT, type Reglages } from '@/lib/api';
-import { CLE_AFFICHAGE } from '@/components/fiche';
+import { CLE_AFFICHAGE, CLE_ENTETE, type VarianteEnTete } from '@/components/fiche';
 import { C } from '@/lib/couleurs';
 import { ecrire, lire } from '@/lib/stockage';
 
@@ -11,9 +11,11 @@ export default function EcranReglages() {
   const [r, setR] = useState<Reglages | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pastilles, setPastilles] = useState(true);
+  const [entete, setEntete] = useState<VarianteEnTete>('C');
   useEffect(() => {
     lireReglages().then(setR);
     lire(CLE_AFFICHAGE).then((v) => setPastilles(v !== 'liste'));
+    lire(CLE_ENTETE).then((v) => setEntete(v === 'A' || v === 'E' ? v : 'C'));
   }, []);
   if (!r) return null;
   const enregistrer = async () => {
@@ -56,6 +58,29 @@ export default function EcranReglages() {
           accessibilityLabel="Fiche en pastilles"
         />
       </View>
+      <View style={[s.option, { flexDirection: 'column', alignItems: 'stretch' }]}>
+        <Text style={s.label}>En-tête de fiche (essai)</Text>
+        <View style={{ flexDirection: 'row', gap: 8 }} accessibilityRole="radiogroup">
+          {([
+            ['A', 'A · bandeaux'],
+            ['C', 'C · étiquettes'],
+            ['E', 'E · compteurs'],
+          ] as [VarianteEnTete, string][]).map(([v, t]) => (
+            <Pressable
+              key={v}
+              onPress={async () => {
+                setEntete(v);
+                await ecrire(CLE_ENTETE, v === 'C' ? null : v);
+              }}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: entete === v }}
+              style={[s.choix, entete === v && s.choixActif]}>
+              <Text style={[s.choixTexte, entete === v && { color: C.accent }]}>{t}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={s.petit}>A : alertes en deux bandeaux. C : chaque alerte en étiquette, qui ouvre son pilier. E : deux compteurs à déplier.</Text>
+      </View>
       <Pressable
         onPress={async () => {
           await effacerHistorique();
@@ -85,5 +110,8 @@ const s = StyleSheet.create({
   secondaireTexte: { color: C.texte, fontSize: 16, fontWeight: '600' },
   message: { fontSize: 15, color: C.accent, fontWeight: '600' },
   petit: { fontSize: 13, lineHeight: 19, color: C.gris },
+  choix: { flex: 1, minHeight: 44, borderRadius: 10, borderWidth: 1, borderColor: C.bordFort, alignItems: 'center', justifyContent: 'center', backgroundColor: C.fond },
+  choixActif: { borderColor: C.accent, backgroundColor: C.carte2 },
+  choixTexte: { fontSize: 14, fontWeight: '700', color: C.texte },
   option: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: C.carte, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: C.bordFort },
 });

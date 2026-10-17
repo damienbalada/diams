@@ -271,6 +271,12 @@ les signalements). Test de bout en bout fait en local le 17/10, données de test
 NumAlim : liquidée (juin 2023, clôture septembre 2025) ; activité reprise par 2JDB (ConsoTrust) et
 Agdatahub (lui-même liquidé fin 2024) : piste abandonnée.
 
+Appli mobile (17/10) : fiche en pastilles (essai, interrupteur dans les Réglages) ; en-tête au choix A, C
+(étiquettes de verdict qui ouvrent le pilier) ou E (compteurs dépliables), réglage « En-tête de fiche ».
+Décision de l'éditeur : le « fil de propriété » (groupe › marque › produit, maquette D) est réservé à
+l'affichage sur ordinateur (site), pas au mobile ; la photo en bandeau (B) reste à éprouver sur des
+produits hauts et étroits (bouteilles).
+
 En discussion (explications données le 17/10, réponse attendue) : 2 taux atypiques, 3 LobbyMap
 (pas de collecte automatisée déguisée en humain), 4 approbation sur copie, 6 périmètres partiels,
 7 Heura, 8 Lancelot (la page « Nos marques » d'Agrial cite Lancelot Blanche Hermine), 9 alerte des

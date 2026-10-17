@@ -11,18 +11,24 @@ import { lire } from '@/lib/stockage';
 
 /** Réglage d'affichage de la fiche : pastilles par pilier (essai, par défaut) ou liste dépliable. */
 export const CLE_AFFICHAGE = 'index.affichage';
+/** Réglage de l'en-tête de fiche (essai) : A compacte avec bandeaux, C étiquettes d'alerte, E compteurs. */
+export const CLE_ENTETE = 'index.entete';
+export type VarianteEnTete = 'A' | 'C' | 'E';
 
 const NIVEAU: Record<string, string> = { groupe: 'Groupe', marque: 'Marque', produit: 'Produits' };
 const dfr = (d: string) => d.split('-').reverse().join('/');
 const ouvrir = (url: string) => WebBrowser.openBrowserAsync(url);
 /** Quantité affichée seulement si elle porte une unité (« 250 g », « 1,5 L ») : « 8 » seul ne dit rien. */
-const quantite = (q: string | null) => (q && /\d\s*[a-zA-Zµ]/.test(q) ? ` · ${q}` : '');
+const quantite = (q: string | null) => {
+  const v = (q ?? '').replace(/\s+[e℮]$/i, '').trim();
+  return /\d\s*[a-zA-Zµ]/.test(v) ? ` · ${v}` : '';
+};
 
 /**
  * En-tête de fiche : photo du produit scanné (agrandie au toucher), logo et nom de la marque, logo et
  * nom du groupe propriétaire. Compact : la base produit est citée en bas de la fiche.
  */
-function EnTete({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) => void }) {
+function EnTete({ fiche, onMarque, medaillon = false }: { fiche: TFiche; onMarque: (slug: string) => void; medaillon?: boolean }) {
   const [grand, setGrand] = useState(false);
   const pr = fiche.produit;
   return (
@@ -34,15 +40,19 @@ function EnTete({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) =
           ) : (
             <View style={[s.photo, s.centre]}><Text style={{ fontSize: 28 }}>🛒</Text></View>
           )}
+          {medaillon && <View style={s.medaillon}><Logo src={fiche.logo} taille={26} /></View>}
         </Pressable>
       ) : (
         <Logo src={fiche.logo} taille={64} groupe={!fiche.proprietaire} />
       )}
       <View style={[s.flex, { gap: 4 }]}>
-        {pr && <Text style={s.produitNom} numberOfLines={2}>{pr.nom}{quantite(pr.quantite)}</Text>}
+        {pr && !medaillon && <Text style={s.produitNom} numberOfLines={2}>{pr.nom}{quantite(pr.quantite)}</Text>}
         <View style={s.ligne}>
-          {pr && <Logo src={fiche.logo} taille={24} />}
-          <Text style={[s.titre, pr && s.titrePetit]} accessibilityRole="header" numberOfLines={2}>{fiche.nom}</Text>
+          {pr && !medaillon && <Logo src={fiche.logo} taille={24} />}
+          <Text style={[s.titre, pr && s.titrePetit]} accessibilityRole="header" numberOfLines={2}>
+            {fiche.nom}
+            {pr && medaillon && quantite(pr.quantite) ? <Text style={s.petit}>{quantite(pr.quantite)}</Text> : null}
+          </Text>
         </View>
         {fiche.proprietaire ? (
           <Pressable onPress={() => onMarque(fiche.proprietaire!.slug)} accessibilityRole="link" style={s.ligne}>
@@ -68,19 +78,125 @@ function EnTete({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) =
   );
 }
 
+/** Intitulé court d'un indicateur pour une étiquette (« Bien-être animal (classement BBFAW) » → « Bien-être animal »). */
+const court = (t: string) => {
+  const c = t.replace(/\s*\(.*\)\s*/, '').trim();
+  return c.length > 30 ? c.slice(0, 29) + '…' : c;
+};
+
+/** Verdict court d'une alerte pour une étiquette (le motif complet reste dans le pilier). */
+function verdict(a: TFiche['alertes'][number]): string {
+  const m = a.motif;
+  const note = m.match(/note ([A-F][+-]?)/)?.[1];
+  switch (a.code) {
+    case 'ANI_EXPLOITATION': return 'Exploitation animale';
+    case 'ANI_BBFAW_TIER': return `Bien-être animal : BBFAW ${m.match(/(\d) sur 6/)?.[1] ?? '?'}/6`;
+    case 'GEO_RUSSIA_EXIT': return 'Toujours en Russie';
+    case 'GEO_CONFLICT_TIES': return 'Liens avec un conflit';
+    case 'ENV_GHG_TREND': return /hausse/.test(m) ? 'Émissions en hausse' : 'Émissions : baisse trop lente';
+    case 'ENV_CDP_CLIMATE': return /aucune réponse/.test(m) ? 'CDP climat : pas de réponse' : `CDP climat : ${note ?? 'note basse'}`;
+    case 'WAT_CDP': return /aucune réponse/.test(m) ? 'CDP eau : pas de réponse' : `CDP eau : ${note ?? 'note basse'}`;
+    case 'ENV_CDP_FORESTS': return /aucune réponse/.test(m) ? 'CDP forêts : pas de réponse' : `CDP forêts : ${note ?? 'note basse'}`;
+    case 'ENV_SBTI_VALIDATED': return 'Objectif climat retiré';
+    case 'ENV_GREENWASHING': return 'Écoblanchiment sanctionné';
+    case 'PLA_POLLUTER': return 'Gros pollueur plastique';
+    case 'PLA_REDUCTION': return 'Plastique neuf en hausse';
+    case 'LAB_EGAPRO_INDEX': return `Égapro ${m.match(/(\d+)\/100/)?.[1] ?? ''}/100`.replace(' /100', ' bas');
+    case 'LAB_GENDER_PAYGAP': return 'Écart de salaire F-H';
+    case 'LAB_CEO_PAY_RATIO': return 'Écart de rémunération';
+    case 'GOV_SANCTIONS': return 'Sanction';
+    case 'GOV_BOARD_GENDER': case 'GOV_EXEC_GENDER': return 'Peu de femmes dirigeantes';
+    case 'GOV_BOARD_INDEP': return 'Conseil peu indépendant';
+    case 'TAX_EFFECTIVE_RATE': return 'Impôt faible';
+    case 'SUP_FTI_SCORE': case 'SUP_KNOWTHECHAIN': case 'SUP_LIVING_WAGE': return 'Chaîne d\'approvisionnement';
+    case 'WAT_CONTROVERSY': return 'Infraction sur l\'eau';
+    default: return court(a.nom ?? m);
+  }
+}
+
+/** En-tête C : chaque alerte ou point de vigilance en étiquette ; un toucher ouvre le pilier concerné. */
+function EtiquettesAlertes({ alertes, ouvrirPilier }: { alertes: TFiche['alertes']; ouvrirPilier?: (code: string) => void }) {
+  if (!alertes.length) return null;
+  return (
+    <View style={s.etiquettes}>
+      {alertes.map((a, i) => {
+        const al = a.niveau === 'alerte';
+        return (
+          <Pressable
+            key={i}
+            onPress={() => ouvrirPilier?.(a.pilier)}
+            accessibilityRole="button"
+            accessibilityLabel={`${al ? 'Alerte' : 'Point de vigilance'} : ${a.motif}`}
+            style={({ pressed }) => [s.etiq, al ? s.etiqAlerte : s.etiqVigilance, pressed && { opacity: 0.6 }]}>
+            <Text style={[s.etiqTexte, { color: al ? '#8f1f19' : C.vigilanceTexte }]} numberOfLines={1}>
+              {al ? '⚠️' : '🟠'} {verdict(a)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/** En-tête E : deux compteurs (alertes, vigilances) ; un toucher déplie la liste, chaque ligne ouvre son pilier. */
+function Compteurs({ alertes, vigilance, ouvrirPilier }: { alertes: TFiche['alertes']; vigilance: TFiche['alertes']; ouvrirPilier?: (code: string) => void }) {
+  const [ouvert, setOuvert] = useState<'alerte' | 'vigilance' | null>(null);
+  const liste = ouvert === 'alerte' ? alertes : ouvert === 'vigilance' ? vigilance : [];
+  const bouton = (cle: 'alerte' | 'vigilance', n: number) => {
+    const al = cle === 'alerte';
+    return (
+      <Pressable
+        onPress={() => n > 0 && setOuvert(ouvert === cle ? null : cle)}
+        disabled={n === 0}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: ouvert === cle }}
+        style={({ pressed }) => [s.compteurBloc, al ? (n ? s.compteurAlerte : s.compteurVide) : (n ? s.compteurVigilance : s.compteurVide), pressed && { opacity: 0.7 }]}>
+        <Text style={[s.compteurN, { color: al && n ? '#fff' : n ? C.vigilanceTexte : C.gris }]}>{n}</Text>
+        <Text style={[s.compteurL, { color: al && n ? '#fff' : n ? C.vigilanceTexte : C.gris }]}>
+          {al ? `alerte${n > 1 ? 's' : ''}` : `vigilance${n > 1 ? 's' : ''}`} {n ? (ouvert === cle ? '▲' : '▼') : ''}
+        </Text>
+      </Pressable>
+    );
+  };
+  return (
+    <View style={{ gap: 8 }}>
+      <View style={s.ligne}>
+        {bouton('alerte', alertes.length)}
+        {bouton('vigilance', vigilance.length)}
+      </View>
+      {liste.length > 0 && (
+        <View style={s.listeAlertes}>
+          {liste.map((a, i) => (
+            <Pressable key={i} onPress={() => ouvrirPilier?.(a.pilier)} accessibilityRole="button" style={({ pressed }) => [s.ligneAlerte, pressed && { opacity: 0.6 }]}>
+              <Text style={s.ligneAlerteTexte}>{a.icone} {a.motif}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
 /** La fiche d'une marque ou d'un groupe : en-tête, alertes, piliers. */
 export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: string) => void }) {
   const [liste, setListe] = useState(false);
+  const [variante, setVariante] = useState<VarianteEnTete>('C');
+  const [choix, setChoix] = useState<string | null>(null);
   useEffect(() => {
     lire(CLE_AFFICHAGE).then((v) => setListe(v === 'liste'));
+    lire(CLE_ENTETE).then((v) => setVariante(v === 'A' || v === 'E' ? v : 'C'));
   }, []);
   const alertes = fiche.alertes.filter((a) => a.niveau === 'alerte');
   const vigilance = fiche.alertes.filter((a) => a.niveau === 'vigilance');
+  // Depuis l'en-tête : ouvre la pastille du pilier concerné (affichage en pastilles seulement).
+  const ouvrirPilier = liste ? undefined : (code: string) => setChoix(code);
   return (
     <View style={s.pile}>
-      <EnTete fiche={fiche} onMarque={onMarque} />
+      <EnTete fiche={fiche} onMarque={onMarque} medaillon={variante === 'C'} />
+      {variante === 'C' && <EtiquettesAlertes alertes={fiche.alertes} ouvrirPilier={ouvrirPilier} />}
+      {variante === 'E' && <Compteurs alertes={alertes} vigilance={vigilance} ouvrirPilier={ouvrirPilier} />}
 
-      {alertes.length > 0 && (
+      {variante === 'A' && alertes.length > 0 && (
         <View style={s.bandeauAlerte} accessibilityRole="summary">
           <Text style={s.bandeauTitreAlerte}>⚠️ {alertes.length} alerte{alertes.length > 1 ? 's' : ''}</Text>
           {alertes.map((a, i) => (
@@ -88,7 +204,7 @@ export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: str
           ))}
         </View>
       )}
-      {vigilance.length > 0 && (
+      {variante === 'A' && vigilance.length > 0 && (
         <View style={s.bandeauVigilance}>
           <Text style={s.bandeauTitreVigilance}>🟠 {vigilance.length} point{vigilance.length > 1 ? 's' : ''} de vigilance</Text>
           {vigilance.map((a, i) => (
@@ -105,7 +221,7 @@ export function Fiche({ fiche, onMarque }: { fiche: TFiche; onMarque: (slug: str
           ))}
         </View>
       ) : (
-        <Pastilles fiche={fiche} />
+        <Pastilles fiche={fiche} choix={choix} setChoix={setChoix} />
       )}
       <Text style={s.pied}>
         {fiche.renseignes} informations documentées sur {fiche.total} recherchées · aucune note, que des faits sourcés.
@@ -204,8 +320,7 @@ function trierFaits(p: Pilier) {
  * Fiche en pastilles (essai) : une pastille par pilier (icône, nom, état, nombre renseigné) ; un appui
  * déplie le contenu du pilier juste dessous, un second le replie. Les produits ont leur pastille.
  */
-function Pastilles({ fiche }: { fiche: TFiche }) {
-  const [choix, setChoix] = useState<string | null>(null);
+function Pastilles({ fiche, choix, setChoix }: { fiche: TFiche; choix: string | null; setChoix: (c: string | null) => void }) {
   const p = fiche.piliers.find((x) => x.code === choix) ?? null;
   const teinte = p ? TEINTE[p.code] ?? C.accent : C.accent;
   const produits = fiche.estMarque ? fiche.produitsLus ?? [] : null;
@@ -569,6 +684,21 @@ const s = StyleSheet.create({
   pied: { fontSize: 13, lineHeight: 18, color: C.gris },
   lienPied: { fontSize: 13, fontWeight: '600', color: C.accent },
   enTete: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  medaillon: { position: 'absolute', right: -6, bottom: -6, borderRadius: 8, backgroundColor: '#fff', padding: 1 },
+  etiquettes: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  etiq: { borderRadius: 999, borderWidth: 1, paddingHorizontal: 10, minHeight: 34, justifyContent: 'center', maxWidth: '100%' },
+  etiqAlerte: { backgroundColor: '#fde9e7', borderColor: '#f0c9c4' },
+  etiqVigilance: { backgroundColor: C.vigilanceFond, borderColor: '#f2c48a' },
+  etiqTexte: { fontSize: 13, fontWeight: '700' },
+  compteurBloc: { flex: 1, borderRadius: 14, paddingVertical: 8, alignItems: 'center', minHeight: 56, justifyContent: 'center', borderWidth: 1, borderColor: 'transparent' },
+  compteurAlerte: { backgroundColor: C.alerte },
+  compteurVigilance: { backgroundColor: C.vigilanceFond, borderColor: '#f2c48a' },
+  compteurVide: { backgroundColor: C.carte, borderColor: C.bord },
+  compteurN: { fontSize: 22, fontWeight: '800' },
+  compteurL: { fontSize: 13, fontWeight: '700' },
+  listeAlertes: { backgroundColor: C.carte, borderRadius: 12, borderWidth: 1, borderColor: C.bord },
+  ligneAlerte: { paddingHorizontal: 12, paddingVertical: 10, minHeight: 44, borderBottomWidth: 1, borderBottomColor: C.bord },
+  ligneAlerteTexte: { fontSize: 14, lineHeight: 20, color: C.texte, fontWeight: '600' },
   titrePetit: { fontSize: 22, flexShrink: 1 },
   voile: { flex: 1, backgroundColor: 'rgba(10,6,24,0.92)', alignItems: 'center', justifyContent: 'center', padding: 16, gap: 12 },
   photoGrande: { width: '100%', height: '80%' },
