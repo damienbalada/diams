@@ -60,7 +60,7 @@ sourcé, vérifiable et défendable. Priorité : exactitude et traçabilité ava
   `import_curated`.
 - **Après chaque écriture** : `node scripts/snapshot-db.mjs` (écrit
   `supabase/seed/99_snapshot.sql`), incrémenter la clé de cache dans
-  `apps/web/lib/data.ts` (actuellement **`all-scores-v301`** → passer à v154, etc.),
+  `apps/web/lib/data.ts` (actuellement **`all-scores-v302`** → passer à v154, etc.),
   puis commit + push, puis vérifier le déploiement Vercel (outils MCP Vercel
   `list_deployments`, `get_runtime_errors`).
 - SIREN et LEI : **toujours confirmés par un registre officiel** (annuaire
@@ -320,6 +320,18 @@ de Henkel ; décision sur l'offre Supabase Pro.
 **Grandes marques encore absentes faute de source lisible** : Port Salut, Le Gall, Lou
 Pérac, Étoile du Vercors, Mademoiselle Desserts, Bridor, Monin, Legal, Père Magloire,
 Hépar, La Baleine, Le Saunier de Camargue.
+
+**Non alimentaire (17/10/2026, lot 210)** : Open Products Facts est lu pour les codes-barres ;
+relevé des scans non reconnus dans `/admin/scans`. Ajoutés : STABILO, Oxford, Pelikan, Herlitz,
+Elba, scribzee, Unilux (Hamelin), VARTA, Opinel, Luminarc, Cristal d'Arques (Arc France), tesa
+(Beiersdorf). Sur 685 marques d'Open Products Facts vendues en France, 168 étaient déjà dans l'Index
+(63 % des produits). Restent absents : Canard WC, Baygon, Raid (site de SC Johnson : refus 429
+deux fois), Monin (monin.com : erreur 530 deux fois), Signal (unilever.fr : refus 403 ; absent du
+rapport ESEF d'Unilever), Paic (absent du 10-K et du rapport de Colgate-Palmolive), St Marc,
+Staedtler, Faber-Castell, Duralex, Le Parfait, O-Cedar, Briochin, Baranne, Chanteclair (pages
+introuvables). **Pyrex : décision de l'éditeur** — la marque appartient à Corning Incorporated et
+est exploitée sous licence par International Cookware (Châteauroux, RCS 399 311 315), qui vend
+les produits en Europe.
 
 ## 10. Méthode de travail attendue
 
