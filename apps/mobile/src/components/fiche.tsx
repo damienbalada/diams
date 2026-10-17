@@ -584,6 +584,7 @@ function CarteFait({ f, teinte, niveau, deplie = false }: { f: Fait; teinte: str
               </Text>
             </View>
           )}
+          {f.preuve?.copie && <Text style={s.petit}>📄 Citation vérifiée mot pour mot sur une copie enregistrée de la page : le site refuse les robots de vérification.</Text>}
           {f.preuve?.citation && (
             <View>
               <Text style={s.citationTexte} numberOfLines={toute ? undefined : 4}>« {f.preuve.citation} »</Text>

@@ -49,7 +49,7 @@ export function ficheEnJson(
         signal: f.signal ? { niveau: f.signal.niveau, motif: f.signal.motif, regle: f.signal.regle } : null,
         note: f.note,
         preuve: f.preuve
-          ? { source: f.preuve.source, solidite: f.preuve.solidite, date: f.preuve.date, url: f.preuve.url, citation: f.preuve.citation, reprisDe: f.preuve.reprisDe }
+          ? { source: f.preuve.source, solidite: f.preuve.solidite, date: f.preuve.date, url: f.preuve.url, citation: f.preuve.citation, reprisDe: f.preuve.reprisDe, copie: !!f.preuve.copie }
           : null,
       })),
     })),

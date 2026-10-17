@@ -237,6 +237,7 @@ function CarteIndicateur({ f }: { f: Fait }) {
                 )}
               </div>
             )}
+            {p?.copie && <div className="ci-ind-txt ci-small ci-faint">📄 Citation vérifiée mot pour mot sur une copie enregistrée de la page : le site refuse les robots de vérification.</div>}
             {p?.url && (
               <a className="ci-det-lien" href={p.url} target="_blank" rel="noopener noreferrer">
                 Ouvrir la source ↗

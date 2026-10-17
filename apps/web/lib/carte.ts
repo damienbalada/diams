@@ -44,6 +44,8 @@ export interface PreuveEntree {
   excerpt: string | null;
   inherited_from?: string | null;
   contested?: boolean;
+  /** Trace de l'approbation (« auto:verify_curated:copie » : vérifiée sur une copie enregistrée). */
+  reviewer?: string | null;
 }
 export interface JournalEntree {
   indicator_code: string;
@@ -75,6 +77,8 @@ export interface Fait {
     reprisDe: string | null;
     conteste: boolean;
     valeurNum: number | null;
+    /** Citation vérifiée sur une copie enregistrée de la page, le site refusant les robots (point 4, 17/10/2026). */
+    copie?: boolean;
   };
   /** Obligation légale qui s'applique (régimes). */
   obligation: string[];
@@ -128,6 +132,18 @@ export function niveauBbfaw(v: number): string {
   if (v <= 2) return "Bien noté pour le bien-être des animaux d'élevage";
   if (v <= 4) return "Moyennement noté pour le bien-être des animaux d'élevage";
   return v >= 6 ? "Mal noté pour le bien-être des animaux d'élevage, au plus bas du classement" : "Mal noté pour le bien-être des animaux d'élevage";
+}
+
+/**
+ * Périmètre partiel d'un chiffre social, tel que la citation le précise (point 6 du rapport de nuit,
+ * 17/10/2026) : « (sur 60,8 % des salariés permanents, principaux pays) », « (sept pays les plus significatifs) ».
+ */
+function perimetre(x: string): string {
+  const part = x.match(/calculé sur ([\d,.]+ ?% des salariés[^)]*)\)/)?.[1];
+  if (part) return ` (sur ${part.trim()})`;
+  // Un périmètre décrit par l'Index (« sept pays les plus significatifs »), pas une citation entre guillemets.
+  const zone = x.match(/périmètre : (?!«)([^;)«]+)/)?.[1];
+  return zone ? ` (périmètre : ${zone.trim()})` : "";
 }
 
 export function valeurCourte(code: string, unit: string | null, p: PreuveEntree): string {
@@ -223,14 +239,17 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       if (v === null) return "Publié";
       // La Nef publie l'écart au salaire le plus bas, pas à la médiane (17/10/2026).
       if (/plus bas|lowest[- ]paid/i.test(x)) return `Le plus haut salaire vaut ${nf(v, v < 10 ? 2 : 0)} fois le plus bas`;
-      return `Le dirigeant gagne ${nf(v, v < 20 ? 1 : 0)} fois le salaire médian`;
-    case "LAB_GENDER_PAYGAP": return v === null ? "Publié" : v < 0 ? `${nf(-v)} % en faveur des femmes` : `${nf(v)} % en faveur des hommes`;
+      return `Le dirigeant gagne ${nf(v, v < 20 ? 1 : 0)} fois le salaire médian${perimetre(x)}`;
+    case "LAB_GENDER_PAYGAP": return v === null ? "Publié" : (v < 0 ? `${nf(-v)} % en faveur des femmes` : `${nf(v)} % en faveur des hommes`) + perimetre(x);
     case "LAB_EGAPRO_INDEX": return v === null ? "Publié" : `Index Égapro : ${nf(v, 0)}/100`;
     case "GOV_BCORP": return "Certifiée B Corp";
     case "GOV_BOARD_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes au conseil ${/conseil de surveillance|supervisory board/i.test(x) ? "de surveillance" : "d'administration"}`;
     case "GOV_EXEC_GENDER": return v === null ? "Publié" : `${nf(v)} % de femmes dans les instances dirigeantes (comité de direction)`;
     case "GOV_BOARD_INDEP": return v === null ? "Publié" : `${nf(v)} % d'administrateurs indépendants`;
-    case "TAX_EFFECTIVE_RATE": return v === null ? "Publié" : `Taux effectif d'impôt : ${nf(v)} % du bénéfice avant impôt (charge comptable)`;
+    case "TAX_EFFECTIVE_RATE":
+      if (v === null) return "Publié";
+      // Point 2 (17/10/2026) : négatif ou au-delà de 60 %, le taux ne se compare pas (voir « En savoir plus »).
+      return `Taux effectif d'impôt : ${nf(v)} % du bénéfice avant impôt (charge comptable)${v < 0 || v > 60 ? ", taux atypique" : ""}`;
     case "WAT_CONTROVERSY": {
       // « Convention judiciaire d'intérêt public validée le 13/09/2022 … : amende d'intérêt public de 40 000 € … »
       if (/^Convention judiciaire d.intérêt public/.test(x)) {
@@ -242,6 +261,12 @@ export function valeurCourte(code: string, unit: string | null, p: PreuveEntree)
       const an = m1(/mise en demeure du \d{2}\/\d{2}\/(\d{4})/, x);
       const site = m1(/site de ([^,(]+)/, x);
       return `Mise en demeure de la préfecture portant sur l'eau${site ? ` (site de ${site.trim()}` : ""}${an ? `${site ? ", " : " ("}${an})` : site ? ")" : ""}`;
+    }
+    case "GEO_SANCTIONS_BREACH": {
+      const an = (p.event_date ?? p.observed_on ?? "").slice(0, 4);
+      const montant = v === null ? "" : ` : ${v >= 1e6 ? `${nf(v / 1e6, 1)} M$` : `${nf(v, 0)} $`}`;
+      const programme = m1(/programme de sanctions : ([^;]+);/, x) ? ` (${m1(/programme de sanctions : ([^;]+);/, x)!.trim()})` : "";
+      return `Règlement avec le Trésor des États-Unis (OFAC, ${an}) pour violation de sanctions${programme}${montant}, sans reconnaissance de faute`;
     }
     case "GEO_POL_FINANCING": return v === null ? "Publié" : v === 0 ? "Comité politique déclaré aux États-Unis, sans contribution ce cycle" : `${nf(v, 0)} $ versés à des candidats et comités politiques aux États-Unis (2025-2026)`;
     case "SUP_BHRRC_ALLEG": return v === null ? "Relayé" : `${nf(v, 0)} article${v > 1 ? "s" : ""} relayant des allégations en 12 mois (BHRRC)`;
@@ -359,11 +384,12 @@ const SOURCES_CHERCHEES: [RegExp, string][] = [
   [/annuaire B Lab/, "annuaire B Corp de B Lab"],
   [/radar du devoir de vigilance/, "radar du devoir de vigilance (CCFD-Terre Solidaire, Sherpa) et site de l'entreprise"],
   [/annuaire Leaping Bunny/, "annuaire Leaping Bunny des marques sans tests sur les animaux"],
+  [/recherche web et site de l.entreprise/, "recherche web et site de l'entreprise"],
 ];
 
 /** Construit la carte à partir de l'entrée de calcul (compute_score_input) et du journal. */
 /** Indicateurs d'information affichés seulement quand ils sont documentés (rien sinon, décision du 17/10/2026). */
-export const SI_DOCUMENTE = new Set(["GOV_CJIP", "ANI_HUNTING_FISHING", "LAB_PAY_RATIO_MAXMIN"]);
+export const SI_DOCUMENTE = new Set(["GOV_CJIP", "ANI_HUNTING_FISHING", "LAB_PAY_RATIO_MAXMIN", "ENV_TAXONOMY_CAPEX", "GEO_SANCTIONS_BREACH"]);
 
 export function construireCarte(
   payload: { entity: { slug: string; name: string }; ownership_chain?: string[]; applicableIndicators: IndicateurEntree[]; evidence: PreuveEntree[]; dimensions: { code: string; name: string }[] },
@@ -395,7 +421,7 @@ export function construireCarte(
         preuve: {
           source: p.source_name ?? p.source_code ?? "Source", url: p.source_url, solidite: SOLIDITE[p.tier] ?? "declarative",
           date: p.event_date ?? p.observed_on, dateEvenement: !!p.event_date, citation: p.excerpt, reprisDe: p.inherited_from ? (p.specificity === -2 ? `la filiale française ${p.inherited_from}` : p.inherited_from) : null,
-          conteste: !!p.contested, valeurNum: num(p.value_numeric),
+          conteste: !!p.contested, valeurNum: num(p.value_numeric), copie: /copie/.test(p.reviewer ?? ""),
         },
       };
     }

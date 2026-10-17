@@ -69,9 +69,14 @@ export const REGLES: Record<string, { alerte: string; vigilance?: string; refere
   GOV_BOARD_GENDER: { alerte: "moins de 20 % de femmes", vigilance: "moins de 40 % de femmes", reference: "loi Copé-Zimmermann : 40 % au minimum dans les conseils des sociétés cotées en France ; alerte : la moitié de ce minimum" },
   GOV_EXEC_GENDER: { alerte: "moins de 15 % de femmes", vigilance: "moins de 30 % de femmes", reference: "loi Rixain : depuis le 1er mars 2026, au moins 30 % de chaque sexe parmi les membres des instances dirigeantes des entreprises d'au moins 1 000 salariés en France (40 % au 1er mars 2029) ; alerte : la moitié de ce minimum" },
   GOV_BOARD_INDEP: { alerte: "—", vigilance: "moins d'un tiers d'indépendants", reference: "code Afep-Medef : au moins un tiers d'indépendants, même dans une société contrôlée" },
-  TAX_EFFECTIVE_RATE: { alerte: "—", vigilance: "taux effectif sous 15 %", reference: "impôt minimum mondial de l'OCDE : 15 % ; un taux bas une année peut aussi venir de pertes ou de crédits d'impôt" },
+  TAX_EFFECTIVE_RATE: { alerte: "—", vigilance: "taux effectif sous 15 %", reference: "impôt minimum mondial de l'OCDE : 15 % ; un taux bas une année peut aussi venir de pertes ou de crédits d'impôt ; un taux négatif ou supérieur à 60 % est affiché comme atypique, sans signal" },
+  // Point 9 (17/10/2026) : une convention judiciaire d'intérêt public est une sanction pénale négociée,
+  // validée par un juge : alerte, en disant qu'elle n'emporte pas déclaration de culpabilité.
+  GOV_CJIP: { alerte: "convention judiciaire d'intérêt public validée par un juge", reference: "article 41-1-2 du code de procédure pénale : amende d'intérêt public, sans déclaration de culpabilité" },
+  WAT_CONTROVERSY: { alerte: "convention judiciaire d'intérêt public pour une infraction au droit de l'eau", vigilance: "mise en demeure de la préfecture", reference: "conventions judiciaires validées par un juge (sans déclaration de culpabilité) ; arrêtés préfectoraux de mise en demeure des installations classées" },
   GEO_RUSSIA_EXIT: { alerte: "activité poursuivie en Russie", vigilance: "activité réduite ou investissements gelés", reference: "statuts de la base Leave Russia (KSE Institute)" },
   GEO_CONFLICT_TIES: { alerte: "implication documentée", reference: "choix de l'Index : toute implication documentée par une source publique" },
+  GEO_SANCTIONS_BREACH: { alerte: "règlement avec l'OFAC pour violation de sanctions internationales", reference: "avis d'exécution publiés par l'OFAC (Trésor des États-Unis) : l'entreprise règle sa responsabilité civile potentielle, sans reconnaître de faute" },
 };
 
 /** Signal d'un fait, ou null s'il ne franchit aucun seuil. */
@@ -164,12 +169,24 @@ export function evaluer(f: FaitEvalue): Signal | null {
         : v(`seulement ${nf(x)} % d'administrateurs indépendants au conseil`, ref);
     }
     // Pas de vigilance sur un exercice en perte : un taux bas ou négatif n'y dit rien de l'impôt payé.
-    case "TAX_EFFECTIVE_RATE": return x !== null && x < 15 && !/perte|loss/i.test(c) ? v(`impôt sur les bénéfices : taux réel de ${nf(x)} %, sous le minimum mondial de 15 %`, ref) : null;
+    case "TAX_EFFECTIVE_RATE": return x !== null && x >= 0 && x <= 60 && x < 15 && !/perte|loss/i.test(c) ? v(`impôt sur les bénéfices : taux réel de ${nf(x)} %, sous le minimum mondial de 15 %`, ref) : null;
     case "GEO_RUSSIA_EXIT":
       if (/activité poursuivie/.test(c)) return a("poursuit ses activités en Russie", ref);
       if (/investissements gelés/.test(c)) return v("toujours présent en Russie, investissements gelés", ref);
       return /activité réduite/.test(c) ? v("toujours présent en Russie, activité réduite", ref) : null;
     case "GEO_CONFLICT_TIES": return a("liens documentés avec un conflit armé ou une occupation", ref);
+    case "GEO_SANCTIONS_BREACH": {
+      const prog = c.match(/programme de sanctions : ([^;]+);/)?.[1]?.trim();
+      return a(`a payé pour régler des violations de sanctions internationales${prog ? ` (${prog})` : ""} auprès du Trésor des États-Unis`, ref);
+    }
+    case "GOV_CJIP": {
+      const motif = c.match(/— motif : ([^;]+);/)?.[1]?.trim();
+      return a(`convention judiciaire d'intérêt public${motif ? ` (${motif})` : ""} validée par un juge, sans déclaration de culpabilité`, ref);
+    }
+    case "WAT_CONTROVERSY":
+      return /Convention judiciaire d.intérêt public/i.test(c)
+        ? a("convention judiciaire d'intérêt public pour une infraction au droit de l'eau, validée par un juge (sans déclaration de culpabilité)", ref)
+        : v("mise en demeure de la préfecture portant sur l'eau", ref);
   }
   return null;
 }
@@ -212,6 +229,10 @@ export const REPERES: Record<string, string> = {
  * propre à une entreprise reste dans la citation vérifiée de sa source.
  */
 export const EN_SAVOIR_PLUS: Record<string, string> = {
+  TAX_EFFECTIVE_RATE:
+    "Le taux effectif rapporte la charge d'impôt sur les bénéfices inscrite dans les comptes au bénéfice avant impôt de la même année. Ce n'est pas l'impôt versé dans l'année : la charge comptable compte aussi les impôts différés (dus ou récupérables plus tard), les crédits d'impôt et les rectifications des années passées. Elle peut donc être négative, quand l'entreprise inscrit un produit d'impôt (pertes passées qu'elle pourra déduire, crédit d'impôt, remboursement), ou dépasser le bénéfice, quand des pertes ou des dépréciations ne sont pas déductibles, ou quand le groupe paie l'impôt dans des pays bénéficiaires alors qu'il perd de l'argent ailleurs. Un taux négatif ou supérieur à 60 % est affiché comme atypique : il ne se compare pas au minimum mondial de 15 %.",
+  ENV_TAXONOMY_CAPEX:
+    "La taxonomie verte de l'Union européenne est une liste d'activités économiques jugées durables (produire de l'électricité renouvelable, rénover des bâtiments, fabriquer des véhicules à faibles émissions…), avec des critères techniques précis. Les grandes entreprises publient la part de leurs investissements qui finance ces activités. Pour l'énergie et l'automobile, la liste couvre le cœur du métier : la part en dit long. Pour l'alimentation, les boissons, le luxe ou la distribution, peu d'activités y figurent : une part proche de 0 % est normale et ne dit pas que l'entreprise n'investit rien pour le climat. L'Index l'affiche à titre d'information, sans signal.",
   LAB_CEO_PAY_RATIO:
     "Le ratio compare la rémunération totale du dirigeant sur un an (salaire, primes et actions attribuées) à celle du salarié « médian », celui qui se trouve pile au milieu : la moitié des salariés gagne plus, l'autre moitié moins. Le nombre de salariés ou de niveaux hiérarchiques ne fait donc pas monter le chiffre en soi ; ce qui compte, c'est qui se trouve au milieu. Les entreprises cotées aux États-Unis calculent ce salarié médian sur leurs salariés du monde entier, sans corriger le coût de la vie et en comptant les temps partiels tels quels : un groupe qui emploie beaucoup de vendeurs, de serveurs ou d'ouvriers à temps partiel ou dans des pays à bas salaires affiche un ratio très élevé. En France, le « ratio d'équité » de la loi PACTE porte souvent sur les seuls salariés de la société en France : les chiffres de deux pays ne se comparent pas directement.",
 };

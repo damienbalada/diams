@@ -98,7 +98,7 @@ export interface Fait {
   enSavoirPlus?: string | null;
   signal: Signal | null;
   note: string | null;
-  preuve: { source: string; solidite: 'officielle' | 'reconnue' | 'declarative'; date: string; url: string | null; citation: string | null; reprisDe: string | null } | null;
+  preuve: { source: string; solidite: 'officielle' | 'reconnue' | 'declarative'; date: string; url: string | null; citation: string | null; reprisDe: string | null; copie?: boolean } | null;
 }
 export interface Pilier {
   code: string;
